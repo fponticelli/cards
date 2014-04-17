@@ -1,0 +1,739 @@
+html,
+body,
+div,
+span,
+applet,
+object,
+iframe,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote,
+pre,
+a,
+abbr,
+acronym,
+address,
+big,
+cite,
+code,
+del,
+dfn,
+em,
+img,
+ins,
+kbd,
+q,
+s,
+samp,
+small,
+strike,
+strong,
+sub,
+sup,
+tt,
+var,
+dl,
+dt,
+dd,
+ol,
+ul,
+li,
+fieldset,
+form,
+label,
+legend,
+table,
+caption,
+tbody,
+tfoot,
+thead,
+tr,
+th,
+td {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  font-weight: inherit;
+  font-style: inherit;
+  font-family: inherit;
+  font-size: 100%;
+  vertical-align: baseline;
+}
+body {
+  line-height: 1;
+  color: #000;
+  background: #fff;
+}
+ol,
+ul {
+  list-style: none;
+}
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+  vertical-align: middle;
+}
+caption,
+th,
+td {
+  text-align: left;
+  font-weight: normal;
+  vertical-align: middle;
+}
+a img {
+  border: none;
+}
+* {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+body {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 10pt;
+}
+.blink,
+.container main.card > article span.selected {
+  -webkit-animation-name: blinker;
+  -moz-animation-name: blinker;
+  -o-animation-name: blinker;
+  -ms-animation-name: blinker;
+  animation-name: blinker;
+  -webkit-animation-duration: 1s;
+  -moz-animation-duration: 1s;
+  -o-animation-duration: 1s;
+  -ms-animation-duration: 1s;
+  animation-duration: 1s;
+  -webkit-animation-timing-function: linear;
+  -moz-animation-timing-function: linear;
+  -o-animation-timing-function: linear;
+  -ms-animation-timing-function: linear;
+  animation-timing-function: linear;
+  -webkit-animation-iteration-count: infinite;
+  -moz-animation-iteration-count: infinite;
+  -o-animation-iteration-count: infinite;
+  -ms-animation-iteration-count: infinite;
+  animation-iteration-count: infinite;
+}
+p.desc {
+  font-size: 60%;
+  color: #fff;
+  background-color: #ddd;
+  text-shadow: 0.5px 0.5px 0px rgba(0,0,0,0.4);
+  margin: 0 -22px;
+  padding: 0 0.5em;
+}
+p.note {
+  font-size: 80%;
+  color: #999;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+@-moz-keyframes blinker {
+  0% {
+    opacity: 0.7;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=70)";
+    filter: alpha(opacity=70);
+  }
+
+  1% {
+    opacity: 1;
+    -ms-filter: none;
+    filter: none;
+  }
+
+  50% {
+    opacity: 1;
+    -ms-filter: none;
+    filter: none;
+  }
+
+  51% {
+    opacity: 0.7;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=70)";
+    filter: alpha(opacity=70);
+  }
+
+  100% {
+    opacity: 0.7;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=70)";
+    filter: alpha(opacity=70);
+  }
+}
+@-webkit-keyframes blinker {
+  0% {
+    opacity: 0.7;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=70)";
+    filter: alpha(opacity=70);
+  }
+
+  1% {
+    opacity: 1;
+    -ms-filter: none;
+    filter: none;
+  }
+
+  50% {
+    opacity: 1;
+    -ms-filter: none;
+    filter: none;
+  }
+
+  51% {
+    opacity: 0.7;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=70)";
+    filter: alpha(opacity=70);
+  }
+
+  100% {
+    opacity: 0.7;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=70)";
+    filter: alpha(opacity=70);
+  }
+}
+@-o-keyframes blinker {
+  0% {
+    opacity: 0.7;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=70)";
+    filter: alpha(opacity=70);
+  }
+
+  1% {
+    opacity: 1;
+    -ms-filter: none;
+    filter: none;
+  }
+
+  50% {
+    opacity: 1;
+    -ms-filter: none;
+    filter: none;
+  }
+
+  51% {
+    opacity: 0.7;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=70)";
+    filter: alpha(opacity=70);
+  }
+
+  100% {
+    opacity: 0.7;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=70)";
+    filter: alpha(opacity=70);
+  }
+}
+@-ms-keyframes blinker {
+  0% {
+    opacity: 0.7;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=70)";
+    filter: alpha(opacity=70);
+  }
+
+  1% {
+    opacity: 1;
+    -ms-filter: none;
+    filter: none;
+  }
+
+  50% {
+    opacity: 1;
+    -ms-filter: none;
+    filter: none;
+  }
+
+  51% {
+    opacity: 0.7;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=70)";
+    filter: alpha(opacity=70);
+  }
+
+  100% {
+    opacity: 0.7;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=70)";
+    filter: alpha(opacity=70);
+  }
+}
+@keyframes blinker {
+  0% {
+    opacity: 0.7;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=70)";
+    filter: alpha(opacity=70);
+  }
+
+  1% {
+    opacity: 1;
+    -ms-filter: none;
+    filter: none;
+  }
+
+  50% {
+    opacity: 1;
+    -ms-filter: none;
+    filter: none;
+  }
+
+  51% {
+    opacity: 0.7;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=70)";
+    filter: alpha(opacity=70);
+  }
+
+  100% {
+    opacity: 0.7;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=70)";
+    filter: alpha(opacity=70);
+  }
+}
+.container {
+  width: 960px;
+  margin: 50px auto;
+}
+.container .drag-pair {
+  font-size: 80%;
+  opacity: 0.2;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=20)";
+  filter: alpha(opacity=20);
+  padding: 2pt 0 0 2pt;
+}
+.container main.card {
+  width: 100%;
+  margin-bottom: 20px;
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: box;
+  display: flex;
+}
+.container main.card header.toolbar {
+  padding: 2px;
+  background-color: #fff;
+  border-bottom: 1px solid #eee;
+  height: 20px;
+}
+.container main.card header.toolbar .left {
+  float: left;
+}
+.container main.card header.toolbar .left button {
+  margin-right: 2px;
+}
+.container main.card header.toolbar .left button:last-child {
+  margin-right: 0;
+}
+.container main.card header.toolbar .right {
+  float: right;
+}
+.container main.card header.toolbar .right button {
+  margin-left: 2px;
+}
+.container main.card header.toolbar .right button:first-child {
+  margin-left: 0;
+}
+.container main.card header.toolbar button {
+  color: #aaa;
+  width: 15px;
+  height: 15px;
+  padding: 0;
+  border-width: 0;
+  background-color: #fff;
+}
+.container main.card header.toolbar button:hover {
+  color: #333;
+}
+.container main.card header.toolbar .title {
+  color: #aaa;
+  padding: 0 3px;
+}
+.container main.card > article {
+  padding: 10px 20px;
+  border: 1px solid #eee;
+  font-size: 110%;
+  line-height: 14pt;
+  -webkit-box-flex: 3;
+  -moz-box-flex: 3;
+  -o-box-flex: 3;
+  box-flex: 3;
+  -webkit-flex: 1 3 60%;
+  -ms-flex: 1 3 60%;
+  flex: 1 3 60%;
+  overflow: auto;
+}
+.container main.card > article output {
+  color: #369;
+}
+.container main.card > article span.variable {
+  color: #369;
+}
+.container main.card > article span.editable {
+  border-bottom: 1px dotted #369;
+}
+.container main.card > article span.selected {
+  background-color: #acf;
+}
+.container main.card > article p,
+.container main.card > article ul {
+  margin-bottom: 0.75em;
+}
+.container main.card > article > *:not(.desc),
+.container main.card > article li {
+  margin-bottom: 0.5em;
+  position: relative;
+}
+.container main.card > article > *:not(.desc):before,
+.container main.card > article li:before {
+  content: "\f0c8";
+  display: block;
+  position: absolute;
+  left: -14px;
+  font-family: FontAwesome;
+  font-size: 10px;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  margin: 5px 0 0;
+  color: #ddd;
+}
+.container main.card > article li {
+  -webkit-box-shadow: 0.5px 0.5px 4px 0px rgba(0,0,0,0.1);
+  box-shadow: 0.5px 0.5px 4px 0px rgba(0,0,0,0.1);
+  padding: 0.25em 0.5em;
+}
+.container main.card > article p.notes {
+  font-style: italic;
+  font-size: 90%;
+  margin-top: -0.5em;
+}
+.container main.card > article section {
+  border-left: 1px solid #eee;
+  padding-left: 1em;
+}
+.container main.card > article h1 {
+  font-size: 140%;
+  font-weight: bold;
+  border-top: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+  margin: 1em 0 0.5em;
+  padding: 0.2em 0;
+}
+.container main.card > article section h1 {
+  font-size: 120%;
+  font-weight: bold;
+  padding: 0 0 0.2em 0;
+  border-top: none;
+  border-bottom: 1px solid #ccc;
+}
+.container main.card > article section section h1 {
+  font-size: 110%;
+  font-weight: bold;
+  border-bottom: none;
+  padding: 0;
+}
+.container main.card > article h1:first-child {
+  margin-top: 0;
+}
+.container main.card > article blockquote {
+  font-family: Georgia, serif;
+  font-size: 110%;
+  font-style: italic;
+  padding: 0.25em 30px;
+  line-height: 1.35;
+  position: relative;
+  color: #383838;
+}
+.container main.card > article blockquote cite {
+  color: #999;
+  font-size: 110%;
+  display: block;
+  margin-top: 5px;
+}
+.container main.card > article blockquote cite:before {
+  content: "\2014 \2009";
+}
+.container main.card > article blockquote:before {
+  display: block;
+  content: "\201C";
+  font-size: 350%;
+  position: absolute;
+  left: -5px;
+  top: -20px;
+  color: #ccc;
+}
+.container main.card > article pre {
+  font-family: monospace;
+  background-color: #eee;
+  padding: 4pt 12pt;
+}
+.container main.card > article figure {
+  display: block;
+  position: relative;
+  margin: 1.5em 0;
+  border-top: 1px dotted #0098d8;
+  border-bottom: 1px dotted #0098d8;
+}
+.container main.card > article figure img {
+  width: 25%;
+  max-width: 97%;
+  display: block;
+  height: auto;
+  margin: 0;
+  border: 1px solid #999;
+  padding: 5px;
+  background: #fff;
+}
+.container main.card > article figure dt {
+  margin-top: 0.75em;
+}
+.container main.card > article figure dd {
+  margin-left: 0;
+  padding-left: 0;
+}
+.container main.card > article figure img,
+.container main.card > article figure iframe {
+  margin: 0.75em auto;
+}
+.container main.card > article figure blockquote {
+  margin: 1.5em 0px 0.75em -1.5em;
+}
+.container main.card > article figure ul,
+.container main.card > article figure ol {
+  margin: 0.75em 0 0.75em 2em;
+}
+.container main.card > article figure .semantic-list {
+  margin-left: 0;
+}
+.container main.card > article figure li ul,
+.container main.card > article figure li ol {
+  margin: 0 0 0 1.5em;
+}
+.container main.card > article figure p,
+.container main.card > article figure pre {
+  margin-top: 0.75em;
+  margin-bottom: 0.75em;
+}
+.container main.card > article figure p+p {
+  margin-top: 1.5em;
+}
+.container main.card > article figure figcaption {
+  clear: left;
+  margin: 0.75em 0;
+  text-align: center;
+  font-style: italic;
+  line-height: 1.5em;
+}
+.container main.card > article table {
+  min-width: 40%;
+  font-family: "Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
+  font-size: 105%;
+  background: #fff;
+  border-collapse: collapse;
+  text-align: left;
+}
+.container main.card > article table th {
+  color: #039;
+  padding: 4px;
+  border-bottom: 1px solid #ccc;
+}
+.container main.card > article table thead th {
+  border-bottom: 1px solid #6678b1;
+}
+.container main.card > article table td {
+  border-bottom: 1px solid #ccc;
+  color: #669;
+  padding: 4px;
+}
+.container main.card > article table tbody tr:hover td,
+.container main.card > article table tbody tr:hover th {
+  color: #009;
+}
+.container main.card > article table tfoot tr:last-child th,
+.container main.card > article table tfoot tr:last-child td {
+  border-bottom: none;
+}
+.container main.card > article ul.cards li {
+  text-align: center;
+  float: left;
+  width: calc(33.3% - 9px);
+  min-height: 45px;
+  margin-right: 12px;
+  margin-bottom: 9px;
+}
+.container main.card > article ul.cards li:nth-child(3) {
+  margin-right: 0px;
+}
+.container main.card > article ul.unordered,
+.container main.card > article ol {
+  text-indent: 0em;
+  list-style-position: inside;
+}
+.container main.card > article ul.unordered {
+  list-style-type: disc;
+}
+.container main.card > article ol {
+  list-style-type: decimal;
+}
+.container main.card > article hr.cards {
+  display: block;
+  clear: left;
+  border: none;
+}
+.container main.card > article > *:last-child,
+.container main.card > article li:last-child {
+  margin-bottom: 0;
+}
+.container main.card > side {
+  background-color: #fbfbfb;
+  border-right: 1px solid #eee;
+  border-top: 1px solid #eee;
+  font-size: 90%;
+  line-height: 11pt;
+  -webkit-box-flex: 2;
+  -moz-box-flex: 2;
+  -o-box-flex: 2;
+  box-flex: 2;
+  -webkit-flex: 1 2 40%;
+  -ms-flex: 1 2 40%;
+  flex: 1 2 40%;
+  overflow: auto;
+}
+.container main.card > side table.root > tbody > tr > th {
+  min-width: 4em;
+}
+.container main.card > side table.root > tbody > tr > td {
+  border-left: none;
+}
+.container main.card > side table {
+  width: 100%;
+  border-left: 1px solid #eee;
+  border-bottom: 1px solid #eee;
+}
+.container main.card > side table table table {
+  border-bottom: none;
+}
+.container main.card > side table tr:last-child {
+  margin-bottom: 0;
+}
+.container main.card > side table th {
+  color: #999;
+  vertical-align: top;
+  white-space: nowrap;
+}
+.container main.card > side table th var {
+  padding: 0 4pt;
+}
+.container main.card > side table th var.selected {
+  color: #333;
+}
+.container main.card > side table th var.unreferenced {
+  font-style: italic;
+  color: #a30;
+}
+.container main.card > side table th var.index {
+  padding: 0 0 0 2pt;
+  font-size: 70%;
+}
+.container main.card > side table td {
+  width: 100%;
+  vertical-align: bottom;
+}
+.container main.card > side table td.sub {
+  padding-left: 10pt;
+}
+.container main.card > side th,
+.container main.card > side td {
+  border-bottom: 1px solid #eee;
+}
+.container main.card > side tr:last-child th,
+.container main.card > side tr:last-child td {
+  border-bottom: none;
+}
+.container main.card > side td.formula {
+  font-family: monospace;
+  background-color: #f3f3f3;
+}
+.container main.card > side .number {
+  font-family: monospace;
+}
+.container main.card > side .url {
+  text-decoration: underline;
+  color: #069;
+  -o-text-overflow: ellipsis;
+  text-overflow: ellipsis;
+}
+.container main.card > side td {
+  position: relative;
+}
+.container main.card > side td data:focus::after {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: block;
+  border-left: 1px solid #eee;
+  background-color: #ccc;
+  color: #fff;
+  font-family: monospace;
+  font-weight: bold;
+  padding: 0 3pt;
+  text-align: center;
+}
+.container main.card > side td.number data:focus::after {
+  content: "n";
+}
+.container main.card > side td.formula data:focus::after {
+  content: "f";
+}
+.container main.card > side td.string data:focus::after {
+  content: "s";
+}
+.container main.card > side td.date data:focus::after {
+  content: "d";
+}
+.container main.card > side th {
+  position: relative;
+}
+.container main.card > side th var:focus::after {
+  position: absolute;
+  top: 0;
+  right: 2px;
+  display: block;
+  background-color: #c30;
+  color: #fff;
+  font-family: monospace;
+  font-weight: bold;
+  padding: 0 3pt;
+  text-align: center;
+  content: "X";
+}
+.placeholder {
+  color: #eee;
+}
+[contenteditable]:focus {
+  outline: 1px solid #ccc;
+}
+section.model:focus,
+article:focus {
+  z-index: 100;
+}
+@media print {
+  body {
+    font-size: 7pt;
+  }
+  .container {
+    width: 100%;
+  }
+  .container main.card {
+    page-break-before: always;
+  }
+  .container main.card article li {
+    -webkit-box-shadow: none;
+    box-shadow: none;
+    border: 1px solid #eee;
+  }
+  .container main.card:first-child {
+    page-break-before: avoid;
+  }
+}

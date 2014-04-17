@@ -1,0 +1,241 @@
+extend layout
+
+block content
+
+  main.card
+    article(contenteditable)
+      p BMI is a controversial and most likely inaccurate way to measure the fat profile of a person.
+      p My weight is 
+        +e("86.2")  kg and my height is 
+        +e("177")  cm.
+      p The BMI formula is:
+      pre
+        +e("kg, m => kg / (m * m)")
+      p Follows that my BMI is 
+        +v("27.51")  and according to Adolphe Quetelet that means that I am 
+        +v("overweight") . A little offensive but probably also true.
+      p The BMI formula according to Nick Trefethen should be revised this way:
+      pre
+        +e("kg, m => kg * 1.3 / Math.pow(m, 2.5)")
+      p According to this formula my BMI is 
+        +v("26.89") . That means that I am still 
+        +v("overweight") . Slight improvement.
+    side
+      section.doc
+        +headerDocModel("fragment")
+        table.root
+          +pairi("eye", "true", "boolean")
+          +pairi("bold", "false", "boolean")
+          +pairi("italic", "false", "boolean")
+          +pairi("underline", "false", "boolean")
+          +pairi("strikethrough", "false", "boolean")
+      section.model
+        +headerModel()
+        table.root
+          +pair("weight", "86.2", "number")
+          +pair("height", "177", "number")
+          +pair("bmiƒ", "kg, m => kg / (m * m)", "formula")
+          +pair("mybmi", "bmiƒ($.weight, $.height / 100)", "formula")
+          +pairl("ranges")
+            table
+              +pair("underweight", "bmi => bmi < 18.5", "formula")
+              +pair("normal", "bmi => bmi >= 18.5 && bmi < 25", "formula")
+              +pair("overweight", "bmi => bmi >= 25 && bmi < 30", "formula")
+              +pair("obese", "bmi => bmi > 30", "formula")
+          +pair("getrangeƒ", "bmi => object.lookup.field($.ranges, bmi)", "formula")
+          +pair("nbmiƒ", "kg, m => kg * 1.3 / Math.pow(m, 2.5)", "formula")
+          +pair("mynbmi", "nbmiƒ($.weight, $.height / 100)", "formula")
+
+  main.card
+    article(contenteditable)
+      p
+        | My name is 
+        +e('Ponticelli') , 
+        +e('Franco')  and I am 
+        +v('41', true)  years old.
+    side
+      section.doc
+        +headerDocModel("paragraph")
+        table.root
+          +pairi("eye", "true", "boolean")
+      section.model
+        +headerModel()
+        table.root
+          +pair("first_name", "Franco", "string")
+          +pair("last_name", "Ponticelli", "string")
+          +pair("birth_date", "7/5/1972", "date")
+          +pair("age", "date.span.years($.birth_date, date.now())", "formula", "selected")
+          +pair("weight", "200", "number", "unreferenced")
+
+  main.card
+    article(contenteditable)
+      p
+        | House area is 
+        +v(164)  mq
+      ul
+        li
+          +v('1') .
+          +e('Kitchen')  is 
+          +v(32)  mq (
+          +e("8 * 4") )
+        li
+          +v('2') .
+          +e('Bed Room')  is 
+          +v(48)  mq (
+          +e("6 * 8") )
+        li
+          +v('3') .
+          +e('Living Room')  is 
+          +v(84)  mq (
+          +e("(4 * 7) + (3 * 4)") )
+    side
+      section.model
+        +headerModel()
+        table.root
+          +pairl("rooms")
+            +pli("0")
+              +pair("name", "Kitchen", "string")
+              +pair("area", "$.L1 * $.L2", "formula")
+            +pli("1")
+              +pair("name", "Bed Room", "string")
+              +pair("area", "$.L3 * $.L1", "formula")
+            +pli("2")
+              +pair("name", "Living Room", "string")
+              +pair("area", "($.L2 * $.L4) + ($.L5 * $.L2)", "formula")
+          +pair("total_area", "list.sum($.rooms, 'area')", "formula")
+          +pair("L1", "8", "number")
+          +pair("L2", "4", "number")
+          +pair("L3", "6", "number")
+          +pair("L4", "7", "number")
+          +pair("L5", "3", "number")
+
+  main.card
+    article(contenteditable)
+      h1 Bill of Materials (total cost $
+        +v('1,130.45') )
+      p section 
+        select
+          option hardware
+          option motion
+          option electronics
+        | , displaying 
+        +v('4')  items of 
+        +v('6')
+      ul
+        li
+          h2
+            a(href="http://openbuildspartstore.com/v-slot-20-x-40mm")
+              +e('V-Slot 20x40mm (1500)')
+          p
+            | $ 
+            +v('175.50')  = 
+            +e('9')
+            | × $ 
+            +e('19.50')
+          p.notes End pieces, table support, and gantry support.
+        li
+          h2
+            a(href="http://openbuildspartstore.com/v-slot-20-x-60mm")
+              +e('V-Slot 20x60mm (1500)')
+          p
+            | $ 
+            +v('69.00')  = 
+            +e('3')
+            | × $ 
+            +e('23.00')
+          p.notes X Axis (gantry)
+        li
+          h2
+            a(href="http://openbuildspartstore.com/v-slot-20-x-80mm")
+              +e('V-Slot 20x80mm (1500)')
+          p
+            | $ 
+            +v('60.00')  = 
+            +e('2')
+            | × $ 
+            +e('30.00')
+          p.notes Y Axis
+        li
+          h2
+            a(href="http://openbuildspartstore.com/v-slot-20-x-60mm")
+              +e('V-Slot 20x60mm (1000)')
+          p
+            | $ 
+            +v('15.50')  = 
+            +e('1')
+            | × $ 
+            +e('15.50')
+          p.notes Z axis (180mm)
+    side
+      section.model
+        +headerModel()
+        table.root
+          +pair("total_per_item", "$$.qty * $$.price_each", "formula")
+          +pair("product_url", "$.urls[$$.supplier] + $$.code", "formula")
+          +pairl("sections")
+            table
+              +pair("list", "list.distinct($.BOM, 'section')", "formula")
+              +pair("current", "hardware", "string")
+              +pair("filtered_by", "list.filter($.BOM)\n  .on('section')\n  .equalTo($$.current)", "formula")
+          +pairl("urls")
+            table
+              +pair("openbuilds", "http://openbuildspartstore.com/", "string")
+              +pair("mcmaster", "http://www.mcmaster.com/", "string")
+              +pair("mcmaster", "http://www.mscdirect.com/product/", "string")
+          +pairl("BOM")
+            +pli("0")
+              +pair("name", "V-Slot 20x40mm (1500)", "string")
+              +pair("code", "v-slot-20-x-40mm", "string")
+              +pair("supplier", "openbuilds", "string")
+              +pair("notes", "End pieces, table support, and gantry support.", "string")
+              +pair("section", "hadware", "string")
+              +pair("qty", "9", "number")
+              +pair("price_each", "19.50", "number")
+            +pli("1")
+              +pair("name", "V-Slot 20x60mm (1500)", "string")
+              +pair("code", "v-slot-20-x-60mm", "string")
+              +pair("supplier", "openbuilds", "string")
+              +pair("notes", "X Axis (gantry)", "string")
+              +pair("section", "hadware", "string")
+              +pair("qty", "3", "number")
+              +pair("price_each", "23.00", "number")
+            +pli("2")
+              +pair("name", "V-Slot 20x80mm (1500)", "string")
+              +pair("code", "v-slot-20-x-80mm", "string")
+              +pair("supplier", "openbuilds", "string")
+              +pair("notes", "Y Axis", "string")
+              +pair("section", "hadware", "string")
+              +pair("qty", "2", "number")
+              +pair("price_each", "30.00", "number")
+            +pli("3")
+              +pair("name", "V-Slot 20x60mm (1000)", "string")
+              +pair("code", "v-slot-20-x-60mm", "string")
+              +pair("supplier", "openbuilds", "string")
+              +pair("notes", "Z axis (180mm)", "string")
+              +pair("section", "hadware", "string")
+              +pair("qty", "1", "number")
+              +pair("price_each", "15.50", "number")
+            +pli("4")
+              +pair("name", "Solid V Wheel Kit", "string")
+              +pair("code", "openbuilds-solid-v-wheel-kit", "string")
+              +pair("supplier", "openbuilds", "string")
+              +pair("notes", "Will not need the 25mm screws for this build,\n save them for another build.", "string")
+              +pair("section", "motion", "string")
+              +pair("qty", "28", "number")
+              +pair("price_each", "3.95", "number")
+            +pli("5")
+              +pair("name", "Nema 17 Stepper Motor", "string")
+              +pair("code", "nema-17-stepper-motor", "string")
+              +pair("supplier", "openbuilds", "string")
+              +pair("notes", "This is the stepper for the Z axis.", "string")
+              +pair("section", "electronics", "string")
+              +pair("qty", "1", "number")
+              +pair("price_each", "17.50", "number")
+            +pli("6")
+              +pair("name", "Nema 23 Stepper Motor", "string")
+              +pair("code", "nema-23-stepper-motor", "string")
+              +pair("supplier", "openbuilds", "string")
+              +pair("notes", "This is the stepper for the Z axis.", "string")
+              +pair("section", "electronics", "string")
+              +pair("qty", "3", "number")
+              +pair("price_each", "24.50", "number")

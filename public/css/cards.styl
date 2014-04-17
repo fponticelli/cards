@@ -1,0 +1,339 @@
+.container
+  width 960px
+  margin 50px auto
+
+  .drag-pair
+    font-size 80%
+    opacity 0.2
+    padding 2pt 0 0 2pt
+
+  main.card
+    width 100%
+    margin-bottom 20px
+    display flex
+    //max-height 402px
+    header.toolbar
+      padding 2px
+      //height 20px
+      background-color #fff
+      border-bottom 1px solid borderColor
+      size = 15px
+      height size + 5px
+      .left
+        float left
+        button
+          margin-right 2px
+        button:last-child
+          margin-right 0
+      .right
+        float right
+        button
+          margin-left 2px
+        button:first-child
+          margin-left 0
+      button
+        color #aaa
+        width size
+        height size
+        //font-size 10px
+        padding 0
+        border-width 0
+        background-color #fff
+      button:hover
+        color #333
+      .title
+        //font-family monospace
+        color #aaa
+        padding 0 3px
+    > article
+      padding 10px 20px
+      border 1px solid borderColor
+      font-size 110%
+      line-height 14pt
+      flex 1 3 60%
+      overflow auto
+      output
+        color variableColor
+      span
+        &.variable
+          //border-bottom 1px dashed variableColor
+          color variableColor
+        &.editable
+          border-bottom 1px dotted variableColor
+        &.selected
+          @extend .blink
+          background-color textSelectedColor
+      p, ul
+        margin-bottom 0.75em
+      > *:not(.desc), li
+        margin-bottom 0.5em
+        position relative
+        &:before
+          content "\f0c8"
+          display block
+          position absolute
+          left -14px
+          font-family FontAwesome
+          font-size 10px
+          line-height 1
+          font-smoothing antialiased
+          margin 5px 0 0
+          color #ddd
+      li
+        box-shadow 0.5px 0.5px 4px 0px rgba(0,0,0,0.1)
+        padding 0.25em 0.5em
+      p.notes
+        font-style italic
+        font-size 90%
+        margin-top -0.5em
+      section
+        border-left 1px solid #eee
+        padding-left 1em
+      h1
+        font-size 140%
+        font-weight bold
+        border-top 1px solid #ccc
+        border-bottom 1px solid #ccc
+        margin 1em 0 0.5em
+        padding 0.2em 0
+      section h1
+        font-size 120%
+        font-weight bold
+        padding 0 0 0.2em 0
+        border-top none
+        border-bottom 1px solid #ccc
+      section section h1
+        font-size 110%
+        font-weight bold
+        border-bottom none
+        padding 0
+      h1:first-child
+        margin-top 0
+
+      blockquote
+        font-family Georgia, serif
+        font-size 110%
+        font-style italic
+        padding 0.25em 30px
+        line-height 1.35
+        position relative
+        color #383838
+
+        cite
+          color #999999
+          font-size 110%
+          display block
+          margin-top 5px
+
+          &:before
+            content "\2014 \2009"
+
+        &:before
+          display block
+          content "\201C"
+          font-size 350%
+          position absolute
+          left -5px
+          top -20px
+          color #ccc
+
+      pre
+        font-family monospace
+        background-color placeHolderColor
+        padding 4pt 12pt
+
+      figure
+        display block
+        position relative
+        margin 1.5em 0
+        border-top 1px dotted #0098d8
+        border-bottom 1px dotted #0098d8
+        img
+          width 25%
+          max-width 97%
+          display block
+          height auto
+          margin 0
+          border 1px solid #999
+          padding 5px
+          background #fff
+        dt
+          margin-top .75em
+        dd
+          margin-left 0
+          padding-left 0
+        img, iframe
+          margin .75em auto
+        blockquote
+          margin 1.5em 0px .75em -1.5em
+
+        ul, ol
+          margin .75em 0 .75em 2em
+        .semantic-list
+          margin-left 0
+        li ul, li ol
+          margin 0 0 0 1.5em
+        p, pre
+          margin-top .75em
+          margin-bottom .75em
+        p+p
+          margin-top 1.5em
+        figcaption
+          clear left
+          margin .75em 0
+          text-align center
+          font-style italic
+          line-height 1.5em
+
+
+      table
+        min-width 40%
+        font-family "Lucida Sans Unicode", "Lucida Grande", Sans-Serif
+        font-size 105%
+        background #fff
+        border-collapse collapse
+        text-align left
+
+        th
+          color #039
+          padding 4px
+          border-bottom 1px solid #ccc
+        thead th
+          border-bottom 1px solid #6678b1
+        td
+          border-bottom 1px solid #ccc
+          color #669
+          padding 4px
+        tbody tr:hover td, tbody tr:hover th
+          color #009
+        tfoot
+          tr:last-child
+            th, td
+              border-bottom none
+      ul.cards
+        li
+          text-align center
+          float left
+          width calc(33.3% - 9px)
+          min-height 45px
+          margin-right 12px
+          margin-bottom 9px
+          &:nth-child(3)
+            margin-right 0px
+      ul.unordered, ol
+        text-indent: 0em;
+        list-style-position: inside
+      ul.unordered
+        list-style-type disc
+      ol
+        list-style-type decimal
+      hr.cards
+        display block
+        clear left
+        border none
+
+      > *:last-child, li:last-child
+        margin-bottom 0
+    > side
+      background-color #fbfbfb
+      border-right 1px solid borderColor
+      border-top 1px solid borderColor
+      font-size 90%
+      line-height 11pt
+      flex 1 2 40%
+      overflow auto
+      table.root
+        > tbody
+          > tr
+            > th
+              min-width 4em
+            > td
+              border-left none
+      table
+        width 100%
+        border-left 1px solid borderColor
+        border-bottom 1px solid borderColor
+        table table
+          border-bottom none
+        tr
+          &:last-child
+            margin-bottom 0
+        th
+          color contextTextColor
+          vertical-align top
+          white-space no-wrap
+          var
+            padding 0 4pt
+            &.selected
+              color selectedColor
+            &.unreferenced
+              font-style italic
+              color unreferencedColor
+            &.index
+              padding 0 0 0 2pt
+              font-size 70%
+        td
+          width 100%
+          vertical-align bottom
+        td.sub
+          padding-left 10pt
+      th, td
+          border-bottom 1px solid #eee
+      tr:last-child
+        th, td
+          border-bottom none
+      td.formula
+        font-family monospace
+        background-color #f3f3f3
+      .number
+        font-family monospace
+      .url
+        text-decoration underline
+        color #069
+        text-overflow ellipsis
+      td
+        position relative
+      td data:focus::after
+        position absolute
+        top 0
+        right 0
+        display block
+        border-left 1px solid borderColor
+        background-color #ccc
+        color #fff
+        font-family monospace
+        font-weight bold
+        padding 0 3pt
+        text-align center
+      td.number data:focus::after
+        content "n"
+      td.formula data:focus::after
+        content "f"
+      td.string data:focus::after
+        content "s"
+      td.date data:focus::after
+        content "d"
+
+      th
+        position relative
+      th var:focus::after
+        position absolute
+        top 0
+        right 2px
+        display block
+        background-color #c30
+        color #fff
+        font-family monospace
+        font-weight bold
+        padding 0 3pt
+        text-align center
+        content "X"
+
+.placeholder
+  color placeHolderColor
+
+[contenteditable]:focus
+  outline 1px solid #ccc
+
+section.model:focus, article:focus
+  z-index 100

@@ -1,0 +1,13 @@
+@media print
+  body
+    font-size 7pt
+  .container
+    width 100%
+    main.card
+      page-break-before always
+      article
+        li
+          box-shadow none
+          border 1px solid #eee
+    main.card:first-child
+      page-break-before avoid

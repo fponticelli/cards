@@ -1,0 +1,12 @@
+doctype
+include mixin
+html
+  head
+    title #{title}
+    link(rel='stylesheet', href='/css/font-awesome.min.css')
+    link(rel='stylesheet', href='/css/style.css')
+    script(src="app/main.js")
+  body
+    .container
+      .main-content
+        block content

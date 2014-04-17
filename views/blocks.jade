@@ -1,0 +1,109 @@
+extend layout
+
+block content
+  main.card
+    article(contenteditable)
+      p.desc Paragraph
+      p sample paragraph
+
+      p.desc Code
+      pre sample code
+
+      p.desc Section
+      section
+        p paragraph
+        pre code
+
+      p.desc Header
+      h1 Title
+      section
+        h1 Title
+        section
+          h1 Title
+
+      p.desc Block Quote
+      blockquote block quote text
+        cite cite name
+
+      p.desc Table
+      table
+        thead
+          tr
+            th
+            th head1
+            th head2
+            th head3
+        tbody
+          tr
+            th row
+            td cell1
+            td cell2
+            td cell3
+          tr
+            th row
+            td cell1
+            td cell2
+            td cell3
+          tr
+            th row
+            td cell1
+            td cell2
+            td cell3
+        tfoot
+          tr
+            td
+            td sum1
+            td sum2
+            td sum3
+      p.note caption
+
+      p.desc Figure
+      figure
+        img(src="images/bmi_chart.png")
+        figcaption BMI
+
+      p.desc Card List / Pin List
+      ul.cards
+        li item
+        li item
+        li item
+      hr.cards
+
+      p.desc List
+      ul
+        li item
+        li item
+        li item
+
+      p.desc Unordered List
+      ul.unordered
+        li item
+        li item
+        li item
+
+      p.desc Ordered List
+      ol
+        li item
+        li item
+        li item
+    footer
+
+  section.todo
+    ul
+      li REST API integration
+      li Promises
+      li setTimeout/setInterval
+      li web sockets
+      li generators
+      li charts
+      li document blocks (paragraphs, code, tables, lists, cards ...)
+      li block properties
+      li variable appearance
+      li variable edit
+      li variable move
+      li variable delete
+      li document data VS model data (formulas are currently evaluated in the document and not in the model)
+      li UI controls (select, checkboxes, radio, slider, spinner, tree view, grid view, progress bar, accordion, input?, textarea?, tooltip, grouped list, page indicator, custom ...)
+      li data structure
+      li
+        pre cite q canvas dd dl dt mark meter progress s time audio video
