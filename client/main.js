@@ -1,7 +1,11 @@
-import Card from './ui/card';
-import Bacon from 'ext/bacon';
+import FragmentEditor from './ui/fragmenteditor';
 
-console.log(Bacon);
+document.addEventListener("DOMContentLoaded", function() {
+	console.log("GO");
+	let container = document.querySelector('.container'),
+		editor    = new FragmentEditor;
 
-var card = new Card();
-console.log(card);
+	editor.attachTo(container);
+	editor.focus();
+}, false);
+
