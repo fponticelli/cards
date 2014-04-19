@@ -1,4 +1,5 @@
 import FragmentEditor from './ui/fragmenteditor';
+import { Stream } from 'cards/model/stream';
 
 document.addEventListener("DOMContentLoaded", function() {
 	let container = document.querySelector('.container'),
@@ -8,5 +9,9 @@ document.addEventListener("DOMContentLoaded", function() {
 	editor1.attachTo(container);
 	editor1.focus();
 	editor2.attachTo(container);
+	editor1.text
+		.map((t) => t.length > 0)
+		.unique()
+		.log();
 }, false);
 

@@ -133,3 +133,7 @@ body {
 .fragment-editor [contenteditable]:focus:after {
   display: block;
 }
+.fragment-editor [contenteditable].empty {
+  padding: 0 0.25em;
+  background-color: #edc;
+}

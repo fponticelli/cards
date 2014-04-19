@@ -27,7 +27,7 @@ export default class FragmentEditor {
 			editable: editable
 		};
 		this[p] = {
-			text : new StringValue(options.text || "some text "),
+			text : new StringValue(options.text),
 			bold : new BoolValue(options.bold),
 			italic : new BoolValue(options.italic),
 			strikethrough : new BoolValue(options.strikethrough)
@@ -54,6 +54,13 @@ export default class FragmentEditor {
 		}, false);
 
 		this[p].text.subscribe(text => editable.innerText = text);
+		this[p].text
+			.map((t) => t.length === 0)
+			.unique()
+			.subscribe((empty) => empty ?
+				editable.classList.add("empty") :
+				editable.classList.remove("empty"));
+		// TODO use classes or wrap in strong/em/strike
 		this[p].bold.subscribe(value => $el.style.fontWeight = value ? "bold" : "normal");
 		this[p].italic.subscribe(value => $el.style.fontStyle = value ? "italic" : "normal");
 		this[p].strikethrough.subscribe(value => $el.style.textDecoration = value ? "line-through" : "none");
