@@ -17,7 +17,7 @@ let template = require('./index.jade'),
 // visible focus
 // placeholder
 export default class FragmentEditor {
-	constructor() {
+	constructor(options = {}) {
 		let self = this,
 			$el = Html.parse(template()),
 			editable = Query.first('[contenteditable]', $el);
@@ -26,10 +26,10 @@ export default class FragmentEditor {
 			editable: editable
 		};
 		this[p] = {
-			text : new StringValue("some text "),
-			bold : new BoolValue(),
-			italic : new BoolValue(),
-			strikethrough : new BoolValue()
+			text : new StringValue(options.text || "some text "),
+			bold : new BoolValue(options.bold),
+			italic : new BoolValue(options.italic),
+			strikethrough : new BoolValue(options.strikethrough)
 		}
 		editable.addEventListener("input", () => {
 			this[p].text.set(editable.innerText);
@@ -57,6 +57,7 @@ export default class FragmentEditor {
 		this[p].italic.subscribe(value => $el.style.fontStyle = value ? "italic" : "normal");
 		this[p].strikethrough.subscribe(value => $el.style.textDecoration = value ? "line-through" : "none");
 
+		this[p].text.subscribe(text => console.log(text));
 	}
 	attachTo(container) {
 		container.appendChild(this[$].el)
