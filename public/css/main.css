@@ -1,0 +1,140 @@
+html,
+body,
+div,
+span,
+applet,
+object,
+iframe,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote,
+pre,
+a,
+abbr,
+acronym,
+address,
+big,
+cite,
+code,
+del,
+dfn,
+em,
+img,
+ins,
+kbd,
+q,
+s,
+samp,
+small,
+strike,
+strong,
+sub,
+sup,
+tt,
+var,
+dl,
+dt,
+dd,
+ol,
+ul,
+li,
+fieldset,
+form,
+label,
+legend,
+table,
+caption,
+tbody,
+tfoot,
+thead,
+tr,
+th,
+td {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  font-weight: inherit;
+  font-style: inherit;
+  font-family: inherit;
+  font-size: 100%;
+  vertical-align: baseline;
+}
+body {
+  line-height: 1;
+  color: #000;
+  background: #fff;
+}
+ol,
+ul {
+  list-style: none;
+}
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+  vertical-align: middle;
+}
+caption,
+th,
+td {
+  text-align: left;
+  font-weight: normal;
+  vertical-align: middle;
+}
+a img {
+  border: none;
+}
+* {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+body {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 18pt;
+  padding: 20px;
+}
+.fragment-editor [contenteditable] {
+  display: inline-block;
+  position: relative;
+}
+.fragment-editor [contenteditable]:before,
+.fragment-editor [contenteditable]:after {
+  display: none;
+  position: absolute;
+  font-family: FontAwesome;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 85%;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  color: #89a;
+  background-image: none;
+}
+.fragment-editor [contenteditable]:before {
+  content: "\f0da";
+  left: 0px;
+  top: 0.7em;
+}
+.fragment-editor [contenteditable]:after {
+  content: "\f0d9";
+  right: 0px;
+  bottom: -0.5em;
+}
+.fragment-editor [contenteditable]:focus {
+  background-color: #abd;
+  background-image: -webkit-repeating-linear-gradient(135deg, transparent, transparent 2px, #fff 2px, #fff 4px);
+  background-image: -moz-repeating-linear-gradient(135deg, transparent, transparent 2px, #fff 2px, #fff 4px);
+  background-image: -o-repeating-linear-gradient(135deg, transparent, transparent 2px, #fff 2px, #fff 4px);
+  background-image: -ms-repeating-linear-gradient(135deg, transparent, transparent 2px, #fff 2px, #fff 4px);
+  background-image: repeating-linear-gradient(-45deg, transparent, transparent 2px, #fff 2px, #fff 4px);
+}
+.fragment-editor [contenteditable]:focus:before,
+.fragment-editor [contenteditable]:focus:after {
+  display: block;
+}
