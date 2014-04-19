@@ -1,42 +1,40 @@
-import { Html, Query } from 'ui/dom';
+import { Html, Query, Dom } from 'ui/dom';
 import { StringValue, BoolValue } from 'cards/model/value';
 
 let template = require('./index.jade'),
 	$ = Symbol(),
 	p = Symbol(),
 	metaKeys = {
-		66 : function() { this[p].bold.toggle(); },
-		73 : function() { this[p].italic.toggle(); }
+		66 : function() { this[p].strong.toggle(); },
+		73 : function() { this[p].emphasis.toggle(); }
 	},
 	ctrlKeys = {
-		85 : function() {/* underline, ignore */}
+		85 : function() {/* underline, ignore */},
+		72 : function() { this[p].removed.toggle(); } // CTRL + h
 	};
 
 
 // TODO
-// editor events should bubble outside and not apply the state directly (bold, italic ...)
+// editor events should bubble outside and not apply the state directly (strong, emphasis ...)
 // visible focus
 // placeholder
 export default class FragmentEditor {
 	constructor(options = {}) {
 		let self = this,
-			$el = Html.parse(template()),
-			editable = Query.first('[contenteditable]', $el);
-		this[$] = {
-			el: $el,
-			editable: editable
-		};
+			$el = this[$] = Html.parse(template());
+
 		this[p] = {
 			text : new StringValue(options.text),
-			bold : new BoolValue(options.bold),
-			italic : new BoolValue(options.italic),
-			strikethrough : new BoolValue(options.strikethrough)
+			strong : new BoolValue(options.strong),
+			emphasis : new BoolValue(options.emphasis),
+			removed : new BoolValue(options.removed)
 		}
-		editable.addEventListener("input", () => {
-			this[p].text.set(editable.innerText);
+		$el.addEventListener("input", () => {
+			this[p].text.set($el.innerText);
 		}, false);
 
-		editable.addEventListener("keydown", (e) => {
+		$el.addEventListener("keydown", (e) => {
+			console.log(e);
 			if(e.metaKey) { // TODO test on Win, Linux
 				let ƒ = metaKeys[e.keyCode];
 				if(ƒ) {
@@ -53,36 +51,35 @@ export default class FragmentEditor {
 			}
 		}, false);
 
-		this[p].text.subscribe(text => editable.innerText = text);
+		this[p].text.subscribe(text => $el.innerText = text);
 		this[p].text
 			.map((t) => t.length === 0)
 			.unique()
-			.subscribe((empty) => empty ?
-				editable.classList.add("empty") :
-				editable.classList.remove("empty"));
+			.subscribe(Dom.swapClass($el, "empty"));
+
 		// TODO use classes or wrap in strong/em/strike
-		this[p].bold.subscribe(value => $el.style.fontWeight = value ? "bold" : "normal");
-		this[p].italic.subscribe(value => $el.style.fontStyle = value ? "italic" : "normal");
-		this[p].strikethrough.subscribe(value => $el.style.textDecoration = value ? "line-through" : "none");
+		this[p].strong.subscribe(Dom.swapClass($el, "strong"));
+		this[p].emphasis.subscribe(Dom.swapClass($el, "emphasis"));
+		this[p].removed.subscribe(Dom.swapClass($el, "removed"));
 
 		this[p].text.subscribe(text => console.log(text));
 	}
 	attachTo(container) {
-		container.appendChild(this[$].el)
+		container.appendChild(this[$])
 	}
 	focus() {
-		this[$].editable.focus();
+		this[$].focus();
 	}
 	get text() {
 		return this[p].text;
 	}
-	get bold() {
-		return this[p].bold;
+	get strong() {
+		return this[p].strong;
 	}
-	get italic() {
-		return this[p].italic;
+	get emphasis() {
+		return this[p].emphasis;
 	}
-	get strikethrough() {
-		return this[p].strikethrough;
+	get removed() {
+		return this[p].removed;
 	}
 }

@@ -1,10 +1,18 @@
 marker-color = #cba
 marker-background-color = #edc
-marker-pos-before = 0.70em
+marker-background-light = #fed
+marker-pos-before = 0.85em
 marker-pos-after = -0.5em
 
-.fragment-editor [contenteditable]
-	display inline-block
+.strong
+	font-weight bold
+.emphasis
+	font-style italic
+.removed
+	text-decoration line-through
+
+.fragment-editor[contenteditable]
+	/*
 	position relative
 	&:before, &:after
 		display none
@@ -26,13 +34,15 @@ marker-pos-after = -0.5em
 		content "\f0d9"
 		right 0px
 		bottom marker-pos-after
-	&:focus
+	*/
+	&.empty
+		padding 0 0.25em
+		background-color marker-background-light
+	&.empty:focus, &:focus
 		background-color marker-background-color
-		background url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAMElEQVQIW2Pcf/v2f0dVVcabN2/+V1dXZ2QAAjCBLABShKICpgusEgSQjQELopsLAPatJwSBfLNtAAAAAElFTkSuQmCC")
+		border-bottom 3px solid marker-color
+		//background url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAMElEQVQIW2Pcf/v2f0dVVcabN2/+V1dXZ2QAAjCBLABShKICpgusEgSQjQELopsLAPatJwSBfLNtAAAAAElFTkSuQmCC")
 		//background-image repeating-linear-gradient(-45deg, transparent, transparent 2px, white 2px, white 4px)
 
 		&:before, &:after
 			display block
-	&.empty
-		padding 0 0.25em
-		background-color marker-background-color

@@ -97,43 +97,30 @@ a img {
 body {
   font-family: Helvetica, Arial, sans-serif;
   font-size: 18pt;
+  line-height: 1.2em;
   padding: 20px;
 }
-.fragment-editor [contenteditable] {
-  display: inline-block;
-  position: relative;
+.strong {
+  font-weight: bold;
 }
-.fragment-editor [contenteditable]:before,
-.fragment-editor [contenteditable]:after {
-  display: none;
-  position: absolute;
-  font-family: FontAwesome;
-  font-style: normal;
-  font-weight: normal;
-  font-size: 85%;
-  line-height: 1;
-  -webkit-font-smoothing: antialiased;
-  color: #cba;
+.emphasis {
+  font-style: italic;
 }
-.fragment-editor [contenteditable]:before {
-  content: "\f0da";
-  left: 0px;
-  top: 0.7em;
+.removed {
+  text-decoration: line-through;
 }
-.fragment-editor [contenteditable]:after {
-  content: "\f0d9";
-  right: 0px;
-  bottom: -0.5em;
-}
-.fragment-editor [contenteditable]:focus {
-  background-color: #edc;
-  background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAMElEQVQIW2Pcf/v2f0dVVcabN2/+V1dXZ2QAAjCBLABShKICpgusEgSQjQELopsLAPatJwSBfLNtAAAAAElFTkSuQmCC");
-}
-.fragment-editor [contenteditable]:focus:before,
-.fragment-editor [contenteditable]:focus:after {
-  display: block;
-}
-.fragment-editor [contenteditable].empty {
+.fragment-editor[contenteditable].empty {
   padding: 0 0.25em;
+  background-color: #fed;
+}
+.fragment-editor[contenteditable].empty:focus,
+.fragment-editor[contenteditable]:focus {
   background-color: #edc;
+  border-bottom: 3px solid #cba;
+}
+.fragment-editor[contenteditable].empty:focus:before,
+.fragment-editor[contenteditable]:focus:before,
+.fragment-editor[contenteditable].empty:focus:after,
+.fragment-editor[contenteditable]:focus:after {
+  display: block;
 }
