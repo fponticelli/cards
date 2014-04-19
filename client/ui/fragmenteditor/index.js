@@ -13,7 +13,8 @@ let template = require('./index.jade'),
 	};
 
 
-
+// TODO
+// editor events should bubble outside and not apply the state directly (bold, italic ...)
 // visible focus
 // placeholder
 export default class FragmentEditor {

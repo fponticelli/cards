@@ -127,6 +127,7 @@ body {
 }
 .fragment-editor [contenteditable]:focus {
   background-color: #edc;
+  background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAMElEQVQIW2Pcf/v2f0dVVcabN2/+V1dXZ2QAAjCBLABShKICpgusEgSQjQELopsLAPatJwSBfLNtAAAAAElFTkSuQmCC");
 }
 .fragment-editor [contenteditable]:focus:before,
 .fragment-editor [contenteditable]:focus:after {
