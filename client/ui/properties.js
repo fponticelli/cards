@@ -1,7 +1,7 @@
 let string  = require('string'),
 	numeral = require('numeral');
 
-import { Dom } from 'ui/dom';
+import { Dom, Query } from 'ui/dom';
 import { StringValue, BoolValue, FloatValue } from 'cards/model/value';
 
 function addSwapClassFragment(name, className = name) {
@@ -10,6 +10,14 @@ function addSwapClassFragment(name, className = name) {
 			return Dom.stream(value).applySwapClass(el, className);
 		});
 	};
+}
+
+function addAttributeFragment(name, attribute) {
+	return function(fragment, text = "") {
+		fragment.addPropertyValue(name, new StringValue(text), function(value, el) {
+			return Dom.stream(value).applyAttribute(attribute, content);
+		});
+	}
 }
 
 function createValue(type, a, b, c, d, e) {
@@ -23,6 +31,7 @@ function createValue(type, a, b, c, d, e) {
 	}
 }
 
+// TODO add link
 let p = {
 	value: function(fragment, type, ...args) {
 		let value = typeof type === "string" ? createValue(type, ...args) : type;
@@ -32,7 +41,8 @@ let p = {
 	},
 	text: function(fragment, text = "") {
 		fragment.addPropertyValue("text", new StringValue(text), function(value, el) {
-			return Dom.stream(value).applyText(el);
+			let content = Query.first('.content', el);
+			return Dom.stream(value).applyText(content);
 		});
 	},
 	visible: function(fragment, defaultValue = true) {
@@ -42,7 +52,8 @@ let p = {
 	},
 	strong: addSwapClassFragment('strong'),
 	emphasis: addSwapClassFragment('emphasis'),
-	strike: addSwapClassFragment('strike')
+	strike: addSwapClassFragment('strike'),
+	tooltip: addAttributeFragment('tooltip', 'title')
 };
 
 let Properties = {
