@@ -31,7 +31,6 @@ function createValue(type, a, b, c, d, e) {
 	}
 }
 
-// TODO add link
 let p = {
 	value: function(fragment, type, ...args) {
 		let value = typeof type === "string" ? createValue(type, ...args) : type;
@@ -53,7 +52,26 @@ let p = {
 	strong: addSwapClassFragment('strong'),
 	emphasis: addSwapClassFragment('emphasis'),
 	strike: addSwapClassFragment('strike'),
-	tooltip: addAttributeFragment('tooltip', 'title')
+	tooltip: addAttributeFragment('tooltip', 'title'),
+	link: function(fragment, url = "") {
+		fragment.addPropertyValue("link", new StringValue(url), function(value, el) {
+			let a = document.createElement('a'),
+				ƒ = (url) => a.href = url;
+			a.target = "_blank";
+			for(let i = 0; i < el.childNodes.length; i++) {
+				a.appendChild(el.childNodes[i]);
+			}
+			el.appendChild(a);
+			value.subscribe(ƒ);
+			return () => {
+				value.unsubscribe(ƒ);
+				el.removeChild(a);
+				for(let i = 0; i < a.childNodes.length; i++) {
+					el.appendChild(a.childNodes[i]);
+				}
+			};
+		});
+	}
 };
 
 let Properties = {

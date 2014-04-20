@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 	// make it blink
 	Properties.addVisible(fragment);
-	Stream.interval(750)
+	Stream.interval(300)
 		.reduce(true, (acc) => !acc)
 		.feed(fragment.properties.visible);
 
@@ -32,6 +32,12 @@ document.addEventListener("DOMContentLoaded", function() {
 
 	// add format
 	Properties.addNumericFormat(number, "$ 0,0.00");
+
+	// add link
+	Properties.addLink(number, "http://google.com");
+	// remove link after 4 secs
+	Stream.delay(5000)
+		.subscribe(() => Properties.removeLink(number));
 
 	// update number
 	Stream.interval(1000)
