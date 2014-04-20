@@ -1,25 +1,41 @@
-import FragmentEditor from './ui/fragmenteditor';
-import { NumberFragment } from './ui/fragments/number';
 import { Stream } from 'cards/model/stream';
+import { Fragment } from './ui/fragment';
+import { Properties } from './ui/properties';
 
 document.addEventListener("DOMContentLoaded", function() {
 	let container = document.querySelector('.container'),
-		editor1   = new FragmentEditor(),
-		editor2   = new FragmentEditor({ strong : true }),
-		number    = new NumberFragment();
+		number    = new Fragment(),
+		fragment  = new Fragment();
 
-	editor1.attachTo(container);
-	editor1.focus();
-	editor2.attachTo(container);
-	editor1.text
-		.map((t) => t.length > 0)
-		.unique()
-		.log();
 	number.attachTo(container);
+	fragment.attachTo(container);
 
-	number.format.set("$ 0,0.00");
-	Stream.signal(1000)
+	// add text property and rendering
+	Properties.addText(fragment);
+	Properties.addText(number);
+
+	// add a value
+	Properties.addValue(fragment, "String");
+	fragment.properties.value = "Hey Franco";
+	fragment.properties.value.feed(fragment.properties.text);
+
+	Properties.addValue(number, "Float");
+
+	// make it blink
+	Properties.addVisible(fragment);
+	Stream.interval(750)
+		.reduce(true, (acc) => !acc)
+		.feed(fragment.properties.visible);
+
+	// make bold
+	Properties.addStrong(fragment, true);
+
+	// add format
+	Properties.addNumericFormat(number, "$ 0,0.00");
+
+	// update number
+	Stream.interval(1000)
 		.reduce(0, (acc) => acc + 3/7)
-		.subscribe((v) => number.value.set(v));
+		.feed(number.properties.value);
 }, false);
 

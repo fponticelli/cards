@@ -4,10 +4,9 @@ var path       = require('path'),
     fs         = require('fs'),
     browserify = require('browserify'),
     es6ify     = require('es6ify'),
-    bpj        = require('browserify-plain-jade'),
     jadeify    = require('jadeify'),
     bundlePath = path.join(__dirname, 'public/app/main.js'),
-    syms       = ['ext', 'cards', 'ui'];
+    syms       = ['cards', 'ui'];
 
 syms.map(function(p) {
   var dst = path.join(__dirname, 'node_modules', p),
@@ -23,7 +22,7 @@ es6ify.traceurOverrides = { blockBinding: true };
 browserify()
   .transform(jadeify)
   .add(es6ify.runtime)
-  .transform(es6ify.configure(/^((?!.*node_modules)+.+\.js|(?:.*node_modules\/(ext|cards|ui)\/)+.+\.js$)$/))
+  .transform(es6ify.configure(/^((?!.*node_modules)+.+\.js|(?:.*node_modules\/(cards|ui)\/)+.+\.js$)$/))
   .require(require.resolve('./client/main.js'), { entry: true })
   .bundle({ debug: true })
   .on('error', function (err) { console.error(err); })
