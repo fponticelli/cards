@@ -7,14 +7,25 @@ let numeral = require('numeral');
 class NumberFragment extends TextContainerFragment {
 	constructor(options = {}) {
 		super(options);
-		this[p].format = new StringValue(options.format || "0,0");
+		this[p].format = new StringValue(options.format || "");
 		this[p].value  = new FloatValue(options.value);
 
 		this[p].value
 			.zip(this[p].format)
 			.spread((value, format) => {
-				this[$].innerText = numeral(value)(format);
+				if(format === "") {
+					format = Math.floor(value) === value ? "0,0" : "0,0.000";
+				}
+				this[$].innerText = numeral(value).format(format);
 			});
+	}
+
+	get value() {
+		return this[p].value;
+	}
+
+	get format() {
+		return this[p].format;
 	}
 }
 

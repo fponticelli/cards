@@ -9,7 +9,7 @@ class BaseFragment {
 	constructor(options) {
 		this[$] = Html.parse(template);
 		this[p] = {
-			visible : new BoolValue(options.visible),
+			visible : new BoolValue(options.visible !== undefined ? options.visible : true, true),
 		};
 
 		Dom.stream(this[p].visible).applyDisplay(this[$]);
@@ -35,6 +35,10 @@ class BaseFragment {
 				continue;
 			this[p][key].value = o[key];
 		}
+	}
+
+	get visible() {
+		return this[p].visible;
 	}
 }
 

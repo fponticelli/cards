@@ -10,6 +10,18 @@ class TextContainerFragment extends BaseFragment {
 		this[p].emphasis = new BoolValue(options.emphasis),
 		this[p].removed  = new BoolValue(options.removed)
 	}
+
+	get strong() {
+		return this[p].strong;
+	}
+
+	get emphasis() {
+		return this[p].emphasis;
+	}
+
+	get removed() {
+		return this[p].removed;
+	}
 }
 
 export { TextContainerFragment, $, p };

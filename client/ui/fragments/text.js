@@ -9,6 +9,10 @@ class TextFragment extends TextContainerFragment {
 		this[p].text = new StringValue(options.text),
 		Dom.stream(this[p].text).applyText(this[$]);
 	}
+
+	get text() {
+		return this[p].text;
+	}
 }
 
 export { TextFragment, $, p };
