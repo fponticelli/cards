@@ -16,6 +16,8 @@
     "browserify": "^3.43.0",
     "lodash": "^2.4.1",
     "jadeify": "^2.1.1",
-    "browserijade": "^0.5.7"
+    "browserijade": "^0.5.7",
+    "numeral": "^1.5.3",
+    "immediate": "^2.6.3"
   }
 }
