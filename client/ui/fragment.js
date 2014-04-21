@@ -42,7 +42,7 @@ class PropertyContainer {
 
 	addPropertyValue(name, value, wire) {
 		if(this[u][name])
-			throw new Error(`A property ${name} already exists`);
+			throw new Error(`A property '${name}' already exists`);
 		Object.defineProperty(this[p], name, {
 			configurable: true,
 			enumerable: true,
@@ -55,7 +55,7 @@ class PropertyContainer {
 
 	addPropertyContainer(name, defaultField) {
 		if(this[u][name])
-			throw new Error(`A property ${name} already exists`);
+			throw new Error(`A property '${name}' already exists`);
 		let container = this[u][name] = new PropertyContainer(),
 			setter = (defaultField) ?
 				function(v) { container[defaultField].push(v); } :
@@ -72,7 +72,7 @@ class PropertyContainer {
 
 	removeProperty(name) {
 		if(!this[u][name])
-			throw `Object doesn't contain a property ${name}`;
+			throw `Object doesn't contain a property '${name}'`;
 		if(this[u][name] instanceof PropertyContainer)
 			this[u][name].removeProperties();
 		else
