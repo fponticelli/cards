@@ -35,6 +35,11 @@ document.addEventListener("DOMContentLoaded", function() {
 	// add format
 	Properties.addNumericFormat(number, "$ 0,0.00");
 
+	// change format dynamically
+	Stream
+		.sequence(2000, ["$ 0,0.00", "0.000", "0,0"], true)
+		.feed(number.properties.format);
+
 	// add link
 	Properties.addLink(number, "http://google.com");
 	// remove link after 5 secs
@@ -50,7 +55,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 	// update number
 	Stream.interval(1000)
-		.reduce(0, (acc) => acc + 3/7)
+		.reduce(0, (acc) => acc + 3000/7)
 		.feed(number.properties.value);
 }, false);
 
