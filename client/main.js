@@ -1,4 +1,4 @@
-import { Stream } from 'cards/model/stream';
+import { Stream } from 'streamy/stream';
 import { Fragment } from './ui/fragment';
 import { Properties } from './ui/properties';
 

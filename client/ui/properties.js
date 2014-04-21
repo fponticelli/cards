@@ -2,7 +2,7 @@ let string  = require('string'),
 	numeral = require('numeral');
 
 import { Dom, Query } from 'ui/dom';
-import { StringValue, BoolValue, FloatValue } from 'cards/model/value';
+import { StringValue, BoolValue, FloatValue } from 'streamy/value';
 
 function addSwapClassFragment(name, className = name) {
 	return function(fragment, defaultValue = false) {
