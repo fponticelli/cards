@@ -20,14 +20,14 @@ function addAttributeFragment(name, attribute) {
 	}
 }
 
-function createValue(type, a, b, c, d, e) {
+function createValue(type, ...args) {
 	switch(type) {
 		case "String":
-			return new StringValue(a, b, c, d, e);
+			return new StringValue(...args);
 		case "Bool":
-			return new BoolValue(a, b, c, d, e);
+			return new BoolValue(...args);
 		case "Float":
-			return new FloatValue(a, b, c, d, e);
+			return new FloatValue(...args);
 	}
 }
 
