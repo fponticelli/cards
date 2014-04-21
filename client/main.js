@@ -1,8 +1,9 @@
 import { Stream } from 'streamy/stream';
 import { Fragment } from './ui/fragment';
 import { Properties } from './ui/properties';
+import { Dom } from 'ui/dom';
 
-document.addEventListener("DOMContentLoaded", function() {
+Dom.ready().then(() => {
 	let container = document.querySelector('.container'),
 		number    = new Fragment(),
 		fragment  = new Fragment();
@@ -60,5 +61,5 @@ document.addEventListener("DOMContentLoaded", function() {
 		.reduce(0, (acc) => acc + 3000/7)
 		.feed(number.properties.value);
 
-}, false);
+});
 
