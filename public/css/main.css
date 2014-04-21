@@ -109,11 +109,11 @@ body {
 .strike {
   text-decoration: line-through;
 }
-[title]:after {
+[title]:before {
   display: block;
   position: absolute;
   top: -0.2em;
-  right: -0.5em;
+  left: -0.5em;
   z-index: -1;
   color: #f96;
   content: "\f069";

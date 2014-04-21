@@ -35,9 +35,13 @@ document.addEventListener("DOMContentLoaded", function() {
 
 	// add link
 	Properties.addLink(number, "http://google.com");
-	// remove link after 4 secs
+	// remove link after 5 secs
 	Stream.delay(5000)
 		.subscribe(() => Properties.removeLink(number));
+
+	// remove tooltip after 8 secs
+	Stream.delay(8000)
+		.subscribe(() => Properties.removeTooltip(number));
 
 	// add tooltip
 	Properties.addTooltip(number, "tooltip text goes here");
