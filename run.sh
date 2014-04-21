@@ -1,1 +1,1 @@
-nodemon --harmony server/server.js
+node --harmony server/server.js

@@ -128,6 +128,9 @@ body {
   display: inline;
   position: relative;
 }
+.fragment a {
+  color: #039;
+}
 .fragment .content[contenteditable].empty {
   padding: 0 0.25em;
   background-color: #fed;

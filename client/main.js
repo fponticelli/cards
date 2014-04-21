@@ -16,7 +16,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
 	// add a value
 	Properties.addValue(fragment, "String");
-	fragment.properties.value = "Hey Franco";
+	fragment.properties.value = " Hey Franco";
+	// manually wire value to text
 	fragment.properties.value.feed(fragment.properties.text);
 
 	Properties.addValue(number, "Float");
@@ -24,6 +25,7 @@ document.addEventListener("DOMContentLoaded", function() {
 	// make it blink
 	Properties.addVisible(fragment);
 	Stream.interval(300)
+		.cancelOn(Stream.delay(6500).subscribe(() => Properties.removeVisible(fragment)))
 		.reduce(true, (acc) => !acc)
 		.feed(fragment.properties.visible);
 
