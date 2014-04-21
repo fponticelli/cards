@@ -3,7 +3,7 @@ import { Fragment } from './ui/fragment';
 import { Properties, Formats } from './ui/properties';
 import { Dom, Query } from 'ui/dom';
 
-Dom.ready().then(() => {
+Dom.ready(() => {
 	let container = document.querySelector('.container'),
 		editor    = new Fragment(),
 		number    = new Fragment(),
@@ -20,9 +20,9 @@ Dom.ready().then(() => {
 
 	// add a value
 	Properties.addValue(fragment, "String");
-	fragment.properties.value = " Hey Franco";
+	fragment.value = " Hey Franco";
 	// manually wire value to text
-	fragment.properties.value.feed(fragment.properties.text);
+	fragment.value.feed(fragment.text);
 
 	Properties.addValue(number, "Float");
 
@@ -31,7 +31,7 @@ Dom.ready().then(() => {
 	Stream.interval(300)
 		.cancelOn(Stream.delay(6500).subscribe(() => Properties.removeVisible(fragment)))
 		.reduce(true, (acc) => !acc)
-		.feed(fragment.properties.visible);
+		.feed(fragment.visible);
 
 	// make bold
 	Properties.addStrong(fragment, true);
@@ -42,11 +42,11 @@ Dom.ready().then(() => {
 	// change format dynamically
 	Stream
 		.sequence(2000, ["$ 0,0.00", "0.000", "0,0"], true)
-		.feed(number.properties.format);
+		.feed(number.format);
 
 	// add link
 	Properties.addLink(number);
-	number.properties.link = "http://google.com";
+	number.link = "http://google.com";
 
 	// remove link after 5 secs
 	Stream.delay(5000)
@@ -62,11 +62,13 @@ Dom.ready().then(() => {
 	// update number
 	Stream.interval(1000)
 		.reduce(0, (acc) => acc + 3000/7)
-		.feed(number.properties.value);
+		//.subscribe(() => console.log(JSON.stringify(number)))
+		.subscribe(() => console.log(number.properties()))
+		.feed(number.value);
 
 	// attempt at adding text editor
 	editor.addPropertyValue("editor", {}, function(prop, el) {
-		let text = editor.properties.text;
+		let text = editor.text;
 		if(!text) {
 			throw new Error("'editor' requires the property 'text'");
 		}
@@ -85,6 +87,6 @@ Dom.ready().then(() => {
 			content.removeAttribute("contenteditable");
 		};
 	});
-	editor.properties.editor.focus();
+	editor.editor.focus();
 });
 

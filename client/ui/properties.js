@@ -82,8 +82,8 @@ let Properties = {
 
 let Formats = {
 	addNumeric(fragment, defaultFormat = "") {
-		let value = fragment.properties.value,
-			text  = fragment.properties.text;
+		let value = fragment.value,
+			text  = fragment.text;
 		if(!value) {
 			throw new Error("'format' requires the property 'value'");
 		}

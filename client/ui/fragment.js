@@ -10,57 +10,31 @@ let template = require('./fragment.jade')(),
 class PropertyContainer {
 	constructor(parent) {
 		this[parent] = parent;
-		this[p] = {};
 		this[u] = {};
 	}
 
-	get data() {
-		let out = {},
-			properties = this.properties;
-		for(let key in properties) {
-			if(properties[key] instanceof PropertyContainer) {
-				out[key] = properties[key].data;
-			} else if(!properties[key].isDefault) {
-				out[key] = properties[key].value;
-			}
-		}
-		return out;
-	}
-
-	set data(o) {
-		let properties = this.properties;
-		for(let key in o) {
-			if(!properties[key])
-				continue;
-			if(properties[key] instanceof PropertyContainer) {
-				properties[key].data = o[key];
-			} else {
-				properties[key].value = o[key];
-			}
-		}
-	}
-
 	addPropertyValue(name, value, wire) {
-		if(this[u][name])
+		if(name in this)
 			throw new Error(`A property '${name}' already exists`);
-		Object.defineProperty(this[p], name, {
+		Object.defineProperty(this, name, {
 			configurable: true,
 			enumerable: true,
 			writeable: false,
 			get: () => value,
 			set: (v) => value.push(v)
 		});
-		this[u][name] = wire.call(this.properties, value, this[$]);
+		this[u][name] = wire.call(this, value, this[$]);
 	}
 
 	addPropertyContainer(name, defaultField) {
 		if(this[u][name])
 			throw new Error(`A property '${name}' already exists`);
-		let container = this[u][name] = new PropertyContainer(),
+		let container = new PropertyContainer(),
 			setter = (defaultField) ?
 				function(v) { container[defaultField].push(v); } :
 				function() { throw new Error('Property Container doesn\'t have a default field'); };
-		Object.defineProperty(this[p], name, {
+		this[u][name] = container.removeProperties.bind(container);
+		Object.defineProperty(this, name, {
 			configurable: true,
 			enumerable: true,
 			writeable: false,
@@ -73,12 +47,9 @@ class PropertyContainer {
 	removeProperty(name) {
 		if(!this[u][name])
 			throw `Object doesn't contain a property '${name}'`;
-		if(this[u][name] instanceof PropertyContainer)
-			this[u][name].removeProperties();
-		else
-			this[u][name]();
+		this[u][name]();
 		delete this[u][name];
-		delete this[p][name];
+		delete this[name];
 	}
 
 	removeProperties() {
@@ -86,12 +57,25 @@ class PropertyContainer {
 			this.removeProperty(key);
 	}
 
-	get properties() {
-		return this[p];
+	properties() {
+		let arr = [];
+		for(let key in this[u])
+			arr.push(key)
+		return arr;
 	}
 
 	get parent() {
 		return this[parent];
+	}
+
+	toJSON() {
+		let out = {};
+		for(let key in this[u]) {
+			if("isDefault" in this[key] && this[key].isDefault)
+				continue;
+			out[key] = this[key].value;
+		}
+		return out;
 	}
 }
 
@@ -107,11 +91,9 @@ class Fragment extends PropertyContainer {
 	}
 
 	detach() {
+		if(!this[$].parentNode)
+			throw new Error('Fragment is not attached');
 		this[$].parentNode.removeChild(this[$]);
-	}
-
-	toJSON() {
-		return this.data;
 	}
 }
 
