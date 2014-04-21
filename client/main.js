@@ -1,17 +1,20 @@
 import { Stream } from 'streamy/stream';
 import { Fragment } from './ui/fragment';
 import { Properties, Formats } from './ui/properties';
-import { Dom } from 'ui/dom';
+import { Dom, Query } from 'ui/dom';
 
 Dom.ready().then(() => {
 	let container = document.querySelector('.container'),
+		editor    = new Fragment(),
 		number    = new Fragment(),
 		fragment  = new Fragment();
 
+	editor.attachTo(container);
 	number.attachTo(container);
 	fragment.attachTo(container);
 
 	// add text property and rendering
+	Properties.addText(editor);
 	Properties.addText(fragment);
 	Properties.addText(number);
 
@@ -61,5 +64,27 @@ Dom.ready().then(() => {
 		.reduce(0, (acc) => acc + 3000/7)
 		.feed(number.properties.value);
 
+	// attempt at adding text editor
+	editor.addPropertyValue("editor", {}, function(prop, el) {
+		let text = editor.properties.text;
+		if(!text) {
+			throw new Error("'editor' requires the property 'text'");
+		}
+		let content = Query.first('.content', el),
+			stream  = text.map((s) => s.length === 0).unique(),
+			streamƒ = Dom.stream(stream).applySwapClass(content, 'empty'),
+			listenƒ = (e) => {
+				text.push(el.innerText);
+			};
+		content.setAttribute("contenteditable", true);
+		content.addEventListener("input", listenƒ, false);
+		prop.focus = () => content.focus();
+		return function() {
+			streamƒ();
+			content.removeEventListener("input", listenƒ, false);
+			content.removeAttribute("contenteditable");
+		};
+	});
+	editor.properties.editor.focus();
 });
 
