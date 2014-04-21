@@ -6,7 +6,7 @@ import { StringValue, BoolValue, FloatValue, DateValue } from 'streamy/value';
 
 function addSwapClassFragment(name, className = name) {
 	return function(fragment, defaultValue = false) {
-		fragment.addPropertyValue(name, new BoolValue(defaultValue), function(value, el) {
+		fragment.addValue(name, new BoolValue(defaultValue), function(value, el) {
 			return Dom.stream(value).applySwapClass(el, className);
 		});
 	};
@@ -14,7 +14,7 @@ function addSwapClassFragment(name, className = name) {
 
 function addAttributeFragment(name, attribute) {
 	return function(fragment, text = "") {
-		fragment.addPropertyValue(name, new StringValue(text), function(value, el) {
+		fragment.addValue(name, new StringValue(text), function(value, el) {
 			return Dom.stream(value).applyAttribute(attribute, el);
 		});
 	}
@@ -36,18 +36,18 @@ function createValue(type, ...args) {
 let p = {
 	value: function(fragment, type, ...args) {
 		let value = typeof type === "string" ? createValue(type, ...args) : type;
-		fragment.addPropertyValue("value", value, function(value, el) {
+		fragment.addValue("value", value, function(value, el) {
 			return () => {};
 		});
 	},
 	text: function(fragment, text = "") {
-		fragment.addPropertyValue("text", new StringValue(text), function(value, el) {
+		fragment.addValue("text", new StringValue(text), function(value, el) {
 			let content = Query.first('.content', el);
 			return Dom.stream(value).applyText(content);
 		});
 	},
 	visible: function(fragment, defaultValue = true) {
-		fragment.addPropertyValue("visible", new BoolValue(defaultValue), function(value, el) {
+		fragment.addValue("visible", new BoolValue(defaultValue), function(value, el) {
 			return Dom.stream(value).applyDisplay(el);
 		});
 	},
@@ -56,7 +56,7 @@ let p = {
 	strike: addSwapClassFragment('strike'),
 	tooltip: addAttributeFragment('tooltip', 'title'),
 	link: function(fragment, url = "") {
-		fragment.addPropertyValue("link", new StringValue(url), function(value, el) {
+		fragment.addValue("link", new StringValue(url), function(value, el) {
 			let a = document.createElement('a'),
 				ƒ = (url) => a.href = url;
 			a.target = "_blank";
@@ -90,7 +90,7 @@ let Formats = {
 		if(!text) {
 			throw new Error("'format' requires the property 'text'");
 		}
-		fragment.addPropertyValue("format", new StringValue(defaultFormat), function(format) {
+		fragment.addValue("format", new StringValue(defaultFormat), function(format) {
 			let stream = value.zip(format);
 			stream.spread((value, format) => {
 					if(format === "") {

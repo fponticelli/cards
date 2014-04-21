@@ -12,7 +12,7 @@ class PropertyContainer {
 		this[$] = element;
 	}
 
-	addPropertyValue(name, value, wire) {
+	addValue(name, value, wire) {
 		if(name in this)
 			throw new Error(`A property '${name}' already exists`);
 		Object.defineProperty(this, name, {
@@ -25,7 +25,7 @@ class PropertyContainer {
 		this[u][name] = wire.call(this, value, this[$]);
 	}
 
-	addPropertyContainer(name, defaultField) {
+	addContainer(name, defaultField) {
 		if(this[u][name])
 			throw new Error(`A property '${name}' already exists`);
 		let container = new PropertyContainer(this[$], this),

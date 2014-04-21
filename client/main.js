@@ -67,7 +67,7 @@ Dom.ready(() => {
 		.feed(number.value);
 
 	// attempt at adding text editor
-	editor.addPropertyValue("editor", {}, function(prop, el) {
+	editor.addValue("editor", {}, function(prop, el) {
 		let text = editor.text;
 		if(!text) {
 			throw new Error("'editor' requires the property 'text'");
