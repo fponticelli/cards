@@ -41,7 +41,9 @@ document.addEventListener("DOMContentLoaded", function() {
 		.feed(number.properties.format);
 
 	// add link
-	Properties.addLink(number, "http://google.com");
+	Properties.addLink(number);
+	number.properties.link = "http://google.com";
+
 	// remove link after 5 secs
 	Stream.delay(5000)
 		.subscribe(() => Properties.removeLink(number));
@@ -57,5 +59,6 @@ document.addEventListener("DOMContentLoaded", function() {
 	Stream.interval(1000)
 		.reduce(0, (acc) => acc + 3000/7)
 		.feed(number.properties.value);
+
 }, false);
 

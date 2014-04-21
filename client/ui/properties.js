@@ -2,7 +2,7 @@ let string  = require('string'),
 	numeral = require('numeral');
 
 import { Dom, Query } from 'ui/dom';
-import { StringValue, BoolValue, FloatValue } from 'streamy/value';
+import { StringValue, BoolValue, FloatValue, DateValue } from 'streamy/value';
 
 function addSwapClassFragment(name, className = name) {
 	return function(fragment, defaultValue = false) {
@@ -28,6 +28,8 @@ function createValue(type, ...args) {
 			return new BoolValue(...args);
 		case "Float":
 			return new FloatValue(...args);
+		case "Date":
+			return new DateValue(...args);
 	}
 }
 

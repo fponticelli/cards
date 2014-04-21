@@ -109,6 +109,10 @@ class Fragment extends PropertyContainer {
 	detach() {
 		this[$].parentNode.removeChild(this[$]);
 	}
+
+	toJSON() {
+		return this.data;
+	}
 }
 
 
