@@ -133,29 +133,7 @@ body {
 }
 .fragment .content[contenteditable] {
   white-space: pre;
-/*
-		position relative
-		&:before, &:after
-			display none
-			position absolute
-			font-family FontAwesome
-			font-style normal
-			font-weight normal
-			font-size 85%
-			line-height 1
-			font-smoothing antialiased
-			color marker-color
-			//background-image none
-
-		&:before
-			content "\f0da"
-			left 0px
-			top marker-pos-before
-		&:after
-			content "\f0d9"
-			right 0px
-			bottom marker-pos-after
-		*/
+  position: relative;
 }
 .fragment .content[contenteditable].empty {
   padding: 0 0.25em;
@@ -164,11 +142,5 @@ body {
 .fragment .content[contenteditable].empty:focus,
 .fragment .content[contenteditable]:focus {
   background-color: rgba(240,220,200,0.25);
-  border-bottom: 3px solid #cba;
-}
-.fragment .content[contenteditable].empty:focus:before,
-.fragment .content[contenteditable]:focus:before,
-.fragment .content[contenteditable].empty:focus:after,
-.fragment .content[contenteditable]:focus:after {
-  display: block;
+  border-bottom: 2px solid #cba;
 }

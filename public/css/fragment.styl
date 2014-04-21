@@ -37,37 +37,10 @@ link-color = #039
 		color link-color
 	.content[contenteditable]
 		white-space pre
-		/*
 		position relative
-		&:before, &:after
-			display none
-			position absolute
-			font-family FontAwesome
-			font-style normal
-			font-weight normal
-			font-size 85%
-			line-height 1
-			font-smoothing antialiased
-			color marker-color
-			//background-image none
-
-		&:before
-			content "\f0da"
-			left 0px
-			top marker-pos-before
-		&:after
-			content "\f0d9"
-			right 0px
-			bottom marker-pos-after
-		*/
 		&.empty
 			padding 0 0.25em
 			background-color marker-background-light
 		&.empty:focus, &:focus
 			background-color marker-background-color
-			border-bottom 3px solid marker-color
-			//background url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAMElEQVQIW2Pcf/v2f0dVVcabN2/+V1dXZ2QAAjCBLABShKICpgusEgSQjQELopsLAPatJwSBfLNtAAAAAElFTkSuQmCC")
-			//background-image repeating-linear-gradient(-45deg, transparent, transparent 2px, white 2px, white 4px)
-
-			&:before, &:after
-				display block
+			border-bottom 2px solid marker-color
