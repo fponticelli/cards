@@ -63,7 +63,7 @@ Dom.ready(() => {
 	Stream.interval(1000)
 		.reduce(0, (acc) => acc + 3000/7)
 		//.subscribe(() => console.log(JSON.stringify(number)))
-		.subscribe(() => console.log(number.properties()))
+		//.subscribe(() => console.log(number.properties()))
 		.feed(number.value);
 
 	// attempt at adding text editor
