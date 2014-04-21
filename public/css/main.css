@@ -109,18 +109,37 @@ body {
 .strike {
   text-decoration: line-through;
 }
-.fragment-editor[contenteditable].empty {
+[title]:after {
+  display: block;
+  position: absolute;
+  top: -0.2em;
+  right: -0.5em;
+  z-index: -1;
+  color: #f96;
+  content: "\f069";
+  font-family: FontAwesome;
+  font-style: normal;
+  font-weight: normal;
+  line-height: 1;
+  font-size: 0.3em;
+  -webkit-font-smoothing: antialiased;
+}
+.fragment {
+  display: inline;
+  position: relative;
+}
+.fragment .content[contenteditable].empty {
   padding: 0 0.25em;
   background-color: #fed;
 }
-.fragment-editor[contenteditable].empty:focus,
-.fragment-editor[contenteditable]:focus {
+.fragment .content[contenteditable].empty:focus,
+.fragment .content[contenteditable]:focus {
   background-color: #edc;
   border-bottom: 3px solid #cba;
 }
-.fragment-editor[contenteditable].empty:focus:before,
-.fragment-editor[contenteditable]:focus:before,
-.fragment-editor[contenteditable].empty:focus:after,
-.fragment-editor[contenteditable]:focus:after {
+.fragment .content[contenteditable].empty:focus:before,
+.fragment .content[contenteditable]:focus:before,
+.fragment .content[contenteditable].empty:focus:after,
+.fragment .content[contenteditable]:focus:after {
   display: block;
 }

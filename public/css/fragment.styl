@@ -1,0 +1,68 @@
+marker-color = #cba
+marker-background-color = #edc
+marker-background-light = #fed
+marker-pos-before = 0.85em
+marker-pos-after = -0.5em
+
+tooltip-marker-color = #f96
+
+.strong
+	font-weight bold
+.emphasis
+	font-style italic
+.strike
+	text-decoration line-through
+[title]
+	&:after
+		display block
+		position absolute
+		top -0.2em
+		right -0.5em
+		z-index -1
+		color tooltip-marker-color
+		content "\f069";
+		font-family: FontAwesome;
+		font-style: normal;
+		font-weight: normal;
+		line-height: 1;
+		font-size: 0.3em
+		font-smoothing: antialiased;
+
+.fragment
+	display inline
+	position relative
+	.content[contenteditable]
+		/*
+		position relative
+		&:before, &:after
+			display none
+			position absolute
+			font-family FontAwesome
+			font-style normal
+			font-weight normal
+			font-size 85%
+			line-height 1
+			font-smoothing antialiased
+			color marker-color
+			//background-image none
+
+		&:before
+			content "\f0da"
+			left 0px
+			top marker-pos-before
+		&:after
+			content "\f0d9"
+			right 0px
+			bottom marker-pos-after
+		*/
+		&.empty
+			padding 0 0.25em
+			background-color marker-background-light
+		&.empty:focus, &:focus
+			background-color marker-background-color
+			border-bottom 3px solid marker-color
+			//background url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAMElEQVQIW2Pcf/v2f0dVVcabN2/+V1dXZ2QAAjCBLABShKICpgusEgSQjQELopsLAPatJwSBfLNtAAAAAElFTkSuQmCC")
+			//background-image repeating-linear-gradient(-45deg, transparent, transparent 2px, white 2px, white 4px)
+
+			&:before, &:after
+				display block

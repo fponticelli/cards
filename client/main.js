@@ -39,6 +39,9 @@ document.addEventListener("DOMContentLoaded", function() {
 	Stream.delay(5000)
 		.subscribe(() => Properties.removeLink(number));
 
+	// add tooltip
+	Properties.addTooltip(number, "tooltip text goes here");
+
 	// update number
 	Stream.interval(1000)
 		.reduce(0, (acc) => acc + 3/7)

@@ -15,7 +15,7 @@ function addSwapClassFragment(name, className = name) {
 function addAttributeFragment(name, attribute) {
 	return function(fragment, text = "") {
 		fragment.addPropertyValue(name, new StringValue(text), function(value, el) {
-			return Dom.stream(value).applyAttribute(attribute, content);
+			return Dom.stream(value).applyAttribute(attribute, el);
 		});
 	}
 }
