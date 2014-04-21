@@ -48,7 +48,7 @@ class PropertyContainer {
 			enumerable: true,
 			writeable: false,
 			get: () => value,
-			set: (v) => value.set(v)
+			set: (v) => value.push(v)
 		});
 		this[u][name] = wire.call(this.properties, value, this[$]);
 	}
@@ -58,7 +58,7 @@ class PropertyContainer {
 			throw new Error(`A property ${name} already exists`);
 		let container = this[u][name] = new PropertyContainer(),
 			setter = (defaultField) ?
-				function(v) { container[defaultField].set(v); } :
+				function(v) { container[defaultField].push(v); } :
 				function() { throw new Error('Property Container doesn\'t have a default field'); };
 		Object.defineProperty(this[p], name, {
 			configurable: true,
