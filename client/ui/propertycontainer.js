@@ -1,16 +1,15 @@
 import { Html } from 'ui/dom';
 
-let template = require('./fragment.jade')(),
+let u = Symbol(),
 	$ = Symbol(),
-	p = Symbol(),
-	u = Symbol(),
 	parent = Symbol();
 
 // TODO, add properties iterator
 class PropertyContainer {
-	constructor(parent) {
+	constructor(element, parent) {
 		this[parent] = parent;
 		this[u] = {};
+		this[$] = element;
 	}
 
 	addPropertyValue(name, value, wire) {
@@ -29,7 +28,7 @@ class PropertyContainer {
 	addPropertyContainer(name, defaultField) {
 		if(this[u][name])
 			throw new Error(`A property '${name}' already exists`);
-		let container = new PropertyContainer(),
+		let container = new PropertyContainer(this[$], this),
 			setter = (defaultField) ?
 				function(v) { container[defaultField].push(v); } :
 				function() { throw new Error('Property Container doesn\'t have a default field'); };
@@ -79,24 +78,5 @@ class PropertyContainer {
 	}
 }
 
-class Fragment extends PropertyContainer {
-	constructor() {
-		this[$] = Html.parse(template);
-		this[p] = {};
-		this[u] = {};
-	}
 
-	attachTo(container) {
-		container.appendChild(this[$]);
-	}
-
-	detach() {
-		if(!this[$].parentNode)
-			throw new Error('Fragment is not attached');
-		this[$].parentNode.removeChild(this[$]);
-	}
-}
-
-
-
-export { Fragment, PropertyContainer, $, p };
+export { PropertyContainer, $ };
