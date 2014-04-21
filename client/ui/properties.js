@@ -77,7 +77,11 @@ let p = {
 };
 
 let Properties = {
-	addNumericFormat(fragment, defaultFormat = "") {
+
+};
+
+let Formats = {
+	addNumeric(fragment, defaultFormat = "") {
 		let value = fragment.properties.value,
 			text  = fragment.properties.text;
 		if(!value) {
@@ -97,7 +101,7 @@ let Properties = {
 			return stream.cancel.bind(stream);
 		});
 	},
-	removeFormat(fragment) {
+	remove(fragment) {
 		fragment.removeProperty('format');
 	}
 }
@@ -110,4 +114,4 @@ for(let name in p) {
 	Properties[keyRemove] = function(fragment) { fragment.removeProperty(name); };
 }
 
-export { Properties };
+export { Properties, Formats };

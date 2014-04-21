@@ -1,6 +1,6 @@
 import { Stream } from 'streamy/stream';
 import { Fragment } from './ui/fragment';
-import { Properties } from './ui/properties';
+import { Properties, Formats } from './ui/properties';
 import { Dom } from 'ui/dom';
 
 Dom.ready().then(() => {
@@ -34,7 +34,7 @@ Dom.ready().then(() => {
 	Properties.addStrong(fragment, true);
 
 	// add format
-	Properties.addNumericFormat(number, "$ 0,0.00");
+	Formats.addNumeric(number, "$ 0,0.00");
 
 	// change format dynamically
 	Stream
