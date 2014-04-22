@@ -41,7 +41,7 @@ Dom.ready(() => {
 
 	// change format dynamically
 	Stream
-		.sequence(2000, ["$ 0,0.00", "0.000", "0,0"], true)
+		.sequence(["$ 0,0.00", "0.000", "0,0"], 2000, true)
 		.feed(number.format);
 
 	// add link
@@ -88,5 +88,11 @@ Dom.ready(() => {
 		};
 	});
 	editor.editor.focus();
+
+	// test cancel
+	// let s = Stream.sequence([1,2,3], 200, true).cancelOn(Stream.delay(5000));
+	// s.log("S");
+	// let m = s.map((v) => -v * 9).cancelOn(Stream.delay(2500));
+	// m.log("M");
 });
 
