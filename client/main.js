@@ -73,6 +73,8 @@ Dom.ready(() => {
 	editor.editor.value.feed(editor.text);
 	editor.editor.focus();
 
+	window.editor = editor.editor;
+
 	// test cancel
 	// let s = Stream.sequence([1,2,3], 200, true).cancelOn(Stream.delay(5000));
 	// s.log("S");

@@ -131,16 +131,16 @@ body {
 .fragment a {
   color: #039;
 }
-.fragment .content[contenteditable] {
+.fragment .content {
   white-space: pre;
   position: relative;
 }
-.fragment .content[contenteditable].empty {
+.fragment .content.empty {
   padding: 0 0.25em;
   background-color: rgba(255,235,215,0.5);
 }
-.fragment .content[contenteditable].empty:focus,
-.fragment .content[contenteditable]:focus {
+.fragment .content.empty:focus,
+.fragment .content:focus {
   background-color: rgba(240,220,200,0.25);
   border-bottom: 2px solid #cba;
 }

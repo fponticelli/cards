@@ -114,27 +114,54 @@ let Formats = {
 	}
 }
 
-let Editors = {
+let _bound = Symbol(),
+	_bindƒ = Symbol(),
+	_unbindƒ = Symbol(),
+	Editors = {
 	addText(fragment) {
 		var container = fragment.addContainer("editor", "value");
 		container.addValue("value", new StringValue(""), function(value, el) {
+			this[_bound] = false;
 			let content = Query.first('.content', el),
 				stream  = value.map((s) => s.length === 0).unique(),
 				streamƒ = Dom.stream(stream).applySwapClass(content, 'empty'),
 				listenƒ = (e) => {
 					value.push(el.innerText);
 				};
+			this[_bindƒ] = () => {
+				if(this[_bound]) return;
+				content.setAttribute("contenteditable", true);
+				content.addEventListener("input", listenƒ, false);
+				this[_bound] = true;
+			},
+			this[_unbindƒ] = () => {
+				if(!this[_bound]) return;
+				content.removeEventListener("input", listenƒ, false);
+				content.removeAttribute("contenteditable");
+				this[_bound] = false;
+			};
 
-			content.setAttribute("contenteditable", true);
-			content.addEventListener("input", listenƒ, false);
+			content.addEventListener("click", () => this.focus());
+			content.addEventListener("blur", () => this[_unbindƒ]());
 
 			return function() {
 				streamƒ();
+				this[_unbindƒ]();
+				delete this[_unbindƒ];
+				delete this[_bindƒ];
+				delete this[_bound];
 				content.removeEventListener("input", listenƒ, false);
 				content.removeAttribute("contenteditable");
 			};
 		});
 		container.addBehavior("focus", function(el) {
+			let content = Query.first('.content', el)
+			return function() {
+				this[_bindƒ]();
+				content.focus();
+			};
+		});
+		container.addBehavior("getSelection", function(el) {
 			let content = Query.first('.content', el)
 			return function() { content.focus(); };
 		});
