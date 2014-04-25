@@ -68,9 +68,9 @@ Dom.ready(() => {
 		//.subscribe(() => console.log(number.properties()))
 		.feed(number.value);
 
-	// attempt at adding text editor
+	// add text editor
 	Editors.addText(editor);
-	editor.editor.value.log();
+	editor.editor.value.feed(editor.text);
 	editor.editor.focus();
 
 	// test cancel
