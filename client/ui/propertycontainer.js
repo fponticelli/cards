@@ -35,7 +35,7 @@ class PropertyContainer {
 			unwire = wire && wire.call(this, this[$]) || function(){};
 		this[u][name] = () => {
 			unwire();
-			container.removeAll.bind(container);
+			container.removeAll.call(container);
 		};
 		Object.defineProperty(this, name, {
 			configurable: true,
