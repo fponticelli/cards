@@ -155,15 +155,40 @@ let _bound = Symbol(),
 			};
 		});
 		container.addBehavior("focus", function(el) {
-			let content = Query.first('.content', el)
+			let content = Query.first('.content', el);
 			return function() {
 				this[_bindƒ]();
 				content.focus();
 			};
 		});
 		container.addBehavior("getSelection", function(el) {
-			let content = Query.first('.content', el)
-			return function() { content.focus(); };
+			let content = Query.first('.content', el);
+			return function() {
+				let selection = window.getSelection();
+				if(!selection.baseNode in content.childNodes)
+					throw "not found!";
+				return {
+					start: selection.anchorOffset,
+					end: selection.focusOffset,
+					text: selection.toString()
+				};
+			};
+		});
+		container.addBehavior("setSelection", function(el) {
+			let content = Query.first('.content', el);
+			return function(start, end) {
+				let node  = content.firstChild,
+					range = document.createRange(),
+					sel   = window.getSelection();
+				this.focus();
+				if(!node) {
+					return;
+				}
+				range.setStart(node, Math.max(start, 0));
+				range.setEnd(node, Math.min(end, node.wholeText.length));
+				sel.removeAllRanges();
+				sel.addRange(range);
+			};
 		});
 	},
 	remove(fragment) {
