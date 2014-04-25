@@ -118,12 +118,8 @@ let Editors = {
 	addText(fragment) {
 		var container = fragment.addContainer("editor", "value");
 		container.addValue("value", new StringValue(""), function(value, el) {
-			let text = this.parent.text;
-			if(!text) {
-				throw new Error("'editor' requires the property 'text'");
-			}
 			let content = Query.first('.content', el),
-				stream  = text.map((s) => s.length === 0).unique(),
+				stream  = value.map((s) => s.length === 0).unique(),
 				streamƒ = Dom.stream(stream).applySwapClass(content, 'empty'),
 				listenƒ = (e) => {
 					value.push(el.innerText);
