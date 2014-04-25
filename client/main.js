@@ -1,7 +1,9 @@
 import { Stream } from 'streamy/stream';
 import { Fragment } from './ui/fragment';
-import { Properties, Formats } from './ui/properties';
+import { Properties, Formats, Editors } from './ui/properties';
 import { Dom, Query } from 'ui/dom';
+
+import { StringValue } from 'streamy/value';
 
 Dom.ready(() => {
 	let container = document.querySelector('.container'),
@@ -67,26 +69,8 @@ Dom.ready(() => {
 		.feed(number.value);
 
 	// attempt at adding text editor
-	editor.addValue("editor", {}, function(prop, el) {
-		let text = editor.text;
-		if(!text) {
-			throw new Error("'editor' requires the property 'text'");
-		}
-		let content = Query.first('.content', el),
-			stream  = text.map((s) => s.length === 0).unique(),
-			streamƒ = Dom.stream(stream).applySwapClass(content, 'empty'),
-			listenƒ = (e) => {
-				text.push(el.innerText);
-			};
-		content.setAttribute("contenteditable", true);
-		content.addEventListener("input", listenƒ, false);
-		prop.focus = () => content.focus();
-		return function() {
-			streamƒ();
-			content.removeEventListener("input", listenƒ, false);
-			content.removeAttribute("contenteditable");
-		};
-	});
+	Editors.addText(editor);
+	editor.editor.value.log();
 	editor.editor.focus();
 
 	// test cancel

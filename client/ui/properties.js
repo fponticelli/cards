@@ -80,6 +80,14 @@ let Properties = {
 
 };
 
+for(let name in p) {
+	let cap       = string(name).capitalize().s,
+		keyRemove = 'remove' + cap,
+		keyAdd    = 'add' + cap;
+	Properties[keyAdd] = p[name];
+	Properties[keyRemove] = function(fragment) { fragment.remove(name); };
+}
+
 let Formats = {
 	addNumeric(fragment, defaultFormat = "") {
 		let value = fragment.value,
@@ -102,16 +110,42 @@ let Formats = {
 		});
 	},
 	remove(fragment) {
-		fragment.removeProperty('format');
+		fragment.remove('format');
 	}
 }
 
-for(let name in p) {
-	let cap       = string(name).capitalize().s,
-		keyRemove = 'remove' + cap,
-		keyAdd    = 'add' + cap;
-	Properties[keyAdd] = p[name];
-	Properties[keyRemove] = function(fragment) { fragment.removeProperty(name); };
+let Editors = {
+	addText(fragment) {
+		var container = fragment.addContainer("editor", "value");
+		container.addValue("value", new StringValue(""), function(value, el) {
+			let text = this.parent.text;
+			if(!text) {
+				throw new Error("'editor' requires the property 'text'");
+			}
+			let content = Query.first('.content', el),
+				stream  = text.map((s) => s.length === 0).unique(),
+				streamƒ = Dom.stream(stream).applySwapClass(content, 'empty'),
+				listenƒ = (e) => {
+					value.push(el.innerText);
+				};
+
+			content.setAttribute("contenteditable", true);
+			content.addEventListener("input", listenƒ, false);
+
+			return function() {
+				streamƒ();
+				content.removeEventListener("input", listenƒ, false);
+				content.removeAttribute("contenteditable");
+			};
+		});
+		container.addBehavior("focus", function(el) {
+			let content = Query.first('.content', el)
+			return function() { content.focus(); };
+		});
+	},
+	remove(fragment) {
+		fragment.remove('editor');
+	}
 }
 
-export { Properties, Formats };
+export { Properties, Formats, Editors };

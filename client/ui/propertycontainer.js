@@ -2,12 +2,12 @@ import { Html } from 'ui/dom';
 
 let u = Symbol(),
 	$ = Symbol(),
-	parent = Symbol();
+	_parent = Symbol();
 
 // TODO, add properties iterator
 class PropertyContainer {
 	constructor(element, parent) {
-		this[parent] = parent;
+		this[_parent] = parent;
 		this[u] = {};
 		this[$] = element;
 	}
@@ -25,14 +25,18 @@ class PropertyContainer {
 		this[u][name] = wire.call(this, value, this[$]);
 	}
 
-	addContainer(name, defaultField) {
+	addContainer(name, defaultField, wire) {
 		if(this[u][name])
 			throw new Error(`A property '${name}' already exists`);
 		let container = new PropertyContainer(this[$], this),
 			setter = (defaultField) ?
 				function(v) { container[defaultField].push(v); } :
-				function() { throw new Error('Property Container doesn\'t have a default field'); };
-		this[u][name] = container.removeProperties.bind(container);
+				function() { throw new Error('Property Container doesn\'t have a default field'); },
+			unwire = wire && wire.call(this, this[$]) || function(){};
+		this[u][name] = () => {
+			unwire();
+			container.removeAll.bind(container);
+		};
 		Object.defineProperty(this, name, {
 			configurable: true,
 			enumerable: true,
@@ -43,7 +47,20 @@ class PropertyContainer {
 		return container;
 	}
 
-	removeProperty(name) {
+	addBehavior(name, wire) {
+		if(this[u][name])
+			throw new Error(`A property '${name}' already exists`);
+		this[u][name] = () => {};
+		let ƒ = wire.call(this, this[$]);
+		Object.defineProperty(this, name, {
+			configurable: true,
+			enumerable: true,
+			writeable: false,
+			get: () => ƒ.bind(this)
+		});
+	}
+
+	remove(name) {
 		if(!this[u][name])
 			throw `Object doesn't contain a property '${name}'`;
 		this[u][name]();
@@ -51,9 +68,9 @@ class PropertyContainer {
 		delete this[name];
 	}
 
-	removeProperties() {
+	removeAll() {
 		for(let key in this[u])
-			this.removeProperty(key);
+			this.remove(key);
 	}
 
 	properties() {
@@ -64,7 +81,7 @@ class PropertyContainer {
 	}
 
 	get parent() {
-		return this[parent];
+		return this[_parent];
 	}
 
 	toJSON() {
