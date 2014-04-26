@@ -1,21 +1,42 @@
 import { Html } from 'ui/dom';
-import { PropertyContainer, $ } from './propertycontainer';
+import { Properties } from '../properties/properties';
 
-let template = require('./fragment.jade')();
+let template = require('./fragment.jade')(),
+	_p = Symbol();
 
-class Fragment extends PropertyContainer {
+class Fragment {
 	constructor() {
-		super(Html.parse(template));
+		new Properties(this);
+		this[_p] = {
+			el: Html.parse(template),
+			attached: false
+		};
 	}
 
 	attachTo(container) {
-		container.appendChild(this[$]);
+		container.appendChild(this.el);
+		this[_p].attached = true;
 	}
 
 	detach() {
-		if(!this[$].parentNode)
+		if(!this.isAttached)
 			throw new Error('Fragment is not attached');
-		this[$].parentNode.removeChild(this[$]);
+		this.el.parentNode.removeChild(this.el);
+		this[_p].attached = false;
+	}
+
+	destroy() {
+		if(this.isAttached)
+			this.detach();
+		this.properties.removeAll();
+	}
+
+	get el() {
+		return this[_p].el;
+	}
+
+	get isAttached() {
+		return this[_p].attached;
 	}
 }
 

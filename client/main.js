@@ -1,45 +1,56 @@
 import { Stream } from 'streamy/stream';
 import { Fragment } from './ui/fragment';
-import { Properties, Formats, Editors } from './ui/properties';
 import { Dom, Query } from 'ui/dom';
-
 import { StringValue } from 'streamy/value';
+import {
+	TextProperty, ValueProperty, VisibleProperty, LinkProperty,
+	StrongProperty, NumericFormatProperty, TooltipProperty,
+	TextEditorProperty
+} from './properties/types';
 
 Dom.ready(() => {
-	let container = document.querySelector('.container'),
-		editor    = new Fragment(),
-		number    = new Fragment(),
-		fragment  = new Fragment();
+	let container    = Query.first('.container'),
+		editor       = new Fragment(),
+		number       = new Fragment(),
+		fragment     = new Fragment(),
+		text         = new TextProperty(),
+		stringValue  = new ValueProperty("String"),
+		floatValue   = new ValueProperty("Float"),
+		visible      = new VisibleProperty(),
+		strong       = new StrongProperty(true),
+		formatNumber = new NumericFormatProperty(),
+		link         = new LinkProperty(),
+		tooltip      = new TooltipProperty("tooltip text goes here"),
+		textEditor   = new TextEditorProperty();
 
 	editor.attachTo(container);
 	number.attachTo(container);
 	fragment.attachTo(container);
 
 	// add text property and rendering
-	Properties.addText(editor);
-	Properties.addText(fragment);
-	Properties.addText(number);
+	editor.properties.add(text);
+	fragment.properties.add(text);
+	number.properties.add(text);
 
 	// add a value
-	Properties.addValue(fragment, "String");
+	fragment.properties.add(stringValue);
 	fragment.value = " Hey Franco";
 	// manually wire value to text
 	fragment.value.feed(fragment.text);
 
-	Properties.addValue(number, "Float");
-
 	// make it blink
-	Properties.addVisible(fragment);
+	fragment.properties.add(visible);
 	Stream.interval(300)
-		.cancelOn(Stream.delay(6500).subscribe(() => Properties.removeVisible(fragment)))
+		.cancelOn(Stream.delay(6500).subscribe(() => fragment.properties.remove(visible)))
 		.reduce(true, (acc) => !acc)
 		.feed(fragment.visible);
 
 	// make bold
-	Properties.addStrong(fragment, true);
+	fragment.properties.add(strong);
 
-	// add format
-	Formats.addNumeric(number, "$ 0,0.00");
+	// add number value and format
+	number.properties.add(floatValue);
+	number.properties.add(formatNumber);
 
 	// change format dynamically
 	Stream
@@ -47,33 +58,30 @@ Dom.ready(() => {
 		.feed(number.format);
 
 	// add link
-	Properties.addLink(number);
+	number.properties.add(link);
 	number.link = "http://google.com";
 
 	// remove link after 5 secs
 	Stream.delay(5000)
-		.subscribe(() => Properties.removeLink(number));
+		.subscribe(() => number.properties.remove(link));
+
+	// add tooltip
+	number.properties.add(tooltip);
 
 	// remove tooltip after 8 secs
 	Stream.delay(8000)
-		.subscribe(() => Properties.removeTooltip(number));
-
-	// add tooltip
-	Properties.addTooltip(number, "tooltip text goes here");
-
+		.subscribe(() => number.properties.remove(tooltip));
 	// update number
 	Stream.interval(1000)
 		.reduce(0, (acc) => acc + 3000/7)
-		//.subscribe(() => console.log(JSON.stringify(number)))
-		//.subscribe(() => console.log(number.properties()))
+		//.subscribe(() => console.log(number.properties.list()))
 		.feed(number.value);
 
 	// add text editor
-	Editors.addText(editor);
+	editor.properties.add(textEditor);
 	editor.editor.value.feed(editor.text);
+	editor.editor = "select me...";
 	editor.editor.focus();
-
-	window.editor = editor.editor;
 
 	// test cancel
 	// let s = Stream.sequence([1,2,3], 200, true).cancelOn(Stream.delay(5000));

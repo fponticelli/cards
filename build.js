@@ -6,7 +6,7 @@ var path       = require('path'),
     es6ify     = require('es6ify'),
     jadeify    = require('jadeify'),
     bundlePath = path.join(__dirname, 'public/app/main.js'),
-    syms       = ['ui', 'streamy'];
+    syms       = ['ui', 'streamy', 'util'];
 
 syms.map(function(p) {
   var dst = path.join(__dirname, 'node_modules', p),
@@ -22,7 +22,7 @@ es6ify.traceurOverrides = { blockBinding: true };
 browserify()
   .transform(jadeify)
   .add(es6ify.runtime)
-  .transform(es6ify.configure(/^((?!.*node_modules)+.+\.js|(?:.*node_modules\/(ui|streamy)\/)+.+\.js$)$/))
+  .transform(es6ify.configure(/^((?!.*node_modules)+.+\.js|(?:.*node_modules\/(ui|streamy|util)\/)+.+\.js$)$/))
   .require(require.resolve('./client/main.js'), { entry: true })
   .bundle({ debug: true })
   .on('error', function (err) { console.error(err); })

@@ -1,7 +1,5 @@
 'use strict';
 
-// import { e } from 'express';
-
 let express    = require('express'),
     stylus     = require('stylus'),
     nib        = require('nib'),
