@@ -83,6 +83,10 @@ Dom.ready(() => {
 	editor.editor = "select me...";
 	editor.editor.focus();
 
+	//let copy = new Fragment();
+	//editor.properties.copyTo(copy);
+	//copy.attachTo(container);
+
 	// test cancel
 	// let s = Stream.sequence([1,2,3], 200, true).cancelOn(Stream.delay(5000));
 	// s.log("S");

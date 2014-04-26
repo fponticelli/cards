@@ -33,6 +33,10 @@ class Properties {
 		delete this[_p].properties[name];
 	}
 
+	get(name) {
+		return this[_p].properties[name];
+	}
+
 	removeAll() {
 		for(let name of this) {
 			this.remove(name);
@@ -40,11 +44,17 @@ class Properties {
 	}
 
 	[Symbol.iterator]() {
-		return this.list();
+		return this.array;
 	}
 
-	list() {
+	get array() {
 		return Object.keys(this[_p].properties);
+	}
+
+	copyTo(target) {
+		for(let key of this.array) {
+			target.properties.add(this.get(key));
+		}
 	}
 }
 
