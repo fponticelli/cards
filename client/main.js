@@ -8,11 +8,14 @@ import {
 	TextEditorProperty
 } from './properties/types';
 
+import { Paragraph } from './ui/paragraph';
+
 Dom.ready(() => {
-	let container    = Query.first('.container'),
-		editor       = new Fragment(),
-		number       = new Fragment(),
-		fragment     = new Fragment(),
+	let container    = Query.first('.cards'),
+		p            = new Paragraph(),
+		editor       = p.createFragment(),
+		number       = p.createFragment(),
+		fragment     = p.createFragment(),
 		text         = new TextProperty(),
 		stringValue  = new ValueProperty("String"),
 		floatValue   = new ValueProperty("Float"),
@@ -23,9 +26,7 @@ Dom.ready(() => {
 		tooltip      = new TooltipProperty("tooltip text goes here"),
 		textEditor   = new TextEditorProperty();
 
-	editor.attachTo(container);
-	number.attachTo(container);
-	fragment.attachTo(container);
+	p.attachTo(container);
 
 	// add text property and rendering
 	editor.properties.add(text);
@@ -34,7 +35,7 @@ Dom.ready(() => {
 
 	// add a value
 	fragment.properties.add(stringValue);
-	fragment.value = " Hey Franco";
+	fragment.value = fragment.uuid;
 	// manually wire value to text
 	fragment.value.feed(fragment.text);
 
@@ -92,5 +93,6 @@ Dom.ready(() => {
 	// s.log("S");
 	// let m = s.map((v) => -v * 9).cancelOn(Stream.delay(2500));
 	// m.log("M");
+
 });
 
