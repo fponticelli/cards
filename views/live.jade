@@ -3,13 +3,41 @@ extend layout-js
 block content
   .card
     .doc
-      header toolbar
+      header
+        .main-bar main
+        .context-bar context
+        .side-bar
+          button
+              i.fa.fa-ban
       article
       footer footer / breadcrumbs
     aside
       .context
-        header toolbar
+        header
+          .main-bar
+            button insert
+              | 
+              i.fa.fa-caret-down
+          .context-bar
+            .btn-group
+              button ƒ
+              button.active l
+          .side-bar
+            button
+              i.fa.fa-ban
         article
       .model
-        header toolbar
+        header
+          .main-bar
+            button insert
+          .context-bar
+            .btn-group
+              button.active ƒ
+              button t
+              button n
+              button d
+              button b
+          .side-bar
+            button
+              i.fa.fa-ban
         article
