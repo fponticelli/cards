@@ -98,18 +98,87 @@ body {
   font-family: Helvetica, Arial, sans-serif;
   font-size: 18pt;
   line-height: 1.2em;
-  padding: 20px;
+  padding: 0px;
 }
-.strong {
+html,
+body,
+body > .container,
+body > .container > .main-content {
+  height: 100%;
+}
+.card {
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: box;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -moz-box-orient: horizontal;
+  -o-box-orient: horizontal;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  height: 100%;
+}
+.card .doc {
+  width: calc(100% - 300px);
+  overflow: auto;
+  min-height: 2em;
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: box;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -moz-box-orient: vertical;
+  -o-box-orient: vertical;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  height: 100%;
+}
+.card .doc article {
+  height: calc(100% - 20px);
+}
+.card aside {
+  width: 300px;
+  overflow: auto;
+}
+.card header {
+  color: #ccc;
+  text-align: center;
+  padding: 2px;
+  font-size: 10pt;
+  line-height: 20px;
+  height: 20px;
+  background-color: #f6f6f6;
+  margin-bottom: 2px;
+}
+.card footer {
+  color: #ccc;
+  text-align: center;
+  padding: 2px;
+  font-size: 10pt;
+  line-height: 20px;
+  height: 20px;
+  background-color: #f6f6f6;
+  margin-top: 2px;
+}
+.card .fragment {
+  position: relative;
+}
+.card .fragment.strong {
   font-weight: bold;
 }
-.emphasis {
+.card .fragment.emphasis {
   font-style: italic;
 }
-.strike {
+.card .fragment.strike {
   text-decoration: line-through;
 }
-[title]:before {
+.card .fragment[title]:before {
   display: block;
   position: absolute;
   top: -0.2em;
@@ -124,23 +193,96 @@ body {
   font-size: 0.3em;
   -webkit-font-smoothing: antialiased;
 }
-.fragment {
-  display: inline;
+.card .fragment .content {
+  white-space: pre-wrap;
   position: relative;
+  border-bottom: 2px solid transparent;
 }
-.fragment a {
-  color: #039;
-}
-.fragment .content {
-  white-space: pre;
-  position: relative;
-}
-.fragment .content.empty {
+.card .fragment .content.empty {
   padding: 0 0.25em;
   background-color: rgba(255,235,215,0.5);
 }
-.fragment .content.empty:focus,
-.fragment .content:focus {
+.card .fragment .content.empty:focus,
+.card .fragment .content:focus {
   background-color: rgba(240,220,200,0.25);
   border-bottom: 2px solid #cba;
+}
+.card .field-container .field {
+  margin: 0 2px;
+}
+.card .field-container .field .key {
+  background-color: #fff;
+  padding: 2px;
+}
+.card .field-container .field .value {
+  background-color: #f6f6f6;
+  padding: 2px;
+}
+.card .field-container .field .value .fragment {
+  display: inline-block;
+  width: 100%;
+  min-height: 1em;
+}
+.card .field-container .field .value .fragment .content {
+  display: inline-block;
+  width: 100%;
+  min-height: 1em;
+}
+.card .field-container .field .value .fragment .content[contenteditable] {
+  background-color: #fff;
+}
+.card .field-container .calculated {
+  background-color: #f6f6f6;
+  padding: 2px;
+  display: none;
+}
+.card .field-container hr {
+  border: none;
+  border-bottom: 1px solid #eee;
+  display: block;
+  margin: 0;
+  padding: 0;
+}
+.card .field-container:last-child hr {
+  border-bottom: none;
+}
+.card a {
+  color: #039;
+  text-decoration: none;
+}
+.card a:hover {
+  text-decoration: underline;
+}
+.card .doc {
+  border-right: 1px solid #ddd;
+}
+.card .doc article {
+  font-size: 16pt;
+  padding: 4px 8px;
+}
+.card aside {
+  font-size: 10pt;
+  line-height: 12pt;
+}
+.card aside .field {
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: box;
+  display: flex;
+}
+.card aside .field .key {
+  width: calc(100% - 200px);
+}
+.card aside .field .value {
+  width: 200px;
+}
+.card aside .context {
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 2px;
+}
+.card aside .model {
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 2px;
 }

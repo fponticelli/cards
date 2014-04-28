@@ -1,0 +1,42 @@
+@import 'colors'
+
+.card
+  display flex
+  flex-direction row
+  height 100%
+  .doc
+    width calc(100% - 300px)
+    overflow auto
+    min-height 2em
+    display flex
+    flex-direction column
+    height 100%
+    article
+      height calc(100% - 20px)
+  aside
+    width 300px
+    overflow auto
+  header
+    color #ccc
+    text-align center
+    padding 2px
+    font-size 10pt
+    line-height 20px
+    height 20px
+    background-color toolbar-bg-color
+    margin-bottom 2px
+  footer
+    color #ccc
+    text-align center
+    padding 2px
+    font-size 10pt
+    line-height 20px
+    height 20px
+    background-color toolbar-bg-color
+    margin-top 2px
+
+.card
+  @import 'ui'
+  @import 'properties'
+  @import 'doc'
+  @import 'side'
