@@ -20,6 +20,7 @@
     "string": "^1.8.0",
     "node-uuid": "^1.4.1",
     "mocha": "^1.18.2",
-    "chai": "^1.9.1"
+    "chai": "^1.9.1",
+    "source-map-support": "^0.2.6"
   }
 }
