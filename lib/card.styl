@@ -8,11 +8,18 @@
     width calc(100% - 300px)
     overflow auto
     min-height 2em
-    display flex
+    position relative
     flex-direction column
     height 100%
+    > div
+      position absolute
+    header
+      top 0
     article
-      height calc(100% - 24px)
+      top 24px
+      height calc(100% - 48px)
+    footer
+      bottom 24px
   aside
     width 300px
     overflow auto
@@ -33,7 +40,7 @@
     text-align center
     padding 2px
     font-size 10pt
-    line-height 24px
+    line-height 20px
     height 24px
     background-color toolbar-bg-color
     margin-top 2px
