@@ -29,7 +29,7 @@ Dom.ready(() => {
 		editor           = p.createFragment(),
 		text             = new TextProperty(),
 		stringValue      = new ValueProperty("String"),
-		floatValue       = new ValueProperty("Float"),
+		numberValue      = new ValueProperty("Number"),
 		visible          = new VisibleProperty(),
 		strong           = new StrongProperty(),
 		emphasis         = new EmphasisProperty(),
@@ -45,7 +45,7 @@ Dom.ready(() => {
 	editor.properties.add(strong);
 	editor.properties.add(emphasis);
 	editor.properties.add(strike);
-	editor.properties.add(link);
+	//editor.properties.add(link);
 
 	// add text editor
 	editor.properties.add(textEditor);
@@ -70,7 +70,7 @@ Dom.ready(() => {
 	field.value.properties.add(new TextProperty());
 	field.value.properties.add(new TextEditorProperty());
 	field.value.editor.value.feed(field.value.text);
-	field.value.editor.value.feed(editor.link);
+	//field.value.editor.value.feed(editor.link);
 	field.value.editor.value = 'http://www.google.com';
 
 	let field = new Field();
@@ -121,4 +121,3 @@ Dom.ready(() => {
 	// m.log("M");
 
 });
-
