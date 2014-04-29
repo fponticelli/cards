@@ -1,16 +1,16 @@
 import { Stream } from 'streamy/stream';
-import { Fragment } from './ui/fragment';
+import { Fragment } from 'ui/fragment';
 import { Dom, Query } from 'ui/dom';
 import { StringValue } from 'streamy/value';
 import {
 	TextProperty, ValueProperty, VisibleProperty, LinkProperty,
 	StrongProperty, EmphasisProperty, StrikeProperty, NumericFormatProperty, TooltipProperty,
 	TextEditorProperty, BoolEditorProperty, HtmlProperty, IconProperty
-} from './properties/types';
+} from 'ui/properties/types';
 
-import { Field } from './ui/Field';
+import { Field } from 'ui/Field';
 
-import { Paragraph } from './ui/paragraph';
+import { Paragraph } from 'ui/paragraph';
 
 Dom.ready(() => {
 	let $card            = Query.first('.card'),

@@ -1,1 +1,0 @@
-nodemon --watch client --watch lib -e js build.js

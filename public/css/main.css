@@ -227,6 +227,13 @@ body > .container > .main-content {
   background-color: #f6f6f6;
   margin-top: 2px;
 }
+.card a {
+  color: #039;
+  text-decoration: none;
+}
+.card a:hover {
+  text-decoration: underline;
+}
 .card .fragment {
   position: relative;
 }
@@ -306,13 +313,6 @@ body > .container > .main-content {
 }
 .card .field-container:last-child hr {
   border-bottom: none;
-}
-.card a {
-  color: #039;
-  text-decoration: none;
-}
-.card a:hover {
-  text-decoration: underline;
 }
 .card .doc {
   border-right: 1px solid #ddd;

@@ -18,6 +18,8 @@
     "numeral": "^1.5.3",
     "immediate": "^2.6.3",
     "string": "^1.8.0",
-    "node-uuid": "^1.4.1"
+    "node-uuid": "^1.4.1",
+    "mocha": "^1.18.2",
+    "chai": "^1.9.1"
   }
 }

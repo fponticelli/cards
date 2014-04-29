@@ -23,7 +23,7 @@ app.use(stylus.middleware({
 
 app.use(express.static(cwd + '/public'));
 
-['index', 'examples', 'blocks', 'live'].forEach(function (value) {
+['index', 'examples', 'blocks', 'live', 'test'].forEach(function (value) {
   app.get('/' + (value === 'index' ? '' : value), function (req, res) {
     res.render(value, { title : value });
   });
