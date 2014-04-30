@@ -8,6 +8,9 @@ import {
 	TextEditorProperty, BoolEditorProperty, HtmlProperty, IconProperty
 } from 'ui/properties/types';
 
+import { ModelView, SchemaWrapper } from 'ui/modelview';
+import { Schema } from 'ui/schema';
+
 import { Field } from 'ui/Field';
 
 import { Paragraph } from 'ui/paragraph';
@@ -95,9 +98,19 @@ Dom.ready(() => {
 	p.attachTo($doc_article);
 
 
+	let schema = new Schema(),
+		view = new ModelView(),
+		wrapper = new SchemaWrapper(schema, view);
 
+	view.attachTo($model_article);
 
+	schema.reset([
+		{name:'name',type:'String'},
+		{name:'lastname',type:'String'},
+		{name:'alive',type:'Bool'}
+	]);
 
+	/*
 	let field = new Field();
 
 	field.attachTo($model_article);
@@ -106,7 +119,7 @@ Dom.ready(() => {
 	field.value.properties.add(new TextProperty());
 	field.value.properties.add(new TextEditorProperty());
 	field.value.editor.value.feed(field.value.text);
-
+	*/
 
 
 
