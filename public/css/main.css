@@ -123,15 +123,9 @@ body > .container > .main-content {
 }
 .card .doc {
   width: calc(100% - 300px);
-  overflow: auto;
+  overflow: none;
   min-height: 2em;
   position: relative;
-  -webkit-box-orient: vertical;
-  -moz-box-orient: vertical;
-  -o-box-orient: vertical;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
   height: 100%;
 }
 .card .doc > div {
@@ -139,6 +133,7 @@ body > .container > .main-content {
 }
 .card .doc header {
   top: 0;
+  height: 24px;
 }
 .card .doc article {
   top: 24px;
@@ -146,19 +141,19 @@ body > .container > .main-content {
 }
 .card .doc footer {
   bottom: 24px;
+  height: 24px;
 }
 .card aside {
   width: 300px;
   overflow: auto;
 }
-.card header {
+.card header,
+.card footer {
   color: #ccc;
   padding: 2px;
   font-size: 10pt;
   line-height: 20px;
-  height: 24px;
   background-color: #f6f6f6;
-  margin-bottom: 2px;
   display: -webkit-box;
   display: -moz-box;
   display: -webkit-flex;
@@ -235,16 +230,6 @@ body > .container > .main-content {
 .card header .btn-group :last-child {
   border-top-right-radius: 9px;
   border-bottom-right-radius: 9px;
-}
-.card footer {
-  color: #ccc;
-  text-align: center;
-  padding: 2px;
-  font-size: 10pt;
-  line-height: 20px;
-  height: 24px;
-  background-color: #f6f6f6;
-  margin-top: 2px;
 }
 .card a {
   color: #039;

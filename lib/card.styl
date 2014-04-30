@@ -6,44 +6,36 @@
   height 100%
   .doc
     width calc(100% - 300px)
-    overflow auto
+    overflow none
     min-height 2em
     position relative
-    flex-direction column
     height 100%
     > div
       position absolute
     header
       top 0
+      height 24px
     article
       top 24px
       height calc(100% - 48px)
     footer
       bottom 24px
+      height 24px
   aside
     width 300px
     overflow auto
-  header
+  header, footer
     color #ccc
     padding 2px
     font-size 10pt
     line-height 20px
-    height 24px
     background-color toolbar-bg-color
-    margin-bottom 2px
     display flex
     flex-direction row
   header
     @import 'header'
   footer
-    color #ccc
-    text-align center
-    padding 2px
-    font-size 10pt
-    line-height 20px
-    height 24px
-    background-color toolbar-bg-color
-    margin-top 2px
+    @import 'footer'
 
 .card
   @import 'ui'
