@@ -9,6 +9,7 @@ import {
 } from 'ui/properties/types';
 
 import { ModelView, SchemaWrapper } from 'ui/modelview';
+import { Model } from 'ui/model';
 import { Schema } from 'ui/schema';
 
 import { Field } from 'ui/Field';
@@ -98,11 +99,17 @@ Dom.ready(() => {
 	p.attachTo($doc_article);
 
 
-	let schema = new Schema(),
-		view = new ModelView(),
+	let schema  = new Schema(),
+		view    = new ModelView(),
+		model   = new Model(),
 		wrapper = new SchemaWrapper(schema, view);
 
 	view.attachTo($model_article);
+
+	schema.stream.feed(model.schema);
+	view.data.feed(model.data);
+
+	model.stream.map(JSON.stringify).log('model');
 
 	schema.reset([
 		{name:'name',type:'String'},
