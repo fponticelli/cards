@@ -123,7 +123,7 @@ body > .container > .main-content {
 }
 .card .doc {
   width: calc(100% - 300px);
-  overflow: none;
+  overflow: hidden;
   min-height: 2em;
   position: relative;
   height: 100%;
@@ -133,15 +133,15 @@ body > .container > .main-content {
 }
 .card .doc header {
   top: 0;
-  height: 24px;
+  height: 25px;
 }
 .card .doc article {
-  top: 24px;
-  height: calc(100% - 48px);
+  top: 25px;
+  height: calc(100% - 50px);
 }
 .card .doc footer {
-  bottom: 24px;
-  height: 24px;
+  bottom: 25px;
+  height: 25px;
 }
 .card aside {
   width: 300px;
@@ -167,6 +167,9 @@ body > .container > .main-content {
   -ms-flex-direction: row;
   flex-direction: row;
 }
+.card header {
+  border-bottom: 1px solid #ddd;
+}
 .card header > .main-bar {
   width: 20%;
   text-align: left;
@@ -180,8 +183,8 @@ body > .container > .main-content {
   text-align: right;
 }
 .card header button {
-  font-size: 14px;
-  color: #888;
+  font-size: 11px;
+  color: #444;
   text-shadow: 1px 1px 1px rgba(255,255,255,0.9);
   background-color: #f0f0f0;
   border: none;
@@ -216,8 +219,8 @@ body > .container > .main-content {
   color: #a30;
 }
 .card header button {
-  -webkit-border-radius: 9px;
-  border-radius: 9px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
 }
 .card header .btn-group > * {
   margin-right: 0;
@@ -225,12 +228,12 @@ body > .container > .main-content {
   border-radius: 0;
 }
 .card header .btn-group :first-child {
-  border-top-left-radius: 9px;
-  border-bottom-left-radius: 9px;
+  border-top-left-radius: 3px;
+  border-bottom-left-radius: 3px;
 }
 .card header .btn-group :last-child {
-  border-top-right-radius: 9px;
-  border-bottom-right-radius: 9px;
+  border-top-right-radius: 3px;
+  border-bottom-right-radius: 3px;
 }
 .card a {
   color: #039;

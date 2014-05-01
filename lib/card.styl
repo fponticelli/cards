@@ -6,7 +6,7 @@
   height 100%
   .doc
     width calc(100% - 300px)
-    overflow none
+    overflow hidden
     min-height 2em
     position relative
     height 100%
@@ -14,13 +14,13 @@
       position absolute
     header
       top 0
-      height 24px
+      height 25px
     article
-      top 24px
-      height calc(100% - 48px)
+      top 25px
+      height calc(100% - 50px)
     footer
-      bottom 24px
-      height 24px
+      bottom 25px
+      height 25px
   aside
     width 300px
     overflow auto
@@ -32,6 +32,8 @@
     background-color toolbar-bg-color
     display flex
     flex-direction row
+  header
+    border-bottom 1px solid #ddd
   header
     @import 'header'
   footer
