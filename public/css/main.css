@@ -290,6 +290,19 @@ body > .container > .main-content {
   background-color: #fff;
   padding: 2px;
 }
+.card .field-container .field .key .fragment {
+  display: inline-block;
+  width: 100%;
+  min-height: 1em;
+}
+.card .field-container .field .key .fragment .content {
+  display: inline-block;
+  width: 100%;
+  min-height: 1em;
+}
+.card .field-container .field .key .fragment .content[contenteditable] {
+  background-color: #fff;
+}
 .card .field-container .field .value {
   background-color: #f6f6f6;
   padding: 2px;
