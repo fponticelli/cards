@@ -170,15 +170,15 @@ body > .container > .main-content {
 .card header {
   border-bottom: 1px solid #ddd;
 }
-.card header > .main-bar {
+.card header > .left {
   width: 20%;
   text-align: left;
 }
-.card header > .context-bar {
+.card header > .middle {
   width: 60%;
   text-align: center;
 }
-.card header > .side-bar {
+.card header > .right {
   width: 20%;
   text-align: right;
 }
@@ -221,6 +221,14 @@ body > .container > .main-content {
 .card header button {
   -webkit-border-radius: 3px;
   border-radius: 3px;
+}
+.card header button.disabled {
+  color: #ccc;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
+.card header button.disabled:hover {
+  background-color: #f0f0f0;
 }
 .card header .btn-group > * {
   margin-right: 0;

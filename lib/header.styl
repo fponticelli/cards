@@ -4,15 +4,16 @@ button-bg-color = #f0f0f0
 button-bg-active-color = #f9f9f9
 button-br-color = #ddd
 button-color = #444
+button-disabled-color = #ccc
 alert-color = #a30
 
-> .main-bar
+> .left
   width 20%
   text-align left
-> .context-bar
+> .middle
   width 60%
   text-align center
-> .side-bar
+> .right
   width 20%
   text-align right
 
@@ -48,6 +49,12 @@ button.alert
 
 button
 	border-radius radius
+
+button.disabled
+  color button-disabled-color
+  box-shadow none
+  &:hover
+    background-color button-bg-color
 
 .btn-group
 	> *
