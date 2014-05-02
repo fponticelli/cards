@@ -29,22 +29,22 @@ Dom.ready(() => {
 		$context_article = Query.first('article', $context),
 		$model           = Query.first('.model', $aside),
 		$model_header    = Query.first('header', $model),
-		$model_article   = Query.first('article', $model),
-		p                = new Paragraph(),
-		editor           = p.createFragment(),
-		text             = new TextProperty(),
-		stringValue      = new ValueProperty("String"),
-		numberValue      = new ValueProperty("Number"),
-		visible          = new VisibleProperty(),
-		strong           = new StrongProperty(),
-		emphasis         = new EmphasisProperty(),
-		strike           = new StrikeProperty(),
-		formatNumber     = new NumericFormatProperty(),
-		link             = new LinkProperty(),
-		tooltip          = new TooltipProperty("tooltip text goes here"),
-		textEditor       = new TextEditorProperty();
+		$model_article   = Query.first('article', $model);
+		//p                = new Paragraph(),
+		//editor           = p.createFragment(),
+		//text             = new TextProperty(),
+		//stringValue      = new ValueProperty("String"),
+		//numberValue      = new ValueProperty("Number"),
+		//visible          = new VisibleProperty(),
+		//strong           = new StrongProperty(),
+		//emphasis         = new EmphasisProperty(),
+		//strike           = new StrikeProperty(),
+		//formatNumber     = new NumericFormatProperty(),
+		//link             = new LinkProperty(),
+		//tooltip          = new TooltipProperty("tooltip text goes here"),
+		//textEditor       = new TextEditorProperty();
 
-
+/*
 	// add text property and rendering
 	editor.properties.add(text);
 	editor.properties.add(strong);
@@ -98,7 +98,7 @@ Dom.ready(() => {
 	field.value.properties.add(new BoolEditorProperty());
 	field.value.editor.value.feed(editor.strike);
 	p.attachTo($doc_article);
-
+*/
 
 	let schema       = new Schema(),
 		view         = new ModelView(),
