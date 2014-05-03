@@ -12,6 +12,7 @@ import { Model } from 'ui/model';
 import { Schema } from 'ui/schema';
 import { Paragraph } from 'ui/paragraph';
 
+import { ContextUI } from 'ui/contextui';
 import { ModelUI } from 'ui/modelui';
 
 Dom.ready(() => {
@@ -93,6 +94,10 @@ Dom.ready(() => {
 	field.value.editor.value.feed(editor.strike);
 	p.attachTo($doc_article);
 */
+
+	let contextui = new ContextUI();
+
+	contextui.attachTo($aside);
 
 	let schema  = new Schema(),
 		model   = new Model(),
