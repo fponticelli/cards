@@ -8,14 +8,11 @@ import {
 	TextEditorProperty, BoolEditorProperty, HtmlProperty, IconProperty
 } from 'ui/properties/types';
 
-import { ModelView, SchemaWrapper } from 'ui/modelview';
-import { ModelViewToolbar } from 'ui/modelviewtoolbar';
 import { Model } from 'ui/model';
 import { Schema } from 'ui/schema';
-
-import { Field } from 'ui/Field';
-
 import { Paragraph } from 'ui/paragraph';
+
+import { ModelUI } from 'ui/modelui';
 
 Dom.ready(() => {
 	let $card            = Query.first('.card'),
@@ -26,10 +23,7 @@ Dom.ready(() => {
 		$aside           = Query.first('aside', $card),
 		$context         = Query.first('.context', $aside),
 		$context_header  = Query.first('header', $context),
-		$context_article = Query.first('article', $context),
-		$model           = Query.first('.model', $aside),
-		$model_header    = Query.first('header', $model),
-		$model_article   = Query.first('article', $model);
+		$context_article = Query.first('article', $context);
 		//p                = new Paragraph(),
 		//editor           = p.createFragment(),
 		//text             = new TextProperty(),
@@ -100,27 +94,11 @@ Dom.ready(() => {
 	p.attachTo($doc_article);
 */
 
-	let schema       = new Schema(),
-		view         = new ModelView(),
-		model        = new Model(),
-		wrapper      = new SchemaWrapper(schema, view),
-		modeltoolbar = new ModelViewToolbar(view);
+	let schema  = new Schema(),
+		model   = new Model(),
+		modelui = new ModelUI(model, schema);
 
-	modeltoolbar.attachTo($model);
-	view.attachTo($model_article);
-
-	schema.stream.feed(model.schema);
-	view.data.feed(model.data);
-
-	view.focusStream.log("model view focus");
-
-	model.stream.map(JSON.stringify).log('model');
-
-	schema.reset([
-		{name:'name',type:'String'},
-		{name:'lastname',type:'String'},
-		{name:'alive',type:'Bool'}
-	]);
+	modelui.attachTo($aside);
 
 	/*
 	let field = new Field();

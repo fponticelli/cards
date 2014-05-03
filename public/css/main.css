@@ -172,6 +172,7 @@ body > .container > .main-content {
 }
 .card header > .left {
   width: 20%;
+  padding-left: 2px;
   text-align: left;
 }
 .card header > .middle {
@@ -180,6 +181,7 @@ body > .container > .main-content {
 }
 .card header > .right {
   width: 20%;
+  padding-right: 2px;
   text-align: right;
 }
 .card header button {
