@@ -251,6 +251,84 @@ body > .container {
   border-top-right-radius: 3px;
   border-bottom-right-radius: 3px;
 }
+.card footer {
+  border-top: 1px solid #ddd;
+}
+.card footer > .left {
+  width: 20%;
+  padding-left: 2px;
+  text-align: left;
+}
+.card footer > .middle {
+  width: 60%;
+  text-align: center;
+}
+.card footer > .right {
+  width: 20%;
+  padding-right: 2px;
+  text-align: right;
+}
+.card footer button {
+  font-size: 11px;
+  color: #444;
+  text-shadow: 1px 1px 1px rgba(255,255,255,0.9);
+  background-color: #f0f0f0;
+  border: none;
+  padding: 0 4px 1px 4px;
+  min-width: 18px;
+  height: 18px;
+  margin: 0;
+  background: color;
+  display: inline-block;
+  margin-right: 2px;
+  -webkit-box-shadow: inset 1px 1px 1px rgba(255,255,255,0.8), 0px 0px 1px rgba(0,0,0,0.3);
+  box-shadow: inset 1px 1px 1px rgba(255,255,255,0.8), 0px 0px 1px rgba(0,0,0,0.3);
+  text-shadow: -0.5px -0.5px 1px rgba(255,255,255,0.8), 0.5px 0.5px 1px rgba(0,0,0,0.2);
+}
+.card footer button:last-child {
+  margin-right: 0;
+}
+.card footer button.active,
+.card footer button:active {
+  background-color: #f9f9f9;
+  -webkit-box-shadow: inset -1px -1px 1px rgba(255,255,255,0.8), inset 0px 0px 1px rgba(0,0,0,0.6), 0px 0px 1px rgba(0,0,0,0.3);
+  box-shadow: inset -1px -1px 1px rgba(255,255,255,0.8), inset 0px 0px 1px rgba(0,0,0,0.6), 0px 0px 1px rgba(0,0,0,0.3);
+}
+.card footer button:focus {
+  outline: none;
+  outline-offset: -4px;
+}
+.card footer button:hover {
+  background-color: #f9f9f9;
+}
+.card footer button.alert {
+  color: #a30;
+}
+.card footer button {
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+}
+.card footer button.disabled {
+  color: #ccc;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
+.card footer button.disabled:hover {
+  background-color: #f0f0f0;
+}
+.card footer .btn-group > * {
+  margin-right: 0;
+  -webkit-border-radius: 0;
+  border-radius: 0;
+}
+.card footer .btn-group :first-child {
+  border-top-left-radius: 3px;
+  border-bottom-left-radius: 3px;
+}
+.card footer .btn-group :last-child {
+  border-top-right-radius: 3px;
+  border-bottom-right-radius: 3px;
+}
 .card a {
   color: #039;
   text-decoration: none;
