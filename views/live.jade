@@ -1,14 +1,10 @@
-extend layout-js
-
-block content
-  .card
-    .doc
-      header
-        .main-bar main
-        .context-bar context
-        .side-bar
-          button.alert
-              i.fa.fa-ban
-      article
-      footer footer / breadcrumbs
-    aside
+doctype
+include mixin
+html
+  head
+    title #{title}
+    link(rel='stylesheet', href='/css/font-awesome.min.css')
+    link(rel='stylesheet', href='/css/main.css')
+    script(src="app/main.js")
+  body
+    .container

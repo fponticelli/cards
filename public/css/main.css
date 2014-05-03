@@ -102,9 +102,15 @@ body {
 }
 html,
 body,
-body > .container,
-body > .container > .main-content {
+body > .container {
   height: 100%;
+  width: 100%;
+}
+.card,
+.card * {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
 }
 .card {
   display: -webkit-box;
