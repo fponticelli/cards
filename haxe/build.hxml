@@ -1,0 +1,7 @@
+-js bin/app.js
+-cp src
+-main Main
+-cp /Users/francoponticelli/projects/steamer/src
+-cp /Users/francoponticelli/projects/extern/promhx/src/main
+#-lib steamer
+#-lib promhx
