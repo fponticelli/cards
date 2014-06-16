@@ -1,10 +1,14 @@
--js bin/app.js
+-js bin/test.js
 -cp src
--main Main
+-cp test
+-main TestAll
 -cp /Users/francoponticelli/projects/steamer/src
 -cp /Users/francoponticelli/projects/extern/promhx/src/main
 -lib thx.core
+-lib utest
 -debug
+-D nodejs
 -D source-map-content
+-cmd node bin/test.js
 #-lib steamer
 #-lib promhx

@@ -28,18 +28,16 @@ class Dom {
 		}, false);
 		return deferred;
 	}
-
-
 }
 
 class Query {
 	static var doc : Element = untyped __js__('document');
 	public static function first(selector : String, ?ctx : js.html.Element) {
-		return (ctx != null ? doc : ctx).querySelector(selector);
+		return (ctx != null ? ctx : doc).querySelector(selector);
 	}
 
 	public static function list(selector : String, ?ctx : js.html.Element) {
-		return (ctx != null ? doc : ctx).querySelectorAll(selector);
+		return (ctx != null ? ctx : doc).querySelectorAll(selector);
 	}
 
 	public inline static function all(selector : String, ?ctx : js.html.Element) : Array<Element> {

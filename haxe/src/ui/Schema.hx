@@ -8,7 +8,7 @@ using Lambda;
 
 class Schema {
 	var fields : Map<String, FieldType>;
-	var stream : SchemaProducer;
+	public var stream(default, null) : SchemaProducer;
 	var feed : Pulse<SchemaEvent> -> Void;
 
 	public function new() {
@@ -58,15 +58,28 @@ class Schema {
 		feed(Emit(RetypeField(name, type)));
 	}
 
-	public function getPairs() {
+	public function get(name : String) {
+		return fields.get(name);
+	}
+
+	public function has(name : String) {
+		return fields.has(name);
+	}
+
+	public function getFieldNames() {
 		var arr = [];
-		for(key in fields.keys()) {
-			arr.push({
+		for(key in fields.keys())
+			arr.push(key);
+		return arr;
+	}
+
+	public function getPairs() {
+		return getFieldNames().map(function(key) {
+			return {
 				name : key,
 				type : fields.get(key)
-			});
-		}
-		return arr;
+			};
+		});
 	}
 }
 
