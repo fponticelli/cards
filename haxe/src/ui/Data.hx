@@ -4,18 +4,23 @@ import haxe.Json;
 using thx.core.Arrays;
 using thx.core.Iterators;
 using thx.core.Strings;
+import steamer.Producer;
+import steamer.Pulse;
 import thx.ref.ObjectRef;
 import thx.ref.IRef;
 
 class Data {
 	var root : ObjectRef;
 	var cache : Map<String, IRef>;
+	var feed : Pulse<{}> -> Void;
+
+	public var stream(default, null) : Producer<{}>;
 
 	public function new(data : {}) {
-		root = new ObjectRef(null);
-		cache = new Map();
-		if(null != data)
-			set("", data);
+		stream = new Producer(function(feed) {
+			this.feed = feed;
+		});
+		reset(data);
 	}
 
 	function resolve(path : String) {
@@ -39,18 +44,34 @@ class Data {
 	public function set(path : String, value : Dynamic) : Data {
 		var ref = resolve(path);
 		cache.set(path, ref);
-		ref.set(value);
+		if(ref.get() != value) {
+			ref.set(value);
+			feed(Emit(toObject()));
+		}
+		return this;
+	}
+
+	public function reset(value : Dynamic) : Data {
+		root = new ObjectRef(null);
+		cache = new Map();
+		if(null != value) {
+			set("", value);
+		}
+		feed(Emit(toObject()));
 		return this;
 	}
 
 	public function remove(path : String) {
 		var ref = cache.get(path);
 		if(null == ref) {
-			root.resolve(path).remove();
-		} else {
-			ref.remove();
-			cache.remove(path);
+			ref = root.resolve(path);
 		}
+
+		if(ref.hasValue()) {
+			ref.remove();
+			feed(Emit(toObject()));
+		}
+		cache.remove(path);
 	}
 
 	public function rename(oldpath : String, newpath : String) {
@@ -59,6 +80,7 @@ class Data {
 		var v = get(oldpath);
 		remove(oldpath);
 		set(newpath, v);
+		feed(Emit(toObject()));
 		return true;
 	}
 

@@ -99,16 +99,6 @@ HxOverrides.iter = function(a) {
 		return this.arr[this.cur++];
 	}};
 };
-var Lambda = function() { };
-Lambda.__name__ = ["Lambda"];
-Lambda.has = function(it,elt) {
-	var $it0 = $iterator(it)();
-	while( $it0.hasNext() ) {
-		var x = $it0.next();
-		if(x == elt) return true;
-	}
-	return false;
-};
 var List = function() {
 	this.length = 0;
 };
@@ -138,13 +128,11 @@ Main.main = function() {
 		var schema = new ui.Schema();
 		var data = new ui.Data({ name : "Franco", contacts : [{ type : "email", value : "franco.ponticelli@gmail.com"},{ type : "phone", value : "7206902488"}]});
 		var model = new ui.Model(data);
-		haxe.Log.trace("Hello World",{ fileName : "Main.hx", lineNumber : 22, className : "Main", methodName : "main"});
+		haxe.Log.trace("Hello World",{ fileName : "Main.hx", lineNumber : 23, className : "Main", methodName : "main"});
 		data.set("contacts[2]",{ type : "twitter", value : "fponticelli"});
 		data.set("contacts[3].type","skype");
 		data.set("contacts[3].value","francoponticelli");
-		haxe.Log.trace(data.get("contacts[3].value"),{ fileName : "Main.hx", lineNumber : 26, className : "Main", methodName : "main"});
-		haxe.Log.trace(data.get("contacts"),{ fileName : "Main.hx", lineNumber : 27, className : "Main", methodName : "main"});
-		haxe.Log.trace(data.toJSON(),{ fileName : "Main.hx", lineNumber : 28, className : "Main", methodName : "main"});
+		haxe.Log.trace(data.toJSON(),{ fileName : "Main.hx", lineNumber : 27, className : "Main", methodName : "main"});
 	});
 };
 var IMap = function() { };
@@ -1912,9 +1900,11 @@ thx.ref.ValueRef.prototype = $extend(thx.ref.BaseRef.prototype,{
 });
 var ui = {};
 ui.Data = function(data) {
-	this.root = new thx.ref.ObjectRef(null);
-	this.cache = new haxe.ds.StringMap();
-	if(null != data) this.set("",data);
+	var _g = this;
+	this.stream = new steamer.Producer(function(feed) {
+		_g.feed = feed;
+	});
+	this.reset(data);
 };
 ui.Data.__name__ = ["ui","Data"];
 ui.Data.prototype = {
@@ -1935,21 +1925,34 @@ ui.Data.prototype = {
 	,set: function(path,value) {
 		var ref = this.resolve(path);
 		this.cache.set(path,ref);
-		ref.set(value);
+		if(ref.get() != value) {
+			ref.set(value);
+			this.feed(steamer.Pulse.Emit(this.toObject()));
+		}
+		return this;
+	}
+	,reset: function(value) {
+		this.root = new thx.ref.ObjectRef(null);
+		this.cache = new haxe.ds.StringMap();
+		if(null != value) this.set("",value);
+		this.feed(steamer.Pulse.Emit(this.toObject()));
 		return this;
 	}
 	,remove: function(path) {
 		var ref = this.cache.get(path);
-		if(null == ref) this.root.resolve(path).remove(); else {
+		if(null == ref) ref = this.root.resolve(path);
+		if(ref.hasValue()) {
 			ref.remove();
-			this.cache.remove(path);
+			this.feed(steamer.Pulse.Emit(this.toObject()));
 		}
+		this.cache.remove(path);
 	}
 	,rename: function(oldpath,newpath) {
 		if(!this.hasValue(oldpath) || this.hasValue(newpath)) return false;
 		var v = this.get(oldpath);
 		this.remove(oldpath);
 		this.set(newpath,v);
+		this.feed(steamer.Pulse.Emit(this.toObject()));
 		return true;
 	}
 	,toObject: function() {
@@ -1965,31 +1968,45 @@ ui.Model = function(data) {
 	this.data = data;
 	this.schema = new ui.Schema();
 	this.changes = new steamer.Producer(function(feed) {
-		_g.schema.stream.feed({ onPulse : function(p) {
+		data.stream.feed({ onPulse : function(p) {
 			switch(p[1]) {
 			case 0:
+				var o = p[2];
+				break;
+			case 2:
 				var e = p[2];
-				switch(e[1]) {
+				feed(steamer.Pulse.Fail(e));
+				break;
+			case 1:
+				feed(steamer.Pulse.End);
+				break;
+			}
+		}});
+		_g.schema.stream.feed({ onPulse : function(p1) {
+			switch(p1[1]) {
+			case 0:
+				var e1 = p1[2];
+				switch(e1[1]) {
 				case 0:
-					var list = e[2];
+					var list = e1[2];
 					break;
 				case 1:
-					var type = e[3];
-					var name = e[2];
+					var type = e1[3];
+					var name = e1[2];
 					break;
 				case 2:
-					var name1 = e[2];
+					var name1 = e1[2];
 					break;
 				case 3:
-					var newname = e[3];
-					var oldname = e[2];
+					var newname = e1[3];
+					var oldname = e1[2];
 					break;
 				default:
 				}
 				break;
 			case 2:
-				var e1 = p[2];
-				feed(steamer.Pulse.Fail(e1));
+				var e2 = p1[2];
+				feed(steamer.Pulse.Fail(e2));
 				break;
 			case 1:
 				feed(steamer.Pulse.End);
@@ -2049,8 +2066,8 @@ ui.Schema.prototype = {
 	,get: function(name) {
 		return this.fields.get(name);
 	}
-	,has: function(name) {
-		return Lambda.has(this.fields,name);
+	,exists: function(name) {
+		return this.fields.exists(name);
 	}
 	,getFieldNames: function() {
 		var arr = [];
@@ -2088,6 +2105,21 @@ ui.SchemaEvent.AddField = function(name,type) { var $x = ["AddField",1,name,type
 ui.SchemaEvent.DeleteField = function(name) { var $x = ["DeleteField",2,name]; $x.__enum__ = ui.SchemaEvent; $x.toString = $estr; return $x; };
 ui.SchemaEvent.RenameField = function(oldname,newname) { var $x = ["RenameField",3,oldname,newname]; $x.__enum__ = ui.SchemaEvent; $x.toString = $estr; return $x; };
 ui.SchemaEvent.RetypeField = function(name,type) { var $x = ["RetypeField",4,name,type]; $x.__enum__ = ui.SchemaEvent; $x.toString = $estr; return $x; };
+ui.SchemaType = { __ename__ : ["ui","SchemaType"], __constructs__ : ["ArrayType","BoolType","DateType","FloatType","ObjectType","StringType"] };
+ui.SchemaType.ArrayType = function(item) { var $x = ["ArrayType",0,item]; $x.__enum__ = ui.SchemaType; $x.toString = $estr; return $x; };
+ui.SchemaType.BoolType = ["BoolType",1];
+ui.SchemaType.BoolType.toString = $estr;
+ui.SchemaType.BoolType.__enum__ = ui.SchemaType;
+ui.SchemaType.DateType = ["DateType",2];
+ui.SchemaType.DateType.toString = $estr;
+ui.SchemaType.DateType.__enum__ = ui.SchemaType;
+ui.SchemaType.FloatType = ["FloatType",3];
+ui.SchemaType.FloatType.toString = $estr;
+ui.SchemaType.FloatType.__enum__ = ui.SchemaType;
+ui.SchemaType.ObjectType = function(fields) { var $x = ["ObjectType",4,fields]; $x.__enum__ = ui.SchemaType; $x.toString = $estr; return $x; };
+ui.SchemaType.StringType = ["StringType",5];
+ui.SchemaType.StringType.toString = $estr;
+ui.SchemaType.StringType.__enum__ = ui.SchemaType;
 function $iterator(o) { if( o instanceof Array ) return function() { return HxOverrides.iter(o); }; return typeof(o.iterator) == 'function' ? $bind(o,o.iterator) : o.iterator; }
 var $_, $fid = 0;
 function $bind(o,m) { if( m == null ) return null; if( m.__id__ == null ) m.__id__ = $fid++; var f; if( o.hx__closures__ == null ) o.hx__closures__ = {}; else f = o.hx__closures__[m.__id__]; if( f == null ) { f = function(){ return f.method.apply(f.scope, arguments); }; f.scope = o; f.method = m; o.hx__closures__[m.__id__] = f; } return f; }

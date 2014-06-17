@@ -14,6 +14,19 @@ class Model {
 		this.data = data;
 		this.schema = new Schema();
 		this.changes = new Producer(function(feed) {
+			data.stream.feed({
+				onPulse : function(p : Pulse<{}>) {
+					switch(p) {
+						case Emit(o):
+							
+						case Fail(e):
+							feed(Fail(e));
+						case End:
+							feed(End);
+					}
+
+				}
+			});
 			schema.stream.feed({
 				onPulse : function(p : Pulse<SchemaEvent>) {
 					switch(p) {

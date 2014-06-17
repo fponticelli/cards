@@ -4,10 +4,10 @@ import steamer.Consumer;
 import steamer.Producer;
 import steamer.Pulse;
 import thx.Error;
-using Lambda;
+import ui.SchemaType;
 
 class Schema {
-	var fields : Map<String, FieldType>;
+	var fields : Map<String, SchemaType>;
 	public var stream(default, null) : SchemaProducer;
 	var feed : Pulse<SchemaEvent> -> Void;
 
@@ -18,7 +18,7 @@ class Schema {
 		});
 	}
 
-	public function add(name : String, type : FieldType) {
+	public function add(name : String, type : SchemaType) {
 		if(fields.exists(name))
 			throw new Error('Schema already contains a field "$name"');
 		fields.set(name, type);
@@ -51,7 +51,7 @@ class Schema {
 		feed(Emit(RenameField(oldname, newname)));
 	}
 
-	public function retype(name : String, type : FieldType) {
+	public function retype(name : String, type : SchemaType) {
 		if(!fields.exists(name))
 			throw new Error('Schema does not contain a field "${name}"');
 		fields.set(name, type);
@@ -62,8 +62,8 @@ class Schema {
 		return fields.get(name);
 	}
 
-	public function has(name : String) {
-		return fields.has(name);
+	public function exists(name : String) {
+		return fields.exists(name);
 	}
 
 	public function getFieldNames() {
@@ -97,18 +97,26 @@ class SchemaProducer extends Producer<SchemaEvent> {
 }
 
 enum SchemaEvent {
-	ListFields(list : Array<FieldPair>);
-	AddField(name : String, type : FieldType);
+	ListFields(list : Iterable<FieldPair>);
+	AddField(name : String, type : SchemaType);
 	DeleteField(name : String);
 	RenameField(oldname : String, newname : String);
-	RetypeField(name : String, type : FieldType);
+	RetypeField(name : String, type : SchemaType);
 }
 
 typedef FieldPair = {
 	name : String,
-	type : FieldType
+	type : SchemaType
 }
 
-typedef FieldType = {
 
-}
+/*
+locations[0].city = "Milano"
+locations : ArrayType<ObjectType>
+locations.city : StringType
+
+address = { city : "Milano" }
+
+address : ObjectType
+address.city : StringType
+*/

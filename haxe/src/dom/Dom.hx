@@ -1,6 +1,7 @@
 package dom;
 
 import js.html.Element;
+import steamer.Producer;
 import thx.Nil;
 import promhx.Promise;
 
@@ -27,6 +28,10 @@ class Dom {
 			deferred.resolve(nil);
 		}, false);
 		return deferred;
+	}
+
+	public static function toggleVisibility(producer : Producer<Bool>, el : Element) : DomToggleStream {
+		
 	}
 }
 
