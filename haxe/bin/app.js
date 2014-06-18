@@ -151,7 +151,7 @@ Main.main = function() {
 		data.set("contacts[3].type","skype");
 		data.set("contacts[3].value","francoponticelli");
 		haxe.Log.trace(data.toJSON(),{ fileName : "Main.hx", lineNumber : 30, className : "Main", methodName : "main"});
-		var component = new ui.components.Button({ });
+		var component = ui.components.Button.withIcon("cubes",{ });
 		component.appendTo(container);
 		ui.properties.ClickPropertyImplementation.asClickable(component).clicks.feed({ onPulse : function(e) {
 			haxe.Log.trace(e,{ fileName : "Main.hx", lineNumber : 36, className : "Main", methodName : "main"});
@@ -1208,8 +1208,9 @@ steamer.Pulses.times = function(n,pulse) {
 };
 steamer.Value = function(initialValue,defaultValue) {
 	var _g = this;
+	this.forwards = [];
 	steamer.Producer.call(this,function(forward) {
-		_g.forward = forward;
+		_g.forwards.push(forward);
 	},false);
 	if(null == defaultValue) this.defaultValue = initialValue; else this.defaultValue = defaultValue;
 	this.set_value(initialValue);
@@ -1229,7 +1230,22 @@ steamer.Value.bool = function(value,defaultValue) {
 };
 steamer.Value.__super__ = steamer.Producer;
 steamer.Value.prototype = $extend(steamer.Producer.prototype,{
-	get_value: function() {
+	forward: function(pulse) {
+		var _g = 0;
+		var _g1 = this.forwards;
+		while(_g < _g1.length) {
+			var f = _g1[_g];
+			++_g;
+			f(pulse);
+		}
+		switch(pulse[1]) {
+		case 1:
+			this.forwards = [];
+			break;
+		default:
+		}
+	}
+	,get_value: function() {
 		return this.value;
 	}
 	,set_value: function(v) {
@@ -1237,6 +1253,13 @@ steamer.Value.prototype = $extend(steamer.Producer.prototype,{
 		this.value = v;
 		this.forward(steamer.Pulse.Emit(v));
 		return v;
+	}
+	,feed: function(consumer) {
+		steamer.Producer.prototype.feed.call(this,consumer);
+		consumer.onPulse(steamer.Pulse.Emit(this.get_value()));
+	}
+	,terminate: function() {
+		this.forward(steamer.Pulse.End);
 	}
 	,onValue: function(pulse) {
 		switch(pulse[1]) {
@@ -2364,13 +2387,62 @@ ui.properties.ClickPropertyImplementation.prototype = $extend(ui.properties.Prop
 	}
 	,__class__: ui.properties.ClickPropertyImplementation
 });
-ui.properties.IconProperty = function(name) {
+ui.properties.IconProperty = function(iconName) {
 	ui.properties.Property.call(this,"icon");
+	this.iconName = iconName;
 };
 ui.properties.IconProperty.__name__ = ["ui","properties","IconProperty"];
 ui.properties.IconProperty.__super__ = ui.properties.Property;
 ui.properties.IconProperty.prototype = $extend(ui.properties.Property.prototype,{
-	__class__: ui.properties.IconProperty
+	inject: function(component) {
+		return new ui.properties.IconPropertyImplementation(component,this);
+	}
+	,__class__: ui.properties.IconProperty
+});
+ui.properties.IconPropertyImplementation = function(component,property) {
+	ui.properties.PropertyImplementation.call(this,component,property);
+};
+ui.properties.IconPropertyImplementation.__name__ = ["ui","properties","IconPropertyImplementation"];
+ui.properties.IconPropertyImplementation.asIcon = function(component) {
+	return component.properties.implementations.get("icon");
+};
+ui.properties.IconPropertyImplementation.getCurrentIcon = function(el) {
+	var _g1 = 0;
+	var _g = el.classList.length;
+	while(_g1 < _g) {
+		var i = _g1++;
+		var className = el.classList.item(i);
+		if(HxOverrides.substr(className,0,3) == "fa-") return HxOverrides.substr(className,3,null);
+	}
+	return null;
+};
+ui.properties.IconPropertyImplementation.__super__ = ui.properties.PropertyImplementation;
+ui.properties.IconPropertyImplementation.prototype = $extend(ui.properties.PropertyImplementation.prototype,{
+	init: function() {
+		var _g = this;
+		var current = ui.properties.IconPropertyImplementation.getCurrentIcon(this.component.el);
+		var needsFa = current == null;
+		this.icon = new steamer.Value(this.property.iconName);
+		if(needsFa) this.component.el.classList.add("fa");
+		this.icon.feed({ onPulse : function(pulse) {
+			switch(pulse[1]) {
+			case 0:
+				var value = pulse[2];
+				if(null != current) _g.component.el.classList.remove(current);
+				_g.component.el.classList.add(current = "fa-" + value);
+				break;
+			case 1:
+				if(needsFa) _g.component.el.classList.remove("fa");
+				break;
+			default:
+			}
+		}});
+		return function() {
+			_g.icon.terminate();
+			_g.icon = null;
+		};
+	}
+	,__class__: ui.properties.IconPropertyImplementation
 });
 ui.properties.Implementations = function() {
 	this.map = new haxe.ds.StringMap();
@@ -2666,7 +2738,7 @@ thx.core.Strings.__digitsPattern = new EReg("^[0-9]+$","");
 thx.ref.EmptyParent.instance = new thx.ref.EmptyParent();
 thx.ref.Ref.reField = new EReg("^\\.?([^.\\[]+)","");
 thx.ref.Ref.reIndex = new EReg("^\\[(\\d+)\\]","");
-ui.components.Button.template = "<button><span class=\"content\"></span></button>";
+ui.components.Button.template = "<button></button>";
 Main.main();
 })(typeof window != "undefined" ? window : exports);
 

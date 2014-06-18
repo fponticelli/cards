@@ -4,7 +4,7 @@ import ui.properties.ClickProperty;
 import ui.properties.IconProperty;
 
 class Button extends Component {
-	static var template = '<button><span class="content"></span></button>';
+	static var template = '<button></button>';
 	public function new(options : ComponentOptions) {
 		if(null == options.template)
 			options.template = template;

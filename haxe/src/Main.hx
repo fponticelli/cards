@@ -29,7 +29,7 @@ class Main {
 			data.set('contacts[3].value', 'francoponticelli');
 			trace(data.toJSON());
 
-			var component = new Button({});
+			var component = Button.withIcon("cubes", {});
 			component.appendTo(container);
 			component.asClickable().clicks.feed({
 				onPulse : function(e) {
