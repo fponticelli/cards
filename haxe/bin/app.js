@@ -92,6 +92,24 @@ HxOverrides.substr = function(s,pos,len) {
 	} else if(len < 0) len = s.length + len - pos;
 	return s.substr(pos,len);
 };
+HxOverrides.indexOf = function(a,obj,i) {
+	var len = a.length;
+	if(i < 0) {
+		i += len;
+		if(i < 0) i = 0;
+	}
+	while(i < len) {
+		if(a[i] === obj) return i;
+		i++;
+	}
+	return -1;
+};
+HxOverrides.remove = function(a,obj) {
+	var i = HxOverrides.indexOf(a,obj,0);
+	if(i == -1) return false;
+	a.splice(i,1);
+	return true;
+};
 HxOverrides.iter = function(a) {
 	return { cur : 0, arr : a, hasNext : function() {
 		return this.cur < this.arr.length;
@@ -128,11 +146,16 @@ Main.main = function() {
 		var schema = new ui.Schema();
 		var data = new ui.Data({ name : "Franco", contacts : [{ type : "email", value : "franco.ponticelli@gmail.com"},{ type : "phone", value : "7206902488"}]});
 		var model = new ui.Model(data);
-		haxe.Log.trace("Hello World",{ fileName : "Main.hx", lineNumber : 23, className : "Main", methodName : "main"});
+		haxe.Log.trace("Hello World",{ fileName : "Main.hx", lineNumber : 26, className : "Main", methodName : "main"});
 		data.set("contacts[2]",{ type : "twitter", value : "fponticelli"});
 		data.set("contacts[3].type","skype");
 		data.set("contacts[3].value","francoponticelli");
-		haxe.Log.trace(data.toJSON(),{ fileName : "Main.hx", lineNumber : 27, className : "Main", methodName : "main"});
+		haxe.Log.trace(data.toJSON(),{ fileName : "Main.hx", lineNumber : 30, className : "Main", methodName : "main"});
+		var component = new ui.components.Button({ });
+		component.appendTo(container);
+		ui.properties.ClickPropertyImplementation.asClickable(component).clicks.feed({ onPulse : function(e) {
+			haxe.Log.trace(e,{ fileName : "Main.hx", lineNumber : 36, className : "Main", methodName : "main"});
+		}});
 	});
 };
 var IMap = function() { };
@@ -1237,6 +1260,64 @@ steamer.Value.prototype = $extend(steamer.Producer.prototype,{
 	}
 	,__class__: steamer.Value
 });
+steamer.dom = {};
+steamer.dom.Dom = function() { };
+steamer.dom.Dom.__name__ = ["steamer","dom","Dom"];
+steamer.dom.Dom.produceEvent = function(el,name) {
+	var cancel = null;
+	var producer = new steamer.Producer(function(forward) {
+		var f = function(e) {
+			forward(steamer.Pulse.Emit(e));
+		};
+		el.addEventListener(name,f,false);
+		cancel = function() {
+			el.removeEventListener(name,f,false);
+			forward(steamer.Pulse.End);
+		};
+	});
+	return { producer : producer, cancel : cancel};
+};
+steamer.dom.Dom.consumeText = function(el) {
+	return steamer.dom.Dom.createConsumer(function(v) {
+		el.innerText = v;
+	});
+};
+steamer.dom.Dom.consumeHtml = function(el) {
+	return steamer.dom.Dom.createConsumer(function(v) {
+		el.innerHTML = v;
+	});
+};
+steamer.dom.Dom.consumeAttribute = function(el,attr) {
+	return steamer.dom.Dom.createConsumer(function(v) {
+		el.setAttribute(attr,v);
+	});
+};
+steamer.dom.Dom.consumeToggleClass = function(el,name) {
+	return steamer.dom.Dom.createConsumer(function(v) {
+		if(v) el.classList.add(name); else el.classList.remove(name);
+	});
+};
+steamer.dom.Dom.consumeToggleVisibility = function(el) {
+	return steamer.dom.Dom.createConsumer(function(v) {
+		if(v) el.style.display = ""; else el.style.display = "none";
+	});
+};
+steamer.dom.Dom.createConsumer = function(f) {
+	return { onPulse : function(pulse) {
+		switch(pulse[1]) {
+		case 0:
+			var v = pulse[2];
+			f(v);
+			break;
+		case 1:
+			break;
+		case 2:
+			var error = pulse[2];
+			throw error;
+			break;
+		}
+	}};
+};
 steamer.producers = {};
 steamer.producers.Interval = function(delay,times) {
 	if(times == null) times = 0;
@@ -1901,6 +1982,8 @@ thx.ref.ValueRef.prototype = $extend(thx.ref.BaseRef.prototype,{
 var ui = {};
 ui.Data = function(data) {
 	var _g = this;
+	this.feed = function(p) {
+	};
 	this.stream = new steamer.Producer(function(feed) {
 		_g.feed = feed;
 	});
@@ -2120,9 +2203,200 @@ ui.SchemaType.ObjectType = function(fields) { var $x = ["ObjectType",4,fields]; 
 ui.SchemaType.StringType = ["StringType",5];
 ui.SchemaType.StringType.toString = $estr;
 ui.SchemaType.StringType.__enum__ = ui.SchemaType;
+ui.components = {};
+ui.components.Component = function(options) {
+	this.isAttached = false;
+	this.list = [];
+	this.properties = new ui.components.Properties(this);
+	if(null == options.template) throw "" + Std.string(this) + " needs a template";
+	this.el = dom.Html.parseList(options.template)[0];
+	if(null != options.classes) this.el.classList.add(options.classes);
+	if(null != options.parent) options.parent.add(this);
+};
+ui.components.Component.__name__ = ["ui","components","Component"];
+ui.components.Component.prototype = {
+	appendTo: function(container) {
+		container.appendChild(this.el);
+		this.isAttached = true;
+	}
+	,detach: function() {
+		if(!this.isAttached) throw "Component is not attached";
+		this.el.parentElement.removeChild(this.el);
+		this.isAttached = false;
+	}
+	,destroy: function() {
+		if(null != this.parent) this.parent.remove(this);
+		if(this.isAttached) this.detach();
+		this.properties.removeAll();
+	}
+	,add: function(child) {
+		if(null != child.parent) child.parent.remove(child);
+		this.list.push(child);
+		child.parent = this;
+	}
+	,remove: function(child) {
+		if(!HxOverrides.remove(this.list,child)) throw "" + Std.string(child) + " is not a child of " + Std.string(this);
+		child.parent = null;
+	}
+	,get_children: function() {
+		return this.list;
+	}
+	,toString: function() {
+		return Type.getClassName(Type.getClass(this)).split(".").pop();
+	}
+	,__class__: ui.components.Component
+};
+ui.components.Button = function(options) {
+	if(null == options.template) options.template = ui.components.Button.template;
+	ui.components.Component.call(this,options);
+	this.properties.add(new ui.properties.ClickProperty());
+};
+ui.components.Button.__name__ = ["ui","components","Button"];
+ui.components.Button.withIcon = function(name,options) {
+	var button = new ui.components.Button(options);
+	button.properties.add(new ui.properties.IconProperty(name));
+	return button;
+};
+ui.components.Button.__super__ = ui.components.Component;
+ui.components.Button.prototype = $extend(ui.components.Component.prototype,{
+	__class__: ui.components.Button
+});
+ui.components.Properties = function(target) {
+	this.target = target;
+	this.implementations = new ui.properties.Implementations();
+	this.properties = new haxe.ds.StringMap();
+};
+ui.components.Properties.__name__ = ["ui","components","Properties"];
+ui.components.Properties.prototype = {
+	removeAll: function() {
+		var $it0 = this.properties.keys();
+		while( $it0.hasNext() ) {
+			var name = $it0.next();
+			this.removeByName(name);
+		}
+	}
+	,add: function(property) {
+		if(this.properties.exists(property.name)) throw "" + Std.string(this.target) + " already has a property " + Std.string(property);
+		this.properties.set(property.name,property);
+		this.implementations.set(property.name,property.inject(this.target));
+	}
+	,get: function(name) {
+		return this.properties.get(name);
+	}
+	,exists: function(name) {
+		return this.properties.exists(name);
+	}
+	,remove: function(property) {
+		this.removeByName(property.name);
+	}
+	,removeByName: function(name) {
+		if(!this.properties.exists(name)) throw "property \"" + name + "\" does not exist in " + Std.string(this.target);
+		this.implementations.get(name).dispose();
+		this.implementations.remove(name);
+		this.properties.remove(name);
+	}
+	,copyTo: function(other) {
+		var $it0 = this.properties.keys();
+		while( $it0.hasNext() ) {
+			var name = $it0.next();
+			other.properties.add(this.get(name));
+		}
+	}
+	,__class__: ui.components.Properties
+};
+ui.properties = {};
+ui.properties.Property = function(name) {
+	this.name = name;
+};
+ui.properties.Property.__name__ = ["ui","properties","Property"];
+ui.properties.Property.prototype = {
+	inject: function(target) {
+		throw "inject must be overridden in " + this.toString();
+	}
+	,toString: function() {
+		return "" + this.name + " (" + Type.getClassName(Type.getClass(this)).split(".").pop() + ")";
+	}
+	,__class__: ui.properties.Property
+};
+ui.properties.ClickProperty = function() {
+	ui.properties.Property.call(this,"click");
+};
+ui.properties.ClickProperty.__name__ = ["ui","properties","ClickProperty"];
+ui.properties.ClickProperty.__super__ = ui.properties.Property;
+ui.properties.ClickProperty.prototype = $extend(ui.properties.Property.prototype,{
+	inject: function(target) {
+		return new ui.properties.ClickPropertyImplementation(target,this);
+	}
+	,__class__: ui.properties.ClickProperty
+});
+ui.properties.PropertyImplementation = function(component,property) {
+	this.component = component;
+	this.property = property;
+	this._dispose = this.init();
+};
+ui.properties.PropertyImplementation.__name__ = ["ui","properties","PropertyImplementation"];
+ui.properties.PropertyImplementation.prototype = {
+	init: function() {
+		throw "abstact function init, must override";
+	}
+	,dispose: function() {
+		this._dispose();
+		this.component = null;
+	}
+	,toString: function() {
+		return Type.getClassName(Type.getClass(this)).split(".").pop();
+	}
+	,__class__: ui.properties.PropertyImplementation
+};
+ui.properties.ClickPropertyImplementation = function(component,property) {
+	ui.properties.PropertyImplementation.call(this,component,property);
+};
+ui.properties.ClickPropertyImplementation.__name__ = ["ui","properties","ClickPropertyImplementation"];
+ui.properties.ClickPropertyImplementation.asClickable = function(component) {
+	return component.properties.implementations.get("click");
+};
+ui.properties.ClickPropertyImplementation.__super__ = ui.properties.PropertyImplementation;
+ui.properties.ClickPropertyImplementation.prototype = $extend(ui.properties.PropertyImplementation.prototype,{
+	init: function() {
+		var tuple = steamer.dom.Dom.produceEvent(this.component.el,"click");
+		this.clicks = tuple.producer;
+		return tuple.cancel;
+	}
+	,__class__: ui.properties.ClickPropertyImplementation
+});
+ui.properties.IconProperty = function(name) {
+	ui.properties.Property.call(this,"icon");
+};
+ui.properties.IconProperty.__name__ = ["ui","properties","IconProperty"];
+ui.properties.IconProperty.__super__ = ui.properties.Property;
+ui.properties.IconProperty.prototype = $extend(ui.properties.Property.prototype,{
+	__class__: ui.properties.IconProperty
+});
+ui.properties.Implementations = function() {
+	this.map = new haxe.ds.StringMap();
+};
+ui.properties.Implementations.__name__ = ["ui","properties","Implementations"];
+ui.properties.Implementations.prototype = {
+	get: function(name) {
+		return this.map.get(name);
+	}
+	,remove: function(name) {
+		return this.map.remove(name);
+	}
+	,set: function(name,implementation) {
+		this.map.set(name,implementation);
+	}
+	,exists: function(name) {
+		return this.map.exists(name);
+	}
+	,__class__: ui.properties.Implementations
+};
 function $iterator(o) { if( o instanceof Array ) return function() { return HxOverrides.iter(o); }; return typeof(o.iterator) == 'function' ? $bind(o,o.iterator) : o.iterator; }
 var $_, $fid = 0;
 function $bind(o,m) { if( m == null ) return null; if( m.__id__ == null ) m.__id__ = $fid++; var f; if( o.hx__closures__ == null ) o.hx__closures__ = {}; else f = o.hx__closures__[m.__id__]; if( f == null ) { f = function(){ return f.method.apply(f.scope, arguments); }; f.scope = o; f.method = m; o.hx__closures__[m.__id__] = f; } return f; }
+if(Array.prototype.indexOf) HxOverrides.indexOf = function(a,o,i) {
+	return Array.prototype.indexOf.call(a,o,i);
+};
 String.prototype.__class__ = String;
 String.__name__ = ["String"];
 Array.__name__ = ["Array"];
@@ -2392,6 +2666,7 @@ thx.core.Strings.__digitsPattern = new EReg("^[0-9]+$","");
 thx.ref.EmptyParent.instance = new thx.ref.EmptyParent();
 thx.ref.Ref.reField = new EReg("^\\.?([^.\\[]+)","");
 thx.ref.Ref.reIndex = new EReg("^\\[(\\d+)\\]","");
+ui.components.Button.template = "<button><span class=\"content\"></span></button>";
 Main.main();
 })(typeof window != "undefined" ? window : exports);
 

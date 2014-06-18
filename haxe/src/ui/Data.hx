@@ -17,6 +17,7 @@ class Data {
 	public var stream(default, null) : Producer<{}>;
 
 	public function new(data : {}) {
+		this.feed = function(p){};
 		stream = new Producer(function(feed) {
 			this.feed = feed;
 		});

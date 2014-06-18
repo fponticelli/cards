@@ -1,12 +1,12 @@
 package ui.properties;
 
 class Implementations {
-	var map : Map<String, PropertyImplementation>;
+	var map : Map<String, PropertyImplementation<Dynamic>>;
 	public function new() {
 		map = new Map();
 	}
 
-	public function get(name : String) : PropertyImplementation {
+	public function get(name : String) : PropertyImplementation<Dynamic> {
 		return map.get(name);
 	}
 
@@ -14,7 +14,7 @@ class Implementations {
 		return map.remove(name);
 	}
 
-	public function set(name : String, implementation : PropertyImplementation) : Void {
+	public function set(name : String, implementation : PropertyImplementation<Dynamic>) : Void {
 		map.set(name, implementation);
 	}
 

@@ -13,7 +13,7 @@ class Component {
 
 	public function new(options : ComponentOptions) {
 		list = [];
-		properties = new Properties();
+		properties = new Properties(this);
 		if(null == options.template)
 			throw '$this needs a template';
 		el = Html.parse(options.template);
@@ -60,5 +60,5 @@ class Component {
 		return list;
 
 	public function toString()
-		return Type.getClass(this).split('.').pop();
+		return Type.getClassName(Type.getClass(this)).split('.').pop();
 }

@@ -1,9 +1,12 @@
 package ui.components;
 
+import ui.properties.Implementations;
+import ui.properties.Property;
+
 @:access(ui.properties.Implementations)
 class Properties {
 	public var implementations(default, null) : Implementations;
-	var properties : Map<String, Property>;
+	var properties : Map<String, Property<Dynamic>>;
 	var target : Component;
 	public function new(target : Component) {
 		this.target = target;
@@ -13,10 +16,10 @@ class Properties {
 
 	public function removeAll() {
 		for(name in properties.keys())
-			remove(name);
+			removeByName(name);
 	}
 
-	public function add(property : Property) {
+	public function add(property : Property<Dynamic>) {
 		if(properties.exists(property.name))
 			throw '$target already has a property $property';
 		properties.set(property.name, property);
@@ -27,8 +30,12 @@ class Properties {
 		return properties.get(name);
 	}
 
-	public function remove(property : Property) {
-		removeByName(property.name)
+	public function exists(name : String) {
+		return properties.exists(name);
+	}
+
+	public function remove(property : Property<Dynamic>) {
+		removeByName(property.name);
 	}
 
 	public function removeByName(name : String) {

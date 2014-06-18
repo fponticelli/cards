@@ -1,8 +1,11 @@
 import dom.Dom;
+import ui.components.Button;
 import ui.Data;
 import ui.Schema;
 import ui.Model;
 import steamer.Value;
+import ui.components.Component;
+using ui.properties.ClickProperty;
 
 class Main {
 	public static function main() {
@@ -25,6 +28,14 @@ class Main {
 			data.set('contacts[3].type', 'skype');
 			data.set('contacts[3].value', 'francoponticelli');
 			trace(data.toJSON());
+
+			var component = new Button({});
+			component.appendTo(container);
+			component.asClickable().clicks.feed({
+				onPulse : function(e) {
+					trace(e);
+				}
+			});
 		});
 	}
 }

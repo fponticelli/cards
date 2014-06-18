@@ -1,5 +1,8 @@
 package ui.components;
 
+import ui.properties.ClickProperty;
+import ui.properties.IconProperty;
+
 class Button extends Component {
 	static var template = '<button><span class="content"></span></button>';
 	public function new(options : ComponentOptions) {

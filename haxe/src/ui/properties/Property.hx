@@ -1,15 +1,17 @@
-pacakge ui.properties;
+package ui.properties;
 
-class Property {
+import ui.components.Component;
+
+class Property<T : Property<Dynamic>> {
 	public var name(default, null) : String;
 	public function new(name : String) {
 		this.name = name;
 	}
 
-	public function inject(target : Component) {
-		throw 'inject is an abstract method and must be overridden';
+	public function inject(target : Component) : PropertyImplementation<T> {
+		return throw 'inject must be overridden in ${toString()}';
 	}
 
 	public function toString()
-		return '$name (${Type.getClass(this).split(".").pop()})';
+		return '$name (${Type.getClassName(Type.getClass(this)).split('.').pop()})';
 }

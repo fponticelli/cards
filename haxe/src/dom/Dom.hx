@@ -16,8 +16,9 @@ class Html {
 		return H.toArray(parseList(html));
 	}
 
-	public inline 	static function parse(html : String) {
-		return parseList(html)[0];
+	// TODO unsafe cast
+	public inline static function parse(html : String) : Element {
+		return cast parseList(html)[0];
 	}
 }
 
@@ -28,10 +29,6 @@ class Dom {
 			deferred.resolve(nil);
 		}, false);
 		return deferred;
-	}
-
-	public static function toggleVisibility(producer : Producer<Bool>, el : Element) : DomToggleStream {
-		
 	}
 }
 
