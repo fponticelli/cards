@@ -1301,18 +1301,27 @@ steamer.dom.Dom.produceEvent = function(el,name) {
 	return { producer : producer, cancel : cancel};
 };
 steamer.dom.Dom.consumeText = function(el) {
+	var text = el.innerText;
 	return steamer.dom.Dom.createConsumer(function(v) {
 		el.innerText = v;
+	},function() {
+		el.innerText = text;
 	});
 };
 steamer.dom.Dom.consumeHtml = function(el) {
+	var html = el.innerHTML;
 	return steamer.dom.Dom.createConsumer(function(v) {
 		el.innerHTML = v;
+	},function() {
+		el.innerHTML = html;
 	});
 };
-steamer.dom.Dom.consumeAttribute = function(el,attr) {
+steamer.dom.Dom.consumeAttribute = function(el,name) {
+	var originalValue = el.getAttribute(name);
 	return steamer.dom.Dom.createConsumer(function(v) {
-		el.setAttribute(attr,v);
+		el.setAttribute(name,v);
+	},function() {
+		if(null == originalValue) el.removeAttribute(name); else el.setAttribute(name,originalValue);
 	});
 };
 steamer.dom.Dom.consumeToggleClass = function(el,name) {
@@ -1321,11 +1330,19 @@ steamer.dom.Dom.consumeToggleClass = function(el,name) {
 	});
 };
 steamer.dom.Dom.consumeToggleVisibility = function(el) {
+	var originalDisplay = el.style.display;
 	return steamer.dom.Dom.createConsumer(function(v) {
-		if(v) el.style.display = ""; else el.style.display = "none";
+		if(v) el.style.display = originalDisplay; else el.style.display = "none";
+	},function() {
+		el.style.display = originalDisplay;
 	});
 };
-steamer.dom.Dom.createConsumer = function(f) {
+steamer.dom.Dom.createConsumer = function(f,end,err) {
+	if(null == end) end = function() {
+	};
+	if(null == err) err = function(error) {
+		throw error;
+	};
 	return { onPulse : function(pulse) {
 		switch(pulse[1]) {
 		case 0:
@@ -1333,10 +1350,11 @@ steamer.dom.Dom.createConsumer = function(f) {
 			f(v);
 			break;
 		case 1:
+			end();
 			break;
 		case 2:
-			var error = pulse[2];
-			throw error;
+			var error1 = pulse[2];
+			err(error1);
 			break;
 		}
 	}};

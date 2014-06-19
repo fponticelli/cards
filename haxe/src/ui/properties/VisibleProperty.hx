@@ -1,6 +1,8 @@
 package ui.properties;
 
+using steamer.dom.Dom;
 import steamer.Value;
+import ui.components.Component;
 
 class VisibleProperty extends Property<VisibleProperty> {
 	public static var visible(default, null) : VisibleProperty = new VisibleProperty(true);
@@ -32,8 +34,10 @@ class VisiblePropertyImplementation extends PropertyImplementation<VisibleProper
 
 	override function init() : Void -> Void {
 		visible = new Value(property.defaultValue);
+		visible.feed(component.el.consumeToggleVisibility());
 		return function() {
-
+			visible.terminate();
+			visible = false;
 		};
 	}
 }
