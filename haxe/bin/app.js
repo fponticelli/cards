@@ -146,15 +146,15 @@ Main.main = function() {
 		var schema = new ui.Schema();
 		var data = new ui.Data({ name : "Franco", contacts : [{ type : "email", value : "franco.ponticelli@gmail.com"},{ type : "phone", value : "7206902488"}]});
 		var model = new ui.Model(data);
-		haxe.Log.trace("Hello World",{ fileName : "Main.hx", lineNumber : 26, className : "Main", methodName : "main"});
+		haxe.Log.trace("Hello World",{ fileName : "Main.hx", lineNumber : 27, className : "Main", methodName : "main"});
 		data.set("contacts[2]",{ type : "twitter", value : "fponticelli"});
 		data.set("contacts[3].type","skype");
 		data.set("contacts[3].value","francoponticelli");
-		haxe.Log.trace(data.toJSON(),{ fileName : "Main.hx", lineNumber : 30, className : "Main", methodName : "main"});
+		haxe.Log.trace(data.toJSON(),{ fileName : "Main.hx", lineNumber : 31, className : "Main", methodName : "main"});
 		var component = ui.components.Button.withIcon("cubes",{ });
 		component.appendTo(container);
 		ui.properties.ClickPropertyImplementation.asClickable(component).clicks.feed({ onPulse : function(e) {
-			haxe.Log.trace(e,{ fileName : "Main.hx", lineNumber : 36, className : "Main", methodName : "main"});
+			haxe.Log.trace(e,{ fileName : "Main.hx", lineNumber : 37, className : "Main", methodName : "main"});
 		}});
 	});
 };
@@ -2420,19 +2420,23 @@ ui.properties.IconPropertyImplementation.__super__ = ui.properties.PropertyImple
 ui.properties.IconPropertyImplementation.prototype = $extend(ui.properties.PropertyImplementation.prototype,{
 	init: function() {
 		var _g = this;
-		var current = ui.properties.IconPropertyImplementation.getCurrentIcon(this.component.el);
+		var el = this.component.el;
+		var current = ui.properties.IconPropertyImplementation.getCurrentIcon(el);
+		var original = current;
 		var needsFa = current == null;
 		this.icon = new steamer.Value(this.property.iconName);
-		if(needsFa) this.component.el.classList.add("fa");
+		if(needsFa) el.classList.add("fa");
 		this.icon.feed({ onPulse : function(pulse) {
 			switch(pulse[1]) {
 			case 0:
 				var value = pulse[2];
-				if(null != current) _g.component.el.classList.remove(current);
-				_g.component.el.classList.add(current = "fa-" + value);
+				if(null != current) el.classList.remove(current);
+				el.classList.add(current = "fa-" + value);
 				break;
 			case 1:
-				if(needsFa) _g.component.el.classList.remove("fa");
+				if(needsFa) el.classList.remove("fa");
+				el.classList.remove(current);
+				if(null != original) el.classList.add(original);
 				break;
 			default:
 			}

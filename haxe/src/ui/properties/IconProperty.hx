@@ -34,21 +34,26 @@ class IconPropertyImplementation extends PropertyImplementation<IconProperty> {
 	}
 
 	override function init() : Void -> Void {
-		var current = getCurrentIcon(component.el),
-			needsFa = current == null;
+		var el       = component.el,
+			current  = getCurrentIcon(el),
+			original = current,
+			needsFa  = current == null;
 		icon = new Value(property.iconName);
 		if(needsFa)
-			component.el.classList.add('fa');
+			el.classList.add('fa');
 		icon.feed({
 			onPulse : function(pulse) {
 				switch pulse {
 					case Emit(value):
 						if(null != current)
-							component.el.classList.remove(current);
-						component.el.classList.add(current = 'fa-$value');
+							el.classList.remove(current);
+						el.classList.add(current = 'fa-$value');
 					case End:
 						if(needsFa)
-							component.el.classList.remove('fa');
+							el.classList.remove('fa');
+						el.classList.remove(current);
+						if(null != original)
+							el.classList.add(original);
 					case _:
 				}
 			}

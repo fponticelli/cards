@@ -6,6 +6,7 @@ import ui.Model;
 import steamer.Value;
 import ui.components.Component;
 using ui.properties.ClickProperty;
+using ui.properties.IconProperty;
 
 class Main {
 	public static function main() {
