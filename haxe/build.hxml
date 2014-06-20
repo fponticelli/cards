@@ -6,5 +6,6 @@
 -lib thx.core
 -debug
 -D source-map-content
+#--js-flatten ????
 #-lib steamer
 #-lib promhx
