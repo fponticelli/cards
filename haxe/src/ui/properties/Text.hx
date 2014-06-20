@@ -6,24 +6,18 @@ import steamer.Value;
 import ui.components.Component;
 import steamer.SimpleConsumer;
 
-class Text extends Property<Text> {
+class Text extends Property {
+	public inline static function asText(component : Component) : TextImplementation {
+		return cast component.properties.get('text');
+	}
+
 	public var defaultText(default, null) : String;
-	public function new(defaultText : String) {
-		super('text');
-		this.defaultText = defaultText;
-	}
-
-	override public function inject(component : Component) {
-		return new TextImplementation(component, this);
-	}
-}
-
-class TextImplementation extends Implementation<Text> {
-	public static function asText(component : Component) : TextImplementation {
-		return cast component.properties.implementations.get('text');
-	}
-
 	public var text(default, null) : Value<String>;
+
+	public function new(component : Component, defaultText : String) {
+		this.defaultText = defaultText;
+		super(component);
+	}
 
 	override function init() : Void -> Void {
 		var el       = component.el,

@@ -5,22 +5,19 @@ import steamer.Producer;
 import ui.components.Component;
 using steamer.dom.Dom;
 
-class Checked extends Property<Checked> {
-	public function new() {
-		super('checked');
+class Checked extends Property {
+	public inline static function asCheckable(component : Component) : Checked {
+		return cast component.properties.get('checked');
 	}
 
-	override public function inject(target : Component) : Implementation<Checked> {
-		return new CheckedImplementation(target, this);
-	}
-}
-
-class CheckedImplementation extends Implementation<Checked> {
-	public static function asCheckable(component : Component) : CheckedImplementation {
-		return cast component.properties.implementations.get('checked');
-	}
-
+	public var defaultValue(default, null) : Bool;
 	public var checked(default, null) : Producer<Bool>;
+
+	public function new(target : Component) {
+		this.defaultValue = dafaultValue;
+		super(target, 'checked');
+	}
+
 	override function init() {
 		var tuple = component.el.produceEvent('change');
 		checked = tuple.producer.map(function(_) return component.el.checked);

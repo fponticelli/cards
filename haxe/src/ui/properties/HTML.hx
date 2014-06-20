@@ -5,29 +5,23 @@ import steamer.Pulse.End;
 import steamer.Value;
 import ui.components.Component;
 
-class HTML extends Property<HTML> {
-	public var defaultHTML(default, null) : String;
-	public function new(defaultHTML : String) {
-		super('html');
+class HTML extends Property {
+	public inline static function asHTML(component : Component) : HTML {
+		return cast component.properties.get('html');
+	}
+
+	public function new(component : Component, defaultHtml : String) {
 		this.defaultHTML = defaultHTML;
-	}
-
-	override public function inject(component : Component) {
-		return new HTMLImplementation(component, this);
-	}
-}
-
-class HTMLImplementation extends Implementation<HTML> {
-	public static function asHTML(component : Component) : HTMLImplementation {
-		return cast component.properties.implementations.get('html');
+		super(component, 'html');
 	}
 
 	public var html(default, null) : Value<String>;
+	public var defaultHTML(default, null) : String;
 
 	override function init() : Void -> Void {
 		var el       = component.el,
 			original = el.innerHTML;
-		html = new Value(property.defaultText);
+		html = new Value(defaultHTML);
 		html.feed(new SimpleConsumer(
 			function(value) el.innerHTML = value,
 			function() el.innerHTML = original

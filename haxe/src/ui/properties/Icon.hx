@@ -5,24 +5,10 @@ import steamer.Pulse.End;
 import steamer.Value;
 import ui.components.Component;
 
-class Icon extends Property<Icon> {
-	public var iconName(default, null) : String;
-	public function new(iconName : String) {
-		super('icon');
-		this.iconName = iconName;
+class Icon extends Property {
+	public inline static function asIcon(component : Component) : Icon {
+		return cast component.properties.get('icon');
 	}
-
-	override public function inject(component : Component) {
-		return new IconImplementation(component, this);
-	}
-}
-
-class IconImplementation extends Implementation<Icon> {
-	public static function asIcon(component : Component) : IconImplementation {
-		return cast component.properties.implementations.get('icon');
-	}
-
-	public var icon(default, null) : Value<String>;
 
 	static function getCurrentIcon(el : Element) {
 		for(i in 0...el.classList.length) {
@@ -33,12 +19,20 @@ class IconImplementation extends Implementation<Icon> {
 		return null;
 	}
 
+	public function new(component : Component, defaultIcon : String) {
+		this.defaultIcon = defaultIcon;
+		super(component, 'icon');
+	}
+
+	public var defaultIcon(default, null) : String;
+	public var icon(default, null) : Value<String>;
+
 	override function init() : Void -> Void {
 		var el       = component.el,
 			current  = getCurrentIcon(el),
 			original = current,
 			needsFa  = current == null;
-		icon = new Value(property.iconName);
+		icon = new Value(defaultIcon);
 		if(needsFa)
 			el.classList.add('fa');
 		icon.feed({

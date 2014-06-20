@@ -18,7 +18,7 @@ class Model {
 				onPulse : function(p : Pulse<{}>) {
 					switch(p) {
 						case Emit(o):
-							
+
 						case Fail(e):
 							feed(Fail(e));
 						case End:

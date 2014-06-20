@@ -5,20 +5,13 @@ import steamer.Producer;
 import ui.components.Component;
 using steamer.dom.Dom;
 
-class Click extends Property<Click> {
-	public function new() {
-		super('click');
+class Click extends Property {
+	public inline static function asClickable(component : Component) : Click {
+		return cast component.properties.get('click');
 	}
 
-	override public function inject(target : Component) : Implementation<Click> {
-		return new ClickImplementation(target, this);
-	}
-}
-
-class ClickImplementation extends Implementation<Click> {
-	public static function asClickable(component : Component) : ClickImplementation {
-		return cast component.properties.implementations.get('click');
-	}
+	public function new(component : Component)
+		super(component, 'click');
 
 	public var clicks(default, null) : Producer<Event>;
 	override function init() {

@@ -4,33 +4,23 @@ using steamer.dom.Dom;
 import steamer.Value;
 import ui.components.Component;
 
-class Visible extends Property<Visible> {
-	public static var visible(default, null) : Visible = new Visible(true);
-	public static var invisible(default, null) : Visible = new Visible(false);
+class Visible extends Property {
+	public static function createVisible(component : Component)
+		return new Visible(component, true);
+	public static function createInvisible(component : Component)
+		return new Visible(component, false);
+
+	public inline static function asVisible(component : Component) : VisibleImplementation {
+		return component.properties.get('visible');
+	}
 
 	public var defaultValue(default, null) : Bool;
-	public function new(defaultValue : Bool) {
-		super('visible');
-		this.defaultValue = defaultValue;
-	}
-
-	override public function inject(component : Component) {
-		return new VisibleImplementation(component, this);
-	}
-}
-
-class VisibleImplementation extends Implementation<Visible> {
-	public static function asVisible(component : Component) : VisibleImplementation {
-		return component.properties.implementations.get('visible');
-	}
-
-	public static function makeVisible(component : Component, defaultValue = true) : VisibleImplementation {
-		if(!component.properties.exists('visible'))
-			component.properties.add(defaultValue ? Visible.visible : Visible.invisible);
-		return asVisible(component);
-	}
-
 	public var visible(default, null) : Value<Bool>;
+
+	public function new(component : Component, defaultValue : Bool) {
+		this.defaultValue = defaultValue;
+		super(component);
+	}
 
 	override function init() : Void -> Void {
 		visible = new Value(property.defaultValue);

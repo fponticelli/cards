@@ -146,15 +146,15 @@ Main.main = function() {
 		var schema = new ui.Schema();
 		var data = new ui.Data({ name : "Franco", contacts : [{ type : "email", value : "franco.ponticelli@gmail.com"},{ type : "phone", value : "7206902488"}]});
 		var model = new ui.Model(data);
-		haxe.Log.trace("Hello World",{ fileName : "Main.hx", lineNumber : 28, className : "Main", methodName : "main"});
+		haxe.Log.trace("Hello World",{ fileName : "Main.hx", lineNumber : 26, className : "Main", methodName : "main"});
 		data.set("contacts[2]",{ type : "twitter", value : "fponticelli"});
 		data.set("contacts[3].type","skype");
 		data.set("contacts[3].value","francoponticelli");
-		haxe.Log.trace(data.toJSON(),{ fileName : "Main.hx", lineNumber : 32, className : "Main", methodName : "main"});
+		haxe.Log.trace(data.toJSON(),{ fileName : "Main.hx", lineNumber : 30, className : "Main", methodName : "main"});
 		var component = ui.components.Button.withIcon("cubes",{ });
 		component.appendTo(container);
-		ui.properties.ClickImplementation.asClickable(component).clicks.feed({ onPulse : function(e) {
-			haxe.Log.trace(e,{ fileName : "Main.hx", lineNumber : 38, className : "Main", methodName : "main"});
+		component.properties.get("click").clicks.feed({ onPulse : function(e) {
+			haxe.Log.trace(e,{ fileName : "Main.hx", lineNumber : 36, className : "Main", methodName : "main"});
 		}});
 	});
 };
@@ -2318,12 +2318,12 @@ ui.components.Component.prototype = {
 ui.components.Button = function(options) {
 	if(null == options.template) options.template = ui.components.Button.template;
 	ui.components.Component.call(this,options);
-	this.properties.add(new ui.properties.Click());
+	new ui.properties.Click(this);
 };
 ui.components.Button.__name__ = ["ui","components","Button"];
-ui.components.Button.withIcon = function(name,options) {
+ui.components.Button.withIcon = function(iconName,options) {
 	var button = new ui.components.Button(options);
-	button.properties.add(new ui.properties.Icon(name));
+	new ui.properties.Icon(button,iconName);
 	return button;
 };
 ui.components.Button.__super__ = ui.components.Component;
@@ -2332,7 +2332,6 @@ ui.components.Button.prototype = $extend(ui.components.Component.prototype,{
 });
 ui.components.Properties = function(target) {
 	this.target = target;
-	this.implementations = new ui.properties.Implementations();
 	this.properties = new haxe.ds.StringMap();
 };
 ui.components.Properties.__name__ = ["ui","components","Properties"];
@@ -2341,13 +2340,12 @@ ui.components.Properties.prototype = {
 		var $it0 = this.properties.keys();
 		while( $it0.hasNext() ) {
 			var name = $it0.next();
-			this.removeByName(name);
+			this.remove(name);
 		}
 	}
 	,add: function(property) {
 		if(this.properties.exists(property.name)) throw "" + Std.string(this.target) + " already has a property " + Std.string(property);
 		this.properties.set(property.name,property);
-		this.implementations.set(property.name,property.inject(this.target));
 	}
 	,get: function(name) {
 		return this.properties.get(name);
@@ -2355,104 +2353,60 @@ ui.components.Properties.prototype = {
 	,exists: function(name) {
 		return this.properties.exists(name);
 	}
-	,remove: function(property) {
-		this.removeByName(property.name);
-	}
-	,removeByName: function(name) {
+	,remove: function(name) {
 		if(!this.properties.exists(name)) throw "property \"" + name + "\" does not exist in " + Std.string(this.target);
-		this.implementations.get(name).dispose();
-		this.implementations.remove(name);
+		this.properties.get(name).dispose();
 		this.properties.remove(name);
-	}
-	,copyTo: function(other) {
-		var $it0 = this.properties.keys();
-		while( $it0.hasNext() ) {
-			var name = $it0.next();
-			other.properties.add(this.get(name));
-		}
 	}
 	,__class__: ui.components.Properties
 };
 ui.properties = {};
-ui.properties.Property = function(name) {
+ui.properties.Property = function(component,name) {
+	this.component = component;
 	this.name = name;
+	this._dispose = this.init();
+	component.properties.add(this);
 };
 ui.properties.Property.__name__ = ["ui","properties","Property"];
 ui.properties.Property.prototype = {
-	inject: function(target) {
-		throw "inject must be overridden in " + this.toString();
-	}
-	,toString: function() {
-		return "" + this.name + " (" + Type.getClassName(Type.getClass(this)).split(".").pop() + ")";
-	}
-	,__class__: ui.properties.Property
-};
-ui.properties.Click = function() {
-	ui.properties.Property.call(this,"click");
-};
-ui.properties.Click.__name__ = ["ui","properties","Click"];
-ui.properties.Click.__super__ = ui.properties.Property;
-ui.properties.Click.prototype = $extend(ui.properties.Property.prototype,{
-	inject: function(target) {
-		return new ui.properties.ClickImplementation(target,this);
-	}
-	,__class__: ui.properties.Click
-});
-ui.properties.Implementation = function(component,property) {
-	this.component = component;
-	this.property = property;
-	this._dispose = this.init();
-};
-ui.properties.Implementation.__name__ = ["ui","properties","Implementation"];
-ui.properties.Implementation.prototype = {
 	init: function() {
 		throw "abstact function init, must override";
 	}
 	,dispose: function() {
 		this._dispose();
+		this.component.properties.remove(this.name);
 		this.component = null;
 	}
 	,toString: function() {
 		return Type.getClassName(Type.getClass(this)).split(".").pop();
 	}
-	,__class__: ui.properties.Implementation
+	,__class__: ui.properties.Property
 };
-ui.properties.ClickImplementation = function(component,property) {
-	ui.properties.Implementation.call(this,component,property);
+ui.properties.Click = function(component) {
+	ui.properties.Property.call(this,component,"click");
 };
-ui.properties.ClickImplementation.__name__ = ["ui","properties","ClickImplementation"];
-ui.properties.ClickImplementation.asClickable = function(component) {
-	return component.properties.implementations.get("click");
+ui.properties.Click.__name__ = ["ui","properties","Click"];
+ui.properties.Click.asClickable = function(component) {
+	return component.properties.get("click");
 };
-ui.properties.ClickImplementation.__super__ = ui.properties.Implementation;
-ui.properties.ClickImplementation.prototype = $extend(ui.properties.Implementation.prototype,{
+ui.properties.Click.__super__ = ui.properties.Property;
+ui.properties.Click.prototype = $extend(ui.properties.Property.prototype,{
 	init: function() {
 		var tuple = steamer.dom.Dom.produceEvent(this.component.el,"click");
 		this.clicks = tuple.producer;
 		return tuple.cancel;
 	}
-	,__class__: ui.properties.ClickImplementation
+	,__class__: ui.properties.Click
 });
-ui.properties.Icon = function(iconName) {
-	ui.properties.Property.call(this,"icon");
-	this.iconName = iconName;
+ui.properties.Icon = function(component,defaultIcon) {
+	this.defaultIcon = defaultIcon;
+	ui.properties.Property.call(this,component,"icon");
 };
 ui.properties.Icon.__name__ = ["ui","properties","Icon"];
-ui.properties.Icon.__super__ = ui.properties.Property;
-ui.properties.Icon.prototype = $extend(ui.properties.Property.prototype,{
-	inject: function(component) {
-		return new ui.properties.IconImplementation(component,this);
-	}
-	,__class__: ui.properties.Icon
-});
-ui.properties.IconImplementation = function(component,property) {
-	ui.properties.Implementation.call(this,component,property);
+ui.properties.Icon.asIcon = function(component) {
+	return component.properties.get("icon");
 };
-ui.properties.IconImplementation.__name__ = ["ui","properties","IconImplementation"];
-ui.properties.IconImplementation.asIcon = function(component) {
-	return component.properties.implementations.get("icon");
-};
-ui.properties.IconImplementation.getCurrentIcon = function(el) {
+ui.properties.Icon.getCurrentIcon = function(el) {
 	var _g1 = 0;
 	var _g = el.classList.length;
 	while(_g1 < _g) {
@@ -2462,15 +2416,15 @@ ui.properties.IconImplementation.getCurrentIcon = function(el) {
 	}
 	return null;
 };
-ui.properties.IconImplementation.__super__ = ui.properties.Implementation;
-ui.properties.IconImplementation.prototype = $extend(ui.properties.Implementation.prototype,{
+ui.properties.Icon.__super__ = ui.properties.Property;
+ui.properties.Icon.prototype = $extend(ui.properties.Property.prototype,{
 	init: function() {
 		var _g = this;
 		var el = this.component.el;
-		var current = ui.properties.IconImplementation.getCurrentIcon(el);
+		var current = ui.properties.Icon.getCurrentIcon(el);
 		var original = current;
 		var needsFa = current == null;
-		this.icon = new steamer.Value(this.property.iconName);
+		this.icon = new steamer.Value(this.defaultIcon);
 		if(needsFa) el.classList.add("fa");
 		this.icon.feed({ onPulse : function(pulse) {
 			switch(pulse[1]) {
@@ -2492,65 +2446,48 @@ ui.properties.IconImplementation.prototype = $extend(ui.properties.Implementatio
 			_g.icon = null;
 		};
 	}
-	,__class__: ui.properties.IconImplementation
+	,__class__: ui.properties.Icon
 });
-ui.properties.Implementations = function() {
-	this.map = new haxe.ds.StringMap();
+ui.properties._PropertyName = {};
+ui.properties._PropertyName.PropertyName_Impl_ = function() { };
+ui.properties._PropertyName.PropertyName_Impl_.__name__ = ["ui","properties","_PropertyName","PropertyName_Impl_"];
+ui.properties._PropertyName.PropertyName_Impl_.fromProperty = function(property) {
+	return property.name;
 };
-ui.properties.Implementations.__name__ = ["ui","properties","Implementations"];
-ui.properties.Implementations.prototype = {
-	get: function(name) {
-		return this.map.get(name);
-	}
-	,remove: function(name) {
-		return this.map.remove(name);
-	}
-	,set: function(name,implementation) {
-		this.map.set(name,implementation);
-	}
-	,exists: function(name) {
-		return this.map.exists(name);
-	}
-	,__class__: ui.properties.Implementations
+ui.properties._PropertyName.PropertyName_Impl_.fromString = function(name) {
+	return name;
 };
-ui.properties.Value = function(defaultValue,eventName) {
-	if(eventName == null) eventName = "input";
-	ui.properties.Property.call(this,"value");
-	this.defaultValue = defaultValue;
+ui.properties._PropertyName.PropertyName_Impl_._new = function(name) {
+	return name;
+};
+ui.properties._PropertyName.PropertyName_Impl_.toString = function(this1) {
+	return this1;
+};
+ui.properties.Value = function(component,eventName) {
 	this.eventName = eventName;
+	ui.properties.Property.call(this,component,"value");
 };
 ui.properties.Value.__name__ = ["ui","properties","Value"];
+ui.properties.Value.asValue = function(component) {
+	return component.properties.get("value");
+};
 ui.properties.Value.__super__ = ui.properties.Property;
 ui.properties.Value.prototype = $extend(ui.properties.Property.prototype,{
-	inject: function(component) {
-		return new ui.properties.ValueImplementation(component,this);
-	}
-	,__class__: ui.properties.Value
-});
-ui.properties.ValueImplementation = function(component,property) {
-	ui.properties.Implementation.call(this,component,property);
-};
-ui.properties.ValueImplementation.__name__ = ["ui","properties","ValueImplementation"];
-ui.properties.ValueImplementation.asValue = function(component) {
-	return component.properties.implementations.get("value");
-};
-ui.properties.ValueImplementation.__super__ = ui.properties.Implementation;
-ui.properties.ValueImplementation.prototype = $extend(ui.properties.Implementation.prototype,{
 	init: function() {
 		var _g = this;
 		var el = this.component.el;
-		var original = el.value;
-		this.value = new steamer.Value(this.property.defaultValue);
-		var pair = steamer.dom.Dom.produceEvent(el,this.property.eventName);
+		var defaultValue = el.value;
+		this.value = new steamer.Value(defaultValue);
+		var pair = steamer.dom.Dom.produceEvent(el,this.eventName);
 		pair.producer.feed(new steamer.SimpleConsumer(function(_) {
 			if(el.value != _g.value.get_value()) _g.value.set_value(el.value);
 		},function() {
-			el.value = original;
+			el.value = defaultValue;
 		}));
 		this.value.feed(new steamer.SimpleConsumer(function(value) {
 			el.value = value;
 		},function() {
-			el.value = original;
+			el.value = defaultValue;
 		}));
 		return function() {
 			pair.cancel();
@@ -2558,7 +2495,7 @@ ui.properties.ValueImplementation.prototype = $extend(ui.properties.Implementati
 			_g.value = null;
 		};
 	}
-	,__class__: ui.properties.ValueImplementation
+	,__class__: ui.properties.Value
 });
 function $iterator(o) { if( o instanceof Array ) return function() { return HxOverrides.iter(o); }; return typeof(o.iterator) == 'function' ? $bind(o,o.iterator) : o.iterator; }
 var $_, $fid = 0;
