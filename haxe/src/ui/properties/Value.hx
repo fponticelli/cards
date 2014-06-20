@@ -7,10 +7,13 @@ import steamer.Value in V;
 import ui.components.Component;
 import steamer.SimpleConsumer;
 using steamer.dom.Dom;
+import thx.Assert;
 
 class Value extends Property {
 	public inline static function asValue(component : Component) : Value {
-		return cast component.properties.get('value');
+		var property = component.properties.get('value');
+		Assert.is(property, Value);
+		return cast property;
 	}
 
 	public var defaultValue(default, null) : String;

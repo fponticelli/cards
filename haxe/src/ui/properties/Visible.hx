@@ -3,6 +3,7 @@ package ui.properties;
 using steamer.dom.Dom;
 import steamer.Value;
 import ui.components.Component;
+import thx.Assert;
 
 class Visible extends Property {
 	public static function createVisible(component : Component)
@@ -10,8 +11,10 @@ class Visible extends Property {
 	public static function createInvisible(component : Component)
 		return new Visible(component, false);
 
-	public inline static function asVisible(component : Component) : VisibleImplementation {
-		return component.properties.get('visible');
+	public inline static function asVisible(component : Component) : Visible {
+		var property = component.properties.get('visible');
+		Assert.is(property, Visible);
+		return cast property;
 	}
 
 	public var defaultValue(default, null) : Bool;

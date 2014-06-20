@@ -3,14 +3,18 @@ package ui.properties;
 using steamer.dom.Dom;
 import steamer.Value;
 import ui.components.Component;
+import thx.Assert;
 
 class ToggleClass extends Property {
-	public inline static function asToggleEmphasis(component : Component, name : String) : ToggleClassImplementation
-		return asToggleClass('emphasis');
-	public inline static function asToggleStrong(component : Component, name : String) : ToggleClassImplementation
-		return asToggleClass('strong');
-	public inline static function asToggleClass(component : Component, name : String) : ToggleClassImplementation
-		return cast component.properties.get(name);
+	public inline static function asToggleEmphasis(component : Component, name : String) : ToggleClass
+		return asToggleClass(component, 'emphasis');
+	public inline static function asToggleStrong(component : Component, name : String) : ToggleClass
+		return asToggleClass(component, 'strong');
+	public static function asToggleClass(component : Component, name : String) : ToggleClass {
+		var property = component.properties.get(name);
+		Assert.is(property, ToggleClass);
+		return cast property;
+	}
 
 	public static function createStrong(component : Component)
 		return new ToggleClass(component, 'strong');

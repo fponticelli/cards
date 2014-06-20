@@ -5,10 +5,13 @@ import steamer.Pulse.End;
 import steamer.Value;
 import ui.components.Component;
 import steamer.SimpleConsumer;
+import thx.Assert;
 
 class Text extends Property {
-	public inline static function asText(component : Component) : TextImplementation {
-		return cast component.properties.get('text');
+	public static function asText(component : Component) : TextImplementation {
+		var property = component.properties.get('text');
+		Assert.is(property, Text);
+		return cast property;
 	}
 
 	public var defaultText(default, null) : String;

@@ -4,10 +4,13 @@ import js.html.Element;
 import steamer.Pulse.End;
 import steamer.Value;
 import ui.components.Component;
+import thx.Assert;
 
 class HTML extends Property {
-	public inline static function asHTML(component : Component) : HTML {
-		return cast component.properties.get('html');
+	public static function asHTML(component : Component) : HTML {
+		var property = component.properties.get('html');
+		Assert.is(property, HTML);
+		return cast property;
 	}
 
 	public function new(component : Component, defaultHtml : String) {

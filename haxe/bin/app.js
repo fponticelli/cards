@@ -13,7 +13,8 @@ var EReg = function(r,opt) {
 };
 EReg.__name__ = ["EReg"];
 EReg.prototype = {
-	match: function(s) {
+	r: null
+	,match: function(s) {
 		if(this.r.global) this.r.lastIndex = 0;
 		this.r.m = this.r.exec(s);
 		this.r.s = s;
@@ -117,12 +118,34 @@ HxOverrides.iter = function(a) {
 		return this.arr[this.cur++];
 	}};
 };
+var Lambda = function() { };
+Lambda.__name__ = ["Lambda"];
+Lambda.array = function(it) {
+	var a = new Array();
+	var $it0 = $iterator(it)();
+	while( $it0.hasNext() ) {
+		var i = $it0.next();
+		a.push(i);
+	}
+	return a;
+};
+Lambda.has = function(it,elt) {
+	var $it0 = $iterator(it)();
+	while( $it0.hasNext() ) {
+		var x = $it0.next();
+		if(x == elt) return true;
+	}
+	return false;
+};
 var List = function() {
 	this.length = 0;
 };
 List.__name__ = ["List"];
 List.prototype = {
-	add: function(item) {
+	h: null
+	,q: null
+	,length: null
+	,add: function(item) {
 		var x = [item];
 		if(this.h == null) this.h = x; else this.q[1] = x;
 		this.q = x;
@@ -153,13 +176,14 @@ Main.main = function() {
 		haxe.Log.trace(data.toJSON(),{ fileName : "Main.hx", lineNumber : 30, className : "Main", methodName : "main"});
 		var component = ui.components.Button.withIcon("cubes",{ });
 		component.appendTo(container);
-		component.properties.get("click").clicks.feed({ onPulse : function(e) {
+		ui.properties.Click.asClickable(component).clicks.feed({ onPulse : function(e) {
 			haxe.Log.trace(e,{ fileName : "Main.hx", lineNumber : 36, className : "Main", methodName : "main"});
 		}});
 	});
 };
 var IMap = function() { };
 IMap.__name__ = ["IMap"];
+Math.__name__ = ["Math"];
 var Reflect = function() { };
 Reflect.__name__ = ["Reflect"];
 Reflect.field = function(o,field) {
@@ -182,6 +206,14 @@ Reflect.fields = function(o) {
 	}
 	return a;
 };
+Reflect.isFunction = function(f) {
+	return typeof(f) == "function" && !(f.__name__ || f.__ename__);
+};
+Reflect.compareMethods = function(f1,f2) {
+	if(f1 == f2) return true;
+	if(!Reflect.isFunction(f1) || !Reflect.isFunction(f2)) return false;
+	return f1.scope == f2.scope && f1.method == f2.method && f1.method != null;
+};
 Reflect.isObject = function(v) {
 	if(v == null) return false;
 	var t = typeof(v);
@@ -203,7 +235,8 @@ var StringBuf = function() {
 };
 StringBuf.__name__ = ["StringBuf"];
 StringBuf.prototype = {
-	add: function(x) {
+	b: null
+	,add: function(x) {
 		this.b += Std.string(x);
 	}
 	,__class__: StringBuf
@@ -262,6 +295,10 @@ Type.getClass = function(o) {
 	if(o == null) return null;
 	if((o instanceof Array) && o.__enum__ == null) return Array; else return o.__class__;
 };
+Type.getEnum = function(o) {
+	if(o == null) return null;
+	return o.__enum__;
+};
 Type.getSuperClass = function(c) {
 	return c.__super__;
 };
@@ -272,6 +309,49 @@ Type.getClassName = function(c) {
 Type.getEnumName = function(e) {
 	var a = e.__ename__;
 	return a.join(".");
+};
+Type.getInstanceFields = function(c) {
+	var a = [];
+	for(var i in c.prototype) a.push(i);
+	HxOverrides.remove(a,"__class__");
+	HxOverrides.remove(a,"__properties__");
+	return a;
+};
+Type["typeof"] = function(v) {
+	var _g = typeof(v);
+	switch(_g) {
+	case "boolean":
+		return ValueType.TBool;
+	case "string":
+		return ValueType.TClass(String);
+	case "number":
+		if(Math.ceil(v) == v % 2147483648.0) return ValueType.TInt;
+		return ValueType.TFloat;
+	case "object":
+		if(v == null) return ValueType.TNull;
+		var e = v.__enum__;
+		if(e != null) return ValueType.TEnum(e);
+		var c;
+		if((v instanceof Array) && v.__enum__ == null) c = Array; else c = v.__class__;
+		if(c != null) return ValueType.TClass(c);
+		return ValueType.TObject;
+	case "function":
+		if(v.__name__ || v.__ename__) return ValueType.TObject;
+		return ValueType.TFunction;
+	case "undefined":
+		return ValueType.TNull;
+	default:
+		return ValueType.TUnknown;
+	}
+};
+Type.enumConstructor = function(e) {
+	return e[0];
+};
+Type.enumParameters = function(e) {
+	return e.slice(2);
+};
+Type.enumIndex = function(e) {
+	return e[1];
 };
 var dom = {};
 dom.Html = function() { };
@@ -314,6 +394,107 @@ dom._Dom.H.toArray = function(list) {
 	return Array.prototype.slice.call(list,0);
 };
 var haxe = {};
+haxe.StackItem = { __ename__ : ["haxe","StackItem"], __constructs__ : ["CFunction","Module","FilePos","Method","LocalFunction"] };
+haxe.StackItem.CFunction = ["CFunction",0];
+haxe.StackItem.CFunction.toString = $estr;
+haxe.StackItem.CFunction.__enum__ = haxe.StackItem;
+haxe.StackItem.Module = function(m) { var $x = ["Module",1,m]; $x.__enum__ = haxe.StackItem; $x.toString = $estr; return $x; };
+haxe.StackItem.FilePos = function(s,file,line) { var $x = ["FilePos",2,s,file,line]; $x.__enum__ = haxe.StackItem; $x.toString = $estr; return $x; };
+haxe.StackItem.Method = function(classname,method) { var $x = ["Method",3,classname,method]; $x.__enum__ = haxe.StackItem; $x.toString = $estr; return $x; };
+haxe.StackItem.LocalFunction = function(v) { var $x = ["LocalFunction",4,v]; $x.__enum__ = haxe.StackItem; $x.toString = $estr; return $x; };
+haxe.CallStack = function() { };
+haxe.CallStack.__name__ = ["haxe","CallStack"];
+haxe.CallStack.callStack = function() {
+	var oldValue = Error.prepareStackTrace;
+	Error.prepareStackTrace = function(error,callsites) {
+		var stack = [];
+		var _g = 0;
+		while(_g < callsites.length) {
+			var site = callsites[_g];
+			++_g;
+			var method = null;
+			var fullName = site.getFunctionName();
+			if(fullName != null) {
+				var idx = fullName.lastIndexOf(".");
+				if(idx >= 0) {
+					var className = HxOverrides.substr(fullName,0,idx);
+					var methodName = HxOverrides.substr(fullName,idx + 1,null);
+					method = haxe.StackItem.Method(className,methodName);
+				}
+			}
+			stack.push(haxe.StackItem.FilePos(method,site.getFileName(),site.getLineNumber()));
+		}
+		return stack;
+	};
+	var a = haxe.CallStack.makeStack(new Error().stack);
+	a.shift();
+	Error.prepareStackTrace = oldValue;
+	return a;
+};
+haxe.CallStack.exceptionStack = function() {
+	return [];
+};
+haxe.CallStack.toString = function(stack) {
+	var b = new StringBuf();
+	var _g = 0;
+	while(_g < stack.length) {
+		var s = stack[_g];
+		++_g;
+		b.b += "\nCalled from ";
+		haxe.CallStack.itemToString(b,s);
+	}
+	return b.b;
+};
+haxe.CallStack.itemToString = function(b,s) {
+	switch(s[1]) {
+	case 0:
+		b.b += "a C function";
+		break;
+	case 1:
+		var m = s[2];
+		b.b += "module ";
+		if(m == null) b.b += "null"; else b.b += "" + m;
+		break;
+	case 2:
+		var line = s[4];
+		var file = s[3];
+		var s1 = s[2];
+		if(s1 != null) {
+			haxe.CallStack.itemToString(b,s1);
+			b.b += " (";
+		}
+		if(file == null) b.b += "null"; else b.b += "" + file;
+		b.b += " line ";
+		if(line == null) b.b += "null"; else b.b += "" + line;
+		if(s1 != null) b.b += ")";
+		break;
+	case 3:
+		var meth = s[3];
+		var cname = s[2];
+		if(cname == null) b.b += "null"; else b.b += "" + cname;
+		b.b += ".";
+		if(meth == null) b.b += "null"; else b.b += "" + meth;
+		break;
+	case 4:
+		var n = s[2];
+		b.b += "local function #";
+		if(n == null) b.b += "null"; else b.b += "" + n;
+		break;
+	}
+};
+haxe.CallStack.makeStack = function(s) {
+	if(typeof(s) == "string") {
+		var stack = s.split("\n");
+		var m = [];
+		var _g = 0;
+		while(_g < stack.length) {
+			var line = stack[_g];
+			++_g;
+			m.push(haxe.StackItem.Module(line));
+		}
+		return m;
+	} else return s;
+};
 haxe.Log = function() { };
 haxe.Log.__name__ = ["haxe","Log"];
 haxe.Log.trace = function(v,infos) {
@@ -326,7 +507,8 @@ haxe.ds.IntMap = function() {
 haxe.ds.IntMap.__name__ = ["haxe","ds","IntMap"];
 haxe.ds.IntMap.__interfaces__ = [IMap];
 haxe.ds.IntMap.prototype = {
-	set: function(key,value) {
+	h: null
+	,set: function(key,value) {
 		this.h[key] = value;
 	}
 	,get: function(key) {
@@ -361,7 +543,8 @@ haxe.ds.ObjectMap = function() {
 haxe.ds.ObjectMap.__name__ = ["haxe","ds","ObjectMap"];
 haxe.ds.ObjectMap.__interfaces__ = [IMap];
 haxe.ds.ObjectMap.prototype = {
-	set: function(key,value) {
+	h: null
+	,set: function(key,value) {
 		var id = key.__id__ || (key.__id__ = ++haxe.ds.ObjectMap.count);
 		this.h[id] = value;
 		this.h.__keys__[id] = key;
@@ -381,7 +564,8 @@ haxe.ds.StringMap = function() {
 haxe.ds.StringMap.__name__ = ["haxe","ds","StringMap"];
 haxe.ds.StringMap.__interfaces__ = [IMap];
 haxe.ds.StringMap.prototype = {
-	set: function(key,value) {
+	h: null
+	,set: function(key,value) {
 		this.h["$" + key] = value;
 	}
 	,get: function(key) {
@@ -412,6 +596,22 @@ haxe.ds.StringMap.prototype = {
 		}};
 	}
 	,__class__: haxe.ds.StringMap
+};
+haxe.io = {};
+haxe.io.Bytes = function() { };
+haxe.io.Bytes.__name__ = ["haxe","io","Bytes"];
+haxe.io.Bytes.prototype = {
+	length: null
+	,b: null
+	,__class__: haxe.io.Bytes
+};
+haxe.io.Eof = function() { };
+haxe.io.Eof.__name__ = ["haxe","io","Eof"];
+haxe.io.Eof.prototype = {
+	toString: function() {
+		return "Eof";
+	}
+	,__class__: haxe.io.Eof
 };
 var js = {};
 js.Boot = function() { };
@@ -654,7 +854,15 @@ promhx.base.AsyncBase.allFulfilled = function($as) {
 	return true;
 };
 promhx.base.AsyncBase.prototype = {
-	catchError: function(f) {
+	id: null
+	,_val: null
+	,_resolved: null
+	,_fulfilled: null
+	,_pending: null
+	,_update: null
+	,_error: null
+	,_errorMap: null
+	,catchError: function(f) {
 		this._error.push(f);
 		return this;
 	}
@@ -776,7 +984,8 @@ promhx.Promise.promise = function(_val,errorf) {
 };
 promhx.Promise.__super__ = promhx.base.AsyncBase;
 promhx.Promise.prototype = $extend(promhx.base.AsyncBase.prototype,{
-	isRejected: function() {
+	_rejected: null
+	,isRejected: function() {
 		return this._rejected;
 	}
 	,reject: function(e) {
@@ -908,11 +1117,13 @@ steamer.Producer.delayed = function(producer,delay) {
 	},producer.endOnError);
 };
 steamer.Producer.prototype = {
-	feed: function(consumer) {
+	handler: null
+	,endOnError: null
+	,feed: function(consumer) {
 		var _g = this;
 		var ended = false;
 		var sendPulse = function(v) {
-			if(ended) throw new Error("Feed already reached end but still receiving pulses: ${v}"); else switch(v[1]) {
+			if(ended) throw new thx.Error("Feed already reached end but still receiving pulses: ${v}",null,{ fileName : "Producer.hx", lineNumber : 22, className : "steamer.Producer", methodName : "feed"}); else switch(v[1]) {
 			case 2:
 				if(_g.endOnError) {
 					thx.Timer.setImmediate((function(f,a1) {
@@ -964,12 +1175,12 @@ steamer.Producer.prototype = {
 					};
 					transform(value,t);
 				} catch( $e0 ) {
-					if( js.Boot.__instanceof($e0,Error) ) {
+					if( js.Boot.__instanceof($e0,thx.Error) ) {
 						var e = $e0;
 						forward(steamer.Pulse.Fail(e));
 					} else {
 					var e1 = $e0;
-					forward(steamer.Pulse.Fail(new Error(Std.string(e1))));
+					forward(steamer.Pulse.Fail(new thx.Error(Std.string(e1),null,{ fileName : "Producer.hx", lineNumber : 50, className : "steamer.Producer", methodName : "mapAsync"})));
 					}
 				}
 			},forward));
@@ -997,12 +1208,12 @@ steamer.Producer.prototype = {
 					};
 					f(value,t);
 				} catch( $e0 ) {
-					if( js.Boot.__instanceof($e0,Error) ) {
+					if( js.Boot.__instanceof($e0,thx.Error) ) {
 						var e = $e0;
 						forward(steamer.Pulse.Fail(e));
 					} else {
 					var e1 = $e0;
-					forward(steamer.Pulse.Fail(new Error(Std.string(e1))));
+					forward(steamer.Pulse.Fail(new thx.Error(Std.string(e1),null,{ fileName : "Producer.hx", lineNumber : 80, className : "steamer.Producer", methodName : "filterAsync"})));
 					}
 				}
 			},forward));
@@ -1161,7 +1372,10 @@ steamer.Bus.passOn = function(emit,forward) {
 	});
 };
 steamer.Bus.prototype = {
-	onPulse: function(pulse) {
+	emit: null
+	,end: null
+	,fail: null
+	,onPulse: function(pulse) {
 		switch(pulse[1]) {
 		case 0:
 			var value = pulse[2];
@@ -1217,7 +1431,10 @@ steamer.SimpleConsumer = function(onEmit,onEnd,onFail) {
 };
 steamer.SimpleConsumer.__name__ = ["steamer","SimpleConsumer"];
 steamer.SimpleConsumer.prototype = {
-	onPulse: function(pulse) {
+	onEmit: null
+	,onEnd: null
+	,onFail: null
+	,onPulse: function(pulse) {
 		switch(pulse[1]) {
 		case 0:
 			var value = pulse[2];
@@ -1258,7 +1475,10 @@ steamer.Value.bool = function(value,defaultValue) {
 };
 steamer.Value.__super__ = steamer.Producer;
 steamer.Value.prototype = $extend(steamer.Producer.prototype,{
-	forward: function(pulse) {
+	value: null
+	,defaultValue: null
+	,forwards: null
+	,forward: function(pulse) {
 		var _g = 0;
 		var _g1 = this.forwards;
 		while(_g < _g1.length) {
@@ -1329,63 +1549,74 @@ steamer.dom.Dom.produceEvent = function(el,name) {
 	return { producer : producer, cancel : cancel};
 };
 steamer.dom.Dom.consumeText = function(el) {
-	var text = el.innerText;
-	return steamer.dom.Dom.createConsumer(function(v) {
-		el.innerText = v;
-	},function() {
+	var originalText = el.innerText;
+	var consume = function(text) {
 		el.innerText = text;
-	});
+	};
+	return new steamer.SimpleConsumer(consume,(function(f,a1) {
+		return function() {
+			return f(a1);
+		};
+	})(consume,originalText));
 };
 steamer.dom.Dom.consumeHtml = function(el) {
-	var html = el.innerHTML;
-	return steamer.dom.Dom.createConsumer(function(v) {
-		el.innerHTML = v;
-	},function() {
+	var originalHtml = el.innerHTML;
+	var consume = function(html) {
 		el.innerHTML = html;
-	});
+	};
+	return new steamer.SimpleConsumer(consume,(function(f,a1) {
+		return function() {
+			return f(a1);
+		};
+	})(consume,originalHtml));
 };
 steamer.dom.Dom.consumeAttribute = function(el,name) {
 	var originalValue = el.getAttribute(name);
-	return steamer.dom.Dom.createConsumer(function(v) {
-		el.setAttribute(name,v);
-	},function() {
-		if(null == originalValue) el.removeAttribute(name); else el.setAttribute(name,originalValue);
-	});
+	var consume = function(value) {
+		el.setAttribute(name,value);
+	};
+	return new steamer.SimpleConsumer(consume,null == originalValue?function() {
+		el.removeAttribute(name);
+	}:(function(f,a1) {
+		return function() {
+			return f(a1);
+		};
+	})(consume,originalValue));
+};
+steamer.dom.Dom.consumeToggleAttribute = function(el,name) {
+	var originalValue = el.hasAttribute(name);
+	var consume = function(v) {
+		if(v) el.setAttribute(name,name); else el.removeAttribute(name);
+	};
+	return new steamer.SimpleConsumer(consume,(function(f,v1) {
+		return function() {
+			return f(v1);
+		};
+	})(consume,originalValue));
 };
 steamer.dom.Dom.consumeToggleClass = function(el,name) {
-	return steamer.dom.Dom.createConsumer(function(v) {
+	var originalValue = el.hasAttribute(name);
+	var consume = function(v) {
 		if(v) el.classList.add(name); else el.classList.remove(name);
-	});
+	};
+	return new steamer.SimpleConsumer(consume,(function(f,v1) {
+		return function() {
+			return f(v1);
+		};
+	})(consume,originalValue));
 };
 steamer.dom.Dom.consumeToggleVisibility = function(el) {
 	var originalDisplay = el.style.display;
-	return steamer.dom.Dom.createConsumer(function(v) {
-		if(v) el.style.display = originalDisplay; else el.style.display = "none";
-	},function() {
-		el.style.display = originalDisplay;
-	});
-};
-steamer.dom.Dom.createConsumer = function(f,end,err) {
-	if(null == end) end = function() {
+	thx.Assert.isNull(originalDisplay,"original element.style.display for visibility is NULL",{ fileName : "Dom.hx", lineNumber : 87, className : "steamer.dom.Dom", methodName : "consumeToggleVisibility"});
+	if(originalDisplay == "none") originalDisplay = "";
+	var consume = function(value) {
+		if(value) el.style.display = originalDisplay; else el.style.display = "none";
 	};
-	if(null == err) err = function(error) {
-		throw error;
-	};
-	return { onPulse : function(pulse) {
-		switch(pulse[1]) {
-		case 0:
-			var v = pulse[2];
-			f(v);
-			break;
-		case 1:
-			end();
-			break;
-		case 2:
-			var error1 = pulse[2];
-			err(error1);
-			break;
-		}
-	}};
+	return new steamer.SimpleConsumer(consume,(function(f,a1) {
+		return function() {
+			return f(a1);
+		};
+	})(consume,true));
 };
 steamer.producers = {};
 steamer.producers.Interval = function(delay,times) {
@@ -1408,6 +1639,497 @@ steamer.producers.Interval.__super__ = steamer.Producer;
 steamer.producers.Interval.prototype = $extend(steamer.Producer.prototype,{
 	__class__: steamer.producers.Interval
 });
+thx.Error = function(message,stack,pos) {
+	this.message = message;
+	if(null == stack) {
+		stack = haxe.CallStack.exceptionStack();
+		if(stack.length == 0) stack = haxe.CallStack.callStack();
+	}
+	this.stack = stack;
+	this.pos = pos;
+};
+thx.Error.__name__ = ["thx","Error"];
+thx.Error.prototype = {
+	message: null
+	,stack: null
+	,pos: null
+	,toString: function() {
+		return this.message + "from: " + this.pos.className + "." + this.pos.methodName + "() at " + this.pos.lineNumber + "\n\n" + haxe.CallStack.toString(this.stack);
+	}
+	,__class__: thx.Error
+};
+thx.Assert = function() { };
+thx.Assert.__name__ = ["thx","Assert"];
+thx.Assert.isTrue = function(cond,msg,pos) {
+	if(thx.Assert.results == null) throw "Assert.results is not currently bound to any assert context";
+	if(null == msg) msg = "expected true";
+	if(cond) thx.Assert.results.add(thx.core.Assertion.Success(pos)); else thx.Assert.results.add(thx.core.Assertion.Failure(msg,pos));
+};
+thx.Assert.isFalse = function(value,msg,pos) {
+	if(null == msg) msg = "expected false";
+	thx.Assert.isTrue(value == false,msg,pos);
+};
+thx.Assert.isNull = function(value,msg,pos) {
+	if(msg == null) msg = "expected null but was " + thx.Assert.q(value);
+	thx.Assert.isTrue(value == null,msg,pos);
+};
+thx.Assert.notNull = function(value,msg,pos) {
+	if(null == msg) msg = "expected not null";
+	thx.Assert.isTrue(value != null,msg,pos);
+};
+thx.Assert["is"] = function(value,type,msg,pos) {
+	if(msg == null) msg = "expected type " + thx.Assert.typeToString(type) + " but was " + thx.Assert.typeToString(value);
+	thx.Assert.isTrue(js.Boot.__instanceof(value,type),msg,pos);
+};
+thx.Assert.notEquals = function(expected,value,msg,pos) {
+	if(msg == null) msg = "expected " + thx.Assert.q(expected) + " and testa value " + thx.Assert.q(value) + " should be different";
+	thx.Assert.isFalse(expected == value,msg,pos);
+};
+thx.Assert.equals = function(expected,value,msg,pos) {
+	if(msg == null) msg = "expected " + thx.Assert.q(expected) + " but was " + thx.Assert.q(value);
+	thx.Assert.isTrue(expected == value,msg,pos);
+};
+thx.Assert.match = function(pattern,value,msg,pos) {
+	if(msg == null) msg = "the value " + thx.Assert.q(value) + "does not match the provided pattern";
+	thx.Assert.isTrue(pattern.match(value),msg,pos);
+};
+thx.Assert.floatEquals = function(expected,value,approx,msg,pos) {
+	if(msg == null) msg = "expected " + thx.Assert.q(expected) + " but was " + thx.Assert.q(value);
+	return thx.Assert.isTrue(thx.Assert._floatEquals(expected,value,approx),msg,pos);
+};
+thx.Assert._floatEquals = function(expected,value,approx) {
+	if(isNaN(expected)) return isNaN(value); else if(isNaN(value)) return false; else if(!isFinite(expected) && !isFinite(value)) return expected > 0 == value > 0;
+	if(null == approx) approx = 1e-5;
+	return Math.abs(value - expected) < approx;
+};
+thx.Assert.getTypeName = function(v) {
+	{
+		var _g = Type["typeof"](v);
+		switch(_g[1]) {
+		case 0:
+			return "[null]";
+		case 1:
+			return "Int";
+		case 2:
+			return "Float";
+		case 3:
+			return "Bool";
+		case 5:
+			return "function";
+		case 6:
+			var c = _g[2];
+			return Type.getClassName(c);
+		case 7:
+			var e = _g[2];
+			return Type.getEnumName(e);
+		case 4:
+			return "Object";
+		case 8:
+			return "Unknown";
+		}
+	}
+};
+thx.Assert.isIterable = function(v,isAnonym) {
+	var fields;
+	if(isAnonym) fields = Reflect.fields(v); else fields = Type.getInstanceFields(Type.getClass(v));
+	if(!Lambda.has(fields,"iterator")) return false;
+	return Reflect.isFunction(Reflect.field(v,"iterator"));
+};
+thx.Assert.isIterator = function(v,isAnonym) {
+	var fields;
+	if(isAnonym) fields = Reflect.fields(v); else fields = Type.getInstanceFields(Type.getClass(v));
+	if(!Lambda.has(fields,"next") || !Lambda.has(fields,"hasNext")) return false;
+	return Reflect.isFunction(Reflect.field(v,"next")) && Reflect.isFunction(Reflect.field(v,"hasNext"));
+};
+thx.Assert.sameAs = function(expected,value,status) {
+	var texpected = thx.Assert.getTypeName(expected);
+	var tvalue = thx.Assert.getTypeName(value);
+	if(texpected != tvalue) {
+		status.error = "expected type " + texpected + " but it is " + tvalue + (status.path == ""?"":" for field " + status.path);
+		return false;
+	}
+	{
+		var _g = Type["typeof"](expected);
+		switch(_g[1]) {
+		case 2:
+			if(!thx.Assert._floatEquals(expected,value)) {
+				status.error = "expected " + thx.Assert.q(expected) + " but it is " + thx.Assert.q(value) + (status.path == ""?"":" for field " + status.path);
+				return false;
+			}
+			return true;
+		case 0:case 1:case 3:
+			if(expected != value) {
+				status.error = "expected " + thx.Assert.q(expected) + " but it is " + thx.Assert.q(value) + (status.path == ""?"":" for field " + status.path);
+				return false;
+			}
+			return true;
+		case 5:
+			if(!Reflect.compareMethods(expected,value)) {
+				status.error = "expected same function reference" + (status.path == ""?"":" for field " + status.path);
+				return false;
+			}
+			return true;
+		case 6:
+			var c = _g[2];
+			var cexpected = Type.getClassName(c);
+			var cvalue = Type.getClassName(Type.getClass(value));
+			if(cexpected != cvalue) {
+				status.error = "expected instance of " + thx.Assert.q(cexpected) + " but it is " + thx.Assert.q(cvalue) + (status.path == ""?"":" for field " + status.path);
+				return false;
+			}
+			if(typeof(expected) == "string" && expected != value) {
+				status.error = "expected '" + Std.string(expected) + "' but it is '" + Std.string(value) + "'";
+				return false;
+			}
+			if((expected instanceof Array) && expected.__enum__ == null) {
+				if(status.recursive || status.path == "") {
+					if(expected.length != value.length) {
+						status.error = "expected " + Std.string(expected.length) + " elements but they were " + Std.string(value.length) + (status.path == ""?"":" for field " + status.path);
+						return false;
+					}
+					var path = status.path;
+					var _g2 = 0;
+					var _g1 = expected.length;
+					while(_g2 < _g1) {
+						var i = _g2++;
+						if(path == "") status.path = "array[" + i + "]"; else status.path = path + "[" + i + "]";
+						if(!thx.Assert.sameAs(expected[i],value[i],status)) {
+							status.error = "expected " + thx.Assert.q(expected) + " but it is " + thx.Assert.q(value) + (status.path == ""?"":" for field " + status.path);
+							return false;
+						}
+					}
+				}
+				return true;
+			}
+			if(js.Boot.__instanceof(expected,Date)) {
+				if(expected.getTime() != value.getTime()) {
+					status.error = "expected " + thx.Assert.q(expected) + " but it is " + thx.Assert.q(value) + (status.path == ""?"":" for field " + status.path);
+					return false;
+				}
+				return true;
+			}
+			if(js.Boot.__instanceof(expected,haxe.io.Bytes)) {
+				if(status.recursive || status.path == "") {
+					var ebytes = expected;
+					var vbytes = value;
+					if(ebytes.length != vbytes.length) return false;
+					var _g21 = 0;
+					var _g11 = ebytes.length;
+					while(_g21 < _g11) {
+						var i1 = _g21++;
+						if(ebytes.b[i1] != vbytes.b[i1]) {
+							status.error = "expected byte " + ebytes.b[i1] + " but wss " + ebytes.b[i1] + (status.path == ""?"":" for field " + status.path);
+							return false;
+						}
+					}
+				}
+				return true;
+			}
+			if(js.Boot.__instanceof(expected,haxe.ds.StringMap) || js.Boot.__instanceof(expected,haxe.ds.IntMap)) {
+				if(status.recursive || status.path == "") {
+					var keys = Lambda.array({ iterator : function() {
+						return expected.keys();
+					}});
+					var vkeys = Lambda.array({ iterator : function() {
+						return value.keys();
+					}});
+					if(keys.length != vkeys.length) {
+						status.error = "expected " + keys.length + " keys but they were " + vkeys.length + (status.path == ""?"":" for field " + status.path);
+						return false;
+					}
+					var path1 = status.path;
+					var _g12 = 0;
+					while(_g12 < keys.length) {
+						var key = keys[_g12];
+						++_g12;
+						if(path1 == "") status.path = "hash[" + key + "]"; else status.path = path1 + "[" + key + "]";
+						if(!thx.Assert.sameAs(expected.get(key),value.get(key),status)) {
+							status.error = "expected " + thx.Assert.q(expected) + " but it is " + thx.Assert.q(value) + (status.path == ""?"":" for field " + status.path);
+							return false;
+						}
+					}
+				}
+				return true;
+			}
+			if(thx.Assert.isIterator(expected,false)) {
+				if(status.recursive || status.path == "") {
+					var evalues = Lambda.array({ iterator : function() {
+						return expected;
+					}});
+					var vvalues = Lambda.array({ iterator : function() {
+						return value;
+					}});
+					if(evalues.length != vvalues.length) {
+						status.error = "expected " + evalues.length + " values in Iterator but they were " + vvalues.length + (status.path == ""?"":" for field " + status.path);
+						return false;
+					}
+					var path2 = status.path;
+					var _g22 = 0;
+					var _g13 = evalues.length;
+					while(_g22 < _g13) {
+						var i2 = _g22++;
+						if(path2 == "") status.path = "iterator[" + i2 + "]"; else status.path = path2 + "[" + i2 + "]";
+						if(!thx.Assert.sameAs(evalues[i2],vvalues[i2],status)) {
+							status.error = "expected " + thx.Assert.q(expected) + " but it is " + thx.Assert.q(value) + (status.path == ""?"":" for field " + status.path);
+							return false;
+						}
+					}
+				}
+				return true;
+			}
+			if(thx.Assert.isIterable(expected,false)) {
+				if(status.recursive || status.path == "") {
+					var evalues1 = Lambda.array(expected);
+					var vvalues1 = Lambda.array(value);
+					if(evalues1.length != vvalues1.length) {
+						status.error = "expected " + evalues1.length + " values in Iterable but they were " + vvalues1.length + (status.path == ""?"":" for field " + status.path);
+						return false;
+					}
+					var path3 = status.path;
+					var _g23 = 0;
+					var _g14 = evalues1.length;
+					while(_g23 < _g14) {
+						var i3 = _g23++;
+						if(path3 == "") status.path = "iterable[" + i3 + "]"; else status.path = path3 + "[" + i3 + "]";
+						if(!thx.Assert.sameAs(evalues1[i3],vvalues1[i3],status)) return false;
+					}
+				}
+				return true;
+			}
+			if(status.recursive || status.path == "") {
+				var fields = Type.getInstanceFields(Type.getClass(expected));
+				var path4 = status.path;
+				var _g15 = 0;
+				while(_g15 < fields.length) {
+					var field = fields[_g15];
+					++_g15;
+					if(path4 == "") status.path = field; else status.path = path4 + "." + field;
+					var e = Reflect.field(expected,field);
+					if(Reflect.isFunction(e)) continue;
+					var v = Reflect.field(value,field);
+					if(!thx.Assert.sameAs(e,v,status)) return false;
+				}
+			}
+			return true;
+		case 7:
+			var e1 = _g[2];
+			var eexpected = Type.getEnumName(e1);
+			var evalue = Type.getEnumName(Type.getEnum(value));
+			if(eexpected != evalue) {
+				status.error = "expected enumeration of " + thx.Assert.q(eexpected) + " but it is " + thx.Assert.q(evalue) + (status.path == ""?"":" for field " + status.path);
+				return false;
+			}
+			if(status.recursive || status.path == "") {
+				if(Type.enumIndex(expected) != Type.enumIndex(value)) {
+					status.error = "expected " + thx.Assert.q(Type.enumConstructor(expected)) + " but is " + thx.Assert.q(Type.enumConstructor(value)) + (status.path == ""?"":" for field " + status.path);
+					return false;
+				}
+				var eparams = Type.enumParameters(expected);
+				var vparams = Type.enumParameters(value);
+				var path5 = status.path;
+				var _g24 = 0;
+				var _g16 = eparams.length;
+				while(_g24 < _g16) {
+					var i4 = _g24++;
+					if(path5 == "") status.path = "enum[" + i4 + "]"; else status.path = path5 + "[" + i4 + "]";
+					if(!thx.Assert.sameAs(eparams[i4],vparams[i4],status)) {
+						status.error = "expected " + thx.Assert.q(expected) + " but it is " + thx.Assert.q(value) + (status.path == ""?"":" for field " + status.path);
+						return false;
+					}
+				}
+			}
+			return true;
+		case 4:
+			if(status.recursive || status.path == "") {
+				var tfields = Reflect.fields(value);
+				var fields1 = Reflect.fields(expected);
+				var path6 = status.path;
+				var _g17 = 0;
+				while(_g17 < fields1.length) {
+					var field1 = fields1[_g17];
+					++_g17;
+					HxOverrides.remove(tfields,field1);
+					if(path6 == "") status.path = field1; else status.path = path6 + "." + field1;
+					if(!Object.prototype.hasOwnProperty.call(value,field1)) {
+						status.error = "expected field " + status.path + " does not exist in " + thx.Assert.q(value);
+						return false;
+					}
+					var e2 = Reflect.field(expected,field1);
+					if(Reflect.isFunction(e2)) continue;
+					var v1 = Reflect.field(value,field1);
+					if(!thx.Assert.sameAs(e2,v1,status)) return false;
+				}
+				if(tfields.length > 0) {
+					status.error = "the tested object has extra field(s) (" + tfields.join(", ") + ") not included in the expected ones";
+					return false;
+				}
+			}
+			if(thx.Assert.isIterator(expected,true)) {
+				if(!thx.Assert.isIterator(value,true)) {
+					status.error = "expected Iterable but it is not " + (status.path == ""?"":" for field " + status.path);
+					return false;
+				}
+				if(status.recursive || status.path == "") {
+					var evalues2 = Lambda.array({ iterator : function() {
+						return expected;
+					}});
+					var vvalues2 = Lambda.array({ iterator : function() {
+						return value;
+					}});
+					if(evalues2.length != vvalues2.length) {
+						status.error = "expected " + evalues2.length + " values in Iterator but they were " + vvalues2.length + (status.path == ""?"":" for field " + status.path);
+						return false;
+					}
+					var path7 = status.path;
+					var _g25 = 0;
+					var _g18 = evalues2.length;
+					while(_g25 < _g18) {
+						var i5 = _g25++;
+						if(path7 == "") status.path = "iterator[" + i5 + "]"; else status.path = path7 + "[" + i5 + "]";
+						if(!thx.Assert.sameAs(evalues2[i5],vvalues2[i5],status)) {
+							status.error = "expected " + thx.Assert.q(expected) + " but it is " + thx.Assert.q(value) + (status.path == ""?"":" for field " + status.path);
+							return false;
+						}
+					}
+				}
+				return true;
+			}
+			if(thx.Assert.isIterable(expected,true)) {
+				if(!thx.Assert.isIterable(value,true)) {
+					status.error = "expected Iterator but it is not " + (status.path == ""?"":" for field " + status.path);
+					return false;
+				}
+				if(status.recursive || status.path == "") {
+					var evalues3 = Lambda.array(expected);
+					var vvalues3 = Lambda.array(value);
+					if(evalues3.length != vvalues3.length) {
+						status.error = "expected " + evalues3.length + " values in Iterable but they were " + vvalues3.length + (status.path == ""?"":" for field " + status.path);
+						return false;
+					}
+					var path8 = status.path;
+					var _g26 = 0;
+					var _g19 = evalues3.length;
+					while(_g26 < _g19) {
+						var i6 = _g26++;
+						if(path8 == "") status.path = "iterable[" + i6 + "]"; else status.path = path8 + "[" + i6 + "]";
+						if(!thx.Assert.sameAs(evalues3[i6],vvalues3[i6],status)) return false;
+					}
+				}
+				return true;
+			}
+			return true;
+		case 8:
+			throw "Unable to compare two unknown types";
+			break;
+		}
+	}
+	throw "Unable to compare values: " + thx.Assert.q(expected) + " and " + thx.Assert.q(value);
+};
+thx.Assert.q = function(v) {
+	if(typeof(v) == "string") return "\"" + StringTools.replace(v,"\"","\\\"") + "\""; else return Std.string(v);
+};
+thx.Assert.same = function(expected,value,recursive,msg,pos) {
+	var status = { recursive : null == recursive?true:recursive, path : "", error : null};
+	if(thx.Assert.sameAs(expected,value,status)) thx.Assert.isTrue(true,msg,pos); else thx.Assert.fail(msg == null?status.error:msg,pos);
+};
+thx.Assert.raises = function(method,type,msgNotThrown,msgWrongType,pos) {
+	if(type == null) type = String;
+	try {
+		method();
+		var name = Type.getClassName(type);
+		if(name == null) name = "" + Std.string(type);
+		if(null == msgNotThrown) msgNotThrown = "exception of type " + name + " not raised";
+		thx.Assert.fail(msgNotThrown,pos);
+	} catch( ex ) {
+		var name1 = Type.getClassName(type);
+		if(name1 == null) name1 = "" + Std.string(type);
+		if(null == msgWrongType) msgWrongType = "expected throw of type " + name1 + " but was " + Std.string(ex);
+		thx.Assert.isTrue(js.Boot.__instanceof(ex,type),msgWrongType,pos);
+	}
+};
+thx.Assert.allows = function(possibilities,value,msg,pos) {
+	if(Lambda.has(possibilities,value)) thx.Assert.isTrue(true,msg,pos); else thx.Assert.fail(msg == null?"value " + thx.Assert.q(value) + " not found in the expected possibilities " + Std.string(possibilities):msg,pos);
+};
+thx.Assert.contains = function(match,values,msg,pos) {
+	if(Lambda.has(values,match)) thx.Assert.isTrue(true,msg,pos); else thx.Assert.fail(msg == null?"values " + thx.Assert.q(values) + " do not contain " + Std.string(match):msg,pos);
+};
+thx.Assert.notContains = function(match,values,msg,pos) {
+	if(!Lambda.has(values,match)) thx.Assert.isTrue(true,msg,pos); else thx.Assert.fail(msg == null?"values " + thx.Assert.q(values) + " do contain " + Std.string(match):msg,pos);
+};
+thx.Assert.stringContains = function(match,value,msg,pos) {
+	if(value != null && value.indexOf(match) >= 0) thx.Assert.isTrue(true,msg,pos); else thx.Assert.fail(msg == null?"value " + thx.Assert.q(value) + " does not contain " + thx.Assert.q(match):msg,pos);
+};
+thx.Assert.stringSequence = function(sequence,value,msg,pos) {
+	if(null == value) {
+		thx.Assert.fail(msg == null?"null argument value":msg,pos);
+		return;
+	}
+	var p = 0;
+	var _g = 0;
+	while(_g < sequence.length) {
+		var s = sequence[_g];
+		++_g;
+		var p2 = value.indexOf(s,p);
+		if(p2 < 0) {
+			if(msg == null) {
+				msg = "expected '" + s + "' after ";
+				if(p > 0) {
+					var cut = HxOverrides.substr(value,0,p);
+					if(cut.length > 30) cut = "..." + HxOverrides.substr(cut,-27,null);
+					msg += " '" + cut + "'";
+				} else msg += " begin";
+			}
+			thx.Assert.fail(msg,pos);
+			return;
+		}
+		p = p2 + s.length;
+	}
+	thx.Assert.isTrue(true,msg,pos);
+};
+thx.Assert.fail = function(msg,pos) {
+	if(msg == null) msg = "failure expected";
+	thx.Assert.isTrue(false,msg,pos);
+};
+thx.Assert.warn = function(msg) {
+	thx.Assert.results.add(thx.core.Assertion.Warning(msg));
+};
+thx.Assert.createAsync = function(f,timeout) {
+	return function() {
+	};
+};
+thx.Assert.createEvent = function(f,timeout) {
+	return function(e) {
+	};
+};
+thx.Assert.typeToString = function(t) {
+	try {
+		var _t = Type.getClass(t);
+		if(_t != null) t = _t;
+	} catch( e ) {
+	}
+	try {
+		return Type.getClassName(t);
+	} catch( e1 ) {
+	}
+	try {
+		var _t1 = Type.getEnum(t);
+		if(_t1 != null) t = _t1;
+	} catch( e2 ) {
+	}
+	try {
+		return Type.getEnumName(t);
+	} catch( e3 ) {
+	}
+	try {
+		return Std.string(Type["typeof"](t));
+	} catch( e4 ) {
+	}
+	try {
+		return Std.string(t);
+	} catch( e5 ) {
+	}
+	return "<unable to retrieve type name>";
+};
 thx.Timer = function() { };
 thx.Timer.__name__ = ["thx","Timer"];
 thx.Timer.setInterval = function(callback,delay) {
@@ -1492,6 +2214,13 @@ thx.core.Arrays.order = function(arr,sort) {
 thx.core.Arrays.isEmpty = function(arr) {
 	return arr.length == 0;
 };
+thx.core.Assertion = { __ename__ : ["thx","core","Assertion"], __constructs__ : ["Success","Failure","Error","PreConditionError","PostConditionError","Warning"] };
+thx.core.Assertion.Success = function(pos) { var $x = ["Success",0,pos]; $x.__enum__ = thx.core.Assertion; $x.toString = $estr; return $x; };
+thx.core.Assertion.Failure = function(msg,pos) { var $x = ["Failure",1,msg,pos]; $x.__enum__ = thx.core.Assertion; $x.toString = $estr; return $x; };
+thx.core.Assertion.Error = function(e,stack) { var $x = ["Error",2,e,stack]; $x.__enum__ = thx.core.Assertion; $x.toString = $estr; return $x; };
+thx.core.Assertion.PreConditionError = function(e,stack) { var $x = ["PreConditionError",3,e,stack]; $x.__enum__ = thx.core.Assertion; $x.toString = $estr; return $x; };
+thx.core.Assertion.PostConditionError = function(e,stack) { var $x = ["PostConditionError",4,e,stack]; $x.__enum__ = thx.core.Assertion; $x.toString = $estr; return $x; };
+thx.core.Assertion.Warning = function(msg) { var $x = ["Warning",5,msg]; $x.__enum__ = thx.core.Assertion; $x.toString = $estr; return $x; };
 thx.core.Ints = function() { };
 thx.core.Ints.__name__ = ["thx","core","Ints"];
 thx.core.Ints.clamp = function(v,min,max) {
@@ -1796,7 +2525,8 @@ thx.ref.BaseRef = function(parent) {
 };
 thx.ref.BaseRef.__name__ = ["thx","ref","BaseRef"];
 thx.ref.BaseRef.prototype = {
-	getRoot: function() {
+	parent: null
+	,getRoot: function() {
 		var ref = this;
 		while(!js.Boot.__instanceof(ref.parent,thx.ref.EmptyParent)) ref = ref.parent;
 		return ref;
@@ -1806,12 +2536,20 @@ thx.ref.BaseRef.prototype = {
 thx.ref.IParentRef = function() { };
 thx.ref.IParentRef.__name__ = ["thx","ref","IParentRef"];
 thx.ref.IParentRef.prototype = {
-	__class__: thx.ref.IParentRef
+	removeChild: null
+	,__class__: thx.ref.IParentRef
 };
 thx.ref.IRef = function() { };
 thx.ref.IRef.__name__ = ["thx","ref","IRef"];
 thx.ref.IRef.prototype = {
-	__class__: thx.ref.IRef
+	parent: null
+	,get: null
+	,set: null
+	,remove: null
+	,hasValue: null
+	,resolve: null
+	,getRoot: null
+	,__class__: thx.ref.IRef
 };
 thx.ref.ArrayRef = function(parent) {
 	thx.ref.BaseRef.call(this,parent);
@@ -1822,7 +2560,9 @@ thx.ref.ArrayRef.__name__ = ["thx","ref","ArrayRef"];
 thx.ref.ArrayRef.__interfaces__ = [thx.ref.IParentRef,thx.ref.IRef];
 thx.ref.ArrayRef.__super__ = thx.ref.BaseRef;
 thx.ref.ArrayRef.prototype = $extend(thx.ref.BaseRef.prototype,{
-	get: function() {
+	items: null
+	,inverse: null
+	,get: function() {
 		var _g = this;
 		var res = [];
 		thx.core.Arrays.order(thx.core.Iterators.toArray(this.items.keys()),thx.core.Ints.compare).map(function(i) {
@@ -1900,7 +2640,9 @@ thx.ref.ObjectRef.__name__ = ["thx","ref","ObjectRef"];
 thx.ref.ObjectRef.__interfaces__ = [thx.ref.IParentRef,thx.ref.IRef];
 thx.ref.ObjectRef.__super__ = thx.ref.BaseRef;
 thx.ref.ObjectRef.prototype = $extend(thx.ref.BaseRef.prototype,{
-	get: function() {
+	fields: null
+	,inverse: null
+	,get: function() {
 		var _g = this;
 		var o = { };
 		thx.core.Iterators.map(this.fields.keys(),function(key) {
@@ -1986,7 +2728,9 @@ thx.ref.UnknownRef.__name__ = ["thx","ref","UnknownRef"];
 thx.ref.UnknownRef.__interfaces__ = [thx.ref.IParentRef,thx.ref.IRef];
 thx.ref.UnknownRef.__super__ = thx.ref.BaseRef;
 thx.ref.UnknownRef.prototype = $extend(thx.ref.BaseRef.prototype,{
-	get: function() {
+	ref: null
+	,hasRef: null
+	,get: function() {
 		if(this.hasRef) return this.ref.get(); else return null;
 	}
 	,set: function(value) {
@@ -2026,7 +2770,9 @@ thx.ref.ValueRef.__name__ = ["thx","ref","ValueRef"];
 thx.ref.ValueRef.__interfaces__ = [thx.ref.IRef];
 thx.ref.ValueRef.__super__ = thx.ref.BaseRef;
 thx.ref.ValueRef.prototype = $extend(thx.ref.BaseRef.prototype,{
-	get: function() {
+	_hasValue: null
+	,value: null
+	,get: function() {
 		return this.value;
 	}
 	,set: function(value) {
@@ -2060,7 +2806,11 @@ ui.Data = function(data) {
 };
 ui.Data.__name__ = ["ui","Data"];
 ui.Data.prototype = {
-	resolve: function(path) {
+	root: null
+	,cache: null
+	,feed: null
+	,stream: null
+	,resolve: function(path) {
 		var ref = this.cache.get(path);
 		if(null == ref) {
 			ref = this.root.resolve(path);
@@ -2169,7 +2919,11 @@ ui.Model = function(data) {
 };
 ui.Model.__name__ = ["ui","Model"];
 ui.Model.prototype = {
-	get_keys: function() {
+	data: null
+	,schema: null
+	,changes: null
+	,keys: null
+	,get_keys: function() {
 		return [];
 	}
 	,__class__: ui.Model
@@ -2184,8 +2938,11 @@ ui.Schema = function() {
 };
 ui.Schema.__name__ = ["ui","Schema"];
 ui.Schema.prototype = {
-	add: function(name,type) {
-		if(this.fields.exists(name)) throw new Error("Schema already contains a field \"" + name + "\"");
+	fields: null
+	,stream: null
+	,feed: null
+	,add: function(name,type) {
+		if(this.fields.exists(name)) throw new thx.Error("Schema already contains a field \"" + name + "\"",null,{ fileName : "Schema.hx", lineNumber : 23, className : "ui.Schema", methodName : "add"});
 		this.fields.set(name,type);
 		this.feed(steamer.Pulse.Emit(ui.SchemaEvent.AddField(name,type)));
 	}
@@ -2199,19 +2956,19 @@ ui.Schema.prototype = {
 		this.feed(steamer.Pulse.Emit(ui.SchemaEvent.ListFields(list.slice())));
 	}
 	,'delete': function(name) {
-		if(!this.fields.exists(name)) throw new Error("Schema does not contain a field \"" + name + "\"");
+		if(!this.fields.exists(name)) throw new thx.Error("Schema does not contain a field \"" + name + "\"",null,{ fileName : "Schema.hx", lineNumber : 40, className : "ui.Schema", methodName : "delete"});
 		this.fields.remove(name);
 		this.feed(steamer.Pulse.Emit(ui.SchemaEvent.DeleteField(name)));
 	}
 	,rename: function(oldname,newname) {
-		if(!this.fields.exists(oldname)) throw new Error("Schema does not contain a field \"" + oldname + "\"");
+		if(!this.fields.exists(oldname)) throw new thx.Error("Schema does not contain a field \"" + oldname + "\"",null,{ fileName : "Schema.hx", lineNumber : 47, className : "ui.Schema", methodName : "rename"});
 		var type = this.fields.get(oldname);
 		this.fields.remove(oldname);
 		this.fields.set(newname,type);
 		this.feed(steamer.Pulse.Emit(ui.SchemaEvent.RenameField(oldname,newname)));
 	}
 	,retype: function(name,type) {
-		if(!this.fields.exists(name)) throw new Error("Schema does not contain a field \"" + name + "\"");
+		if(!this.fields.exists(name)) throw new thx.Error("Schema does not contain a field \"" + name + "\"",null,{ fileName : "Schema.hx", lineNumber : 56, className : "ui.Schema", methodName : "retype"});
 		this.fields.set(name,type);
 		this.feed(steamer.Pulse.Emit(ui.SchemaEvent.RetypeField(name,type)));
 	}
@@ -2245,7 +3002,8 @@ ui.SchemaProducer = function(getPairs,handler) {
 ui.SchemaProducer.__name__ = ["ui","SchemaProducer"];
 ui.SchemaProducer.__super__ = steamer.Producer;
 ui.SchemaProducer.prototype = $extend(steamer.Producer.prototype,{
-	feed: function(consumer) {
+	getPairs: null
+	,feed: function(consumer) {
 		steamer.Producer.prototype.feed.call(this,consumer);
 		consumer.onPulse(steamer.Pulse.Emit(ui.SchemaEvent.ListFields(this.getPairs())));
 	}
@@ -2284,7 +3042,13 @@ ui.components.Component = function(options) {
 };
 ui.components.Component.__name__ = ["ui","components","Component"];
 ui.components.Component.prototype = {
-	appendTo: function(container) {
+	children: null
+	,isAttached: null
+	,parent: null
+	,properties: null
+	,el: null
+	,list: null
+	,appendTo: function(container) {
 		container.appendChild(this.el);
 		this.isAttached = true;
 	}
@@ -2336,7 +3100,9 @@ ui.components.Properties = function(target) {
 };
 ui.components.Properties.__name__ = ["ui","components","Properties"];
 ui.components.Properties.prototype = {
-	removeAll: function() {
+	properties: null
+	,target: null
+	,removeAll: function() {
 		var $it0 = this.properties.keys();
 		while( $it0.hasNext() ) {
 			var name = $it0.next();
@@ -2369,7 +3135,10 @@ ui.properties.Property = function(component,name) {
 };
 ui.properties.Property.__name__ = ["ui","properties","Property"];
 ui.properties.Property.prototype = {
-	init: function() {
+	component: null
+	,name: null
+	,_dispose: null
+	,init: function() {
 		throw "abstact function init, must override";
 	}
 	,dispose: function() {
@@ -2387,11 +3156,14 @@ ui.properties.Click = function(component) {
 };
 ui.properties.Click.__name__ = ["ui","properties","Click"];
 ui.properties.Click.asClickable = function(component) {
-	return component.properties.get("click");
+	var property = component.properties.get("click");
+	thx.Assert["is"](property,ui.properties.Click,null,{ fileName : "Click.hx", lineNumber : 12, className : "ui.properties.Click", methodName : "asClickable"});
+	return property;
 };
 ui.properties.Click.__super__ = ui.properties.Property;
 ui.properties.Click.prototype = $extend(ui.properties.Property.prototype,{
-	init: function() {
+	clicks: null
+	,init: function() {
 		var tuple = steamer.dom.Dom.produceEvent(this.component.el,"click");
 		this.clicks = tuple.producer;
 		return tuple.cancel;
@@ -2404,7 +3176,9 @@ ui.properties.Icon = function(component,defaultIcon) {
 };
 ui.properties.Icon.__name__ = ["ui","properties","Icon"];
 ui.properties.Icon.asIcon = function(component) {
-	return component.properties.get("icon");
+	var property = component.properties.get("icon");
+	thx.Assert["is"](property,ui.properties.Icon,null,{ fileName : "Icon.hx", lineNumber : 12, className : "ui.properties.Icon", methodName : "asIcon"});
+	return property;
 };
 ui.properties.Icon.getCurrentIcon = function(el) {
 	var _g1 = 0;
@@ -2418,7 +3192,9 @@ ui.properties.Icon.getCurrentIcon = function(el) {
 };
 ui.properties.Icon.__super__ = ui.properties.Property;
 ui.properties.Icon.prototype = $extend(ui.properties.Property.prototype,{
-	init: function() {
+	defaultIcon: null
+	,icon: null
+	,init: function() {
 		var _g = this;
 		var el = this.component.el;
 		var current = ui.properties.Icon.getCurrentIcon(el);
@@ -2469,11 +3245,16 @@ ui.properties.Value = function(component,eventName) {
 };
 ui.properties.Value.__name__ = ["ui","properties","Value"];
 ui.properties.Value.asValue = function(component) {
-	return component.properties.get("value");
+	var property = component.properties.get("value");
+	thx.Assert["is"](property,ui.properties.Value,null,{ fileName : "Value.hx", lineNumber : 15, className : "ui.properties.Value", methodName : "asValue"});
+	return property;
 };
 ui.properties.Value.__super__ = ui.properties.Property;
 ui.properties.Value.prototype = $extend(ui.properties.Property.prototype,{
-	init: function() {
+	defaultValue: null
+	,eventName: null
+	,value: null
+	,init: function() {
 		var _g = this;
 		var el = this.component.el;
 		var defaultValue = el.value;
@@ -2506,6 +3287,8 @@ if(Array.prototype.indexOf) HxOverrides.indexOf = function(a,o,i) {
 String.prototype.__class__ = String;
 String.__name__ = ["String"];
 Array.__name__ = ["Array"];
+Date.prototype.__class__ = Date;
+Date.__name__ = ["Date"];
 var Int = { __name__ : ["Int"]};
 var Dynamic = { __name__ : ["Dynamic"]};
 var Float = Number;
@@ -2755,6 +3538,40 @@ var global = window;
     }
 }(typeof global === "object" && global ? global : this));
 ;
+var posToString = function(pos) {
+	return pos;
+};
+thx.Assert.results = { add : function(assertion) {
+	switch(assertion[1]) {
+	case 1:
+		var pos1 = assertion[3];
+		var msg = assertion[2];
+		throw new thx.Error(msg,null,pos1);
+		break;
+	case 2:
+		var stack = assertion[3];
+		var e = assertion[2];
+		throw new thx.Error(Std.string(e),stack,{ fileName : "Assert.hx", lineNumber : 710, className : "thx.Assert", methodName : "__init__"});
+		break;
+	case 3:
+		var stack = assertion[3];
+		var e = assertion[2];
+		throw new thx.Error(Std.string(e),stack,{ fileName : "Assert.hx", lineNumber : 710, className : "thx.Assert", methodName : "__init__"});
+		break;
+	case 4:
+		var stack = assertion[3];
+		var e = assertion[2];
+		throw new thx.Error(Std.string(e),stack,{ fileName : "Assert.hx", lineNumber : 710, className : "thx.Assert", methodName : "__init__"});
+		break;
+	case 5:
+		var msg1 = assertion[2];
+		haxe.Log.trace(msg1,{ fileName : "Assert.hx", lineNumber : 712, className : "thx.Assert", methodName : "__init__"});
+		break;
+	case 0:
+		var pos2 = assertion[2];
+		break;
+	}
+}};
 dom.Query.doc = document;
 haxe.ds.ObjectMap.count = 0;
 promhx.base.AsyncBase.id_ctr = 0;

@@ -4,10 +4,13 @@ import js.html.Element;
 import steamer.Pulse.End;
 import steamer.Value;
 import ui.components.Component;
+import thx.Assert;
 
 class Icon extends Property {
-	public inline static function asIcon(component : Component) : Icon {
-		return cast component.properties.get('icon');
+	public static function asIcon(component : Component) : Icon {
+		var property = component.properties.get('icon');
+		Assert.is(property, Icon);
+		return cast property;
 	}
 
 	static function getCurrentIcon(el : Element) {
