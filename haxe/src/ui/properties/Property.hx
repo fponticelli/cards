@@ -8,7 +8,7 @@ class Property<T : Property<Dynamic>> {
 		this.name = name;
 	}
 
-	public function inject(target : Component) : PropertyImplementation<T> {
+	public function inject(target : Component) : Implementation<T> {
 		return throw 'inject must be overridden in ${toString()}';
 	}
 

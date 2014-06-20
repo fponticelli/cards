@@ -3,12 +3,12 @@ package ui.properties;
 import js.html.Element;
 import js.html.InputElement;
 import steamer.Pulse.End;
-import steamer.Value;
+import steamer.Value in V;
 import ui.components.Component;
 import steamer.SimpleConsumer;
 using steamer.dom.Dom;
 
-class ValueProperty extends Property<ValueProperty> {
+class Value extends Property<Value> {
 	public var defaultValue(default, null) : String;
 	public var eventName(default, null) : String;
 	public function new(defaultValue : String, eventName : String = 'input') {
@@ -18,21 +18,21 @@ class ValueProperty extends Property<ValueProperty> {
 	}
 
 	override public function inject(component : Component) {
-		return new ValuePropertyImplementation(component, this);
+		return new ValueImplementation(component, this);
 	}
 }
 
-class ValuePropertyImplementation extends PropertyImplementation<ValueProperty> {
-	public static function asValue(component : Component) : ValuePropertyImplementation {
+class ValueImplementation extends Implementation<Value> {
+	public static function asValue(component : Component) : ValueImplementation {
 		return cast component.properties.implementations.get('value');
 	}
 
-	public var value(default, null) : Value<String>;
+	public var value(default, null) : V<String>;
 
 	override function init() : Void -> Void {
 		var el : InputElement = cast component.el,
 			original = el.value;
-		value = new Value(property.defaultValue);
+		value = new V(property.defaultValue);
 
 		var pair = el.produceEvent(property.eventName);
 

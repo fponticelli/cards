@@ -2,7 +2,7 @@ package ui.properties;
 
 import ui.components.Component;
 
-class PropertyImplementation<TProperty : Property<Dynamic>> {
+class Implementation<TProperty : Property<Dynamic>> {
 	public var component(default, null) : Component;
 	public var property(default, null) : TProperty;
 	var _dispose : Void -> Void;

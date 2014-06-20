@@ -5,9 +5,9 @@ import ui.Schema;
 import ui.Model;
 import steamer.Value;
 import ui.components.Component;
-using ui.properties.ClickProperty;
-using ui.properties.IconProperty;
-using ui.properties.ValueProperty;
+using ui.properties.Click;
+using ui.properties.Icon;
+using ui.properties.Value;
 
 class Main {
 	public static function main() {

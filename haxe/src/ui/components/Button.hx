@@ -1,7 +1,7 @@
 package ui.components;
 
-import ui.properties.ClickProperty;
-import ui.properties.IconProperty;
+import ui.properties.Click;
+import ui.properties.Icon;
 
 class Button extends Component {
 	static var template = '<button></button>';
@@ -9,12 +9,12 @@ class Button extends Component {
 		if(null == options.template)
 			options.template = template;
 		super(options);
-		properties.add(new ClickProperty());
+		properties.add(new Click());
 	}
 
 	public static function withIcon(name : String, options : ComponentOptions) {
 		var button = new Button(options);
-		button.properties.add(new IconProperty(name));
+		button.properties.add(new Icon(name));
 		return button;
 	}
 }

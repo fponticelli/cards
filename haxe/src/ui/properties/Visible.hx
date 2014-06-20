@@ -4,9 +4,9 @@ using steamer.dom.Dom;
 import steamer.Value;
 import ui.components.Component;
 
-class VisibleProperty extends Property<VisibleProperty> {
-	public static var visible(default, null) : VisibleProperty = new VisibleProperty(true);
-	public static var invisible(default, null) : VisibleProperty = new VisibleProperty(false);
+class Visible extends Property<Visible> {
+	public static var visible(default, null) : Visible = new Visible(true);
+	public static var invisible(default, null) : Visible = new Visible(false);
 
 	public var defaultValue(default, null) : Bool;
 	public function new(defaultValue : Bool) {
@@ -15,18 +15,18 @@ class VisibleProperty extends Property<VisibleProperty> {
 	}
 
 	override public function inject(component : Component) {
-		return new VisiblePropertyImplementation(component, this);
+		return new VisibleImplementation(component, this);
 	}
 }
 
-class VisiblePropertyImplementation extends PropertyImplementation<VisibleProperty> {
-	public static function asVisible(component : Component) : VisiblePropertyImplementation {
+class VisibleImplementation extends Implementation<Visible> {
+	public static function asVisible(component : Component) : VisibleImplementation {
 		return component.properties.implementations.get('visible');
 	}
 
-	public static function makeVisible(component : Component, defaultValue = true) : VisiblePropertyImplementation {
+	public static function makeVisible(component : Component, defaultValue = true) : VisibleImplementation {
 		if(!component.properties.exists('visible'))
-			component.properties.add(defaultValue ? VisibleProperty.visible : VisibleProperty.invisible);
+			component.properties.add(defaultValue ? Visible.visible : Visible.invisible);
 		return asVisible(component);
 	}
 

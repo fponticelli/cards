@@ -5,7 +5,7 @@ import steamer.Pulse.End;
 import steamer.Value;
 import ui.components.Component;
 
-class IconProperty extends Property<IconProperty> {
+class Icon extends Property<Icon> {
 	public var iconName(default, null) : String;
 	public function new(iconName : String) {
 		super('icon');
@@ -13,12 +13,12 @@ class IconProperty extends Property<IconProperty> {
 	}
 
 	override public function inject(component : Component) {
-		return new IconPropertyImplementation(component, this);
+		return new IconImplementation(component, this);
 	}
 }
 
-class IconPropertyImplementation extends PropertyImplementation<IconProperty> {
-	public static function asIcon(component : Component) : IconPropertyImplementation {
+class IconImplementation extends Implementation<Icon> {
+	public static function asIcon(component : Component) : IconImplementation {
 		return cast component.properties.implementations.get('icon');
 	}
 

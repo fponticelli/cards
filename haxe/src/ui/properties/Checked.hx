@@ -5,18 +5,18 @@ import steamer.Producer;
 import ui.components.Component;
 using steamer.dom.Dom;
 
-class CheckedProperty extends Property<CheckedProperty> {
+class Checked extends Property<Checked> {
 	public function new() {
 		super('checked');
 	}
 
-	override public function inject(target : Component) : PropertyImplementation<CheckedProperty> {
-		return new CheckedPropertyImplementation(target, this);
+	override public function inject(target : Component) : Implementation<Checked> {
+		return new CheckedImplementation(target, this);
 	}
 }
 
-class CheckedPropertyImplementation extends PropertyImplementation<CheckedProperty> {
-	public static function asCheckable(component : Component) : CheckedPropertyImplementation {
+class CheckedImplementation extends Implementation<Checked> {
+	public static function asCheckable(component : Component) : CheckedImplementation {
 		return cast component.properties.implementations.get('checked');
 	}
 

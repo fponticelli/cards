@@ -6,7 +6,7 @@ import steamer.Value;
 import ui.components.Component;
 import steamer.SimpleConsumer;
 
-class TextProperty extends Property<TextProperty> {
+class Text extends Property<Text> {
 	public var defaultText(default, null) : String;
 	public function new(defaultText : String) {
 		super('text');
@@ -14,12 +14,12 @@ class TextProperty extends Property<TextProperty> {
 	}
 
 	override public function inject(component : Component) {
-		return new TextPropertyImplementation(component, this);
+		return new TextImplementation(component, this);
 	}
 }
 
-class TextPropertyImplementation extends PropertyImplementation<TextProperty> {
-	public static function asText(component : Component) : TextPropertyImplementation {
+class TextImplementation extends Implementation<Text> {
+	public static function asText(component : Component) : TextImplementation {
 		return cast component.properties.implementations.get('text');
 	}
 

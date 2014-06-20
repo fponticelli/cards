@@ -5,7 +5,7 @@ import steamer.Pulse.End;
 import steamer.Value;
 import ui.components.Component;
 
-class HTMLProperty extends Property<HTMLProperty> {
+class HTML extends Property<HTML> {
 	public var defaultHTML(default, null) : String;
 	public function new(defaultHTML : String) {
 		super('html');
@@ -13,12 +13,12 @@ class HTMLProperty extends Property<HTMLProperty> {
 	}
 
 	override public function inject(component : Component) {
-		return new HTMLPropertyImplementation(component, this);
+		return new HTMLImplementation(component, this);
 	}
 }
 
-class HTMLPropertyImplementation extends PropertyImplementation<HTMLProperty> {
-	public static function asHTML(component : Component) : HTMLPropertyImplementation {
+class HTMLImplementation extends Implementation<HTML> {
+	public static function asHTML(component : Component) : HTMLImplementation {
 		return cast component.properties.implementations.get('html');
 	}
 
