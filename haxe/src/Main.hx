@@ -1,10 +1,8 @@
 import dom.Dom;
-import ui.components.Button;
-import ui.Data;
-import ui.Schema;
-import ui.Model;
-import steamer.Value;
-import ui.components.Component;
+import ui.components.*;
+import ui.*;
+import steamer.*;
+import ui.properties.*;
 using ui.properties.Click;
 using ui.properties.Icon;
 using ui.properties.Value;
