@@ -146,15 +146,15 @@ Main.main = function() {
 		var schema = new ui.Schema();
 		var data = new ui.Data({ name : "Franco", contacts : [{ type : "email", value : "franco.ponticelli@gmail.com"},{ type : "phone", value : "7206902488"}]});
 		var model = new ui.Model(data);
-		haxe.Log.trace("Hello World",{ fileName : "Main.hx", lineNumber : 27, className : "Main", methodName : "main"});
+		haxe.Log.trace("Hello World",{ fileName : "Main.hx", lineNumber : 28, className : "Main", methodName : "main"});
 		data.set("contacts[2]",{ type : "twitter", value : "fponticelli"});
 		data.set("contacts[3].type","skype");
 		data.set("contacts[3].value","francoponticelli");
-		haxe.Log.trace(data.toJSON(),{ fileName : "Main.hx", lineNumber : 31, className : "Main", methodName : "main"});
+		haxe.Log.trace(data.toJSON(),{ fileName : "Main.hx", lineNumber : 32, className : "Main", methodName : "main"});
 		var component = ui.components.Button.withIcon("cubes",{ });
 		component.appendTo(container);
 		ui.properties.ClickPropertyImplementation.asClickable(component).clicks.feed({ onPulse : function(e) {
-			haxe.Log.trace(e,{ fileName : "Main.hx", lineNumber : 37, className : "Main", methodName : "main"});
+			haxe.Log.trace(e,{ fileName : "Main.hx", lineNumber : 38, className : "Main", methodName : "main"});
 		}});
 	});
 };
@@ -1205,6 +1205,34 @@ steamer.Pulses.times = function(n,pulse) {
 		$r = _g;
 		return $r;
 	}(this))).concat([steamer.Pulse.End]);
+};
+steamer.SimpleConsumer = function(onEmit,onEnd,onFail) {
+	if(null == onEmit) this.onEmit = function(_) {
+	}; else this.onEmit = onEmit;
+	if(null == onEnd) this.onEnd = function() {
+	}; else this.onEnd = onEnd;
+	if(null == onFail) this.onFail = function(error) {
+		throw error;
+	}; else this.onFail = onFail;
+};
+steamer.SimpleConsumer.__name__ = ["steamer","SimpleConsumer"];
+steamer.SimpleConsumer.prototype = {
+	onPulse: function(pulse) {
+		switch(pulse[1]) {
+		case 0:
+			var value = pulse[2];
+			this.onEmit(value);
+			break;
+		case 1:
+			this.onEnd;
+			break;
+		case 2:
+			var error = pulse[2];
+			this.onFail(error);
+			break;
+		}
+	}
+	,__class__: steamer.SimpleConsumer
 };
 steamer.Value = function(initialValue,defaultValue) {
 	var _g = this;
@@ -2485,6 +2513,53 @@ ui.properties.Implementations.prototype = {
 	}
 	,__class__: ui.properties.Implementations
 };
+ui.properties.ValueProperty = function(defaultValue,eventName) {
+	if(eventName == null) eventName = "input";
+	ui.properties.Property.call(this,"value");
+	this.defaultValue = defaultValue;
+	this.eventName = eventName;
+};
+ui.properties.ValueProperty.__name__ = ["ui","properties","ValueProperty"];
+ui.properties.ValueProperty.__super__ = ui.properties.Property;
+ui.properties.ValueProperty.prototype = $extend(ui.properties.Property.prototype,{
+	inject: function(component) {
+		return new ui.properties.ValuePropertyImplementation(component,this);
+	}
+	,__class__: ui.properties.ValueProperty
+});
+ui.properties.ValuePropertyImplementation = function(component,property) {
+	ui.properties.PropertyImplementation.call(this,component,property);
+};
+ui.properties.ValuePropertyImplementation.__name__ = ["ui","properties","ValuePropertyImplementation"];
+ui.properties.ValuePropertyImplementation.asValue = function(component) {
+	return component.properties.implementations.get("value");
+};
+ui.properties.ValuePropertyImplementation.__super__ = ui.properties.PropertyImplementation;
+ui.properties.ValuePropertyImplementation.prototype = $extend(ui.properties.PropertyImplementation.prototype,{
+	init: function() {
+		var _g = this;
+		var el = this.component.el;
+		var original = el.value;
+		this.value = new steamer.Value(this.property.defaultValue);
+		var pair = steamer.dom.Dom.produceEvent(el,this.property.eventName);
+		pair.producer.feed(new steamer.SimpleConsumer(function(_) {
+			if(el.value != _g.value.get_value()) _g.value.set_value(el.value);
+		},function() {
+			el.value = original;
+		}));
+		this.value.feed(new steamer.SimpleConsumer(function(value) {
+			el.value = value;
+		},function() {
+			el.value = original;
+		}));
+		return function() {
+			pair.cancel();
+			_g.value.terminate();
+			_g.value = null;
+		};
+	}
+	,__class__: ui.properties.ValuePropertyImplementation
+});
 function $iterator(o) { if( o instanceof Array ) return function() { return HxOverrides.iter(o); }; return typeof(o.iterator) == 'function' ? $bind(o,o.iterator) : o.iterator; }
 var $_, $fid = 0;
 function $bind(o,m) { if( m == null ) return null; if( m.__id__ == null ) m.__id__ = $fid++; var f; if( o.hx__closures__ == null ) o.hx__closures__ = {}; else f = o.hx__closures__[m.__id__]; if( f == null ) { f = function(){ return f.method.apply(f.scope, arguments); }; f.scope = o; f.method = m; o.hx__closures__[m.__id__] = f; } return f; }

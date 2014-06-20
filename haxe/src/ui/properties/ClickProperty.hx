@@ -17,12 +17,12 @@ class ClickProperty extends Property<ClickProperty> {
 
 class ClickPropertyImplementation extends PropertyImplementation<ClickProperty> {
 	public static function asClickable(component : Component) : ClickPropertyImplementation {
-		return cast component.properties.implementations.get("click");
+		return cast component.properties.implementations.get('click');
 	}
 
 	public var clicks(default, null) : Producer<Event>;
 	override function init() {
-		var tuple = component.el.produceEvent("click");
+		var tuple = component.el.produceEvent('click');
 		clicks = tuple.producer;
 		return tuple.cancel;
 	}
