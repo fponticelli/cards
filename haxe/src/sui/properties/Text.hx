@@ -1,9 +1,9 @@
-package ui.properties;
+package sui.properties;
 
 import js.html.Element;
 import steamer.Pulse.End;
 import steamer.Value;
-import ui.components.Component;
+import sui.components.Component;
 import steamer.SimpleConsumer;
 import thx.Assert;
 

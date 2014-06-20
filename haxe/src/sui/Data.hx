@@ -1,4 +1,4 @@
-package ui;
+package sui;
 
 import haxe.Json;
 using thx.core.Arrays;

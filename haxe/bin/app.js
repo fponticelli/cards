@@ -166,17 +166,17 @@ Main.__name__ = ["Main"];
 Main.main = function() {
 	dom.Dom.ready().then(function(_) {
 		var container = dom.Query.first(".container");
-		var schema = new ui.Schema();
-		var data = new ui.Data({ name : "Franco", contacts : [{ type : "email", value : "franco.ponticelli@gmail.com"},{ type : "phone", value : "7206902488"}]});
-		var model = new ui.Model(data);
+		var schema = new sui.Schema();
+		var data = new sui.Data({ name : "Franco", contacts : [{ type : "email", value : "franco.ponticelli@gmail.com"},{ type : "phone", value : "7206902488"}]});
+		var model = new sui.Model(data);
 		haxe.Log.trace("Hello World",{ fileName : "Main.hx", lineNumber : 23, className : "Main", methodName : "main"});
 		data.set("contacts[2]",{ type : "twitter", value : "fponticelli"});
 		data.set("contacts[3].type","skype");
 		data.set("contacts[3].value","francoponticelli");
 		haxe.Log.trace(data.toJSON(),{ fileName : "Main.hx", lineNumber : 27, className : "Main", methodName : "main"});
-		var component = new ui.components.Component({ template : "<button/>"});
-		new ui.properties.Icon(component,"cubes");
-		new ui.properties.Click(component).clicks.feed({ onPulse : function(e) {
+		var component = new sui.components.Component({ template : "<button/>"});
+		new sui.properties.Icon(component,"cubes");
+		new sui.properties.Click(component).clicks.feed({ onPulse : function(e) {
 			haxe.Log.trace(e,{ fileName : "Main.hx", lineNumber : 33, className : "Main", methodName : "main"});
 		}});
 		component.appendTo(container);
@@ -1640,6 +1640,436 @@ steamer.producers.Interval.__super__ = steamer.Producer;
 steamer.producers.Interval.prototype = $extend(steamer.Producer.prototype,{
 	__class__: steamer.producers.Interval
 });
+var sui = {};
+sui.Data = function(data) {
+	var _g = this;
+	this.feed = function(p) {
+	};
+	this.stream = new steamer.Producer(function(feed) {
+		_g.feed = feed;
+	});
+	this.reset(data);
+};
+sui.Data.__name__ = ["sui","Data"];
+sui.Data.prototype = {
+	root: null
+	,cache: null
+	,feed: null
+	,stream: null
+	,resolve: function(path) {
+		var ref = this.cache.get(path);
+		if(null == ref) {
+			ref = this.root.resolve(path);
+			if(ref.hasValue()) this.cache.set(path,ref);
+		}
+		return ref;
+	}
+	,get: function(path) {
+		return this.resolve(path).get();
+	}
+	,hasValue: function(path) {
+		return this.resolve(path).hasValue();
+	}
+	,set: function(path,value) {
+		var ref = this.resolve(path);
+		this.cache.set(path,ref);
+		if(ref.get() != value) {
+			ref.set(value);
+			this.feed(steamer.Pulse.Emit(this.toObject()));
+		}
+		return this;
+	}
+	,reset: function(value) {
+		this.root = new thx.ref.ObjectRef(null);
+		this.cache = new haxe.ds.StringMap();
+		if(null != value) this.set("",value);
+		this.feed(steamer.Pulse.Emit(this.toObject()));
+		return this;
+	}
+	,remove: function(path) {
+		var ref = this.cache.get(path);
+		if(null == ref) ref = this.root.resolve(path);
+		if(ref.hasValue()) {
+			ref.remove();
+			this.feed(steamer.Pulse.Emit(this.toObject()));
+		}
+		this.cache.remove(path);
+	}
+	,rename: function(oldpath,newpath) {
+		if(!this.hasValue(oldpath) || this.hasValue(newpath)) return false;
+		var v = this.get(oldpath);
+		this.remove(oldpath);
+		this.set(newpath,v);
+		this.feed(steamer.Pulse.Emit(this.toObject()));
+		return true;
+	}
+	,toObject: function() {
+		return this.root.get();
+	}
+	,toJSON: function() {
+		return JSON.stringify(this.toObject());
+	}
+	,__class__: sui.Data
+};
+sui.Model = function(data) {
+	var _g = this;
+	this.data = data;
+	this.schema = new sui.Schema();
+	this.changes = new steamer.Producer(function(feed) {
+		data.stream.feed({ onPulse : function(p) {
+			switch(p[1]) {
+			case 0:
+				var o = p[2];
+				break;
+			case 2:
+				var e = p[2];
+				feed(steamer.Pulse.Fail(e));
+				break;
+			case 1:
+				feed(steamer.Pulse.End);
+				break;
+			}
+		}});
+		_g.schema.stream.feed({ onPulse : function(p1) {
+			switch(p1[1]) {
+			case 0:
+				var e1 = p1[2];
+				switch(e1[1]) {
+				case 0:
+					var list = e1[2];
+					break;
+				case 1:
+					var type = e1[3];
+					var name = e1[2];
+					break;
+				case 2:
+					var name1 = e1[2];
+					break;
+				case 3:
+					var newname = e1[3];
+					var oldname = e1[2];
+					break;
+				default:
+				}
+				break;
+			case 2:
+				var e2 = p1[2];
+				feed(steamer.Pulse.Fail(e2));
+				break;
+			case 1:
+				feed(steamer.Pulse.End);
+				break;
+			}
+		}});
+	});
+};
+sui.Model.__name__ = ["sui","Model"];
+sui.Model.prototype = {
+	data: null
+	,schema: null
+	,changes: null
+	,keys: null
+	,get_keys: function() {
+		return [];
+	}
+	,__class__: sui.Model
+};
+sui.ModelChange = { __ename__ : ["sui","ModelChange"], __constructs__ : [] };
+sui.Schema = function() {
+	var _g = this;
+	this.fields = new haxe.ds.StringMap();
+	this.stream = new sui.SchemaProducer($bind(this,this.getPairs),function(feed) {
+		_g.feed = feed;
+	});
+};
+sui.Schema.__name__ = ["sui","Schema"];
+sui.Schema.prototype = {
+	fields: null
+	,stream: null
+	,feed: null
+	,add: function(name,type) {
+		if(this.fields.exists(name)) throw new thx.Error("Schema already contains a field \"" + name + "\"",null,{ fileName : "Schema.hx", lineNumber : 23, className : "sui.Schema", methodName : "add"});
+		this.fields.set(name,type);
+		this.feed(steamer.Pulse.Emit(sui.SchemaEvent.AddField(name,type)));
+	}
+	,reset: function(list) {
+		var _g = this;
+		if(null == list) list = [];
+		this.fields = new haxe.ds.StringMap();
+		list.map(function(pair) {
+			_g.fields.set(pair.name,pair.type);
+		});
+		this.feed(steamer.Pulse.Emit(sui.SchemaEvent.ListFields(list.slice())));
+	}
+	,'delete': function(name) {
+		if(!this.fields.exists(name)) throw new thx.Error("Schema does not contain a field \"" + name + "\"",null,{ fileName : "Schema.hx", lineNumber : 40, className : "sui.Schema", methodName : "delete"});
+		this.fields.remove(name);
+		this.feed(steamer.Pulse.Emit(sui.SchemaEvent.DeleteField(name)));
+	}
+	,rename: function(oldname,newname) {
+		if(!this.fields.exists(oldname)) throw new thx.Error("Schema does not contain a field \"" + oldname + "\"",null,{ fileName : "Schema.hx", lineNumber : 47, className : "sui.Schema", methodName : "rename"});
+		var type = this.fields.get(oldname);
+		this.fields.remove(oldname);
+		this.fields.set(newname,type);
+		this.feed(steamer.Pulse.Emit(sui.SchemaEvent.RenameField(oldname,newname)));
+	}
+	,retype: function(name,type) {
+		if(!this.fields.exists(name)) throw new thx.Error("Schema does not contain a field \"" + name + "\"",null,{ fileName : "Schema.hx", lineNumber : 56, className : "sui.Schema", methodName : "retype"});
+		this.fields.set(name,type);
+		this.feed(steamer.Pulse.Emit(sui.SchemaEvent.RetypeField(name,type)));
+	}
+	,get: function(name) {
+		return this.fields.get(name);
+	}
+	,exists: function(name) {
+		return this.fields.exists(name);
+	}
+	,getFieldNames: function() {
+		var arr = [];
+		var $it0 = this.fields.keys();
+		while( $it0.hasNext() ) {
+			var key = $it0.next();
+			arr.push(key);
+		}
+		return arr;
+	}
+	,getPairs: function() {
+		var _g = this;
+		return this.getFieldNames().map(function(key) {
+			return { name : key, type : _g.fields.get(key)};
+		});
+	}
+	,__class__: sui.Schema
+};
+sui.SchemaProducer = function(getPairs,handler) {
+	this.getPairs = getPairs;
+	steamer.Producer.call(this,handler,false);
+};
+sui.SchemaProducer.__name__ = ["sui","SchemaProducer"];
+sui.SchemaProducer.__super__ = steamer.Producer;
+sui.SchemaProducer.prototype = $extend(steamer.Producer.prototype,{
+	getPairs: null
+	,feed: function(consumer) {
+		steamer.Producer.prototype.feed.call(this,consumer);
+		consumer.onPulse(steamer.Pulse.Emit(sui.SchemaEvent.ListFields(this.getPairs())));
+	}
+	,__class__: sui.SchemaProducer
+});
+sui.SchemaEvent = { __ename__ : ["sui","SchemaEvent"], __constructs__ : ["ListFields","AddField","DeleteField","RenameField","RetypeField"] };
+sui.SchemaEvent.ListFields = function(list) { var $x = ["ListFields",0,list]; $x.__enum__ = sui.SchemaEvent; $x.toString = $estr; return $x; };
+sui.SchemaEvent.AddField = function(name,type) { var $x = ["AddField",1,name,type]; $x.__enum__ = sui.SchemaEvent; $x.toString = $estr; return $x; };
+sui.SchemaEvent.DeleteField = function(name) { var $x = ["DeleteField",2,name]; $x.__enum__ = sui.SchemaEvent; $x.toString = $estr; return $x; };
+sui.SchemaEvent.RenameField = function(oldname,newname) { var $x = ["RenameField",3,oldname,newname]; $x.__enum__ = sui.SchemaEvent; $x.toString = $estr; return $x; };
+sui.SchemaEvent.RetypeField = function(name,type) { var $x = ["RetypeField",4,name,type]; $x.__enum__ = sui.SchemaEvent; $x.toString = $estr; return $x; };
+sui.SchemaType = { __ename__ : ["sui","SchemaType"], __constructs__ : ["ArrayType","BoolType","DateType","FloatType","ObjectType","StringType"] };
+sui.SchemaType.ArrayType = function(item) { var $x = ["ArrayType",0,item]; $x.__enum__ = sui.SchemaType; $x.toString = $estr; return $x; };
+sui.SchemaType.BoolType = ["BoolType",1];
+sui.SchemaType.BoolType.toString = $estr;
+sui.SchemaType.BoolType.__enum__ = sui.SchemaType;
+sui.SchemaType.DateType = ["DateType",2];
+sui.SchemaType.DateType.toString = $estr;
+sui.SchemaType.DateType.__enum__ = sui.SchemaType;
+sui.SchemaType.FloatType = ["FloatType",3];
+sui.SchemaType.FloatType.toString = $estr;
+sui.SchemaType.FloatType.__enum__ = sui.SchemaType;
+sui.SchemaType.ObjectType = function(fields) { var $x = ["ObjectType",4,fields]; $x.__enum__ = sui.SchemaType; $x.toString = $estr; return $x; };
+sui.SchemaType.StringType = ["StringType",5];
+sui.SchemaType.StringType.toString = $estr;
+sui.SchemaType.StringType.__enum__ = sui.SchemaType;
+sui.components = {};
+sui.components.Component = function(options) {
+	this.isAttached = false;
+	this.list = [];
+	this.properties = new sui.components.Properties(this);
+	if(null == options.template) throw "" + Std.string(this) + " needs a template";
+	this.el = dom.Html.parseList(options.template)[0];
+	if(null != options.classes) this.el.classList.add(options.classes);
+	if(null != options.parent) options.parent.add(this);
+};
+sui.components.Component.__name__ = ["sui","components","Component"];
+sui.components.Component.prototype = {
+	children: null
+	,isAttached: null
+	,parent: null
+	,properties: null
+	,el: null
+	,list: null
+	,appendTo: function(container) {
+		container.appendChild(this.el);
+		this.isAttached = true;
+	}
+	,detach: function() {
+		if(!this.isAttached) throw "Component is not attached";
+		this.el.parentElement.removeChild(this.el);
+		this.isAttached = false;
+	}
+	,destroy: function() {
+		if(null != this.parent) this.parent.remove(this);
+		if(this.isAttached) this.detach();
+		this.properties.removeAll();
+	}
+	,add: function(child) {
+		if(null != child.parent) child.parent.remove(child);
+		this.list.push(child);
+		child.parent = this;
+	}
+	,remove: function(child) {
+		if(!HxOverrides.remove(this.list,child)) throw "" + Std.string(child) + " is not a child of " + Std.string(this);
+		child.parent = null;
+	}
+	,get_children: function() {
+		return this.list;
+	}
+	,toString: function() {
+		return Type.getClassName(Type.getClass(this)).split(".").pop();
+	}
+	,__class__: sui.components.Component
+};
+sui.components.Properties = function(target) {
+	this.target = target;
+	this.properties = new haxe.ds.StringMap();
+};
+sui.components.Properties.__name__ = ["sui","components","Properties"];
+sui.components.Properties.prototype = {
+	properties: null
+	,target: null
+	,removeAll: function() {
+		var $it0 = this.properties.keys();
+		while( $it0.hasNext() ) {
+			var name = $it0.next();
+			this.remove(name);
+		}
+	}
+	,add: function(property) {
+		if(this.properties.exists(property.name)) throw "" + Std.string(this.target) + " already has a property " + Std.string(property);
+		this.properties.set(property.name,property);
+	}
+	,get: function(name) {
+		return this.properties.get(name);
+	}
+	,exists: function(name) {
+		return this.properties.exists(name);
+	}
+	,remove: function(name) {
+		if(!this.properties.exists(name)) throw "property \"" + name + "\" does not exist in " + Std.string(this.target);
+		this.properties.get(name).dispose();
+		this.properties.remove(name);
+	}
+	,__class__: sui.components.Properties
+};
+sui.properties = {};
+sui.properties.Property = function(component,name) {
+	this.component = component;
+	this.name = name;
+	this._dispose = this.init();
+	component.properties.add(this);
+};
+sui.properties.Property.__name__ = ["sui","properties","Property"];
+sui.properties.Property.prototype = {
+	component: null
+	,name: null
+	,_dispose: null
+	,init: function() {
+		throw "abstact function init, must override";
+	}
+	,dispose: function() {
+		this._dispose();
+		this.component.properties.remove(this.name);
+		this.component = null;
+	}
+	,toString: function() {
+		return Type.getClassName(Type.getClass(this)).split(".").pop();
+	}
+	,__class__: sui.properties.Property
+};
+sui.properties.Click = function(component) {
+	sui.properties.Property.call(this,component,"click");
+};
+sui.properties.Click.__name__ = ["sui","properties","Click"];
+sui.properties.Click.asClickable = function(component) {
+	var property = component.properties.get("click");
+	thx.Assert["is"](property,sui.properties.Click,null,{ fileName : "Click.hx", lineNumber : 12, className : "sui.properties.Click", methodName : "asClickable"});
+	return property;
+};
+sui.properties.Click.__super__ = sui.properties.Property;
+sui.properties.Click.prototype = $extend(sui.properties.Property.prototype,{
+	clicks: null
+	,init: function() {
+		var tuple = steamer.dom.Dom.produceEvent(this.component.el,"click");
+		this.clicks = tuple.producer;
+		return tuple.cancel;
+	}
+	,__class__: sui.properties.Click
+});
+sui.properties.Icon = function(component,defaultIcon) {
+	this.defaultIcon = defaultIcon;
+	sui.properties.Property.call(this,component,"icon");
+};
+sui.properties.Icon.__name__ = ["sui","properties","Icon"];
+sui.properties.Icon.asIcon = function(component) {
+	var property = component.properties.get("icon");
+	thx.Assert["is"](property,sui.properties.Icon,null,{ fileName : "Icon.hx", lineNumber : 12, className : "sui.properties.Icon", methodName : "asIcon"});
+	return property;
+};
+sui.properties.Icon.getCurrentIcon = function(el) {
+	var _g1 = 0;
+	var _g = el.classList.length;
+	while(_g1 < _g) {
+		var i = _g1++;
+		var className = el.classList.item(i);
+		if(HxOverrides.substr(className,0,3) == "fa-") return HxOverrides.substr(className,3,null);
+	}
+	return null;
+};
+sui.properties.Icon.__super__ = sui.properties.Property;
+sui.properties.Icon.prototype = $extend(sui.properties.Property.prototype,{
+	defaultIcon: null
+	,icon: null
+	,init: function() {
+		var _g = this;
+		var el = this.component.el;
+		var current = sui.properties.Icon.getCurrentIcon(el);
+		var original = current;
+		var needsFa = current == null;
+		this.icon = new steamer.Value(this.defaultIcon);
+		if(needsFa) el.classList.add("fa");
+		this.icon.feed({ onPulse : function(pulse) {
+			switch(pulse[1]) {
+			case 0:
+				var value = pulse[2];
+				if(null != current) el.classList.remove(current);
+				el.classList.add(current = "fa-" + value);
+				break;
+			case 1:
+				if(needsFa) el.classList.remove("fa");
+				el.classList.remove(current);
+				if(null != original) el.classList.add(original);
+				break;
+			default:
+			}
+		}});
+		return function() {
+			_g.icon.terminate();
+			_g.icon = null;
+		};
+	}
+	,__class__: sui.properties.Icon
+});
+sui.properties._PropertyName = {};
+sui.properties._PropertyName.PropertyName_Impl_ = function() { };
+sui.properties._PropertyName.PropertyName_Impl_.__name__ = ["sui","properties","_PropertyName","PropertyName_Impl_"];
+sui.properties._PropertyName.PropertyName_Impl_.fromProperty = function(property) {
+	return property.name;
+};
+sui.properties._PropertyName.PropertyName_Impl_.fromString = function(name) {
+	return name;
+};
+sui.properties._PropertyName.PropertyName_Impl_._new = function(name) {
+	return name;
+};
+sui.properties._PropertyName.PropertyName_Impl_.toString = function(this1) {
+	return this1;
+};
 thx.Error = function(message,stack,pos) {
 	this.message = message;
 	if(null == stack) {
@@ -2795,436 +3225,6 @@ thx.ref.ValueRef.prototype = $extend(thx.ref.BaseRef.prototype,{
 	}
 	,__class__: thx.ref.ValueRef
 });
-var ui = {};
-ui.Data = function(data) {
-	var _g = this;
-	this.feed = function(p) {
-	};
-	this.stream = new steamer.Producer(function(feed) {
-		_g.feed = feed;
-	});
-	this.reset(data);
-};
-ui.Data.__name__ = ["ui","Data"];
-ui.Data.prototype = {
-	root: null
-	,cache: null
-	,feed: null
-	,stream: null
-	,resolve: function(path) {
-		var ref = this.cache.get(path);
-		if(null == ref) {
-			ref = this.root.resolve(path);
-			if(ref.hasValue()) this.cache.set(path,ref);
-		}
-		return ref;
-	}
-	,get: function(path) {
-		return this.resolve(path).get();
-	}
-	,hasValue: function(path) {
-		return this.resolve(path).hasValue();
-	}
-	,set: function(path,value) {
-		var ref = this.resolve(path);
-		this.cache.set(path,ref);
-		if(ref.get() != value) {
-			ref.set(value);
-			this.feed(steamer.Pulse.Emit(this.toObject()));
-		}
-		return this;
-	}
-	,reset: function(value) {
-		this.root = new thx.ref.ObjectRef(null);
-		this.cache = new haxe.ds.StringMap();
-		if(null != value) this.set("",value);
-		this.feed(steamer.Pulse.Emit(this.toObject()));
-		return this;
-	}
-	,remove: function(path) {
-		var ref = this.cache.get(path);
-		if(null == ref) ref = this.root.resolve(path);
-		if(ref.hasValue()) {
-			ref.remove();
-			this.feed(steamer.Pulse.Emit(this.toObject()));
-		}
-		this.cache.remove(path);
-	}
-	,rename: function(oldpath,newpath) {
-		if(!this.hasValue(oldpath) || this.hasValue(newpath)) return false;
-		var v = this.get(oldpath);
-		this.remove(oldpath);
-		this.set(newpath,v);
-		this.feed(steamer.Pulse.Emit(this.toObject()));
-		return true;
-	}
-	,toObject: function() {
-		return this.root.get();
-	}
-	,toJSON: function() {
-		return JSON.stringify(this.toObject());
-	}
-	,__class__: ui.Data
-};
-ui.Model = function(data) {
-	var _g = this;
-	this.data = data;
-	this.schema = new ui.Schema();
-	this.changes = new steamer.Producer(function(feed) {
-		data.stream.feed({ onPulse : function(p) {
-			switch(p[1]) {
-			case 0:
-				var o = p[2];
-				break;
-			case 2:
-				var e = p[2];
-				feed(steamer.Pulse.Fail(e));
-				break;
-			case 1:
-				feed(steamer.Pulse.End);
-				break;
-			}
-		}});
-		_g.schema.stream.feed({ onPulse : function(p1) {
-			switch(p1[1]) {
-			case 0:
-				var e1 = p1[2];
-				switch(e1[1]) {
-				case 0:
-					var list = e1[2];
-					break;
-				case 1:
-					var type = e1[3];
-					var name = e1[2];
-					break;
-				case 2:
-					var name1 = e1[2];
-					break;
-				case 3:
-					var newname = e1[3];
-					var oldname = e1[2];
-					break;
-				default:
-				}
-				break;
-			case 2:
-				var e2 = p1[2];
-				feed(steamer.Pulse.Fail(e2));
-				break;
-			case 1:
-				feed(steamer.Pulse.End);
-				break;
-			}
-		}});
-	});
-};
-ui.Model.__name__ = ["ui","Model"];
-ui.Model.prototype = {
-	data: null
-	,schema: null
-	,changes: null
-	,keys: null
-	,get_keys: function() {
-		return [];
-	}
-	,__class__: ui.Model
-};
-ui.ModelChange = { __ename__ : ["ui","ModelChange"], __constructs__ : [] };
-ui.Schema = function() {
-	var _g = this;
-	this.fields = new haxe.ds.StringMap();
-	this.stream = new ui.SchemaProducer($bind(this,this.getPairs),function(feed) {
-		_g.feed = feed;
-	});
-};
-ui.Schema.__name__ = ["ui","Schema"];
-ui.Schema.prototype = {
-	fields: null
-	,stream: null
-	,feed: null
-	,add: function(name,type) {
-		if(this.fields.exists(name)) throw new thx.Error("Schema already contains a field \"" + name + "\"",null,{ fileName : "Schema.hx", lineNumber : 23, className : "ui.Schema", methodName : "add"});
-		this.fields.set(name,type);
-		this.feed(steamer.Pulse.Emit(ui.SchemaEvent.AddField(name,type)));
-	}
-	,reset: function(list) {
-		var _g = this;
-		if(null == list) list = [];
-		this.fields = new haxe.ds.StringMap();
-		list.map(function(pair) {
-			_g.fields.set(pair.name,pair.type);
-		});
-		this.feed(steamer.Pulse.Emit(ui.SchemaEvent.ListFields(list.slice())));
-	}
-	,'delete': function(name) {
-		if(!this.fields.exists(name)) throw new thx.Error("Schema does not contain a field \"" + name + "\"",null,{ fileName : "Schema.hx", lineNumber : 40, className : "ui.Schema", methodName : "delete"});
-		this.fields.remove(name);
-		this.feed(steamer.Pulse.Emit(ui.SchemaEvent.DeleteField(name)));
-	}
-	,rename: function(oldname,newname) {
-		if(!this.fields.exists(oldname)) throw new thx.Error("Schema does not contain a field \"" + oldname + "\"",null,{ fileName : "Schema.hx", lineNumber : 47, className : "ui.Schema", methodName : "rename"});
-		var type = this.fields.get(oldname);
-		this.fields.remove(oldname);
-		this.fields.set(newname,type);
-		this.feed(steamer.Pulse.Emit(ui.SchemaEvent.RenameField(oldname,newname)));
-	}
-	,retype: function(name,type) {
-		if(!this.fields.exists(name)) throw new thx.Error("Schema does not contain a field \"" + name + "\"",null,{ fileName : "Schema.hx", lineNumber : 56, className : "ui.Schema", methodName : "retype"});
-		this.fields.set(name,type);
-		this.feed(steamer.Pulse.Emit(ui.SchemaEvent.RetypeField(name,type)));
-	}
-	,get: function(name) {
-		return this.fields.get(name);
-	}
-	,exists: function(name) {
-		return this.fields.exists(name);
-	}
-	,getFieldNames: function() {
-		var arr = [];
-		var $it0 = this.fields.keys();
-		while( $it0.hasNext() ) {
-			var key = $it0.next();
-			arr.push(key);
-		}
-		return arr;
-	}
-	,getPairs: function() {
-		var _g = this;
-		return this.getFieldNames().map(function(key) {
-			return { name : key, type : _g.fields.get(key)};
-		});
-	}
-	,__class__: ui.Schema
-};
-ui.SchemaProducer = function(getPairs,handler) {
-	this.getPairs = getPairs;
-	steamer.Producer.call(this,handler,false);
-};
-ui.SchemaProducer.__name__ = ["ui","SchemaProducer"];
-ui.SchemaProducer.__super__ = steamer.Producer;
-ui.SchemaProducer.prototype = $extend(steamer.Producer.prototype,{
-	getPairs: null
-	,feed: function(consumer) {
-		steamer.Producer.prototype.feed.call(this,consumer);
-		consumer.onPulse(steamer.Pulse.Emit(ui.SchemaEvent.ListFields(this.getPairs())));
-	}
-	,__class__: ui.SchemaProducer
-});
-ui.SchemaEvent = { __ename__ : ["ui","SchemaEvent"], __constructs__ : ["ListFields","AddField","DeleteField","RenameField","RetypeField"] };
-ui.SchemaEvent.ListFields = function(list) { var $x = ["ListFields",0,list]; $x.__enum__ = ui.SchemaEvent; $x.toString = $estr; return $x; };
-ui.SchemaEvent.AddField = function(name,type) { var $x = ["AddField",1,name,type]; $x.__enum__ = ui.SchemaEvent; $x.toString = $estr; return $x; };
-ui.SchemaEvent.DeleteField = function(name) { var $x = ["DeleteField",2,name]; $x.__enum__ = ui.SchemaEvent; $x.toString = $estr; return $x; };
-ui.SchemaEvent.RenameField = function(oldname,newname) { var $x = ["RenameField",3,oldname,newname]; $x.__enum__ = ui.SchemaEvent; $x.toString = $estr; return $x; };
-ui.SchemaEvent.RetypeField = function(name,type) { var $x = ["RetypeField",4,name,type]; $x.__enum__ = ui.SchemaEvent; $x.toString = $estr; return $x; };
-ui.SchemaType = { __ename__ : ["ui","SchemaType"], __constructs__ : ["ArrayType","BoolType","DateType","FloatType","ObjectType","StringType"] };
-ui.SchemaType.ArrayType = function(item) { var $x = ["ArrayType",0,item]; $x.__enum__ = ui.SchemaType; $x.toString = $estr; return $x; };
-ui.SchemaType.BoolType = ["BoolType",1];
-ui.SchemaType.BoolType.toString = $estr;
-ui.SchemaType.BoolType.__enum__ = ui.SchemaType;
-ui.SchemaType.DateType = ["DateType",2];
-ui.SchemaType.DateType.toString = $estr;
-ui.SchemaType.DateType.__enum__ = ui.SchemaType;
-ui.SchemaType.FloatType = ["FloatType",3];
-ui.SchemaType.FloatType.toString = $estr;
-ui.SchemaType.FloatType.__enum__ = ui.SchemaType;
-ui.SchemaType.ObjectType = function(fields) { var $x = ["ObjectType",4,fields]; $x.__enum__ = ui.SchemaType; $x.toString = $estr; return $x; };
-ui.SchemaType.StringType = ["StringType",5];
-ui.SchemaType.StringType.toString = $estr;
-ui.SchemaType.StringType.__enum__ = ui.SchemaType;
-ui.components = {};
-ui.components.Component = function(options) {
-	this.isAttached = false;
-	this.list = [];
-	this.properties = new ui.components.Properties(this);
-	if(null == options.template) throw "" + Std.string(this) + " needs a template";
-	this.el = dom.Html.parseList(options.template)[0];
-	if(null != options.classes) this.el.classList.add(options.classes);
-	if(null != options.parent) options.parent.add(this);
-};
-ui.components.Component.__name__ = ["ui","components","Component"];
-ui.components.Component.prototype = {
-	children: null
-	,isAttached: null
-	,parent: null
-	,properties: null
-	,el: null
-	,list: null
-	,appendTo: function(container) {
-		container.appendChild(this.el);
-		this.isAttached = true;
-	}
-	,detach: function() {
-		if(!this.isAttached) throw "Component is not attached";
-		this.el.parentElement.removeChild(this.el);
-		this.isAttached = false;
-	}
-	,destroy: function() {
-		if(null != this.parent) this.parent.remove(this);
-		if(this.isAttached) this.detach();
-		this.properties.removeAll();
-	}
-	,add: function(child) {
-		if(null != child.parent) child.parent.remove(child);
-		this.list.push(child);
-		child.parent = this;
-	}
-	,remove: function(child) {
-		if(!HxOverrides.remove(this.list,child)) throw "" + Std.string(child) + " is not a child of " + Std.string(this);
-		child.parent = null;
-	}
-	,get_children: function() {
-		return this.list;
-	}
-	,toString: function() {
-		return Type.getClassName(Type.getClass(this)).split(".").pop();
-	}
-	,__class__: ui.components.Component
-};
-ui.components.Properties = function(target) {
-	this.target = target;
-	this.properties = new haxe.ds.StringMap();
-};
-ui.components.Properties.__name__ = ["ui","components","Properties"];
-ui.components.Properties.prototype = {
-	properties: null
-	,target: null
-	,removeAll: function() {
-		var $it0 = this.properties.keys();
-		while( $it0.hasNext() ) {
-			var name = $it0.next();
-			this.remove(name);
-		}
-	}
-	,add: function(property) {
-		if(this.properties.exists(property.name)) throw "" + Std.string(this.target) + " already has a property " + Std.string(property);
-		this.properties.set(property.name,property);
-	}
-	,get: function(name) {
-		return this.properties.get(name);
-	}
-	,exists: function(name) {
-		return this.properties.exists(name);
-	}
-	,remove: function(name) {
-		if(!this.properties.exists(name)) throw "property \"" + name + "\" does not exist in " + Std.string(this.target);
-		this.properties.get(name).dispose();
-		this.properties.remove(name);
-	}
-	,__class__: ui.components.Properties
-};
-ui.properties = {};
-ui.properties.Property = function(component,name) {
-	this.component = component;
-	this.name = name;
-	this._dispose = this.init();
-	component.properties.add(this);
-};
-ui.properties.Property.__name__ = ["ui","properties","Property"];
-ui.properties.Property.prototype = {
-	component: null
-	,name: null
-	,_dispose: null
-	,init: function() {
-		throw "abstact function init, must override";
-	}
-	,dispose: function() {
-		this._dispose();
-		this.component.properties.remove(this.name);
-		this.component = null;
-	}
-	,toString: function() {
-		return Type.getClassName(Type.getClass(this)).split(".").pop();
-	}
-	,__class__: ui.properties.Property
-};
-ui.properties.Click = function(component) {
-	ui.properties.Property.call(this,component,"click");
-};
-ui.properties.Click.__name__ = ["ui","properties","Click"];
-ui.properties.Click.asClickable = function(component) {
-	var property = component.properties.get("click");
-	thx.Assert["is"](property,ui.properties.Click,null,{ fileName : "Click.hx", lineNumber : 12, className : "ui.properties.Click", methodName : "asClickable"});
-	return property;
-};
-ui.properties.Click.__super__ = ui.properties.Property;
-ui.properties.Click.prototype = $extend(ui.properties.Property.prototype,{
-	clicks: null
-	,init: function() {
-		var tuple = steamer.dom.Dom.produceEvent(this.component.el,"click");
-		this.clicks = tuple.producer;
-		return tuple.cancel;
-	}
-	,__class__: ui.properties.Click
-});
-ui.properties.Icon = function(component,defaultIcon) {
-	this.defaultIcon = defaultIcon;
-	ui.properties.Property.call(this,component,"icon");
-};
-ui.properties.Icon.__name__ = ["ui","properties","Icon"];
-ui.properties.Icon.asIcon = function(component) {
-	var property = component.properties.get("icon");
-	thx.Assert["is"](property,ui.properties.Icon,null,{ fileName : "Icon.hx", lineNumber : 12, className : "ui.properties.Icon", methodName : "asIcon"});
-	return property;
-};
-ui.properties.Icon.getCurrentIcon = function(el) {
-	var _g1 = 0;
-	var _g = el.classList.length;
-	while(_g1 < _g) {
-		var i = _g1++;
-		var className = el.classList.item(i);
-		if(HxOverrides.substr(className,0,3) == "fa-") return HxOverrides.substr(className,3,null);
-	}
-	return null;
-};
-ui.properties.Icon.__super__ = ui.properties.Property;
-ui.properties.Icon.prototype = $extend(ui.properties.Property.prototype,{
-	defaultIcon: null
-	,icon: null
-	,init: function() {
-		var _g = this;
-		var el = this.component.el;
-		var current = ui.properties.Icon.getCurrentIcon(el);
-		var original = current;
-		var needsFa = current == null;
-		this.icon = new steamer.Value(this.defaultIcon);
-		if(needsFa) el.classList.add("fa");
-		this.icon.feed({ onPulse : function(pulse) {
-			switch(pulse[1]) {
-			case 0:
-				var value = pulse[2];
-				if(null != current) el.classList.remove(current);
-				el.classList.add(current = "fa-" + value);
-				break;
-			case 1:
-				if(needsFa) el.classList.remove("fa");
-				el.classList.remove(current);
-				if(null != original) el.classList.add(original);
-				break;
-			default:
-			}
-		}});
-		return function() {
-			_g.icon.terminate();
-			_g.icon = null;
-		};
-	}
-	,__class__: ui.properties.Icon
-});
-ui.properties._PropertyName = {};
-ui.properties._PropertyName.PropertyName_Impl_ = function() { };
-ui.properties._PropertyName.PropertyName_Impl_.__name__ = ["ui","properties","_PropertyName","PropertyName_Impl_"];
-ui.properties._PropertyName.PropertyName_Impl_.fromProperty = function(property) {
-	return property.name;
-};
-ui.properties._PropertyName.PropertyName_Impl_.fromString = function(name) {
-	return name;
-};
-ui.properties._PropertyName.PropertyName_Impl_._new = function(name) {
-	return name;
-};
-ui.properties._PropertyName.PropertyName_Impl_.toString = function(this1) {
-	return this1;
-};
 function $iterator(o) { if( o instanceof Array ) return function() { return HxOverrides.iter(o); }; return typeof(o.iterator) == 'function' ? $bind(o,o.iterator) : o.iterator; }
 var $_, $fid = 0;
 function $bind(o,m) { if( m == null ) return null; if( m.__id__ == null ) m.__id__ = $fid++; var f; if( o.hx__closures__ == null ) o.hx__closures__ = {}; else f = o.hx__closures__[m.__id__]; if( f == null ) { f = function(){ return f.method.apply(f.scope, arguments); }; f.scope = o; f.method = m; o.hx__closures__[m.__id__] = f; } return f; }

@@ -1,8 +1,8 @@
 import dom.Dom;
-import ui.components.*;
-import ui.*;
+import sui.*;
+import sui.components.*;
+import sui.properties.*;
 import steamer.*;
-import ui.properties.*;
 
 class Main {
 	public static function main() {

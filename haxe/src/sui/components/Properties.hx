@@ -1,7 +1,7 @@
-package ui.components;
+package sui.components;
 
-import ui.properties.Property;
-import ui.properties.PropertyName;
+import sui.properties.Property;
+import sui.properties.PropertyName;
 
 class Properties {
 	var properties : Map<String, Property>;

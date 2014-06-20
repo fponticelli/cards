@@ -1,10 +1,10 @@
-package ui.properties;
+package sui.properties;
 
 import js.html.Element;
 import js.html.InputElement;
 import steamer.Pulse.End;
 import steamer.Value in V;
-import ui.components.Component;
+import sui.components.Component;
 import steamer.SimpleConsumer;
 using steamer.dom.Dom;
 import thx.Assert;

@@ -1,4 +1,4 @@
-package ui;
+package sui;
 
 enum SchemaType {
 	ArrayType(item : SchemaType);

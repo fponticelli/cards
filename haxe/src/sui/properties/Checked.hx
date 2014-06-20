@@ -1,9 +1,9 @@
-package ui.properties;
+package sui.properties;
 
 import js.html.Event;
 import steamer.Producer;
 import thx.Assert;
-import ui.components.Component;
+import sui.components.Component;
 using steamer.dom.Dom;
 
 class Checked extends Property {

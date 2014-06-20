@@ -1,8 +1,8 @@
-package ui;
+package sui;
 
 import steamer.Producer;
 import steamer.Pulse;
-import ui.Schema;
+import sui.Schema;
 
 class Model {
 	public var data(default, null) : Data;

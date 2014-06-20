@@ -1,8 +1,8 @@
-package ui.properties;
+package sui.properties;
 
-import ui.components.Component;
+import sui.components.Component;
 
-@:access(ui.components.Properties)
+@:access(sui.components.Properties)
 class Property {
 	public var component(default, null) : Component;
 	public var name(default, null) : String;

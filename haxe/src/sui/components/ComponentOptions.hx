@@ -1,4 +1,4 @@
-package ui.components;
+package sui.components;
 
 typedef ComponentOptions = {
 	?template : String,

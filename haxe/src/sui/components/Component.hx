@@ -1,4 +1,4 @@
-package ui.components;
+package sui.components;
 
 import dom.Dom;
 import js.html.Element;

@@ -1,8 +1,8 @@
-package ui.properties;
+package sui.properties;
 
 using steamer.dom.Dom;
 import steamer.Value;
-import ui.components.Component;
+import sui.components.Component;
 import thx.Assert;
 
 class ToggleAttribute extends Property {

@@ -1,4 +1,4 @@
-package ui.properties;
+package sui.properties;
 
 abstract PropertyName(String) {
 	@:from public inline static function fromProperty(property : Property)
