@@ -169,16 +169,17 @@ Main.main = function() {
 		var schema = new ui.Schema();
 		var data = new ui.Data({ name : "Franco", contacts : [{ type : "email", value : "franco.ponticelli@gmail.com"},{ type : "phone", value : "7206902488"}]});
 		var model = new ui.Model(data);
-		haxe.Log.trace("Hello World",{ fileName : "Main.hx", lineNumber : 26, className : "Main", methodName : "main"});
+		haxe.Log.trace("Hello World",{ fileName : "Main.hx", lineNumber : 23, className : "Main", methodName : "main"});
 		data.set("contacts[2]",{ type : "twitter", value : "fponticelli"});
 		data.set("contacts[3].type","skype");
 		data.set("contacts[3].value","francoponticelli");
-		haxe.Log.trace(data.toJSON(),{ fileName : "Main.hx", lineNumber : 30, className : "Main", methodName : "main"});
-		var component = ui.components.Button.withIcon("cubes",{ });
-		component.appendTo(container);
-		ui.properties.Click.asClickable(component).clicks.feed({ onPulse : function(e) {
-			haxe.Log.trace(e,{ fileName : "Main.hx", lineNumber : 36, className : "Main", methodName : "main"});
+		haxe.Log.trace(data.toJSON(),{ fileName : "Main.hx", lineNumber : 27, className : "Main", methodName : "main"});
+		var component = new ui.components.Component({ template : "<button/>"});
+		new ui.properties.Icon(component,"cubes");
+		new ui.properties.Click(component).clicks.feed({ onPulse : function(e) {
+			haxe.Log.trace(e,{ fileName : "Main.hx", lineNumber : 33, className : "Main", methodName : "main"});
 		}});
+		component.appendTo(container);
 	});
 };
 var IMap = function() { };
@@ -3079,21 +3080,6 @@ ui.components.Component.prototype = {
 	}
 	,__class__: ui.components.Component
 };
-ui.components.Button = function(options) {
-	if(null == options.template) options.template = ui.components.Button.template;
-	ui.components.Component.call(this,options);
-	new ui.properties.Click(this);
-};
-ui.components.Button.__name__ = ["ui","components","Button"];
-ui.components.Button.withIcon = function(iconName,options) {
-	var button = new ui.components.Button(options);
-	new ui.properties.Icon(button,iconName);
-	return button;
-};
-ui.components.Button.__super__ = ui.components.Component;
-ui.components.Button.prototype = $extend(ui.components.Component.prototype,{
-	__class__: ui.components.Button
-});
 ui.components.Properties = function(target) {
 	this.target = target;
 	this.properties = new haxe.ds.StringMap();
@@ -3239,45 +3225,6 @@ ui.properties._PropertyName.PropertyName_Impl_._new = function(name) {
 ui.properties._PropertyName.PropertyName_Impl_.toString = function(this1) {
 	return this1;
 };
-ui.properties.Value = function(component,eventName) {
-	this.eventName = eventName;
-	ui.properties.Property.call(this,component,"value");
-};
-ui.properties.Value.__name__ = ["ui","properties","Value"];
-ui.properties.Value.asValue = function(component) {
-	var property = component.properties.get("value");
-	thx.Assert["is"](property,ui.properties.Value,null,{ fileName : "Value.hx", lineNumber : 15, className : "ui.properties.Value", methodName : "asValue"});
-	return property;
-};
-ui.properties.Value.__super__ = ui.properties.Property;
-ui.properties.Value.prototype = $extend(ui.properties.Property.prototype,{
-	defaultValue: null
-	,eventName: null
-	,value: null
-	,init: function() {
-		var _g = this;
-		var el = this.component.el;
-		var defaultValue = el.value;
-		this.value = new steamer.Value(defaultValue);
-		var pair = steamer.dom.Dom.produceEvent(el,this.eventName);
-		pair.producer.feed(new steamer.SimpleConsumer(function(_) {
-			if(el.value != _g.value.get_value()) _g.value.set_value(el.value);
-		},function() {
-			el.value = defaultValue;
-		}));
-		this.value.feed(new steamer.SimpleConsumer(function(value) {
-			el.value = value;
-		},function() {
-			el.value = defaultValue;
-		}));
-		return function() {
-			pair.cancel();
-			_g.value.terminate();
-			_g.value = null;
-		};
-	}
-	,__class__: ui.properties.Value
-});
 function $iterator(o) { if( o instanceof Array ) return function() { return HxOverrides.iter(o); }; return typeof(o.iterator) == 'function' ? $bind(o,o.iterator) : o.iterator; }
 var $_, $fid = 0;
 function $bind(o,m) { if( m == null ) return null; if( m.__id__ == null ) m.__id__ = $fid++; var f; if( o.hx__closures__ == null ) o.hx__closures__ = {}; else f = o.hx__closures__[m.__id__]; if( f == null ) { f = function(){ return f.method.apply(f.scope, arguments); }; f.scope = o; f.method = m; o.hx__closures__[m.__id__] = f; } return f; }
@@ -3589,7 +3536,6 @@ thx.core.Strings.__digitsPattern = new EReg("^[0-9]+$","");
 thx.ref.EmptyParent.instance = new thx.ref.EmptyParent();
 thx.ref.Ref.reField = new EReg("^\\.?([^.\\[]+)","");
 thx.ref.Ref.reIndex = new EReg("^\\[(\\d+)\\]","");
-ui.components.Button.template = "<button></button>";
 Main.main();
 })(typeof window != "undefined" ? window : exports);
 

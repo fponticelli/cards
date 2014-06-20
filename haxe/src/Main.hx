@@ -3,9 +3,6 @@ import ui.components.*;
 import ui.*;
 import steamer.*;
 import ui.properties.*;
-using ui.properties.Click;
-using ui.properties.Icon;
-using ui.properties.Value;
 
 class Main {
 	public static function main() {
@@ -29,13 +26,14 @@ class Main {
 			data.set('contacts[3].value', 'francoponticelli');
 			trace(data.toJSON());
 
-			var component = Button.withIcon("cubes", {});
-			component.appendTo(container);
-			component.asClickable().clicks.feed({
+			var component = new Component({ template : '<button/>' });
+			new Icon(component, 'cubes');
+			new Click(component).clicks.feed({
 				onPulse : function(e) {
 					trace(e);
 				}
 			});
+			component.appendTo(container);
 		});
 	}
 }
