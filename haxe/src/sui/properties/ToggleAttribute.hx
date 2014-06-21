@@ -6,6 +6,12 @@ import sui.components.Component;
 import thx.Assert;
 
 class ToggleAttribute extends Property {
+	public static function createContentEditable(component : Component)
+		return new ToggleAttribute(component, 'contentEditable');
+
+	public static function asContentEditable(component : Component)
+		return asToggleAttribute(component, 'contentEditable');
+
 	public static function asToggleAttribute(component : Component, name : String) : ToggleAttributeImplementation {
 		var property = component.properties.get(name);
 		Assert.is(property, ToggleAttribute);
