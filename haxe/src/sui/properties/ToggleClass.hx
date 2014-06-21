@@ -33,8 +33,8 @@ class ToggleClass extends Property {
 		toggleClassName = new Value(className);
 		toggleClassName.feed(component.el.consumeToggleClass(className));
 		return function() {
-			visible.terminate();
-			visible = false;
+			toggleClassName.terminate();
+			toggleClassName = null;
 		};
 	}
 }

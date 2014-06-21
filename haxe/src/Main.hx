@@ -1,8 +1,9 @@
 import dom.Dom;
-import sui.*;
 import sui.components.*;
 import sui.properties.*;
 import steamer.*;
+import ui.*;
+import ui.Card;
 
 class Main {
 	public static function main() {
@@ -26,14 +27,8 @@ class Main {
 			data.set('contacts[3].value', 'francoponticelli');
 			trace(data.toJSON());
 
-			var component = new Component({ template : '<button/>' });
-			new Icon(component, 'cubes');
-			new Click(component).clicks.feed({
-				onPulse : function(e) {
-					trace(e);
-				}
-			});
-			component.appendTo(container);
+			// Card
+			Card.create(model, schema, container);
 		});
 	}
 }

@@ -8,7 +8,7 @@ import steamer.SimpleConsumer;
 import thx.Assert;
 
 class Text extends Property {
-	public static function asText(component : Component) : TextImplementation {
+	public static function asText(component : Component) : Text {
 		var property = component.properties.get('text');
 		Assert.is(property, Text);
 		return cast property;
@@ -19,13 +19,13 @@ class Text extends Property {
 
 	public function new(component : Component, defaultText : String) {
 		this.defaultText = defaultText;
-		super(component);
+		super(component, 'text');
 	}
 
 	override function init() : Void -> Void {
 		var el       = component.el,
 			original = el.innerText;
-		text = new Value(property.defaultText);
+		text = new Value(defaultText);
 		text.feed(new SimpleConsumer(
 			function(value) el.innerText = value,
 			function() el.innerText = original

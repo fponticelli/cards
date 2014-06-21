@@ -30,7 +30,7 @@ class Visible extends Property {
 		visible.feed(component.el.consumeToggleVisibility());
 		return function() {
 			visible.terminate();
-			visible = false;
+			visible = null;
 		};
 	}
 }

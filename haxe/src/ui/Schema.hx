@@ -1,10 +1,10 @@
-package sui;
+package ui;
 
 import steamer.Consumer;
 import steamer.Producer;
 import steamer.Pulse;
 import thx.Error;
-import sui.SchemaType;
+import ui.SchemaType;
 
 class Schema {
 	var fields : Map<String, SchemaType>;

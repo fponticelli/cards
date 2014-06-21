@@ -12,26 +12,28 @@ class ToggleAttribute extends Property {
 	public static function asContentEditable(component : Component)
 		return asToggleAttribute(component, 'contentEditable');
 
-	public static function asToggleAttribute(component : Component, name : String) : ToggleAttributeImplementation {
+	public static function asToggleAttribute(component : Component, name : String) : ToggleAttribute {
 		var property = component.properties.get(name);
 		Assert.is(property, ToggleAttribute);
 		return cast property;
 	}
 
-	public function new(component : Component, name : String, attributeName : String) {
+	public function new(component : Component, name : String, ?attributeName : String, defaultValue = true) {
 		this.attributeName = null == attributeName ? name : attributeName;
+		this.defaultValue = defaultValue;
 		super(component, name);
 	}
 
-	public var attributeName(default, null) : Bool;
+	public var defaultValue(default, null) : Bool;
+	public var attributeName(default, null) : String;
 	public var toggleAttributeName(default, null) : Value<Bool>;
 
 	override function init() : Void -> Void {
-		toggleAttributeName = new Value(attributeName);
+		toggleAttributeName = new Value(defaultValue);
 		toggleAttributeName.feed(component.el.consumeToggleAttribute(attributeName));
 		return function() {
-			visible.terminate();
-			visible = false;
+			toggleAttributeName.terminate();
+			toggleAttributeName = null;
 		};
 	}
 }

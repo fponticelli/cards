@@ -14,13 +14,24 @@ class Component {
 	public function new(options : ComponentOptions) {
 		list = [];
 		properties = new Properties(this);
-		if(null == options.template)
-			throw '$this needs a template';
-		el = Html.parse(options.template);
+		if(null == options.template) {
+			if(null == options.el)
+				throw '$this needs a template';
+			else {
+				el = options.el;
+				if(null != el.parentElement) {
+					isAttached = true;
+				}
+			}
+		} else {
+			el = Html.parse(options.template);
+		}
 		if(null != options.classes)
 			el.classList.add(options.classes);
 		if(null != options.parent)
 			options.parent.add(this);
+		if(null != options.container)
+			appendTo(options.container);
 	}
 
 	public function appendTo(container : Element) {
