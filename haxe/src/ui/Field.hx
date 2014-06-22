@@ -1,5 +1,6 @@
 package ui;
 
+import steamer.Producer;
 import sui.components.Component;
 import dom.Dom;
 import sui.components.ComponentOptions;
@@ -9,6 +10,7 @@ class Field {
 	public var component(default, null) : Component;
 	public var key(default, null) : TextEditor;
 	public var value(default, null) : TextEditor;
+	public var focus(default, null) : Producer<Bool>;
 
 	public function new(options : FieldOptions) {
 		if(null == options.template && null == options.el)
@@ -29,6 +31,8 @@ class Field {
 			parent : component,
 			defaultText : ''
 		});
+
+		focus = key.focus.merge(value.focus).debounce(20).distinct();
 	}
 }
 

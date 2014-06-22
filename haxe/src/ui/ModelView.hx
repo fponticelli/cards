@@ -3,6 +3,7 @@ package ui;
 import js.html.Element;
 using steamer.Consumer;
 using steamer.dom.Dom;
+import steamer.MultiProducer;
 import steamer.Producer;
 import steamer.Pulse;
 import sui.components.Component;
@@ -18,9 +19,14 @@ class ModelView {
 	public var schema(default, null) : Producer<SchemaEvent>;
 	public var data(default, null) : Producer<DataEvent>;
 	public var toolbar(default, null) : Toolbar;
+	public var currentField(default, null) : Null<Field>;
+
 	var feedSchema : Pulse<SchemaEvent> -> Void;
 	var feedData : Pulse<DataEvent> -> Void;
-	var fields : Map<String, Bool>;
+	var fields : Map<String, Field>;
+	var fieldFocus : MultiProducer<Field>;
+	var fieldBlur : MultiProducer<Field>;
+
 	public function new() {
 		component = new Component({
 			template : '<div class="modelview"></div>'
@@ -39,6 +45,7 @@ class ModelView {
 		buttonRemove.clicks.feed(function(_) {
 			trace('remove');
 		}.toConsumer());
+		buttonRemove.enabled.value = false;
 
 
 		this.feedSchema = function(_) {};
@@ -52,6 +59,12 @@ class ModelView {
 		});
 
 		fields = new Map();
+
+		fieldFocus = new MultiProducer();
+		fieldFocus.feed(function(field) {
+			this.currentField = field;
+			buttonRemove.enabled.value = null != field;
+		}.toConsumer());
 	}
 
 	public function guessFieldName() {
@@ -103,7 +116,8 @@ class ModelView {
 		field.value.text.map(function(text : String) {
 			return SetStringValue(field.value.text.value, text);
 		}).feed(Bus.feed(feedData));
+		fieldFocus.add(field.focus.map(function(v) return v ? field : null));
 
-		fields.set(name, true);
+		fields.set(name, field);
 	}
 }

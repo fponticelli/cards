@@ -7,11 +7,10 @@ import steamer.Value;
 import sui.properties.Text;
 using steamer.dom.Dom;
 
-class TextEditor implements Focusable {
+class TextEditor {
 	public var component(default, null) : Component;
 	public var text(default, null) : Value<String>;
-	public var focus(default, null) : Producer<Focusable>;
-	public var blur(default, null) : Producer<Focusable>;
+	public var focus(default, null) : Producer<Bool>;
 	var cancel : Void -> Void;
 	public function new(options : TextEditorOptions) {
 		if(null == options.defaultText)
@@ -32,11 +31,11 @@ class TextEditor implements Focusable {
 			.feed(this.text);
 
 		focus = focusPair.producer
-			.map(function(_) : Focusable return this);
-
-		blur = blurPair.producer
-			.map(function(_) : Focusable return this);
-
+			.map(function(_) return true)
+			.merge(
+				blurPair.producer
+					.map(function(_) return false)
+			);
 		cancel = function() {
 			text.dispose();
 			inputPair.cancel();

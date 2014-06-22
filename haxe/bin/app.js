@@ -1054,6 +1054,19 @@ promhx.error.PromiseError = { __ename__ : ["promhx","error","PromiseError"], __c
 promhx.error.PromiseError.AlreadyResolved = function(message) { var $x = ["AlreadyResolved",0,message]; $x.__enum__ = promhx.error.PromiseError; $x.toString = $estr; return $x; };
 promhx.error.PromiseError.DownstreamNotFullfilled = function(message) { var $x = ["DownstreamNotFullfilled",1,message]; $x.__enum__ = promhx.error.PromiseError; $x.toString = $estr; return $x; };
 var steamer = {};
+steamer.Consumers = function() { };
+steamer.Consumers.__name__ = ["steamer","Consumers"];
+steamer.Consumers.toConsumer = function(handler) {
+	return { onPulse : function(pulse) {
+		switch(pulse[1]) {
+		case 0:
+			var v = pulse[2];
+			handler(v);
+			break;
+		default:
+		}
+	}};
+};
 steamer.Producer = function(handler,endOnError) {
 	if(endOnError == null) endOnError = true;
 	this.handler = handler;
@@ -1185,7 +1198,7 @@ steamer.Producer.prototype = {
 	,log: function(prefix,posInfo) {
 		if(prefix == null) prefix = ""; else prefix = "" + prefix + ": ";
 		return this.map(function(v) {
-			haxe.Log.trace(v,{ fileName : "Producer.hx", lineNumber : 61, className : "steamer.Producer", methodName : "log", customParams : [posInfo]});
+			haxe.Log.trace(v,posInfo);
 			return v;
 		});
 	}
@@ -1338,6 +1351,20 @@ steamer.Producer.prototype = {
 			},forward));
 		},this.endOnError);
 	}
+	,debounce: function(delay) {
+		var _g = this;
+		var id = null;
+		return new steamer.Producer(function(forward) {
+			_g.feed(steamer.Bus.passOn(function(v) {
+				thx.Timer.clearTimer(id);
+				id = thx.Timer.setTimeout((function(f,a1) {
+					return function() {
+						return f(a1);
+					};
+				})(forward,steamer.Pulse.Emit(v)),delay);
+			},forward));
+		},this.endOnError);
+	}
 	,sampleBy: function(sampler) {
 		var _g = this;
 		var latest = null;
@@ -1354,6 +1381,43 @@ steamer.Producer.prototype = {
 	}
 	,__class__: steamer.Producer
 };
+steamer.MultiProducer = function(endOnError) {
+	if(endOnError == null) endOnError = true;
+	this.producers = [];
+	this.consumers = [];
+	steamer.Producer.call(this,function(pulse) {
+	},endOnError);
+};
+steamer.MultiProducer.__name__ = ["steamer","MultiProducer"];
+steamer.MultiProducer.__super__ = steamer.Producer;
+steamer.MultiProducer.prototype = $extend(steamer.Producer.prototype,{
+	producers: null
+	,consumers: null
+	,add: function(producer) {
+		this.producers.push(producer);
+		var _g = 0;
+		var _g1 = this.consumers;
+		while(_g < _g1.length) {
+			var consumer = _g1[_g];
+			++_g;
+			producer.feed(consumer);
+		}
+	}
+	,remove: function(producer) {
+		HxOverrides.remove(this.producers,producer);
+	}
+	,feed: function(consumer) {
+		var _g = 0;
+		var _g1 = this.producers;
+		while(_g < _g1.length) {
+			var producer = _g1[_g];
+			++_g;
+			producer.feed(consumer);
+		}
+		this.consumers.push(consumer);
+	}
+	,__class__: steamer.MultiProducer
+});
 steamer.Bus = function(emit,end,fail) {
 	this.emit = emit;
 	this.end = end;
@@ -1829,40 +1893,6 @@ sui.properties.Text.prototype = $extend(sui.properties.Property.prototype,{
 		};
 	}
 	,__class__: sui.properties.Text
-});
-sui.properties.ToggleAttribute = function(component,name,attributeName,defaultValue) {
-	if(defaultValue == null) defaultValue = true;
-	if(null == attributeName) this.attributeName = name; else this.attributeName = attributeName;
-	this.defaultValue = defaultValue;
-	sui.properties.Property.call(this,component,name);
-};
-sui.properties.ToggleAttribute.__name__ = ["sui","properties","ToggleAttribute"];
-sui.properties.ToggleAttribute.createContentEditable = function(component) {
-	return new sui.properties.ToggleAttribute(component,"contentEditable");
-};
-sui.properties.ToggleAttribute.asContentEditable = function(component) {
-	return sui.properties.ToggleAttribute.asToggleAttribute(component,"contentEditable");
-};
-sui.properties.ToggleAttribute.asToggleAttribute = function(component,name) {
-	var property = component.properties.get(name);
-	thx.Assert["is"](property,sui.properties.ToggleAttribute,null,{ fileName : "ToggleAttribute.hx", lineNumber : 17, className : "sui.properties.ToggleAttribute", methodName : "asToggleAttribute"});
-	return property;
-};
-sui.properties.ToggleAttribute.__super__ = sui.properties.Property;
-sui.properties.ToggleAttribute.prototype = $extend(sui.properties.Property.prototype,{
-	defaultValue: null
-	,attributeName: null
-	,toggleAttributeName: null
-	,init: function() {
-		var _g = this;
-		this.toggleAttributeName = new steamer.Value(this.defaultValue);
-		this.toggleAttributeName.feed(steamer.dom.Dom.consumeToggleAttribute(this.component.el,this.attributeName));
-		return function() {
-			_g.toggleAttributeName.terminate();
-			_g.toggleAttributeName = null;
-		};
-	}
-	,__class__: sui.properties.ToggleAttribute
 });
 thx.Error = function(message,stack,pos) {
 	this.message = message;
@@ -3022,15 +3052,21 @@ thx.ref.ValueRef.prototype = $extend(thx.ref.BaseRef.prototype,{
 var ui = {};
 ui.Button = function(text,icon) {
 	if(text == null) text = "";
+	var _g = this;
 	this.component = new sui.components.Component({ template : null == icon?"<button>" + text + "</button>":"<button class=\"fa fa-" + icon + "\">" + text + "</button>"});
 	var pair = steamer.dom.Dom.produceEvent(this.component.el,"click");
 	this.clicks = pair.producer;
 	this.cancel = pair.cancel;
+	this.enabled = new steamer.Value(true);
+	this.enabled.feed(steamer.Consumers.toConsumer(function(value) {
+		if(value) _g.component.el.removeAttribute("disabled"); else _g.component.el.setAttribute("disabled","disabled");
+	}));
 };
 ui.Button.__name__ = ["ui","Button"];
 ui.Button.prototype = {
 	component: null
 	,clicks: null
+	,enabled: null
 	,cancel: null
 	,destroy: function() {
 		this.cancel();
@@ -3122,14 +3158,20 @@ ui.DataEvent.SetFloatValue = function(path,value) { var $x = ["SetFloatValue",0,
 ui.DataEvent.SetDateValue = function(path,value) { var $x = ["SetDateValue",1,path,value]; $x.__enum__ = ui.DataEvent; $x.toString = $estr; return $x; };
 ui.DataEvent.SetStringValue = function(path,value) { var $x = ["SetStringValue",2,path,value]; $x.__enum__ = ui.DataEvent; $x.toString = $estr; return $x; };
 ui.DataEvent.SetBoolValue = function(path,value) { var $x = ["SetBoolValue",3,path,value]; $x.__enum__ = ui.DataEvent; $x.toString = $estr; return $x; };
-ui.Field = function() { };
-ui.Field.__name__ = ["ui","Field"];
-ui.Field.create = function(options) {
+ui.Field = function(options) {
 	if(null == options.template && null == options.el) options.template = "<div class=\"field\"><div class=\"key\"></div><div class=\"value\"></div></div>";
-	var field = new sui.components.Component(options);
-	var key = new sui.components.Component({ parent : field, el : dom.Query.first(".key",field.el)});
-	var value = new sui.components.Component({ parent : field, el : dom.Query.first(".value",field.el)});
-	return { field : field, key : key, value : value};
+	this.component = new sui.components.Component(options);
+	this.key = new ui.TextEditor({ el : dom.Query.first(".key",this.component.el), parent : this.component, defaultText : options.key});
+	this.value = new ui.TextEditor({ el : dom.Query.first(".value",this.component.el), parent : this.component, defaultText : ""});
+	this.focus = this.key.focus.merge(this.value.focus).debounce(20).distinct();
+};
+ui.Field.__name__ = ["ui","Field"];
+ui.Field.prototype = {
+	component: null
+	,key: null
+	,value: null
+	,focus: null
+	,__class__: ui.Field
 };
 ui.Model = function(data) {
 	var _g = this;
@@ -3202,25 +3244,31 @@ ui.ModelView = function() {
 	this.toolbar.component.appendTo(this.component.el);
 	var buttonAdd = new ui.Button("","plus");
 	buttonAdd.component.appendTo(this.toolbar.left);
-	buttonAdd.clicks.feed({ onPulse : function(pulse) {
-		switch(pulse[1]) {
-		case 0:
-			_g.addField(_g.guessFieldName(),ui.SchemaType.StringType);
-			break;
-		default:
-		}
-	}});
-	this.feedSchema = function(_) {
+	buttonAdd.clicks.feed(steamer.Consumers.toConsumer(function(_) {
+		_g.addField(_g.guessFieldName(),ui.SchemaType.StringType);
+	}));
+	var buttonRemove = new ui.Button("","minus");
+	buttonRemove.component.appendTo(this.toolbar.right);
+	buttonRemove.clicks.feed(steamer.Consumers.toConsumer(function(_1) {
+		haxe.Log.trace("remove",{ fileName : "ModelView.hx", lineNumber : 46, className : "ui.ModelView", methodName : "new"});
+	}));
+	buttonRemove.enabled.set_value(false);
+	this.feedSchema = function(_2) {
 	};
 	this.schema = new steamer.Producer(function(feed) {
 		_g.feedSchema = feed;
 	});
-	this.feedData = function(_1) {
+	this.feedData = function(_3) {
 	};
 	this.data = new steamer.Producer(function(feed1) {
 		_g.feedData = feed1;
 	});
 	this.fields = new haxe.ds.StringMap();
+	this.fieldFocus = new steamer.MultiProducer();
+	this.fieldFocus.feed(steamer.Consumers.toConsumer(function(field) {
+		_g.currentField = field;
+		buttonRemove.enabled.set_value(null != field);
+	}));
 };
 ui.ModelView.__name__ = ["ui","ModelView"];
 ui.ModelView.prototype = {
@@ -3228,9 +3276,12 @@ ui.ModelView.prototype = {
 	,schema: null
 	,data: null
 	,toolbar: null
+	,currentField: null
 	,feedSchema: null
 	,feedData: null
 	,fields: null
+	,fieldFocus: null
+	,fieldBlur: null
 	,guessFieldName: function() {
 		var id = 0;
 		var prefix = "field";
@@ -3248,18 +3299,11 @@ ui.ModelView.prototype = {
 	}
 	,addField: function(name,type) {
 		var _g = this;
-		var field = ui.Field.create({ parent : this.component});
-		field.field.appendTo(this.component.el);
-		var keyEditor = new sui.properties.Attribute(field.key,"contenteditable","contenteditable","true");
-		var keyText = new sui.properties.Text(field.key,name);
-		var keyInput = steamer.dom.Dom.produceEvent(field.key.el,"input");
-		keyInput.producer.map(function(_) {
-			return field.key.el.textContent;
-		}).feed(keyText.text);
+		var field = new ui.Field({ container : this.component.el, parent : this.component, key : name});
 		var oldname = null;
-		keyText.text.filter(function(newname) {
+		field.key.text.filter(function(newname) {
 			if(_g.fields.exists(newname)) {
-				keyText.text.set_value(oldname);
+				field.key.text.set_value(oldname);
 				return false;
 			} else return true;
 		}).map(function(newname1) {
@@ -3272,16 +3316,13 @@ ui.ModelView.prototype = {
 			oldname = newname1;
 			return r;
 		}).feed(steamer.Bus.feed(this.feedSchema));
-		var valueEditor = new sui.properties.Attribute(field.value,"contenteditable","contenteditable","true");
-		var valueText = new sui.properties.Text(field.value,"");
-		var valueInput = steamer.dom.Dom.produceEvent(field.value.el,"input");
-		valueInput.producer.map(function(_1) {
-			return field.value.el.textContent;
-		}).feed(valueText.text);
-		valueText.text.map(function(text) {
-			return ui.DataEvent.SetStringValue(keyText.text.get_value(),text);
+		field.value.text.map(function(text) {
+			return ui.DataEvent.SetStringValue(field.value.text.get_value(),text);
 		}).feed(steamer.Bus.feed(this.feedData));
-		this.fields.set(name,true);
+		this.fieldFocus.add(field.focus.map(function(v1) {
+			if(v1) return field; else return null;
+		}));
+		this.fields.set(name,field);
 	}
 	,__class__: ui.ModelView
 };
@@ -3386,6 +3427,44 @@ ui.SchemaType.ObjectType = function(fields) { var $x = ["ObjectType",4,fields]; 
 ui.SchemaType.StringType = ["StringType",5];
 ui.SchemaType.StringType.toString = $estr;
 ui.SchemaType.StringType.__enum__ = ui.SchemaType;
+ui.TextEditor = function(options) {
+	if(null == options.defaultText) options.defaultText = "";
+	if(null == options.el && null == options.template) options.template = "<span></span>";
+	this.component = new sui.components.Component(options);
+	this.component.el.setAttribute("contenteditable",true);
+	var text = new sui.properties.Text(this.component,options.defaultText);
+	var inputPair = steamer.dom.Dom.produceEvent(this.component.el,"input");
+	var focusPair = steamer.dom.Dom.produceEvent(this.component.el,"focus");
+	var blurPair = steamer.dom.Dom.produceEvent(this.component.el,"blur");
+	this.text = text.text;
+	inputPair.producer.map(function(_) {
+		return text.component.el.textContent;
+	}).feed(this.text);
+	this.focus = focusPair.producer.map(function(_1) {
+		return true;
+	}).merge(blurPair.producer.map(function(_2) {
+		return false;
+	}));
+	this.cancel = function() {
+		text.dispose();
+		inputPair.cancel();
+		focusPair.cancel();
+		blurPair.cancel();
+	};
+};
+ui.TextEditor.__name__ = ["ui","TextEditor"];
+ui.TextEditor.prototype = {
+	component: null
+	,text: null
+	,focus: null
+	,cancel: null
+	,destroy: function() {
+		this.text.terminate();
+		this.component.destroy();
+		this.cancel();
+	}
+	,__class__: ui.TextEditor
+};
 ui.Toolbar = function() {
 	this.component = new sui.components.Component({ template : "<header class=\"toolbar\"><div class=\"left\"></div><div class=\"center\"></div><div class=\"right\"></div></header>"});
 	this.left = dom.Query.first(".left",this.component.el);
