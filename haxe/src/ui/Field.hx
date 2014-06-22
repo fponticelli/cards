@@ -3,19 +3,35 @@ package ui;
 import sui.components.Component;
 import dom.Dom;
 import sui.components.ComponentOptions;
+import ui.TextEditor;
 
 class Field {
-	public static function create(options : ComponentOptions) {
+	public var component(default, null) : Component;
+	public var key(default, null) : TextEditor;
+	public var value(default, null) : TextEditor;
+
+	public function new(options : FieldOptions) {
 		if(null == options.template && null == options.el)
 			options.template = '<div class="field"><div class="key"></div><div class="value"></div></div>';
-		var field = new Component(options),
-			key   = new Component({ parent : field, el : Query.first('.key', field.el) }),
-			value = new Component({ parent : field, el : Query.first('.value', field.el) });
 
-		return {
-			field : field,
-			key   : key,
-			value : value
-		};
+		component = new Component(options);
+		// setup field key
+		key = new TextEditor({
+			el : Query.first('.key', component.el),
+			parent : component,
+			defaultText : options.key
+		});
+
+		// setup field value
+		// TODO support multiple editors data types
+		value = new TextEditor({
+			el : Query.first('.value', component.el),
+			parent : component,
+			defaultText : ''
+		});
 	}
+}
+
+typedef FieldOptions = {>ComponentOptions,
+	key : String
 }
