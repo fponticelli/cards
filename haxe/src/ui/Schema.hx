@@ -4,6 +4,7 @@ import steamer.Consumer;
 import steamer.Producer;
 import steamer.Pulse;
 import thx.Error;
+import ui.SchemaEvent;
 import ui.SchemaType;
 
 class Schema {
@@ -95,20 +96,6 @@ class SchemaProducer extends Producer<SchemaEvent> {
 		consumer.onPulse(Emit(ListFields(getPairs())));
 	}
 }
-
-enum SchemaEvent {
-	ListFields(list : Iterable<FieldPair>);
-	AddField(name : String, type : SchemaType);
-	DeleteField(name : String);
-	RenameField(oldname : String, newname : String);
-	RetypeField(name : String, type : SchemaType);
-}
-
-typedef FieldPair = {
-	name : String,
-	type : SchemaType
-}
-
 
 /*
 locations[0].city = "Milano"

@@ -1360,6 +1360,15 @@ steamer.Bus = function(emit,end,fail) {
 	this.fail = fail;
 };
 steamer.Bus.__name__ = ["steamer","Bus"];
+steamer.Bus.feed = function(forward) {
+	return new steamer.Bus(function(v) {
+		forward(steamer.Pulse.Emit(v));
+	},function() {
+		forward(steamer.Pulse.End);
+	},function(error) {
+		forward(steamer.Pulse.Fail(error));
+	});
+};
 steamer.Bus.passOn = function(emit,forward) {
 	return new steamer.Bus(emit,function() {
 		forward(steamer.Pulse.End);
@@ -1528,42 +1537,6 @@ steamer.Value.prototype = $extend(steamer.Producer.prototype,{
 	}
 	,__class__: steamer.Value
 });
-steamer.consumers = {};
-steamer.consumers.LoggerConsumer = function(prefix) {
-	this.prefix = prefix;
-};
-steamer.consumers.LoggerConsumer.__name__ = ["steamer","consumers","LoggerConsumer"];
-steamer.consumers.LoggerConsumer.log = function(v) {
-	haxe.Log.trace(v,{ fileName : "LoggerConsumer.hx", lineNumber : 26, className : "steamer.consumers.LoggerConsumer", methodName : "log"});
-};
-steamer.consumers.LoggerConsumer.warn = function(v) {
-	haxe.Log.trace("[W] " + v,{ fileName : "LoggerConsumer.hx", lineNumber : 28, className : "steamer.consumers.LoggerConsumer", methodName : "warn"});
-};
-steamer.consumers.LoggerConsumer.error = function(v) {
-	haxe.Log.trace("[E] " + v,{ fileName : "LoggerConsumer.hx", lineNumber : 30, className : "steamer.consumers.LoggerConsumer", methodName : "error"});
-};
-steamer.consumers.LoggerConsumer.prototype = {
-	prefix: null
-	,onPulse: function(pulse) {
-		switch(pulse[1]) {
-		case 0:
-			var v = pulse[2];
-			steamer.consumers.LoggerConsumer.log(this.p(v));
-			break;
-		case 1:
-			steamer.consumers.LoggerConsumer.warn(this.p("End"));
-			break;
-		case 2:
-			var err = pulse[2];
-			steamer.consumers.LoggerConsumer.error(this.p(Std.string(err)));
-			break;
-		}
-	}
-	,p: function(v) {
-		return (null == this.prefix?"":this.prefix + ": ") + v;
-	}
-	,__class__: steamer.consumers.LoggerConsumer
-};
 steamer.dom = {};
 steamer.dom.Dom = function() { };
 steamer.dom.Dom.__name__ = ["steamer","dom","Dom"];
@@ -3064,7 +3037,9 @@ ui.Card.__name__ = ["ui","Card"];
 ui.Card.create = function(model,schema,container) {
 	var card = new sui.components.Component({ template : "<div class=\"card\"><div class=\"doc\"></div><aside><div class=\"context\"></div><div class=\"model\"></div></aside></div>"});
 	var context = dom.Query.first(".context",card.el);
-	ui.ModelUI.create(model,schema,dom.Query.first(".model",card.el));
+	var modelView = new ui.ModelView();
+	modelView.component.appendTo(dom.Query.first(".model",card.el));
+	modelView.addField("name",ui.SchemaType.StringType);
 	card.appendTo(container);
 };
 ui.Data = function(data) {
@@ -3137,6 +3112,11 @@ ui.Data.prototype = {
 	}
 	,__class__: ui.Data
 };
+ui.DataEvent = { __ename__ : ["ui","DataEvent"], __constructs__ : ["SetFloatValue","SetDateValue","SetStringValue","SetBoolValue"] };
+ui.DataEvent.SetFloatValue = function(path,value) { var $x = ["SetFloatValue",0,path,value]; $x.__enum__ = ui.DataEvent; $x.toString = $estr; return $x; };
+ui.DataEvent.SetDateValue = function(path,value) { var $x = ["SetDateValue",1,path,value]; $x.__enum__ = ui.DataEvent; $x.toString = $estr; return $x; };
+ui.DataEvent.SetStringValue = function(path,value) { var $x = ["SetStringValue",2,path,value]; $x.__enum__ = ui.DataEvent; $x.toString = $estr; return $x; };
+ui.DataEvent.SetBoolValue = function(path,value) { var $x = ["SetBoolValue",3,path,value]; $x.__enum__ = ui.DataEvent; $x.toString = $estr; return $x; };
 ui.Doc = function() { };
 ui.Doc.__name__ = ["ui","Doc"];
 ui.Doc.create = function(options) {
@@ -3237,19 +3217,27 @@ ui.Model.prototype = {
 	,__class__: ui.Model
 };
 ui.ModelChange = { __ename__ : ["ui","ModelChange"], __constructs__ : [] };
-ui.ModelUI = function() { };
-ui.ModelUI.__name__ = ["ui","ModelUI"];
-ui.ModelUI.create = function(model,schema,container) {
-	var modelView = new ui.ModelView();
-	modelView.component.appendTo(container);
-	modelView.addField("name",ui.SchemaType.StringType);
-};
 ui.ModelView = function() {
+	var _g = this;
 	this.component = new sui.components.Component({ template : "<div class=\"modelview\"></div>"});
+	this.feedSchema = function(_) {
+	};
+	this.schema = new steamer.Producer(function(feed) {
+		_g.feedSchema = feed;
+	});
+	this.feedData = function(_1) {
+	};
+	this.data = new steamer.Producer(function(feed1) {
+		_g.feedData = feed1;
+	});
 };
 ui.ModelView.__name__ = ["ui","ModelView"];
 ui.ModelView.prototype = {
 	component: null
+	,schema: null
+	,data: null
+	,feedSchema: null
+	,feedData: null
 	,addField: function(name,type) {
 		var field = ui.Field.create({ parent : this.component});
 		field.field.appendTo(this.component.el);
@@ -3259,7 +3247,21 @@ ui.ModelView.prototype = {
 		keyInput.producer.map(function(_) {
 			return field.key.el.textContent;
 		}).feed(keyText.text);
-		keyText.text.feed(new steamer.consumers.LoggerConsumer("input"));
+		var oldname = null;
+		keyText.text.map(function(newname) {
+			var r = ui.SchemaEvent.RenameField(oldname,newname);
+			oldname = newname;
+			return r;
+		}).feed(steamer.Bus.feed(this.feedSchema));
+		var valueEditor = new sui.properties.Attribute(field.value,"contenteditable","contenteditable","true");
+		var valueText = new sui.properties.Text(field.value,"");
+		var valueInput = steamer.dom.Dom.produceEvent(field.value.el,"input");
+		valueInput.producer.map(function(_1) {
+			return field.value.el.textContent;
+		}).feed(valueText.text);
+		valueText.text.map(function(text) {
+			return ui.DataEvent.SetStringValue(keyText.text.get_value(),text);
+		}).feed(steamer.Bus.feed(this.feedData));
 	}
 	,__class__: ui.ModelView
 };
@@ -3276,7 +3278,7 @@ ui.Schema.prototype = {
 	,stream: null
 	,feed: null
 	,add: function(name,type) {
-		if(this.fields.exists(name)) throw new thx.Error("Schema already contains a field \"" + name + "\"",null,{ fileName : "Schema.hx", lineNumber : 23, className : "ui.Schema", methodName : "add"});
+		if(this.fields.exists(name)) throw new thx.Error("Schema already contains a field \"" + name + "\"",null,{ fileName : "Schema.hx", lineNumber : 24, className : "ui.Schema", methodName : "add"});
 		this.fields.set(name,type);
 		this.feed(steamer.Pulse.Emit(ui.SchemaEvent.AddField(name,type)));
 	}
@@ -3290,19 +3292,19 @@ ui.Schema.prototype = {
 		this.feed(steamer.Pulse.Emit(ui.SchemaEvent.ListFields(list.slice())));
 	}
 	,'delete': function(name) {
-		if(!this.fields.exists(name)) throw new thx.Error("Schema does not contain a field \"" + name + "\"",null,{ fileName : "Schema.hx", lineNumber : 40, className : "ui.Schema", methodName : "delete"});
+		if(!this.fields.exists(name)) throw new thx.Error("Schema does not contain a field \"" + name + "\"",null,{ fileName : "Schema.hx", lineNumber : 41, className : "ui.Schema", methodName : "delete"});
 		this.fields.remove(name);
 		this.feed(steamer.Pulse.Emit(ui.SchemaEvent.DeleteField(name)));
 	}
 	,rename: function(oldname,newname) {
-		if(!this.fields.exists(oldname)) throw new thx.Error("Schema does not contain a field \"" + oldname + "\"",null,{ fileName : "Schema.hx", lineNumber : 47, className : "ui.Schema", methodName : "rename"});
+		if(!this.fields.exists(oldname)) throw new thx.Error("Schema does not contain a field \"" + oldname + "\"",null,{ fileName : "Schema.hx", lineNumber : 48, className : "ui.Schema", methodName : "rename"});
 		var type = this.fields.get(oldname);
 		this.fields.remove(oldname);
 		this.fields.set(newname,type);
 		this.feed(steamer.Pulse.Emit(ui.SchemaEvent.RenameField(oldname,newname)));
 	}
 	,retype: function(name,type) {
-		if(!this.fields.exists(name)) throw new thx.Error("Schema does not contain a field \"" + name + "\"",null,{ fileName : "Schema.hx", lineNumber : 56, className : "ui.Schema", methodName : "retype"});
+		if(!this.fields.exists(name)) throw new thx.Error("Schema does not contain a field \"" + name + "\"",null,{ fileName : "Schema.hx", lineNumber : 57, className : "ui.Schema", methodName : "retype"});
 		this.fields.set(name,type);
 		this.feed(steamer.Pulse.Emit(ui.SchemaEvent.RetypeField(name,type)));
 	}
@@ -3624,15 +3626,6 @@ var global = window;
     }
 }(typeof global === "object" && global ? global : this));
 ;
-steamer.consumers.LoggerConsumer.log = function(v) {
-	console.log(v);
-};
-steamer.consumers.LoggerConsumer.warn = function(v1) {
-	console.warn(v1);
-};
-steamer.consumers.LoggerConsumer.error = function(v2) {
-	console.error(v2);
-};
 var posToString = function(pos) {
 	return pos;
 };
