@@ -2,7 +2,6 @@ package ui;
 
 import js.html.Element;
 import sui.components.Component;
-import ui.Doc;
 import dom.Dom;
 
 class Card {
@@ -15,8 +14,6 @@ class Card {
 			modelView = new ModelView();
 
 		modelView.component.appendTo(Query.first('.model', card.el));
-
-		modelView.addField("name", StringType);
 
 		card.appendTo(container);
 	}

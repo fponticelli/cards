@@ -1646,18 +1646,6 @@ steamer.producers.Interval.prototype = $extend(steamer.Producer.prototype,{
 	__class__: steamer.producers.Interval
 });
 var sui = {};
-sui.Footer = function() { };
-sui.Footer.__name__ = ["sui","Footer"];
-sui.Footer.create = function() {
-	var footer = new sui.components.Component({ template : "<footer/>"});
-	return { footer : footer};
-};
-sui.Toolbar = function() { };
-sui.Toolbar.__name__ = ["sui","Toolbar"];
-sui.Toolbar.create = function() {
-	var toolbar = new sui.components.Component({ template : "<header class=\"toolbar\"><div class=\"left\"/><div class=\"center\"/><div class=\"right\"/></header>"});
-	return { toolbar : toolbar, left : dom.Query.first(".left",toolbar.el), center : dom.Query.first(".center",toolbar.el), right : dom.Query.first(".right",toolbar.el)};
-};
 sui.components = {};
 sui.components.Component = function(options) {
 	this.isAttached = false;
@@ -3032,6 +3020,24 @@ thx.ref.ValueRef.prototype = $extend(thx.ref.BaseRef.prototype,{
 	,__class__: thx.ref.ValueRef
 });
 var ui = {};
+ui.Button = function(text,icon) {
+	if(text == null) text = "";
+	this.component = new sui.components.Component({ template : null == icon?"<button>" + text + "</button>":"<button class=\"fa fa-" + icon + "\">" + text + "</button>"});
+	var pair = steamer.dom.Dom.produceEvent(this.component.el,"click");
+	this.clicks = pair.producer;
+	this.cancel = pair.cancel;
+};
+ui.Button.__name__ = ["ui","Button"];
+ui.Button.prototype = {
+	component: null
+	,clicks: null
+	,cancel: null
+	,destroy: function() {
+		this.cancel();
+		this.component.destroy();
+	}
+	,__class__: ui.Button
+};
 ui.Card = function() { };
 ui.Card.__name__ = ["ui","Card"];
 ui.Card.create = function(model,schema,container) {
@@ -3039,7 +3045,6 @@ ui.Card.create = function(model,schema,container) {
 	var context = dom.Query.first(".context",card.el);
 	var modelView = new ui.ModelView();
 	modelView.component.appendTo(dom.Query.first(".model",card.el));
-	modelView.addField("name",ui.SchemaType.StringType);
 	card.appendTo(container);
 };
 ui.Data = function(data) {
@@ -3117,33 +3122,6 @@ ui.DataEvent.SetFloatValue = function(path,value) { var $x = ["SetFloatValue",0,
 ui.DataEvent.SetDateValue = function(path,value) { var $x = ["SetDateValue",1,path,value]; $x.__enum__ = ui.DataEvent; $x.toString = $estr; return $x; };
 ui.DataEvent.SetStringValue = function(path,value) { var $x = ["SetStringValue",2,path,value]; $x.__enum__ = ui.DataEvent; $x.toString = $estr; return $x; };
 ui.DataEvent.SetBoolValue = function(path,value) { var $x = ["SetBoolValue",3,path,value]; $x.__enum__ = ui.DataEvent; $x.toString = $estr; return $x; };
-ui.Doc = function() { };
-ui.Doc.__name__ = ["ui","Doc"];
-ui.Doc.create = function(options) {
-	var doc = new sui.components.Component(options);
-	var toolbar = ui.DocToolbar.create();
-	var view = ui.DocView.create();
-	var footer = ui.DocFooter.create();
-	toolbar.toolbar.toolbar.appendTo(doc.el);
-	view.view.appendTo(doc.el);
-	footer.footer.footer.appendTo(doc.el);
-	return { doc : doc, toolbarui : toolbar, viewui : view, footerui : footer};
-};
-ui.DocFooter = function() { };
-ui.DocFooter.__name__ = ["ui","DocFooter"];
-ui.DocFooter.create = function() {
-	return { footer : sui.Footer.create()};
-};
-ui.DocToolbar = function() { };
-ui.DocToolbar.__name__ = ["ui","DocToolbar"];
-ui.DocToolbar.create = function() {
-	return { toolbar : sui.Toolbar.create()};
-};
-ui.DocView = function() { };
-ui.DocView.__name__ = ["ui","DocView"];
-ui.DocView.create = function() {
-	return { view : new sui.components.Component({ template : "<article class=\"docview\"/>"})};
-};
 ui.Field = function() { };
 ui.Field.__name__ = ["ui","Field"];
 ui.Field.create = function(options) {
@@ -3220,6 +3198,18 @@ ui.ModelChange = { __ename__ : ["ui","ModelChange"], __constructs__ : [] };
 ui.ModelView = function() {
 	var _g = this;
 	this.component = new sui.components.Component({ template : "<div class=\"modelview\"></div>"});
+	this.toolbar = new ui.Toolbar();
+	this.toolbar.component.appendTo(this.component.el);
+	var buttonAdd = new ui.Button("","plus");
+	buttonAdd.component.appendTo(this.toolbar.left);
+	buttonAdd.clicks.feed({ onPulse : function(pulse) {
+		switch(pulse[1]) {
+		case 0:
+			_g.addField(_g.guessFieldName(),ui.SchemaType.StringType);
+			break;
+		default:
+		}
+	}});
 	this.feedSchema = function(_) {
 	};
 	this.schema = new steamer.Producer(function(feed) {
@@ -3230,15 +3220,34 @@ ui.ModelView = function() {
 	this.data = new steamer.Producer(function(feed1) {
 		_g.feedData = feed1;
 	});
+	this.fields = new haxe.ds.StringMap();
 };
 ui.ModelView.__name__ = ["ui","ModelView"];
 ui.ModelView.prototype = {
 	component: null
 	,schema: null
 	,data: null
+	,toolbar: null
 	,feedSchema: null
 	,feedData: null
+	,fields: null
+	,guessFieldName: function() {
+		var id = 0;
+		var prefix = "field";
+		var t;
+		var assemble = function(id1) {
+			if(id1 > 0) return [prefix,"" + id1].join("_"); else return prefix;
+		};
+		while((function($this) {
+			var $r;
+			var key = t = assemble(id);
+			$r = $this.fields.exists(key);
+			return $r;
+		}(this))) id++;
+		return t;
+	}
 	,addField: function(name,type) {
+		var _g = this;
 		var field = ui.Field.create({ parent : this.component});
 		field.field.appendTo(this.component.el);
 		var keyEditor = new sui.properties.Attribute(field.key,"contenteditable","contenteditable","true");
@@ -3248,9 +3257,19 @@ ui.ModelView.prototype = {
 			return field.key.el.textContent;
 		}).feed(keyText.text);
 		var oldname = null;
-		keyText.text.map(function(newname) {
-			var r = ui.SchemaEvent.RenameField(oldname,newname);
-			oldname = newname;
+		keyText.text.filter(function(newname) {
+			if(_g.fields.exists(newname)) {
+				keyText.text.set_value(oldname);
+				return false;
+			} else return true;
+		}).map(function(newname1) {
+			if(null != oldname) {
+				var v = _g.fields.get(oldname);
+				_g.fields.remove(oldname);
+				_g.fields.set(newname1,v);
+			}
+			var r = ui.SchemaEvent.RenameField(oldname,newname1);
+			oldname = newname1;
 			return r;
 		}).feed(steamer.Bus.feed(this.feedSchema));
 		var valueEditor = new sui.properties.Attribute(field.value,"contenteditable","contenteditable","true");
@@ -3262,6 +3281,7 @@ ui.ModelView.prototype = {
 		valueText.text.map(function(text) {
 			return ui.DataEvent.SetStringValue(keyText.text.get_value(),text);
 		}).feed(steamer.Bus.feed(this.feedData));
+		this.fields.set(name,true);
 	}
 	,__class__: ui.ModelView
 };
@@ -3366,6 +3386,20 @@ ui.SchemaType.ObjectType = function(fields) { var $x = ["ObjectType",4,fields]; 
 ui.SchemaType.StringType = ["StringType",5];
 ui.SchemaType.StringType.toString = $estr;
 ui.SchemaType.StringType.__enum__ = ui.SchemaType;
+ui.Toolbar = function() {
+	this.component = new sui.components.Component({ template : "<header class=\"toolbar\"><div class=\"left\"></div><div class=\"center\"></div><div class=\"right\"></div></header>"});
+	this.left = dom.Query.first(".left",this.component.el);
+	this.center = dom.Query.first(".center",this.component.el);
+	this.right = dom.Query.first(".right",this.component.el);
+};
+ui.Toolbar.__name__ = ["ui","Toolbar"];
+ui.Toolbar.prototype = {
+	component: null
+	,left: null
+	,center: null
+	,right: null
+	,__class__: ui.Toolbar
+};
 function $iterator(o) { if( o instanceof Array ) return function() { return HxOverrides.iter(o); }; return typeof(o.iterator) == 'function' ? $bind(o,o.iterator) : o.iterator; }
 var $_, $fid = 0;
 function $bind(o,m) { if( m == null ) return null; if( m.__id__ == null ) m.__id__ = $fid++; var f; if( o.hx__closures__ == null ) o.hx__closures__ = {}; else f = o.hx__closures__[m.__id__]; if( f == null ) { f = function(){ return f.method.apply(f.scope, arguments); }; f.scope = o; f.method = m; o.hx__closures__[m.__id__] = f; } return f; }
