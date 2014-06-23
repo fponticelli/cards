@@ -31,8 +31,17 @@ class Field {
 			parent : component,
 			defaultText : ''
 		});
+		// 250 is kind of a magic value and it is enough
+		// to be able to click on a button
+		// and not have lost focus in the meanwhile
+		focus = key.focus.merge(value.focus).debounce(250).distinct();
+	}
 
-		focus = key.focus.merge(value.focus).debounce(20).distinct();
+	public function destroy() {
+		component.destroy();
+		key = null;
+		value = null;
+		focus = null;
 	}
 }
 

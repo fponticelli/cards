@@ -3163,7 +3163,7 @@ ui.Field = function(options) {
 	this.component = new sui.components.Component(options);
 	this.key = new ui.TextEditor({ el : dom.Query.first(".key",this.component.el), parent : this.component, defaultText : options.key});
 	this.value = new ui.TextEditor({ el : dom.Query.first(".value",this.component.el), parent : this.component, defaultText : ""});
-	this.focus = this.key.focus.merge(this.value.focus).debounce(20).distinct();
+	this.focus = this.key.focus.merge(this.value.focus).debounce(250).distinct();
 };
 ui.Field.__name__ = ["ui","Field"];
 ui.Field.prototype = {
@@ -3171,6 +3171,12 @@ ui.Field.prototype = {
 	,key: null
 	,value: null
 	,focus: null
+	,destroy: function() {
+		this.component.destroy();
+		this.key = null;
+		this.value = null;
+		this.focus = null;
+	}
 	,__class__: ui.Field
 };
 ui.Model = function(data) {
@@ -3250,7 +3256,7 @@ ui.ModelView = function() {
 	var buttonRemove = new ui.Button("","minus");
 	buttonRemove.component.appendTo(this.toolbar.right);
 	buttonRemove.clicks.feed(steamer.Consumers.toConsumer(function(_1) {
-		haxe.Log.trace("remove",{ fileName : "ModelView.hx", lineNumber : 46, className : "ui.ModelView", methodName : "new"});
+		_g.removeField(_g.currentField);
 	}));
 	buttonRemove.enabled.set_value(false);
 	this.feedSchema = function(_2) {
@@ -3296,6 +3302,16 @@ ui.ModelView.prototype = {
 			return $r;
 		}(this))) id++;
 		return t;
+	}
+	,removeFieldByName: function(name) {
+		var field = this.fields.get(name);
+		this.removeField(field);
+	}
+	,removeField: function(field) {
+		thx.Assert.notNull(field,"when removing a field it should not be null",{ fileName : "ModelView.hx", lineNumber : 87, className : "ui.ModelView", methodName : "removeField"});
+		var name = field.key.text.get_value();
+		field.destroy();
+		this.fields.remove(name);
 	}
 	,addField: function(name,type) {
 		var _g = this;

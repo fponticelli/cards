@@ -9,6 +9,7 @@ import steamer.Pulse;
 import sui.components.Component;
 import sui.properties.Attribute;
 import sui.properties.Text;
+import thx.Assert;
 import ui.DataEvent;
 import ui.SchemaEvent;
 import ui.SchemaType;
@@ -43,7 +44,7 @@ class ModelView {
 		var buttonRemove = new Button('', 'minus');
 		buttonRemove.component.appendTo(toolbar.right);
 		buttonRemove.clicks.feed(function(_) {
-			trace('remove');
+			removeField(currentField);
 		}.toConsumer());
 		buttonRemove.enabled.value = false;
 
@@ -75,6 +76,18 @@ class ModelView {
 			return id > 0 ? [prefix, '$id'].join('_') : prefix;
 		while(fields.exists(t = assemble(id))) id++;
 		return t;
+	}
+
+	public function removeFieldByName(name : String) {
+		var field = fields.get(name);
+		removeField(field);
+	}
+
+	public function removeField(field : Field) {
+		Assert.notNull(field, 'when removing a field it should not be null');
+		var name = field.key.text.value;
+		field.destroy();
+		fields.remove(name);
 	}
 
 	public function addField(name : String, type : SchemaType) {

@@ -5,7 +5,7 @@
 + "remove field" button in toolbar
 + implement current field
 + disable right context buttons if no current field
-- implement modelview.removeField()
++ implement modelview.removeField()
 
 MV: monitor changes in model
 MV: monitor changes in schema
