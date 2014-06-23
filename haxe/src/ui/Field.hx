@@ -4,6 +4,7 @@ import steamer.Producer;
 import sui.components.Component;
 import dom.Dom;
 import sui.components.ComponentOptions;
+import sui.properties.ToggleClass;
 import ui.TextEditor;
 
 class Field {
@@ -11,6 +12,8 @@ class Field {
 	public var key(default, null) : TextEditor;
 	public var value(default, null) : TextEditor;
 	public var focus(default, null) : Producer<Bool>;
+
+	var classActive : ToggleClass;
 
 	public function new(options : FieldOptions) {
 		if(null == options.template && null == options.el)
@@ -34,10 +37,14 @@ class Field {
 		// 250 is kind of a magic value and it is enough
 		// to be able to click on a button
 		// and not have lost focus in the meanwhile
-		focus = key.focus.merge(value.focus).debounce(250).distinct();
+		var f = key.focus.merge(value.focus);
+		focus = f.debounce(250).distinct();
+		classActive = new ToggleClass(component, 'active');
+		f.log().feed(classActive.toggleClassName);
 	}
 
 	public function destroy() {
+		classActive.dispose();
 		component.destroy();
 		key = null;
 		value = null;

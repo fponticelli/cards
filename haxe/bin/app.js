@@ -1940,6 +1940,46 @@ sui.properties.Text.prototype = $extend(sui.properties.Property.prototype,{
 	}
 	,__class__: sui.properties.Text
 });
+sui.properties.ToggleClass = function(component,name,className,defaultHasClass) {
+	if(defaultHasClass == null) defaultHasClass = false;
+	this.defaultHasClass = defaultHasClass;
+	if(null == className) this.className = name; else this.className = className;
+	sui.properties.Property.call(this,component,name);
+};
+sui.properties.ToggleClass.__name__ = ["sui","properties","ToggleClass"];
+sui.properties.ToggleClass.asToggleEmphasis = function(component,name) {
+	return sui.properties.ToggleClass.asToggleClass(component,"emphasis");
+};
+sui.properties.ToggleClass.asToggleStrong = function(component,name) {
+	return sui.properties.ToggleClass.asToggleClass(component,"strong");
+};
+sui.properties.ToggleClass.asToggleClass = function(component,name) {
+	var property = component.properties.get(name);
+	thx.Assert["is"](property,sui.properties.ToggleClass,null,{ fileName : "ToggleClass.hx", lineNumber : 15, className : "sui.properties.ToggleClass", methodName : "asToggleClass"});
+	return property;
+};
+sui.properties.ToggleClass.createStrong = function(component) {
+	return new sui.properties.ToggleClass(component,"strong");
+};
+sui.properties.ToggleClass.createEmphasis = function(component) {
+	return new sui.properties.ToggleClass(component,"emphasis");
+};
+sui.properties.ToggleClass.__super__ = sui.properties.Property;
+sui.properties.ToggleClass.prototype = $extend(sui.properties.Property.prototype,{
+	defaultHasClass: null
+	,className: null
+	,toggleClassName: null
+	,init: function() {
+		var _g = this;
+		this.toggleClassName = new steamer.Value(this.defaultHasClass);
+		this.toggleClassName.feed(steamer.dom.Dom.consumeToggleClass(this.component.el,this.className));
+		return function() {
+			_g.toggleClassName.terminate();
+			_g.toggleClassName = null;
+		};
+	}
+	,__class__: sui.properties.ToggleClass
+});
 thx.Error = function(message,stack,pos) {
 	this.message = message;
 	if(null == stack) {
@@ -3115,10 +3155,16 @@ ui.Article.prototype = {
 ui.Block = function(options) {
 	if(null == options.el && null == options.template) options.template = "<section class=\"block\"></div>";
 	this.editor = new ui.TextEditor(options);
+	this.classActive = new sui.properties.ToggleClass(this.editor.component,"active");
+	this.editor.focus.feed(this.classActive.toggleClassName);
 };
 ui.Block.__name__ = ["ui","Block"];
 ui.Block.prototype = {
 	editor: null
+	,classActive: null
+	,destroy: function() {
+		this.editor.destroy();
+	}
 	,__class__: ui.Block
 };
 ui.Button = function(text,icon) {
@@ -3263,7 +3309,10 @@ ui.Field = function(options) {
 	this.component = new sui.components.Component(options);
 	this.key = new ui.TextEditor({ el : dom.Query.first(".key",this.component.el), parent : this.component, defaultText : options.key});
 	this.value = new ui.TextEditor({ el : dom.Query.first(".value",this.component.el), parent : this.component, defaultText : ""});
-	this.focus = this.key.focus.merge(this.value.focus).debounce(250).distinct();
+	var f = this.key.focus.merge(this.value.focus);
+	this.focus = f.debounce(250).distinct();
+	this.classActive = new sui.properties.ToggleClass(this.component,"active");
+	f.log(null,{ fileName : "Field.hx", lineNumber : 43, className : "ui.Field", methodName : "new"}).feed(this.classActive.toggleClassName);
 };
 ui.Field.__name__ = ["ui","Field"];
 ui.Field.prototype = {
@@ -3271,7 +3320,9 @@ ui.Field.prototype = {
 	,key: null
 	,value: null
 	,focus: null
+	,classActive: null
 	,destroy: function() {
+		this.classActive.dispose();
 		this.component.destroy();
 		this.key = null;
 		this.value = null;
