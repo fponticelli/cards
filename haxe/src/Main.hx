@@ -9,7 +9,6 @@ class Main {
 	public static function main() {
 		Dom.ready().then(function(_) {
 			var container = Query.first('.container'),
-				schema    = new Schema(),
 				data      = new Data({
 					name : "Franco",
 					contacts : [{
@@ -28,7 +27,7 @@ class Main {
 			trace(data.toJSON());
 
 			// Card
-			Card.create(model, schema, container);
+			Card.create(model, container);
 		});
 	}
 }
