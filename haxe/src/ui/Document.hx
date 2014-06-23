@@ -2,6 +2,7 @@ package ui;
 
 import sui.components.Component;
 import sui.components.ComponentOptions;
+import ui.Button;
 import ui.Toolbar;
 
 class Document {
@@ -15,5 +16,8 @@ class Document {
 		toolbar   = new Toolbar({ parent : component, container : component.el });
 		article   = new Article({ parent : component, container : component.el });
 		statusbar = new Statusbar({ parent : component, container : component.el });
+
+		var buttonAdd = toolbar.left.addButton('', Config.icons.add);
+
 	}
 }

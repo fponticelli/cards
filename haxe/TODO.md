@@ -1,8 +1,4 @@
-+ create document area
-+ create document toolbar
-+ create document footer
-
-- create 'add block' button
++ create 'add block' button
 - create block as component
 - make block editable
 - on button click create a block after the current one
@@ -30,6 +26,9 @@ CV: add related properties
 
 DONE:
 
++ create document area
++ create document toolbar
++ create document footer
 + add modelview toolbar
 + "add field" button toolbar
 + autogenerate field name

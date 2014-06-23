@@ -7,6 +7,8 @@ function $extend(from, fields) {
 	if( fields.toString !== Object.prototype.toString ) proto.toString = fields.toString;
 	return proto;
 }
+var Config = function() { };
+Config.__name__ = ["Config"];
 var EReg = function(r,opt) {
 	opt = opt.split("u").join("");
 	this.r = new RegExp(r,opt);
@@ -3219,6 +3221,7 @@ ui.Document = function(options) {
 	this.toolbar = new ui.Toolbar({ parent : this.component, container : this.component.el});
 	this.article = new ui.Article({ parent : this.component, container : this.component.el});
 	this.statusbar = new ui.Statusbar({ parent : this.component, container : this.component.el});
+	var buttonAdd = this.toolbar.left.addButton("",Config.icons.add);
 };
 ui.Document.__name__ = ["ui","Document"];
 ui.Document.prototype = {
@@ -3320,13 +3323,11 @@ ui.ModelView = function() {
 	this.component = new sui.components.Component({ template : "<div class=\"modelview\"></div>"});
 	this.toolbar = new ui.Toolbar({ });
 	this.toolbar.component.appendTo(this.component.el);
-	var buttonAdd = new ui.Button("","plus");
-	buttonAdd.component.appendTo(this.toolbar.left);
+	var buttonAdd = this.toolbar.left.addButton("",Config.icons.add);
 	buttonAdd.clicks.feed(steamer.Consumers.toConsumer(function(_) {
 		_g.addField(_g.guessFieldName(),ui.SchemaType.StringType);
 	}));
-	var buttonRemove = new ui.Button("","minus");
-	buttonRemove.component.appendTo(this.toolbar.right);
+	var buttonRemove = this.toolbar.right.addButton("",Config.icons.remove);
 	buttonRemove.clicks.feed(steamer.Consumers.toConsumer(function(_1) {
 		_g.removeField(_g.currentField);
 	}));
@@ -3380,7 +3381,7 @@ ui.ModelView.prototype = {
 		this.removeField(field);
 	}
 	,removeField: function(field) {
-		thx.Assert.notNull(field,"when removing a field it should not be null",{ fileName : "ModelView.hx", lineNumber : 87, className : "ui.ModelView", methodName : "removeField"});
+		thx.Assert.notNull(field,"when removing a field it should not be null",{ fileName : "ModelView.hx", lineNumber : 85, className : "ui.ModelView", methodName : "removeField"});
 		var name = field.key.text.get_value();
 		field.destroy();
 		if(this.fields.remove(name)) this.feedSchema(steamer.Pulse.Emit(ui.SchemaEvent.DeleteField(name)));
@@ -3579,9 +3580,9 @@ ui.TextEditor.prototype = {
 ui.Toolbar = function(options) {
 	if(null == options.el && null == options.template) options.template = "<header class=\"toolbar\"><div class=\"left\"></div><div class=\"center\"></div><div class=\"right\"></div></header>";
 	this.component = new sui.components.Component(options);
-	this.left = dom.Query.first(".left",this.component.el);
-	this.center = dom.Query.first(".center",this.component.el);
-	this.right = dom.Query.first(".right",this.component.el);
+	this.left = new ui.ToolbarGroup(dom.Query.first(".left",this.component.el),this.component);
+	this.center = new ui.ToolbarGroup(dom.Query.first(".center",this.component.el),this.component);
+	this.right = new ui.ToolbarGroup(dom.Query.first(".right",this.component.el),this.component);
 };
 ui.Toolbar.__name__ = ["ui","Toolbar"];
 ui.Toolbar.prototype = {
@@ -3590,6 +3591,23 @@ ui.Toolbar.prototype = {
 	,center: null
 	,right: null
 	,__class__: ui.Toolbar
+};
+ui.ToolbarGroup = function(el,component) {
+	this.el = el;
+	this.component = component;
+};
+ui.ToolbarGroup.__name__ = ["ui","ToolbarGroup"];
+ui.ToolbarGroup.prototype = {
+	el: null
+	,component: null
+	,addButton: function(text,icon) {
+		if(text == null) text = "";
+		var button = new ui.Button(text,icon);
+		button.component.appendTo(this.el);
+		this.component.add(button.component);
+		return button;
+	}
+	,__class__: ui.ToolbarGroup
 };
 function $iterator(o) { if( o instanceof Array ) return function() { return HxOverrides.iter(o); }; return typeof(o.iterator) == 'function' ? $bind(o,o.iterator) : o.iterator; }
 var $_, $fid = 0;
@@ -3885,6 +3903,7 @@ thx.Assert.results = { add : function(assertion) {
 		break;
 	}
 }};
+Config.icons = { add : "plus", remove : "minus"};
 dom.Query.doc = document;
 haxe.ds.ObjectMap.count = 0;
 promhx.base.AsyncBase.id_ctr = 0;

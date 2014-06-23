@@ -35,14 +35,12 @@ class ModelView {
 		toolbar = new Toolbar({});
 		toolbar.component.appendTo(component.el);
 
-		var buttonAdd = new Button('', 'plus');
-		buttonAdd.component.appendTo(toolbar.left);
+		var buttonAdd = toolbar.left.addButton('', Config.icons.add);
 		buttonAdd.clicks.feed(function(_){
 			addField(guessFieldName(), StringType);
 		}.toConsumer());
 
-		var buttonRemove = new Button('', 'minus');
-		buttonRemove.component.appendTo(toolbar.right);
+		var buttonRemove = toolbar.right.addButton('', Config.icons.remove);
 		buttonRemove.clicks.feed(function(_) {
 			removeField(currentField);
 		}.toConsumer());

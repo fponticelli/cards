@@ -10,6 +10,4 @@ class Statusbar {
 			options.template = '<footer class="statusbar"></footer>';
 		component = new Component(options);
 	}
-
-
 }
