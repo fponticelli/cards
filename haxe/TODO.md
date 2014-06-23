@@ -1,7 +1,7 @@
 + create 'add block' button
-- create block as component
-- make block editable
-- on button click create a block after the current one
++ create block as component
++ make block editable
++ on button click create a block after the last one
 - identify the currently selected block
 
 MV: add support for multiple editor
@@ -19,6 +19,7 @@ DOC: create Fragment
 DOC: delete Fragment
 DOC: define Fragment hierarchy
 DOC: display hierarchy breadcrumbs
+DOC: create new blocks after the current one
 
 CV: current fragment/block
 CV: display associated properties

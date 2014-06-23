@@ -4,6 +4,7 @@ import sui.components.Component;
 import sui.components.ComponentOptions;
 import ui.Button;
 import ui.Toolbar;
+using steamer.Consumer;
 
 class Document {
 	public var component(default, null) : Component;
@@ -18,6 +19,8 @@ class Document {
 		statusbar = new Statusbar({ parent : component, container : component.el });
 
 		var buttonAdd = toolbar.left.addButton('', Config.icons.add);
-
+		buttonAdd.clicks.feed(function(_) {
+			article.addBlock();
+		}.toConsumer());
 	}
 }

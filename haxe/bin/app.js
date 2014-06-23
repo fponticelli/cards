@@ -3099,11 +3099,27 @@ var ui = {};
 ui.Article = function(options) {
 	if(null == options.el && null == options.template) options.template = "<article></article>";
 	this.component = new sui.components.Component(options);
+	this.blocks = [];
 };
 ui.Article.__name__ = ["ui","Article"];
 ui.Article.prototype = {
 	component: null
+	,blocks: null
+	,addBlock: function() {
+		var block = new ui.Block({ parent : this.component, container : this.component.el, defaultText : ""});
+		this.blocks.push(block);
+		return block;
+	}
 	,__class__: ui.Article
+};
+ui.Block = function(options) {
+	if(null == options.el && null == options.template) options.template = "<section class=\"block\"></div>";
+	this.editor = new ui.TextEditor(options);
+};
+ui.Block.__name__ = ["ui","Block"];
+ui.Block.prototype = {
+	editor: null
+	,__class__: ui.Block
 };
 ui.Button = function(text,icon) {
 	if(text == null) text = "";
@@ -3217,11 +3233,15 @@ ui.Data.prototype = {
 ui.DataEvent = { __ename__ : ["ui","DataEvent"], __constructs__ : ["SetValue"] };
 ui.DataEvent.SetValue = function(path,value,type) { var $x = ["SetValue",0,path,value,type]; $x.__enum__ = ui.DataEvent; $x.toString = $estr; return $x; };
 ui.Document = function(options) {
+	var _g = this;
 	this.component = new sui.components.Component(options);
 	this.toolbar = new ui.Toolbar({ parent : this.component, container : this.component.el});
 	this.article = new ui.Article({ parent : this.component, container : this.component.el});
 	this.statusbar = new ui.Statusbar({ parent : this.component, container : this.component.el});
 	var buttonAdd = this.toolbar.left.addButton("",Config.icons.add);
+	buttonAdd.clicks.feed(steamer.Consumers.toConsumer(function(_) {
+		_g.article.addBlock();
+	}));
 };
 ui.Document.__name__ = ["ui","Document"];
 ui.Document.prototype = {
