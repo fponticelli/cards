@@ -9,13 +9,16 @@ class Card {
 		var card    = new Component({
 						template : '<div class="card"><div class="doc"></div><aside><div class="context"></div><div class="model"></div></aside></div>'
 					}),
-			//doc     = Doc.create({ el : Query.first('.doc', card.el) }),
 			context = Query.first('.context', card.el),
 			modelView = new ModelView();
 
 		modelView.component.appendTo(Query.first('.model', card.el));
-		modelView.schema.map(function(e) return Std.string(e)).feed(new steamer.consumers.LoggerConsumer('schema'));
-		modelView.data.map(function(e) return Std.string(e)).feed(new steamer.consumers.LoggerConsumer('data'));
+
+		modelView.schema.feed(model.schemaEventConsumer);
+		modelView.data.feed(model.dataEventConsumer);
+
 		card.appendTo(container);
+
+		model.data.stream.map(function(o) return haxe.Json.stringify(o)).feed(new steamer.consumers.LoggerConsumer());
 	}
 }

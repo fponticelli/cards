@@ -18,9 +18,10 @@ class Data {
 
 	public function new(data : {}) {
 		this.feed = function(p){};
+		// debounce removes noise
 		stream = new Producer(function(feed) {
 			this.feed = feed;
-		});
+		}).debounce(100);
 		reset(data);
 	}
 

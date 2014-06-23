@@ -14,6 +14,8 @@ class Schema {
 
 	public function new() {
 		fields = new Map();
+		// TODO sadness
+		feed = function(_){};
 		stream = new SchemaProducer(getPairs, function(feed : Pulse<SchemaEvent> -> Void) {
 			this.feed = feed;
 		});

@@ -1,56 +1,45 @@
 package ui;
 
+using steamer.Consumer;
 import steamer.Producer;
 import steamer.Pulse;
+import ui.DataEvent;
 import ui.Schema;
 
 class Model {
 	public var data(default, null) : Data;
 	public var schema(default, null) : Schema;
-	public var changes(default, null) : Producer<ModelChange>;
 	public var keys(get, null) : Array<String>;
+
+	public var dataEventConsumer(default, null) : Consumer<DataEvent>;
+	public var schemaEventConsumer(default, null) : Consumer<SchemaEvent>;
 
 	public function new(data : Data) {
 		this.data = data;
 		this.schema = new Schema();
-		this.changes = new Producer(function(feed) {
-			data.stream.feed({
-				onPulse : function(p : Pulse<{}>) {
-					switch(p) {
-						case Emit(o):
-
-						case Fail(e):
-							feed(Fail(e));
-						case End:
-							feed(End);
-					}
-
-				}
-			});
-			schema.stream.feed({
-				onPulse : function(p : Pulse<SchemaEvent>) {
-					switch(p) {
-						case Emit(e):
-							switch(e) {
-								case ListFields(list):
-
-								case AddField(name, type):
-
-								case DeleteField(name):
-
-								case RenameField(oldname, newname):
-
-								case _:
-							}
-						case Fail(e):
-							feed(Fail(e));
-						case End:
-							feed(End);
-					}
-
-				}
-			});
-		});
+		this.dataEventConsumer = function(e : DataEvent) {
+			switch e {
+				case SetValue(path, value, type):
+					data.set(path, value);
+			}
+		}.toConsumer();
+		this.schemaEventConsumer = function(e : SchemaEvent) {
+			switch e {
+				case ListFields(list):
+					for(item in list)
+						schema.add(item.name, item.type);
+				case AddField(path, type):
+					schema.add(path, type);
+				case DeleteField(path):
+					schema.delete(path);
+					data.remove(path);
+				case RenameField(oldpath, newpath):
+					schema.rename(oldpath, newpath);
+					data.rename(oldpath, newpath);
+				case RetypeField(path, type):
+					schema.retype(path, type);
+			}
+		}.toConsumer();
 	}
 
 	function get_keys() {
