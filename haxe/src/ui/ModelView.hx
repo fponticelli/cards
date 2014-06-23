@@ -4,7 +4,7 @@ import js.html.Element;
 using steamer.Consumer;
 using steamer.dom.Dom;
 import steamer.MultiProducer;
-import steamer.Producer;
+using steamer.Producer;
 import steamer.Pulse;
 import sui.components.Component;
 import sui.properties.Attribute;
@@ -87,7 +87,9 @@ class ModelView {
 		Assert.notNull(field, 'when removing a field it should not be null');
 		var name = field.key.text.value;
 		field.destroy();
-		fields.remove(name);
+		if(fields.remove(name)) {
+			feedSchema(Emit(DeleteField(name)));
+		}
 	}
 
 	public function addField(name : String, type : SchemaType) {
@@ -99,6 +101,10 @@ class ModelView {
 
 		// setup field key
 		var oldname = null;
+
+		function createSetValue() {
+			return SetValue(field.key.text.value, field.value.value.value, field.value.type);
+		}
 
 		field.key.text
 			.filter(function(newname : String) {
@@ -112,23 +118,30 @@ class ModelView {
 				}
 			})
 			.map(function(newname : String) {
-				// rename field name in fields
-				if(null != oldname) {
+				if(null == oldname) {
+					// new field
+					oldname = newname;
+					return AddField(newname, field.value.type);
+				} else {
+					// rename field name in fields
 					var v = fields.get(oldname);
 					fields.remove(oldname);
 					fields.set(newname, v);
+					var r = RenameField(oldname, newname);
+					oldname = newname;
+					return r;
 				}
-				var r = RenameField(oldname, newname);
-				oldname = newname;
-				return r;
 			})
 			.feed(Bus.feed(feedSchema));
 
 		// setup field value
 		// TODO support multiple editors data types
-		field.value.text.map(function(text : String) {
-			return SetStringValue(field.value.text.value, text);
-		}).feed(Bus.feed(feedData));
+		// the debounce is not only practical to avoid too many calls
+		// but also helps so that data events occur after schema
+		// events (not the best synch mechanism ever)
+		field.value.text.map(function(_ : String) {
+			return createSetValue();
+		}).debounce(250).feed(Bus.feed(feedData));
 		fieldFocus.add(field.focus.map(function(v) return v ? field : null));
 
 		fields.set(name, field);

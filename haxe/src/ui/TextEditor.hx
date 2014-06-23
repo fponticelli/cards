@@ -5,14 +5,18 @@ import sui.components.Component;
 import sui.components.ComponentOptions;
 import steamer.Value;
 import sui.properties.Text;
+import ui.SchemaType;
 using steamer.dom.Dom;
 
-class TextEditor {
+class TextEditor implements Editor {
 	public var component(default, null) : Component;
 	public var text(default, null) : Value<String>;
 	public var focus(default, null) : Producer<Bool>;
+	public var value(default, null) : Value<Dynamic>;
+	public var type(default, null) : SchemaType;
 	var cancel : Void -> Void;
 	public function new(options : TextEditorOptions) {
+		type = StringType;
 		if(null == options.defaultText)
 			options.defaultText = '';
 		if(null == options.el && null == options.template)
@@ -26,6 +30,8 @@ class TextEditor {
 			blurPair  = component.el.produceEvent('blur');
 
 		this.text = text.text;
+		this.value = new Value(options.defaultText);
+		this.text.feed(this.value);
 		inputPair.producer
 			.map(function(_) return text.component.el.textContent)
 			.feed(this.text);
