@@ -1,8 +1,16 @@
-+ create 'add block' button
-+ create block as component
-+ make block editable
-+ on button click create a block after the last one
-- identify the currently selected block
+- create placeholder for context properties
+- create placeholder for context toolbar
+- add split button for "add property"
+
+- list available properties for block
+- display asssociated properties to block
+- add pairs for properties + expressions
+
+- evaluate expressions in context
+- create dependency between model values and context properties
+- refresh evaluation on change
+
+- restore styles
 
 MV: add support for multiple editor
 MV: change value type
@@ -20,6 +28,7 @@ DOC: delete Fragment
 DOC: define Fragment hierarchy
 DOC: display hierarchy breadcrumbs
 DOC: create new blocks after the current one
+DOC: set focus to currently created block/fragment
 
 CV: current fragment/block
 CV: display associated properties
@@ -27,6 +36,11 @@ CV: add related properties
 
 DONE:
 
++ create 'add block' button
++ create block as component
++ make block editable
++ on button click create a block after the last one
++ identify the currently selected block
 + create document area
 + create document toolbar
 + create document footer

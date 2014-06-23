@@ -3139,31 +3139,60 @@ var ui = {};
 ui.Article = function(options) {
 	if(null == options.el && null == options.template) options.template = "<article></article>";
 	this.component = new sui.components.Component(options);
-	this.blocks = [];
+	this.blocks = new haxe.ds.ObjectMap();
+	this.current = new steamer.MultiProducer();
 };
 ui.Article.__name__ = ["ui","Article"];
 ui.Article.prototype = {
 	component: null
+	,current: null
 	,blocks: null
 	,addBlock: function() {
+		var _g = this;
 		var block = new ui.Block({ parent : this.component, container : this.component.el, defaultText : ""});
-		this.blocks.push(block);
+		var addFocus = block.editor.focus.filter(function(v) {
+			return v;
+		}).map(function(_) {
+			return block;
+		});
+		this.current.add(addFocus);
+		this.blocks.set(block,function() {
+			_g.current.remove(addFocus);
+		});
 		return block;
+	}
+	,removeBlock: function(block) {
+		var finalizer = this.blocks.h[block.__id__];
+		thx.Assert.notNull(finalizer,null,{ fileName : "Article.hx", lineNumber : 41, className : "ui.Article", methodName : "removeBlock"});
+		finalizer();
 	}
 	,__class__: ui.Article
 };
+ui.Fragment = function() { };
+ui.Fragment.__name__ = ["ui","Fragment"];
+ui.Fragment.prototype = {
+	name: null
+	,toString: null
+	,__class__: ui.Fragment
+};
 ui.Block = function(options) {
+	this.name = "block";
 	if(null == options.el && null == options.template) options.template = "<section class=\"block\"></div>";
 	this.editor = new ui.TextEditor(options);
 	this.classActive = new sui.properties.ToggleClass(this.editor.component,"active");
 	this.editor.focus.feed(this.classActive.toggleClassName);
 };
 ui.Block.__name__ = ["ui","Block"];
+ui.Block.__interfaces__ = [ui.Fragment];
 ui.Block.prototype = {
-	editor: null
+	name: null
+	,editor: null
 	,classActive: null
 	,destroy: function() {
 		this.editor.destroy();
+	}
+	,toString: function() {
+		return this.name;
 	}
 	,__class__: ui.Block
 };
@@ -3288,6 +3317,9 @@ ui.Document = function(options) {
 	buttonAdd.clicks.feed(steamer.Consumers.toConsumer(function(_) {
 		_g.article.addBlock();
 	}));
+	this.article.current.map(function(v) {
+		return v.toString();
+	}).feed(new steamer.consumers.LoggerConsumer(null,{ fileName : "Document.hx", lineNumber : 26, className : "ui.Document", methodName : "new"}));
 };
 ui.Document.__name__ = ["ui","Document"];
 ui.Document.prototype = {
@@ -3312,7 +3344,7 @@ ui.Field = function(options) {
 	var f = this.key.focus.merge(this.value.focus);
 	this.focus = f.debounce(250).distinct();
 	this.classActive = new sui.properties.ToggleClass(this.component,"active");
-	f.log(null,{ fileName : "Field.hx", lineNumber : 43, className : "ui.Field", methodName : "new"}).feed(this.classActive.toggleClassName);
+	f.feed(this.classActive.toggleClassName);
 };
 ui.Field.__name__ = ["ui","Field"];
 ui.Field.prototype = {

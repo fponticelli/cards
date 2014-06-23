@@ -40,7 +40,7 @@ class Field {
 		var f = key.focus.merge(value.focus);
 		focus = f.debounce(250).distinct();
 		classActive = new ToggleClass(component, 'active');
-		f.log().feed(classActive.toggleClassName);
+		f.feed(classActive.toggleClassName);
 	}
 
 	public function destroy() {

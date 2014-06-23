@@ -5,7 +5,8 @@ import sui.components.ComponentOptions;
 import sui.properties.ToggleClass;
 import ui.TextEditor;
 
-class Block {
+class Block implements Fragment {
+	public var name(default, null) : String = 'block';
 	public var editor(default, null) : TextEditor;
 	var classActive : ToggleClass;
 	public function new(options : TextEditorOptions) {
@@ -20,4 +21,7 @@ class Block {
 	public function destroy() {
 		editor.destroy();
 	}
+
+	public function toString()
+		return name;
 }

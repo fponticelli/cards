@@ -22,5 +22,7 @@ class Document {
 		buttonAdd.clicks.feed(function(_) {
 			article.addBlock();
 		}.toConsumer());
+
+		article.current.map(function(v) return v.toString()).feed(new steamer.consumers.LoggerConsumer());
 	}
 }
