@@ -1,10 +1,16 @@
+- create document area
+- create document toolbar
+- create document footer
+
+- create 'add block' button
+- create block as component
+- make block editable
+- on button click create a block after the current one
+- identify the currently selected block
 
 MV: add support for multiple editor
-
 MV: change value type
-
 MV: nested data structures (objects, arrays)
-
 MV: set focus to next field after deletion
 MV: prevent field blur when moving to a context button OR highlight the currently selected context even if the caret is not there
 MV: text placeholder for editors
