@@ -1,6 +1,6 @@
-- create document area
-- create document toolbar
-- create document footer
++ create document area
++ create document toolbar
++ create document footer
 
 - create 'add block' button
 - create block as component

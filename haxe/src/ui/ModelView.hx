@@ -32,7 +32,7 @@ class ModelView {
 		component = new Component({
 			template : '<div class="modelview"></div>'
 		});
-		toolbar = new Toolbar();
+		toolbar = new Toolbar({});
 		toolbar.component.appendTo(component.el);
 
 		var buttonAdd = new Button('', 'plus');

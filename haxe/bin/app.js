@@ -3094,6 +3094,15 @@ thx.ref.ValueRef.prototype = $extend(thx.ref.BaseRef.prototype,{
 	,__class__: thx.ref.ValueRef
 });
 var ui = {};
+ui.Article = function(options) {
+	if(null == options.el && null == options.template) options.template = "<article></article>";
+	this.component = new sui.components.Component(options);
+};
+ui.Article.__name__ = ["ui","Article"];
+ui.Article.prototype = {
+	component: null
+	,__class__: ui.Article
+};
 ui.Button = function(text,icon) {
 	if(text == null) text = "";
 	var _g = this;
@@ -3124,13 +3133,14 @@ ui.Card.create = function(model,container) {
 	var card = new sui.components.Component({ template : "<div class=\"card\"><div class=\"doc\"></div><aside><div class=\"context\"></div><div class=\"model\"></div></aside></div>"});
 	var context = dom.Query.first(".context",card.el);
 	var modelView = new ui.ModelView();
+	var document = new ui.Document({ el : dom.Query.first(".doc",card.el)});
 	modelView.component.appendTo(dom.Query.first(".model",card.el));
 	modelView.schema.feed(model.schemaEventConsumer);
 	modelView.data.feed(model.dataEventConsumer);
 	card.appendTo(container);
 	model.data.stream.map(function(o) {
 		return JSON.stringify(o);
-	}).feed(new steamer.consumers.LoggerConsumer(null,{ fileName : "Card.hx", lineNumber : 22, className : "ui.Card", methodName : "create"}));
+	}).feed(new steamer.consumers.LoggerConsumer(null,{ fileName : "Card.hx", lineNumber : 24, className : "ui.Card", methodName : "create"}));
 };
 ui.Data = function(data) {
 	var _g = this;
@@ -3204,6 +3214,20 @@ ui.Data.prototype = {
 };
 ui.DataEvent = { __ename__ : ["ui","DataEvent"], __constructs__ : ["SetValue"] };
 ui.DataEvent.SetValue = function(path,value,type) { var $x = ["SetValue",0,path,value,type]; $x.__enum__ = ui.DataEvent; $x.toString = $estr; return $x; };
+ui.Document = function(options) {
+	this.component = new sui.components.Component(options);
+	this.toolbar = new ui.Toolbar({ parent : this.component, container : this.component.el});
+	this.article = new ui.Article({ parent : this.component, container : this.component.el});
+	this.statusbar = new ui.Statusbar({ parent : this.component, container : this.component.el});
+};
+ui.Document.__name__ = ["ui","Document"];
+ui.Document.prototype = {
+	component: null
+	,toolbar: null
+	,article: null
+	,statusbar: null
+	,__class__: ui.Document
+};
 ui.Editor = function() { };
 ui.Editor.__name__ = ["ui","Editor"];
 ui.Editor.prototype = {
@@ -3294,7 +3318,7 @@ ui.ModelChange = { __ename__ : ["ui","ModelChange"], __constructs__ : [] };
 ui.ModelView = function() {
 	var _g = this;
 	this.component = new sui.components.Component({ template : "<div class=\"modelview\"></div>"});
-	this.toolbar = new ui.Toolbar();
+	this.toolbar = new ui.Toolbar({ });
 	this.toolbar.component.appendTo(this.component.el);
 	var buttonAdd = new ui.Button("","plus");
 	buttonAdd.component.appendTo(this.toolbar.left);
@@ -3499,6 +3523,15 @@ ui.SchemaType.ObjectType = function(fields) { var $x = ["ObjectType",4,fields]; 
 ui.SchemaType.StringType = ["StringType",5];
 ui.SchemaType.StringType.toString = $estr;
 ui.SchemaType.StringType.__enum__ = ui.SchemaType;
+ui.Statusbar = function(options) {
+	if(null == options.el && null == options.template) options.template = "<footer class=\"statusbar\"></footer>";
+	this.component = new sui.components.Component(options);
+};
+ui.Statusbar.__name__ = ["ui","Statusbar"];
+ui.Statusbar.prototype = {
+	component: null
+	,__class__: ui.Statusbar
+};
 ui.TextEditor = function(options) {
 	this.type = ui.SchemaType.StringType;
 	if(null == options.defaultText) options.defaultText = "";
@@ -3543,8 +3576,9 @@ ui.TextEditor.prototype = {
 	}
 	,__class__: ui.TextEditor
 };
-ui.Toolbar = function() {
-	this.component = new sui.components.Component({ template : "<header class=\"toolbar\"><div class=\"left\"></div><div class=\"center\"></div><div class=\"right\"></div></header>"});
+ui.Toolbar = function(options) {
+	if(null == options.el && null == options.template) options.template = "<header class=\"toolbar\"><div class=\"left\"></div><div class=\"center\"></div><div class=\"right\"></div></header>";
+	this.component = new sui.components.Component(options);
 	this.left = dom.Query.first(".left",this.component.el);
 	this.center = dom.Query.first(".center",this.component.el);
 	this.right = dom.Query.first(".right",this.component.el);

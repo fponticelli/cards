@@ -3,6 +3,7 @@ package ui;
 import js.html.Element;
 import sui.components.Component;
 import dom.Dom;
+import ui.Document;
 
 class Card {
 	public static function create(model : Model, container : Element) {
@@ -10,7 +11,8 @@ class Card {
 						template : '<div class="card"><div class="doc"></div><aside><div class="context"></div><div class="model"></div></aside></div>'
 					}),
 			context = Query.first('.context', card.el),
-			modelView = new ModelView();
+			modelView = new ModelView(),
+			document = new Document({ el : Query.first('.doc', card.el) });
 
 		modelView.component.appendTo(Query.first('.model', card.el));
 
