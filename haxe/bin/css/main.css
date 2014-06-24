@@ -1,0 +1,129 @@
+html,
+body,
+div,
+span,
+applet,
+object,
+iframe,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote,
+pre,
+a,
+abbr,
+acronym,
+address,
+big,
+cite,
+code,
+del,
+dfn,
+em,
+img,
+ins,
+kbd,
+q,
+s,
+samp,
+small,
+strike,
+strong,
+sub,
+sup,
+tt,
+var,
+dl,
+dt,
+dd,
+ol,
+ul,
+li,
+fieldset,
+form,
+label,
+legend,
+table,
+caption,
+tbody,
+tfoot,
+thead,
+tr,
+th,
+td {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  font-weight: inherit;
+  font-style: inherit;
+  font-family: inherit;
+  font-size: 100%;
+  vertical-align: baseline;
+}
+body {
+  line-height: 1;
+  color: #000;
+  background: #fff;
+}
+ol,
+ul {
+  list-style: none;
+}
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+  vertical-align: middle;
+}
+caption,
+th,
+td {
+  text-align: left;
+  font-weight: normal;
+  vertical-align: middle;
+}
+a img {
+  border: none;
+}
+.card,
+.card * {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+.card .doc {
+  position: absolute;
+  height: 100%;
+  width: calc(100% - 20.2em);
+}
+.card aside {
+  position: absolute;
+  right: 0;
+  height: 100%;
+  width: 20em;
+}
+.card menu {
+  padding: 0;
+  margin: 0;
+}
+.card .toolbar {
+  background-color: #f6f6f6;
+  width: 100%;
+  display: table;
+}
+.card .toolbar > div {
+  display: table-row;
+}
+.card .toolbar > div > div {
+  display: table-cell;
+}
+.card .toolbar .center {
+  text-align: center;
+}
+.card .toolbar .right {
+  text-align: right;
+}

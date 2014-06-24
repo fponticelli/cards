@@ -9,18 +9,19 @@ import thx.Assert;
 using steamer.Consumer;
 import steamer.Value;
 using steamer.dom.Dom;
+import dom.Dom;
 
 class Menu {
 	public var component(default, null) : Component;
 	public var visible(default, null) : Visible;
 	var items : Map<Component, Element>;
 	var reference : Element;
+	var ul : Element;
 	public function new(options : ComponentOptions) {
 		if(null == options.el && null == options.template)
-			options.template = '<menu></menu>';
-		if(options.container == null)
-			options.container = Browser.document.body;
+			options.template = '<menu><ul></ul></menu>';
 		component = new Component(options);
+		ul = Query.first('ul', component.el);
 		items = new Map();
 		visible = new Visible(component, false);
 		function clear(_) {
@@ -48,7 +49,7 @@ class Menu {
 		var el = Browser.document.createLIElement();
 		item.appendTo(el);
 		component.add(item);
-		component.el.appendChild(el);
+		ul.appendChild(el);
 		items.set(item, el);
 	}
 
@@ -56,7 +57,7 @@ class Menu {
 		Assert.notNull(item);
 		Assert.isTrue(items.exists(item));
 		var el = items.get(item);
-		component.el.removeChild(el);
+		ul.removeChild(el);
 		item.detach();
 	}
 
@@ -67,9 +68,15 @@ class Menu {
 	}
 
 	public function reposition() {
-		var style  = component.el.style;
+		if(!component.isAttached) {
+			var parent = [Query.first(Config.selectors.app), Browser.document.body].filter(function(v) return null != v).shift();
+			component.appendTo(parent);
+		}
+
+		var rect = reference.getBoundingClientRect(),
+			style  = component.el.style;
 		style.position = "absolute";
-		style.top  = (reference.offsetTop + reference.offsetHeight) + 'px';
-		style.left = (reference.offsetLeft) + 'px';
+		style.top  = (rect.top + rect.height) + 'px';
+		style.left = (rect.left) + 'px';
 	}
 }

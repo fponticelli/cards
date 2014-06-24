@@ -1726,7 +1726,6 @@ steamer.dom.Dom.consumeToggleVisibility = function(el) {
 	thx.Assert.notNull(originalDisplay,"original element.style.display for visibility is NULL",{ fileName : "Dom.hx", lineNumber : 87, className : "steamer.dom.Dom", methodName : "consumeToggleVisibility"});
 	if(originalDisplay == "none") originalDisplay = "";
 	var consume = function(value) {
-		haxe.Log.trace(value,{ fileName : "Dom.hx", lineNumber : 91, className : "steamer.dom.Dom", methodName : "consumeToggleVisibility"});
 		if(value) el.style.display = originalDisplay; else el.style.display = "none";
 	};
 	return new steamer.SimpleConsumer(consume,(function(f,a1) {
@@ -3415,9 +3414,9 @@ ui.Field.prototype = {
 };
 ui.Menu = function(options) {
 	var _g = this;
-	if(null == options.el && null == options.template) options.template = "<menu></menu>";
-	if(options.container == null) options.container = window.document.body;
+	if(null == options.el && null == options.template) options.template = "<menu><ul></ul></menu>";
 	this.component = new sui.components.Component(options);
+	this.ul = dom.Query.first("ul",this.component.el);
 	this.items = new haxe.ds.ObjectMap();
 	this.visible = new sui.properties.Visible(this.component,false);
 	var clear = function(_) {
@@ -3442,20 +3441,21 @@ ui.Menu.prototype = {
 	,visible: null
 	,items: null
 	,reference: null
+	,ul: null
 	,addItem: function(item) {
 		var el;
 		var _this = window.document;
 		el = _this.createElement("li");
 		item.appendTo(el);
 		this.component.add(item);
-		this.component.el.appendChild(el);
+		this.ul.appendChild(el);
 		this.items.set(item,el);
 	}
 	,removeItem: function(item) {
-		thx.Assert.notNull(item,null,{ fileName : "Menu.hx", lineNumber : 56, className : "ui.Menu", methodName : "removeItem"});
-		thx.Assert.isTrue(this.items.h.__keys__[item.__id__] != null,null,{ fileName : "Menu.hx", lineNumber : 57, className : "ui.Menu", methodName : "removeItem"});
+		thx.Assert.notNull(item,null,{ fileName : "Menu.hx", lineNumber : 57, className : "ui.Menu", methodName : "removeItem"});
+		thx.Assert.isTrue(this.items.h.__keys__[item.__id__] != null,null,{ fileName : "Menu.hx", lineNumber : 58, className : "ui.Menu", methodName : "removeItem"});
 		var el = this.items.h[item.__id__];
-		this.component.el.removeChild(el);
+		this.ul.removeChild(el);
 		item.detach();
 	}
 	,anchorTo: function(el) {
@@ -3463,10 +3463,17 @@ ui.Menu.prototype = {
 		if(this.visible.visible.get_value()) this.reposition();
 	}
 	,reposition: function() {
+		if(!this.component.isAttached) {
+			var parent = [dom.Query.first(Config.selectors.app),window.document.body].filter(function(v) {
+				return null != v;
+			}).shift();
+			this.component.appendTo(parent);
+		}
+		var rect = this.reference.getBoundingClientRect();
 		var style = this.component.el.style;
 		style.position = "absolute";
-		style.top = this.reference.offsetTop + this.reference.offsetHeight + "px";
-		style.left = this.reference.offsetLeft + "px";
+		style.top = rect.top + rect.height + "px";
+		style.left = rect.left + "px";
 	}
 	,__class__: ui.Menu
 };
@@ -3789,7 +3796,7 @@ ui.TextEditor.prototype = {
 	,__class__: ui.TextEditor
 };
 ui.Toolbar = function(options) {
-	if(null == options.el && null == options.template) options.template = "<header class=\"toolbar\"><div class=\"left\"></div><div class=\"center\"></div><div class=\"right\"></div></header>";
+	if(null == options.el && null == options.template) options.template = "<header class=\"toolbar\"><div><div class=\"left\"></div><div class=\"center\"></div><div class=\"right\"></div></div></header>";
 	this.component = new sui.components.Component(options);
 	this.left = new ui.ToolbarGroup(dom.Query.first(".left",this.component.el),this.component);
 	this.center = new ui.ToolbarGroup(dom.Query.first(".center",this.component.el),this.component);
@@ -4115,6 +4122,7 @@ thx.Assert.results = { add : function(assertion) {
 	}
 }};
 Config.icons = { add : "plus", remove : "minus", dropDown : "arrow-down"};
+Config.selectors = { app : ".card"};
 dom.Query.doc = document;
 haxe.ds.ObjectMap.count = 0;
 promhx.base.AsyncBase.id_ctr = 0;

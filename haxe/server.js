@@ -21,7 +21,7 @@ var server = flo(
     // 2. Assuming that `bundle.js` is your output file, update `bundle.js`
     //    and `bundle.css` when a JS or CSS file changes.
     callback({
-      resourceURL: 'app' + path.extname(filepath),
+      resourceURL: filepath,
       // any string-ish value is acceptable. i.e. strings, Buffers etc.
       contents: fs.readFileSync('bin/'+filepath)
     });

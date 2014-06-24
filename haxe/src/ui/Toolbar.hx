@@ -12,7 +12,7 @@ class Toolbar {
 	public var right(default, null) : ToolbarGroup;
 	public function new(options : ComponentOptions) {
 		if(null == options.el && null == options.template)
-			options.template = '<header class="toolbar"><div class="left"></div><div class="center"></div><div class="right"></div></header>';
+			options.template = '<header class="toolbar"><div><div class="left"></div><div class="center"></div><div class="right"></div></div></header>';
 		component = new Component(options);
 		left   = new ToolbarGroup(Query.first('.left', component.el), component);
 		center = new ToolbarGroup(Query.first('.center', component.el), component);

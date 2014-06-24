@@ -4,4 +4,8 @@ class Config {
 		remove : 'minus',
 		dropDown : 'arrow-down'
 	};
+
+	public static var selectors(default, null) = {
+		app : '.card'
+	};
 }
