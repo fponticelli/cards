@@ -22,11 +22,11 @@ class Visible extends Property {
 
 	public function new(component : Component, defaultValue : Bool) {
 		this.defaultValue = defaultValue;
-		super(component);
+		super(component, 'visible');
 	}
 
 	override function init() : Void -> Void {
-		visible = new Value(property.defaultValue);
+		visible = new Value(defaultValue);
 		visible.feed(component.el.consumeToggleVisibility());
 		return function() {
 			visible.terminate();

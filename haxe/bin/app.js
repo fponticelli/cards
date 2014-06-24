@@ -1723,9 +1723,10 @@ steamer.dom.Dom.consumeToggleClass = function(el,name) {
 };
 steamer.dom.Dom.consumeToggleVisibility = function(el) {
 	var originalDisplay = el.style.display;
-	thx.Assert.isNull(originalDisplay,"original element.style.display for visibility is NULL",{ fileName : "Dom.hx", lineNumber : 87, className : "steamer.dom.Dom", methodName : "consumeToggleVisibility"});
+	thx.Assert.notNull(originalDisplay,"original element.style.display for visibility is NULL",{ fileName : "Dom.hx", lineNumber : 87, className : "steamer.dom.Dom", methodName : "consumeToggleVisibility"});
 	if(originalDisplay == "none") originalDisplay = "";
 	var consume = function(value) {
+		haxe.Log.trace(value,{ fileName : "Dom.hx", lineNumber : 91, className : "steamer.dom.Dom", methodName : "consumeToggleVisibility"});
 		if(value) el.style.display = originalDisplay; else el.style.display = "none";
 	};
 	return new steamer.SimpleConsumer(consume,(function(f,a1) {
@@ -1979,6 +1980,37 @@ sui.properties.ToggleClass.prototype = $extend(sui.properties.Property.prototype
 		};
 	}
 	,__class__: sui.properties.ToggleClass
+});
+sui.properties.Visible = function(component,defaultValue) {
+	this.defaultValue = defaultValue;
+	sui.properties.Property.call(this,component,"visible");
+};
+sui.properties.Visible.__name__ = ["sui","properties","Visible"];
+sui.properties.Visible.createVisible = function(component) {
+	return new sui.properties.Visible(component,true);
+};
+sui.properties.Visible.createInvisible = function(component) {
+	return new sui.properties.Visible(component,false);
+};
+sui.properties.Visible.asVisible = function(component) {
+	var property = component.properties.get("visible");
+	thx.Assert["is"](property,sui.properties.Visible,null,{ fileName : "Visible.hx", lineNumber : 16, className : "sui.properties.Visible", methodName : "asVisible"});
+	return property;
+};
+sui.properties.Visible.__super__ = sui.properties.Property;
+sui.properties.Visible.prototype = $extend(sui.properties.Property.prototype,{
+	defaultValue: null
+	,visible: null
+	,init: function() {
+		var _g = this;
+		this.visible = new steamer.Value(this.defaultValue);
+		this.visible.feed(steamer.dom.Dom.consumeToggleVisibility(this.component.el));
+		return function() {
+			_g.visible.terminate();
+			_g.visible = null;
+		};
+	}
+	,__class__: sui.properties.Visible
 });
 thx.Error = function(message,stack,pos) {
 	this.message = message;
@@ -3227,13 +3259,32 @@ ui.Card.create = function(model,container) {
 	var context = dom.Query.first(".context",card.el);
 	var modelView = new ui.ModelView();
 	var document = new ui.Document({ el : dom.Query.first(".doc",card.el)});
+	var context1 = new ui.Context({ el : dom.Query.first(".context",card.el)});
 	modelView.component.appendTo(dom.Query.first(".model",card.el));
 	modelView.schema.feed(model.schemaEventConsumer);
 	modelView.data.feed(model.dataEventConsumer);
 	card.appendTo(container);
 	model.data.stream.map(function(o) {
 		return JSON.stringify(o);
-	}).feed(new steamer.consumers.LoggerConsumer(null,{ fileName : "Card.hx", lineNumber : 24, className : "ui.Card", methodName : "create"}));
+	}).feed(new steamer.consumers.LoggerConsumer(null,{ fileName : "Card.hx", lineNumber : 25, className : "ui.Card", methodName : "create"}));
+};
+ui.Context = function(options) {
+	this.component = new sui.components.Component(options);
+	this.toolbar = new ui.Toolbar({ parent : this.component, container : this.component.el});
+	var buttonAdd = this.toolbar.left.addButton("add property",Config.icons.dropDown);
+	var menuAdd = new ui.Menu({ parent : this.component});
+	var addSomething = new ui.Button("add something");
+	menuAdd.addItem(addSomething.component);
+	menuAdd.anchorTo(buttonAdd.component.el);
+	buttonAdd.clicks.map(function(_) {
+		return true;
+	}).feed(menuAdd.visible.visible);
+};
+ui.Context.__name__ = ["ui","Context"];
+ui.Context.prototype = {
+	component: null
+	,toolbar: null
+	,__class__: ui.Context
 };
 ui.Data = function(data) {
 	var _g = this;
@@ -3361,6 +3412,63 @@ ui.Field.prototype = {
 		this.focus = null;
 	}
 	,__class__: ui.Field
+};
+ui.Menu = function(options) {
+	var _g = this;
+	if(null == options.el && null == options.template) options.template = "<menu></menu>";
+	if(options.container == null) options.container = window.document.body;
+	this.component = new sui.components.Component(options);
+	this.items = new haxe.ds.ObjectMap();
+	this.visible = new sui.properties.Visible(this.component,false);
+	var clear = function(_) {
+		_g.visible.visible.set_value(false);
+	};
+	this.visible.visible.filter(function(b) {
+		return !b;
+	}).feed(steamer.Consumers.toConsumer(function(_1) {
+		window.document.removeEventListener("mouseup",clear,false);
+	}));
+	this.visible.visible.filter(function(b1) {
+		return b1;
+	}).feed(steamer.Consumers.toConsumer(function(_2) {
+		window.document.addEventListener("mouseup",clear,false);
+		_g.reposition();
+	}));
+	this.reference = window.document.body;
+};
+ui.Menu.__name__ = ["ui","Menu"];
+ui.Menu.prototype = {
+	component: null
+	,visible: null
+	,items: null
+	,reference: null
+	,addItem: function(item) {
+		var el;
+		var _this = window.document;
+		el = _this.createElement("li");
+		item.appendTo(el);
+		this.component.add(item);
+		this.component.el.appendChild(el);
+		this.items.set(item,el);
+	}
+	,removeItem: function(item) {
+		thx.Assert.notNull(item,null,{ fileName : "Menu.hx", lineNumber : 56, className : "ui.Menu", methodName : "removeItem"});
+		thx.Assert.isTrue(this.items.h.__keys__[item.__id__] != null,null,{ fileName : "Menu.hx", lineNumber : 57, className : "ui.Menu", methodName : "removeItem"});
+		var el = this.items.h[item.__id__];
+		this.component.el.removeChild(el);
+		item.detach();
+	}
+	,anchorTo: function(el) {
+		this.reference = el;
+		if(this.visible.visible.get_value()) this.reposition();
+	}
+	,reposition: function() {
+		var style = this.component.el.style;
+		style.position = "absolute";
+		style.top = this.reference.offsetTop + this.reference.offsetHeight + "px";
+		style.left = this.reference.offsetLeft + "px";
+	}
+	,__class__: ui.Menu
 };
 ui.Model = function(data) {
 	var _g = this;
@@ -4006,7 +4114,7 @@ thx.Assert.results = { add : function(assertion) {
 		break;
 	}
 }};
-Config.icons = { add : "plus", remove : "minus"};
+Config.icons = { add : "plus", remove : "minus", dropDown : "arrow-down"};
 dom.Query.doc = document;
 haxe.ds.ObjectMap.count = 0;
 promhx.base.AsyncBase.id_ctr = 0;

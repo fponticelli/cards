@@ -1,6 +1,4 @@
-- create placeholder for context properties
-- create placeholder for context toolbar
-- add split button for "add property"
+- restore styles
 
 - list available properties for block
 - display asssociated properties to block
@@ -10,7 +8,6 @@
 - create dependency between model values and context properties
 - refresh evaluation on change
 
-- restore styles
 
 MV: add support for multiple editor
 MV: change value type
@@ -36,6 +33,10 @@ CV: add related properties
 
 DONE:
 
++ add simple menu
++ create placeholder for context properties
++ create placeholder for context toolbar
++ add split button for "add property"
 + create 'add block' button
 + create block as component
 + make block editable

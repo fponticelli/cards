@@ -12,7 +12,8 @@ class Card {
 					}),
 			context = Query.first('.context', card.el),
 			modelView = new ModelView(),
-			document = new Document({ el : Query.first('.doc', card.el) });
+			document = new Document({ el : Query.first('.doc', card.el) }),
+			context = new Context({ el : Query.first('.context', card.el) });
 
 		modelView.component.appendTo(Query.first('.model', card.el));
 
