@@ -1,3 +1,6 @@
+package ui;
+
+/*
 import { ContainerProperty } from '../container';
 import { BehaviorProperty } from '../behavior';
 import { ValueProperty } from './value';
@@ -58,3 +61,4 @@ class BoolEditorProperty extends ContainerProperty {
 }
 
 export { BoolEditorProperty };
+*/
