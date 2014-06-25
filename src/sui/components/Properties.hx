@@ -33,7 +33,8 @@ class Properties {
 	function remove(name : PropertyName) {
 		if(!properties.exists(name))
 			throw 'property "${name}" does not exist in $target';
-		properties.get(name).dispose();
+		var prop = properties.get(name);
 		properties.remove(name);
+		prop.dispose();
 	}
 }

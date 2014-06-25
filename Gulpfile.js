@@ -17,7 +17,7 @@ var paths = {
 gulp.task('stylus', function() {
     gulp.src(paths.src.stylus)
         .pipe(changed(paths.dst.stylus))
-        .pipe(stylus({use:['nib']}))
+        .pipe(stylus({/*use:['nib']*/}))
         .pipe(gulp.dest(paths.dst.stylus));
 });
 

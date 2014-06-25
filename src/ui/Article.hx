@@ -24,7 +24,7 @@ class Article {
 		var block = new Block({
 			parent : component,
 			container : component.el,
-			defaultText : ''
+			defaultText : 'block'
 		});
 		var addFocus = block.editor.focus
 			.filter(function(v) return v)

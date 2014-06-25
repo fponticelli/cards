@@ -1,0 +1,53 @@
+radius = 3px
+
+button-bg-color = #f0f0f0
+button-bg-active-color = #f9f9f9
+button-br-color = #ddd
+button-color = #444
+button-disabled-color = #ccc
+alert-color = #a30
+
+button.fa
+	padding-left 4.5px
+	padding-top 2.5px
+	font-size 10px
+	&:before
+		margin-right 2px
+button
+	font-size 11pt
+	color button-color
+	text-shadow 1px 1px 1px rgba(255,255,255,0.9)
+	background-color button-bg-color
+	border none
+	padding 0 4px 1px 4px
+	min-width 18px
+	height 18px
+	margin 0
+	background color
+	display inline-block
+	margin-right 2px
+	box-shadow inset 1px 1px 1px rgba(255,255,255,0.8), 0px 0px 1px rgba(0,0,0,0.3)
+	&:last-child
+		margin-right 0
+	&.active, &:active
+		background-color button-bg-active-color
+		box-shadow inset -1px -1px 1px rgba(255,255,255,0.8), inset 0px 0px 1px rgba(0,0,0,0.6), 0px 0px 1px rgba(0,0,0,0.3)
+	&:focus
+		outline none //-webkit-focus-ring-color auto 4px
+		outline-offset -4px
+	&:hover
+		background-color button-bg-active-color
+
+	text-shadow -0.5px -0.5px 1px rgba(255,255,255,0.8), 0.5px 0.5px 1px rgba(0,0,0,0.2)
+
+button.alert
+	color alert-color
+
+button
+	border-radius radius
+
+button.disabled
+	color button-disabled-color
+	box-shadow none
+	&:hover
+		background-color button-bg-color

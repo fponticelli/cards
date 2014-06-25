@@ -1,0 +1,23 @@
+.fields
+	position absolute
+	top toolbar-height
+	overflow auto
+	width 100%
+	fill-height-except-toolbar()
+	> div
+		display table
+		width 100%
+		.field
+			display table-row
+			> div
+				display table-cell
+
+			.key
+				background-color light-bg-color
+				padding 0 0.4em
+				border-bottom 1px solid #f0f0f0
+
+			.value
+				padding 0 0.4em
+				width 70%
+				border-bottom 1px solid #f6f6f6

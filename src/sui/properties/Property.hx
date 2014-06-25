@@ -1,6 +1,7 @@
 package sui.properties;
 
 import sui.components.Component;
+using thx.core.Functions;
 
 @:access(sui.components.Properties)
 class Property {
@@ -10,7 +11,7 @@ class Property {
 	public function new(component : Component, name : String) {
 		this.component = component;
 		this.name  = name;
-		this._dispose  = init();
+		this._dispose  = init().once();
 		component.properties.add(this);
 	}
 
@@ -20,8 +21,10 @@ class Property {
 
 	public function dispose() {
 		_dispose();
-		this.component.properties.remove(name);
-		this.component = null;
+		if(this.component.properties.exists(name)) {
+			this.component.properties.remove(name);
+			this.component = null;
+		}
 	}
 
 	public function toString()

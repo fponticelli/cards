@@ -14,6 +14,7 @@ import ui.DataEvent;
 import ui.SchemaEvent;
 import ui.SchemaType;
 import ui.TextEditor;
+import dom.Dom;
 
 class ModelView {
 	public var component(default, null) : Component;
@@ -21,6 +22,8 @@ class ModelView {
 	public var data(default, null) : Producer<DataEvent>;
 	public var toolbar(default, null) : Toolbar;
 	public var currentField(default, null) : Null<Field>;
+
+	var pairs : Element;
 
 	var feedSchema : Pulse<SchemaEvent> -> Void;
 	var feedData : Pulse<DataEvent> -> Void;
@@ -46,6 +49,9 @@ class ModelView {
 		}.toConsumer());
 		buttonRemove.enabled.value = false;
 
+		pairs = Html.parse('<div class="fields"><div></div></div>');
+		component.el.appendChild(pairs);
+		pairs = Query.first('div', pairs);
 
 		this.feedSchema = function(_) {};
 		schema = new Producer(function(feed) {
@@ -92,7 +98,7 @@ class ModelView {
 
 	public function addField(name : String, type : SchemaType) {
 		var field = new Field({
-			container : component.el,
+			container : pairs,
 			parent : component,
 			key : name
 		});

@@ -1837,8 +1837,9 @@ sui.components.Properties.prototype = {
 	}
 	,remove: function(name) {
 		if(!this.properties.exists(name)) throw "property \"" + name + "\" does not exist in " + Std.string(this.target);
-		this.properties.get(name).dispose();
+		var prop = this.properties.get(name);
 		this.properties.remove(name);
+		prop.dispose();
 	}
 	,__class__: sui.components.Properties
 };
@@ -1846,7 +1847,7 @@ sui.properties = {};
 sui.properties.Property = function(component,name) {
 	this.component = component;
 	this.name = name;
-	this._dispose = this.init();
+	this._dispose = thx.core.F0.once(this.init());
 	component.properties.add(this);
 };
 sui.properties.Property.__name__ = ["sui","properties","Property"];
@@ -1859,8 +1860,10 @@ sui.properties.Property.prototype = {
 	}
 	,dispose: function() {
 		this._dispose();
-		this.component.properties.remove(this.name);
-		this.component = null;
+		if(this.component.properties.exists(this.name)) {
+			this.component.properties.remove(this.name);
+			this.component = null;
+		}
 	}
 	,toString: function() {
 		return Type.getClassName(Type.getClass(this)).split(".").pop();
@@ -2593,6 +2596,34 @@ thx.core.Assertion.Error = function(e,stack) { var $x = ["Error",2,e,stack]; $x.
 thx.core.Assertion.PreConditionError = function(e,stack) { var $x = ["PreConditionError",3,e,stack]; $x.__enum__ = thx.core.Assertion; $x.toString = $estr; return $x; };
 thx.core.Assertion.PostConditionError = function(e,stack) { var $x = ["PostConditionError",4,e,stack]; $x.__enum__ = thx.core.Assertion; $x.toString = $estr; return $x; };
 thx.core.Assertion.Warning = function(msg) { var $x = ["Warning",5,msg]; $x.__enum__ = thx.core.Assertion; $x.toString = $estr; return $x; };
+thx.core.F0 = function() { };
+thx.core.F0.__name__ = ["thx","core","F0"];
+thx.core.F0.join = function(fa,fb) {
+	return function() {
+		fa();
+		fb();
+	};
+};
+thx.core.F0.once = function(f) {
+	return function() {
+		f();
+		f = function() {
+		};
+	};
+};
+thx.core.F1 = function() { };
+thx.core.F1.__name__ = ["thx","core","F1"];
+thx.core.F1.compose = function(fa,fb) {
+	return function(v) {
+		return fa(fb(v));
+	};
+};
+thx.core.F1.join = function(fa,fb) {
+	return function(v) {
+		fa(v);
+		fb(v);
+	};
+};
 thx.core.Ints = function() { };
 thx.core.Ints.__name__ = ["thx","core","Ints"];
 thx.core.Ints.clamp = function(v,min,max) {
@@ -3180,7 +3211,7 @@ ui.Article.prototype = {
 	,blocks: null
 	,addBlock: function() {
 		var _g = this;
-		var block = new ui.Block({ parent : this.component, container : this.component.el, defaultText : ""});
+		var block = new ui.Block({ parent : this.component, container : this.component.el, defaultText : "block"});
 		var addFocus = block.editor.focus.filter(function(v) {
 			return v;
 		}).map(function(_) {
@@ -3270,6 +3301,9 @@ ui.Card.create = function(model,container) {
 ui.Context = function(options) {
 	this.component = new sui.components.Component(options);
 	this.toolbar = new ui.Toolbar({ parent : this.component, container : this.component.el});
+	this.pairs = dom.Html.parseList("<div class=\"fields\"><div></div></div>")[0];
+	this.component.el.appendChild(this.pairs);
+	this.pairs = dom.Query.first("div",this.pairs);
 	var buttonAdd = this.toolbar.left.addButton("add property",Config.icons.dropDown);
 	var menuAdd = new ui.Menu({ parent : this.component});
 	var addSomething = new ui.Button("add something");
@@ -3283,6 +3317,7 @@ ui.Context.__name__ = ["ui","Context"];
 ui.Context.prototype = {
 	component: null
 	,toolbar: null
+	,pairs: null
 	,__class__: ui.Context
 };
 ui.Data = function(data) {
@@ -3550,6 +3585,9 @@ ui.ModelView = function() {
 		_g.removeField(_g.currentField);
 	}));
 	buttonRemove.enabled.set_value(false);
+	this.pairs = dom.Html.parseList("<div class=\"fields\"><div></div></div>")[0];
+	this.component.el.appendChild(this.pairs);
+	this.pairs = dom.Query.first("div",this.pairs);
 	this.feedSchema = function(_2) {
 	};
 	this.schema = new steamer.Producer(function(feed) {
@@ -3574,6 +3612,7 @@ ui.ModelView.prototype = {
 	,data: null
 	,toolbar: null
 	,currentField: null
+	,pairs: null
 	,feedSchema: null
 	,feedData: null
 	,fields: null
@@ -3599,14 +3638,14 @@ ui.ModelView.prototype = {
 		this.removeField(field);
 	}
 	,removeField: function(field) {
-		thx.Assert.notNull(field,"when removing a field it should not be null",{ fileName : "ModelView.hx", lineNumber : 85, className : "ui.ModelView", methodName : "removeField"});
+		thx.Assert.notNull(field,"when removing a field it should not be null",{ fileName : "ModelView.hx", lineNumber : 91, className : "ui.ModelView", methodName : "removeField"});
 		var name = field.key.text.get_value();
 		field.destroy();
 		if(this.fields.remove(name)) this.feedSchema(steamer.Pulse.Emit(ui.SchemaEvent.DeleteField(name)));
 	}
 	,addField: function(name,type) {
 		var _g = this;
-		var field = new ui.Field({ container : this.component.el, parent : this.component, key : name});
+		var field = new ui.Field({ container : this.pairs, parent : this.component, key : name});
 		var oldname = null;
 		var createSetValue = function() {
 			return ui.DataEvent.SetValue(field.key.text.get_value(),field.value.value.get_value(),field.value.type);

@@ -7,6 +7,7 @@
   "dependencies": {
     "gulp": "*",
     "gulp-changed": "*",
-    "gulp-stylus": "*"
+    "gulp-stylus": "*",
+    "fb-flo": "^0.2.1"
   }
 }
