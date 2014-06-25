@@ -106,6 +106,14 @@ a img {
   width: 100%;
   height: 100%;
 }
+.card article {
+  background: -webkit-gradient(linear, left bottom, left top, color-stop(0, #f0f0f6), color-stop(1, #fff));
+  background: -webkit-linear-gradient(bottom, #f0f0f6 0%, #fff 100%);
+  background: -moz-linear-gradient(bottom, #f0f0f6 0%, #fff 100%);
+  background: -o-linear-gradient(bottom, #f0f0f6 0%, #fff 100%);
+  background: -ms-linear-gradient(bottom, #f0f0f6 0%, #fff 100%);
+  background: linear-gradient(bottom, #f0f0f6 0%, #fff 100%);
+}
 .card article * {
   font-size: 14pt;
 }
@@ -154,9 +162,21 @@ a img {
   background-color: rgba(240,220,200,0.25);
   border-bottom: 2px solid #cba;
 }
+.card .block {
+  border-bottom: 1px dashed #eee;
+  padding: 0.25em 0.5em;
+  -webkit-box-shadow: 0px 1px 1px #fff;
+  box-shadow: 0px 1px 1px #fff;
+}
+.card .block:first-child {
+  padding-top: 0.5em;
+}
+.card .block:last-child {
+  padding-bottom: 0.5em;
+}
 .card .block:focus {
   outline: none;
-  background-color: rgba(255,255,0,0.1);
+  background: #fff;
 }
 .card button.fa {
   padding-left: 4.5px;
@@ -167,7 +187,7 @@ a img {
   margin-right: 2px;
 }
 .card button {
-  font-size: 11pt;
+  font-size: 10px;
   color: #444;
   text-shadow: 1px 1px 1px rgba(255,255,255,0.9);
   background-color: #f0f0f0;
@@ -206,12 +226,12 @@ a img {
   -webkit-border-radius: 3px;
   border-radius: 3px;
 }
-.card button.disabled {
+.card button[disabled] {
   color: #ccc;
   -webkit-box-shadow: none;
   box-shadow: none;
 }
-.card button.disabled:hover {
+.card button[disabled]:hover {
   background-color: #f0f0f0;
 }
 .card .doc {
@@ -256,26 +276,31 @@ a img {
 }
 .card .fields > div .field > div {
   display: table-cell;
+  padding: 0.3em;
 }
 .card .fields > div .field .key {
   background-color: #f6f6f6;
-  padding: 0 0.4em;
   border-bottom: 1px solid #f0f0f0;
 }
 .card .fields > div .field .value {
-  padding: 0 0.4em;
   width: 70%;
   border-bottom: 1px solid #f6f6f6;
 }
 .card menu {
-  padding: 0;
+  padding: 0.5em;
   margin: 0;
+  margin-top: 2px;
+  background: #f6f6f6;
+  z-index: 100;
+  -webkit-box-shadow: inset 1px 1px 1px rgba(255,255,255,0.8), 0px 0px 1px rgba(0,0,0,0.3), 2px 2px 4px rgba(0,0,0,0.1);
+  box-shadow: inset 1px 1px 1px rgba(255,255,255,0.8), 0px 0px 1px rgba(0,0,0,0.3), 2px 2px 4px rgba(0,0,0,0.1);
 }
 .card .model {
   position: absolute;
   width: 100%;
   height: 50%;
   top: 50%;
+  border-top: 1px solid #eee;
 }
 .card .statusbar {
   height: 22px;
