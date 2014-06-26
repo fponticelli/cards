@@ -3303,9 +3303,9 @@ ui.Context = function(options) {
 	var _g = this;
 	this.component = new sui.components.Component(options);
 	this.toolbar = new ui.Toolbar({ parent : this.component, container : this.component.el});
-	this.pairs = dom.Html.parseList("<div class=\"fields\"><div></div></div>")[0];
-	this.component.el.appendChild(this.pairs);
-	this.pairs = dom.Query.first("div",this.pairs);
+	this.fieldsEl = dom.Html.parseList("<div class=\"fields\"><div></div></div>")[0];
+	this.component.el.appendChild(this.fieldsEl);
+	this.fieldsEl = dom.Query.first("div",this.fieldsEl);
 	this.buttonAdd = this.toolbar.left.addButton("add property",Config.icons.dropDown);
 	this.menuAdd = new ui.Menu({ parent : this.component});
 	this.menuAdd.anchorTo(this.buttonAdd.component.el);
@@ -3342,17 +3342,50 @@ ui.Context = function(options) {
 			break;
 		}
 	}));
+	this.expressions = new haxe.ds.StringMap();
 };
 ui.Context.__name__ = ["ui","Context"];
+ui.Context.toggleClass = function(name) {
+	return function(target) {
+		var toggle = new sui.properties.ToggleClass(target,name,name);
+		var expression = new steamer.Value(ui.Expression.Fun(function() {
+			return false;
+		}));
+		var state = null;
+		expression.map(function(exp) {
+			switch(exp[1]) {
+			case 0:
+				var f = exp[2];
+				return f;
+			default:
+				return null;
+			}
+		}).filter(function(f1) {
+			return f1 != null;
+		}).filter(function(f2) {
+			try {
+				state = f2();
+				return true;
+			} catch( e ) {
+				haxe.Log.trace(e,{ fileName : "Context.hx", lineNumber : 159, className : "ui.Context", methodName : "toggleClass"});
+				return false;
+			}
+		}).map(function(_) {
+			return !!(state);
+		}).feed(toggle.toggleClassName);
+		return expression;
+	};
+};
 ui.Context.prototype = {
 	component: null
 	,toolbar: null
 	,fragments: null
 	,currentFragment: null
-	,pairs: null
+	,fieldsEl: null
 	,menuAdd: null
 	,buttonAdd: null
 	,buttonRemove: null
+	,expressions: null
 	,field: null
 	,setFragmentStatus: function(fragment) {
 		this.currentFragment = fragment;
@@ -3360,15 +3393,28 @@ ui.Context.prototype = {
 		this.setAddMenuItems(fragment);
 	}
 	,setFields: function(fragment) {
-		this.pairs.innerHTML = "";
+		this.fieldsEl.innerHTML = "";
 		var fields = this.getAttachedPropertiesForFragment(fragment);
 		fields.map($bind(this,this.addField));
 	}
-	,addField: function(pair) {
-		var f = new ui.ContextField({ container : this.pairs, parent : this.component, display : pair.display, name : pair.name, value : "true"});
+	,addField: function(fieldInfo) {
+		var f = new ui.ContextField({ container : this.fieldsEl, parent : this.component, display : fieldInfo.display, name : fieldInfo.name, value : fieldInfo.code});
 		f.focus.map(function(v) {
 			if(v) return haxe.ds.Option.Some(f); else return haxe.ds.Option.None;
 		}).feed(this.field);
+		var exp = f.value.text.distinct().debounce(500).map(ui.Expressions.toExpression);
+		exp.feed(this.expressions.get(fieldInfo.name));
+		exp.map(function(e) {
+			haxe.Log.trace(e,{ fileName : "Context.hx", lineNumber : 105, className : "ui.Context", methodName : "addField"});
+			switch(e[1]) {
+			case 0:
+				var f1 = e[2];
+				return haxe.ds.Option.None;
+			case 1:
+				var e1 = e[2];
+				return haxe.ds.Option.Some(e1);
+			}
+		}).feed(f.withError);
 	}
 	,setAddMenuItems: function(fragment) {
 		var _g = this;
@@ -3379,35 +3425,28 @@ ui.Context.prototype = {
 		var attachables = this.getAttachablePropertiesForFragment(fragment);
 		this.buttonAdd.enabled.set_value(attachables.length > 0);
 		this.menuAdd.clear();
-		attachables.map(function(pair) {
-			var button = new ui.Button("add " + pair.display);
+		attachables.map(function(fieldInfo) {
+			var button = new ui.Button("add " + fieldInfo.display);
 			_g.menuAdd.addItem(button.component);
 			button.clicks.feed(steamer.Consumers.toConsumer(function(_) {
-				pair.create(fragment.component);
+				var value = fieldInfo.create(fragment.component);
+				_g.expressions.set(fieldInfo.name,value);
 				_g.setFragmentStatus(fragment);
 			}));
 		});
 	}
 	,getAttachedPropertiesForFragment: function(fragment) {
-		return this.getPropertiesForFragment(fragment).filter(function(pair) {
-			return fragment.component.properties.exists(pair.name);
+		return this.getPropertiesForFragment(fragment).filter(function(fieldInfo) {
+			return fragment.component.properties.exists(fieldInfo.name);
 		});
 	}
 	,getAttachablePropertiesForFragment: function(fragment) {
-		return this.getPropertiesForFragment(fragment).filter(function(pair) {
-			return !fragment.component.properties.exists(pair.name);
+		return this.getPropertiesForFragment(fragment).filter(function(fieldInfo) {
+			return !fragment.component.properties.exists(fieldInfo.name);
 		});
 	}
 	,getPropertiesForFragment: function(fragment) {
-		return [{ display : "bold", name : "strong", create : function(target) {
-			var toggle = new sui.properties.ToggleClass(target,"strong","strong");
-			toggle.toggleClassName.set_value(true);
-			return toggle;
-		}, type : ui.SchemaType.BoolType},{ display : "italic", name : "emphasis", create : function(target1) {
-			var toggle1 = new sui.properties.ToggleClass(target1,"emphasis","emphasis");
-			toggle1.toggleClassName.set_value(true);
-			return toggle1;
-		}, type : ui.SchemaType.BoolType}];
+		return [{ display : "bold", name : "strong", create : ui.Context.toggleClass("strong"), type : ui.SchemaType.BoolType, code : "true"},{ display : "italic", name : "emphasis", create : ui.Context.toggleClass("emphasis"), type : ui.SchemaType.BoolType, code : "true"}];
 	}
 	,__class__: ui.Context
 };
@@ -3421,6 +3460,16 @@ ui.ContextField = function(options) {
 	this.focus = this.value.focus.debounce(250).distinct();
 	this.classActive = new sui.properties.ToggleClass(this.component,"active");
 	this.focus.feed(this.classActive.toggleClassName);
+	var hasError = steamer.dom.Dom.consumeToggleClass(this.component.el,"error");
+	this.withError = new steamer.Value(haxe.ds.Option.None);
+	this.withError.map(function(o) {
+		switch(o[1]) {
+		case 1:
+			return false;
+		case 0:
+			return true;
+		}
+	}).feed(hasError);
 };
 ui.ContextField.__name__ = ["ui","ContextField"];
 ui.ContextField.prototype = {
@@ -3428,6 +3477,7 @@ ui.ContextField.prototype = {
 	,value: null
 	,focus: null
 	,name: null
+	,withError: null
 	,classActive: null
 	,destroy: function() {
 		this.classActive.dispose();
@@ -3554,6 +3604,21 @@ ui.Editor.prototype = {
 	value: null
 	,type: null
 	,__class__: ui.Editor
+};
+ui.Expression = { __ename__ : ["ui","Expression"], __constructs__ : ["Fun","SyntaxError"] };
+ui.Expression.Fun = function(f) { var $x = ["Fun",0,f]; $x.__enum__ = ui.Expression; $x.toString = $estr; return $x; };
+ui.Expression.SyntaxError = function(msg) { var $x = ["SyntaxError",1,msg]; $x.__enum__ = ui.Expression; $x.toString = $estr; return $x; };
+ui.Expressions = function() { };
+ui.Expressions.__name__ = ["ui","Expressions"];
+ui.Expressions.createFunction = function(args,code) {
+	return new Function(args.join(","),code);
+};
+ui.Expressions.toExpression = function(code) {
+	try {
+		return ui.Expression.Fun(ui.Expressions.createFunction([],"return " + code));
+	} catch( e ) {
+		return ui.Expression.SyntaxError(Std.string(e));
+	}
 };
 ui.Menu = function(options) {
 	var _g = this;

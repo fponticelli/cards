@@ -8,30 +8,33 @@ import sui.components.Component;
 import sui.components.ComponentOptions;
 import sui.properties.ToggleClass;
 import ui.Button;
+import ui.Expression;
 import ui.Fragment;
 import ui.Menu;
 import ui.SchemaType;
 import ui.Toolbar;
 using steamer.Consumer;
+using ui.Expression;
 
 class Context {
 	public var component(default, null) : Component;
 	public var toolbar(default, null) : Toolbar;
 	public var fragments(default, null) : Consumer<Fragment>;
 	public var currentFragment(default, null) : Null<Fragment>;
-	var pairs : Element;
+	var fieldsEl : Element;
 	var menuAdd : Menu;
 	var buttonAdd : Button;
 	var buttonRemove : Button;
+	var expressions : Map<String, Value<Expression>>;
 
 	public var field(default, null) : Value<Option<ContextField>>;
 
 	public function new(options : ComponentOptions) {
 		component = new Component(options);
 		toolbar   = new Toolbar({ parent : component, container : component.el });
-		pairs = Html.parse('<div class="fields"><div></div></div>');
-		component.el.appendChild(pairs);
-		pairs = Query.first('div', pairs);
+		fieldsEl = Html.parse('<div class="fields"><div></div></div>');
+		component.el.appendChild(fieldsEl);
+		fieldsEl = Query.first('div', fieldsEl);
 
 		buttonAdd = toolbar.left.addButton('add property', Config.icons.dropDown);
 		menuAdd = new Menu({ parent : component });
@@ -65,6 +68,7 @@ class Context {
 					buttonRemove.enabled.value = false;
 			}
 		}.toConsumer());
+		expressions = new Map();
 	}
 
 	function setFragmentStatus(fragment : Fragment) {
@@ -74,22 +78,36 @@ class Context {
 	}
 
 	function setFields(fragment : Fragment) {
-		pairs.innerHTML = '';
+		fieldsEl.innerHTML = '';
 		var fields = getAttachedPropertiesForFragment(fragment);
 		fields.map(addField);
 	}
 
-	public function addField(pair) {
+	public function addField(fieldInfo : FieldInfo) {
 		var f = new ContextField({
-			container : pairs,
+			container : fieldsEl,
 			parent : component,
-			display : pair.display,
-			name : pair.name,
-			value : 'true'
+			display : fieldInfo.display,
+			name : fieldInfo.name,
+			value : fieldInfo.code
 		});
-		f.focus.map(function(v) {
-			return v ? Some(f) : None;
-		}).feed(field);
+		f.focus
+			.map(function(v) return v ? Some(f) : None)
+			.feed(field);
+
+		var exp = f.value.text
+				.distinct()
+				.debounce(500)
+				.map(Expressions.toExpression);
+
+		exp.feed(expressions.get(fieldInfo.name));
+		exp.map(function(e) {
+			trace(e);
+			return switch e {
+				case Fun(f): None;
+				case SyntaxError(e): Some(e);
+			};
+		}).feed(f.withError);
 	}
 
 	function setAddMenuItems(fragment : Fragment) {
@@ -101,47 +119,77 @@ class Context {
 		var attachables = getAttachablePropertiesForFragment(fragment);
 		buttonAdd.enabled.value = attachables.length > 0;
 		menuAdd.clear();
-		attachables.map(function(pair) {
-			var button = new Button('add ${pair.display}');
+		attachables.map(function(fieldInfo) {
+			var button = new Button('add ${fieldInfo.display}');
 			menuAdd.addItem(button.component);
 			button.clicks.feed(function(_) {
-				pair.create(fragment.component);
+				expressions.set(fieldInfo.name, fieldInfo.create(fragment.component));
 				setFragmentStatus(fragment);
 			}.toConsumer());
 		});
 	}
 
 	public function getAttachedPropertiesForFragment(fragment : Fragment) {
-		return getPropertiesForFragment(fragment).filter(function(pair) {
-			return fragment.component.properties.exists(pair.name);
+		return getPropertiesForFragment(fragment).filter(function(fieldInfo) {
+			return fragment.component.properties.exists(fieldInfo.name);
 		});
 	}
 
 	public function getAttachablePropertiesForFragment(fragment : Fragment) {
-		return getPropertiesForFragment(fragment).filter(function(pair) {
-			return !fragment.component.properties.exists(pair.name);
+		return getPropertiesForFragment(fragment).filter(function(fieldInfo) {
+			return !fragment.component.properties.exists(fieldInfo.name);
 		});
 	}
 
-	public function getPropertiesForFragment(fragment : Fragment) {
+	static function toggleClass(name : String) {
+		return function(target : Component) {
+			var toggle     = new ToggleClass(target, name, name),
+				expression = new Value(Fun(function() return false)),
+				state : Dynamic = null;
+			expression
+				.map(function(exp) {
+					return switch exp { case Fun(f): f; case _: null; };
+				})
+				.filter(function(f) return f != null)
+				.filter(function(f) {
+					return try {
+						state = f();
+						true;
+					} catch(e : Dynamic) {
+						trace(e);
+						false;
+					};
+				})
+				.map(function(_) {
+					return (untyped __js__("!!"))(state);
+				})
+				.feed(toggle.toggleClassName);
+			return expression;
+		};
+	}
+
+	public function getPropertiesForFragment(fragment : Fragment) : Array<FieldInfo> {
 		return [{
 			display : 'bold',
 			name : 'strong',
-			create : function(target : Component) {
-				var toggle = new ToggleClass(target, 'strong', 'strong');
-				toggle.toggleClassName.value = true;
-				return toggle;
-			},
-			type : BoolType
+			create : toggleClass('strong'),
+			type : BoolType,
+			code : 'true'
 		}, {
 			display : 'italic',
 			name : 'emphasis',
-			create : function(target : Component) {
-				var toggle = new ToggleClass(target, 'emphasis', 'emphasis');
-				toggle.toggleClassName.value = true;
-				return toggle;
-			},
-			type : BoolType
+			create : toggleClass('emphasis'),
+			type : BoolType,
+			code : 'true'
 		}];
 	}
+}
+
+typedef FieldInfo = {
+	display : String,
+	name : String,
+	create : Component -> Value<Expression>,
+	type : SchemaType,
+	code : String,
+	?expression : Value<Expression>
 }

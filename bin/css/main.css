@@ -248,6 +248,9 @@ a img {
   width: 100%;
   height: 50%;
 }
+.card .context .error {
+  background-color: #f00;
+}
 .card .doc {
   border-right: 1px solid #eee;
 }
