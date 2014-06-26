@@ -3221,7 +3221,7 @@ ui.Article.prototype = {
 	}
 	,removeBlock: function(block) {
 		var finalizer = this.blocks.h[block.__id__];
-		thx.Assert.notNull(finalizer,null,{ fileName : "Article.hx", lineNumber : 41, className : "ui.Article", methodName : "removeBlock"});
+		thx.Assert.notNull(finalizer,null,{ fileName : "Article.hx", lineNumber : 42, className : "ui.Article", methodName : "removeBlock"});
 		finalizer();
 	}
 	,__class__: ui.Article
@@ -3367,7 +3367,7 @@ ui.Context.toggleClass = function(name) {
 				state = f2();
 				return true;
 			} catch( e ) {
-				haxe.Log.trace(e,{ fileName : "Context.hx", lineNumber : 159, className : "ui.Context", methodName : "toggleClass"});
+				haxe.Log.trace(e,{ fileName : "Context.hx", lineNumber : 158, className : "ui.Context", methodName : "toggleClass"});
 				return false;
 			}
 		}).map(function(_) {
@@ -3402,10 +3402,9 @@ ui.Context.prototype = {
 		f.focus.map(function(v) {
 			if(v) return haxe.ds.Option.Some(f); else return haxe.ds.Option.None;
 		}).feed(this.field);
-		var exp = f.value.text.distinct().debounce(500).map(ui.Expressions.toExpression);
+		var exp = f.value.text.debounce(250).distinct().map(ui.Expressions.toExpression);
 		exp.feed(this.expressions.get(fieldInfo.name));
 		exp.map(function(e) {
-			haxe.Log.trace(e,{ fileName : "Context.hx", lineNumber : 105, className : "ui.Context", methodName : "addField"});
 			switch(e[1]) {
 			case 0:
 				var f1 = e[2];

@@ -171,9 +171,12 @@ a img {
 .card .block:last-child {
   padding-bottom: 0.5em;
 }
+.card .block.active {
+  background-color: #f9f9f9;
+}
 .card .block:focus {
   outline: none;
-  background: #fff;
+  background-color: #fff;
 }
 .card button.fa {
   padding-left: 4.5px;

@@ -96,13 +96,12 @@ class Context {
 			.feed(field);
 
 		var exp = f.value.text
+				.debounce(250)
 				.distinct()
-				.debounce(500)
 				.map(Expressions.toExpression);
 
 		exp.feed(expressions.get(fieldInfo.name));
 		exp.map(function(e) {
-			trace(e);
 			return switch e {
 				case Fun(f): None;
 				case SyntaxError(e): Some(e);
@@ -190,6 +189,5 @@ typedef FieldInfo = {
 	name : String,
 	create : Component -> Value<Expression>,
 	type : SchemaType,
-	code : String,
-	?expression : Value<Expression>
+	code : String
 }

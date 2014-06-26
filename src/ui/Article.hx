@@ -26,7 +26,8 @@ class Article {
 			container : component.el,
 			defaultText : 'block'
 		});
-		var addFocus = block.editor.focus
+		var addFocus = block.editor
+			.focus
 			.filter(function(v) return v)
 			.map(function(_) : Fragment return block);
 		current.add(addFocus);
