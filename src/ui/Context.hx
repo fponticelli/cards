@@ -36,7 +36,6 @@ class Context {
 		buttonAdd = toolbar.left.addButton('add property', Config.icons.dropDown);
 		menuAdd = new Menu({ parent : component });
 
-		var addSomething = new Button('add something');
 		menuAdd.anchorTo(buttonAdd.component.el);
 		buttonAdd.clicks.map(function(_) {
 			return true;
@@ -103,7 +102,7 @@ class Context {
 		buttonAdd.enabled.value = attachables.length > 0;
 		menuAdd.clear();
 		attachables.map(function(pair) {
-			var button = new Button('add ${pair.name}');
+			var button = new Button('add ${pair.display}');
 			menuAdd.addItem(button.component);
 			button.clicks.feed(function(_) {
 				pair.create(fragment.component);

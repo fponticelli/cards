@@ -1,11 +1,7 @@
-+ list available properties for block
-+ display asssociated properties to block
-+ add pairs for properties
-- add expression
-
 - transform expression into function
 - display syntax errors
 - evaluate expressions in context
+
 - create dependency between model values and context properties
 - refresh evaluation on change
 
@@ -34,6 +30,10 @@ CV: add related properties
 
 DONE:
 
++ list available properties for block
++ display asssociated properties to block
++ add pairs for properties
++ add expression
 + restore styles
 + add simple menu
 + create placeholder for context properties

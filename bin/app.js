@@ -3308,7 +3308,6 @@ ui.Context = function(options) {
 	this.pairs = dom.Query.first("div",this.pairs);
 	this.buttonAdd = this.toolbar.left.addButton("add property",Config.icons.dropDown);
 	this.menuAdd = new ui.Menu({ parent : this.component});
-	var addSomething = new ui.Button("add something");
 	this.menuAdd.anchorTo(this.buttonAdd.component.el);
 	this.buttonAdd.clicks.map(function(_) {
 		return true;
@@ -3381,7 +3380,7 @@ ui.Context.prototype = {
 		this.buttonAdd.enabled.set_value(attachables.length > 0);
 		this.menuAdd.clear();
 		attachables.map(function(pair) {
-			var button = new ui.Button("add " + pair.name);
+			var button = new ui.Button("add " + pair.display);
 			_g.menuAdd.addItem(button.component);
 			button.clicks.feed(steamer.Consumers.toConsumer(function(_) {
 				pair.create(fragment.component);
