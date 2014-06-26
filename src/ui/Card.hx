@@ -15,6 +15,8 @@ class Card {
 			document = new Document({ el : Query.first('.doc', card.el) }),
 			context = new Context({ el : Query.first('.context', card.el) });
 
+		document.article.current.feed(context.currentFragment);
+
 		modelView.component.appendTo(Query.first('.model', card.el));
 
 		modelView.schema.feed(model.schemaEventConsumer);

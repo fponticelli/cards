@@ -45,6 +45,11 @@ class Menu {
 		reference = Browser.document.body;
 	}
 
+	public function clear() {
+		ul.innerHTML = '';
+		items = new Map();
+	}
+
 	public function addItem(item : Component) {
 		var el = Browser.document.createLIElement();
 		item.appendTo(el);
@@ -57,8 +62,8 @@ class Menu {
 		Assert.notNull(item);
 		Assert.isTrue(items.exists(item));
 		var el = items.get(item);
-		ul.removeChild(el);
 		item.detach();
+		ul.removeChild(el);
 	}
 
 	public function anchorTo(el : Element) {
@@ -75,7 +80,7 @@ class Menu {
 
 		var rect = reference.getBoundingClientRect(),
 			style  = component.el.style;
-		style.position = "absolute";
+		style.position = "fixed";
 		style.top  = (rect.top + rect.height) + 'px';
 		style.left = (rect.left) + 'px';
 	}

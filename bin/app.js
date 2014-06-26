@@ -3234,6 +3234,7 @@ ui.Fragment = function() { };
 ui.Fragment.__name__ = ["ui","Fragment"];
 ui.Fragment.prototype = {
 	name: null
+	,component: null
 	,toString: null
 	,__class__: ui.Fragment
 };
@@ -3243,12 +3244,14 @@ ui.Block = function(options) {
 	this.editor = new ui.TextEditor(options);
 	this.classActive = new sui.properties.ToggleClass(this.editor.component,"active");
 	this.editor.focus.feed(this.classActive.toggleClassName);
+	this.component = this.editor.component;
 };
 ui.Block.__name__ = ["ui","Block"];
 ui.Block.__interfaces__ = [ui.Fragment];
 ui.Block.prototype = {
 	name: null
 	,editor: null
+	,component: null
 	,classActive: null
 	,destroy: function() {
 		this.editor.destroy();
@@ -3290,13 +3293,14 @@ ui.Card.create = function(model,container) {
 	var modelView = new ui.ModelView();
 	var document = new ui.Document({ el : dom.Query.first(".doc",card.el)});
 	var context1 = new ui.Context({ el : dom.Query.first(".context",card.el)});
+	document.article.current.feed(context1.currentFragment);
 	modelView.component.appendTo(dom.Query.first(".model",card.el));
 	modelView.schema.feed(model.schemaEventConsumer);
 	modelView.data.feed(model.dataEventConsumer);
 	card.appendTo(container);
 	model.data.stream.map(function(o) {
 		return JSON.stringify(o);
-	}).feed(new steamer.consumers.LoggerConsumer(null,{ fileName : "Card.hx", lineNumber : 25, className : "ui.Card", methodName : "create"}));
+	}).feed(new steamer.consumers.LoggerConsumer(null,{ fileName : "Card.hx", lineNumber : 27, className : "ui.Card", methodName : "create"}));
 };
 ui.Context = function(options) {
 	this.component = new sui.components.Component(options);
@@ -3304,20 +3308,59 @@ ui.Context = function(options) {
 	this.pairs = dom.Html.parseList("<div class=\"fields\"><div></div></div>")[0];
 	this.component.el.appendChild(this.pairs);
 	this.pairs = dom.Query.first("div",this.pairs);
-	var buttonAdd = this.toolbar.left.addButton("add property",Config.icons.dropDown);
-	var menuAdd = new ui.Menu({ parent : this.component});
+	this.buttonAdd = this.toolbar.left.addButton("add property",Config.icons.dropDown);
+	this.menuAdd = new ui.Menu({ parent : this.component});
 	var addSomething = new ui.Button("add something");
-	menuAdd.addItem(addSomething.component);
-	menuAdd.anchorTo(buttonAdd.component.el);
-	buttonAdd.clicks.map(function(_) {
+	this.menuAdd.anchorTo(this.buttonAdd.component.el);
+	this.buttonAdd.clicks.map(function(_) {
 		return true;
-	}).feed(menuAdd.visible.visible);
+	}).feed(this.menuAdd.visible.visible);
+	this.currentFragment = steamer.Consumers.toConsumer($bind(this,this.setFragmentStatus));
+	this.buttonAdd.enabled.set_value(false);
 };
 ui.Context.__name__ = ["ui","Context"];
 ui.Context.prototype = {
 	component: null
 	,toolbar: null
+	,currentFragment: null
 	,pairs: null
+	,menuAdd: null
+	,buttonAdd: null
+	,setFragmentStatus: function(fragment) {
+		var _g = this;
+		if(null == fragment) {
+			this.buttonAdd.enabled.set_value(false);
+			return;
+		}
+		var attachables = this.getAttachablePropertiesForFragment(fragment);
+		this.buttonAdd.enabled.set_value(attachables.length > 0);
+		this.menuAdd.clear();
+		attachables.map(function(pair) {
+			var button = new ui.Button("add " + pair.name);
+			_g.menuAdd.addItem(button.component);
+			button.clicks.feed(steamer.Consumers.toConsumer(function(_) {
+				pair.create(fragment.component);
+				_g.setFragmentStatus(fragment);
+			}));
+		});
+	}
+	,getVisiblePropertiesForFragment: function(fragment) {
+		return this.getPropertiesForFragment(fragment).filter(function(pair) {
+			return fragment.component.properties.exists(pair.name);
+		});
+	}
+	,getAttachablePropertiesForFragment: function(fragment) {
+		return this.getPropertiesForFragment(fragment).filter(function(pair) {
+			return !fragment.component.properties.exists(pair.name);
+		});
+	}
+	,getPropertiesForFragment: function(fragment) {
+		return [{ display : "bold", name : "strong", create : function(target) {
+			return new sui.properties.ToggleClass(target,"strong","strong",true);
+		}},{ display : "italic", name : "emphasis", create : function(target1) {
+			return new sui.properties.ToggleClass(target1,"emphasis","emphasis",true);
+		}}];
+	}
 	,__class__: ui.Context
 };
 ui.Data = function(data) {
@@ -3477,6 +3520,10 @@ ui.Menu.prototype = {
 	,items: null
 	,reference: null
 	,ul: null
+	,clear: function() {
+		this.ul.innerHTML = "";
+		this.items = new haxe.ds.ObjectMap();
+	}
 	,addItem: function(item) {
 		var el;
 		var _this = window.document;
@@ -3487,11 +3534,11 @@ ui.Menu.prototype = {
 		this.items.set(item,el);
 	}
 	,removeItem: function(item) {
-		thx.Assert.notNull(item,null,{ fileName : "Menu.hx", lineNumber : 57, className : "ui.Menu", methodName : "removeItem"});
-		thx.Assert.isTrue(this.items.h.__keys__[item.__id__] != null,null,{ fileName : "Menu.hx", lineNumber : 58, className : "ui.Menu", methodName : "removeItem"});
+		thx.Assert.notNull(item,null,{ fileName : "Menu.hx", lineNumber : 62, className : "ui.Menu", methodName : "removeItem"});
+		thx.Assert.isTrue(this.items.h.__keys__[item.__id__] != null,null,{ fileName : "Menu.hx", lineNumber : 63, className : "ui.Menu", methodName : "removeItem"});
 		var el = this.items.h[item.__id__];
-		this.ul.removeChild(el);
 		item.detach();
+		this.ul.removeChild(el);
 	}
 	,anchorTo: function(el) {
 		this.reference = el;
@@ -3506,7 +3553,7 @@ ui.Menu.prototype = {
 		}
 		var rect = this.reference.getBoundingClientRect();
 		var style = this.component.el.style;
-		style.position = "absolute";
+		style.position = "fixed";
 		style.top = rect.top + rect.height + "px";
 		style.left = rect.left + "px";
 	}

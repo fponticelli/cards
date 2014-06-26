@@ -1,7 +1,5 @@
-- restore styles
-
-- list available properties for block
-- display asssociated properties to block
++ list available properties for block
++ display asssociated properties to block
 - add pairs for properties + expressions
 
 - evaluate expressions in context
@@ -33,6 +31,7 @@ CV: add related properties
 
 DONE:
 
++ restore styles
 + add simple menu
 + create placeholder for context properties
 + create placeholder for context toolbar
