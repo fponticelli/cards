@@ -1,23 +1,30 @@
 package ui;
 
 import dom.Dom;
+import haxe.ds.Option;
 import js.html.Element;
+import steamer.Value;
 import sui.components.Component;
 import sui.components.ComponentOptions;
 import sui.properties.ToggleClass;
 import ui.Button;
 import ui.Fragment;
 import ui.Menu;
+import ui.SchemaType;
 import ui.Toolbar;
 using steamer.Consumer;
 
 class Context {
 	public var component(default, null) : Component;
 	public var toolbar(default, null) : Toolbar;
-	public var currentFragment(default, null) : Consumer<Fragment>;
+	public var fragments(default, null) : Consumer<Fragment>;
+	public var currentFragment(default, null) : Null<Fragment>;
 	var pairs : Element;
 	var menuAdd : Menu;
 	var buttonAdd : Button;
+	var buttonRemove : Button;
+
+	public var field(default, null) : Value<Option<ContextField>>;
 
 	public function new(options : ComponentOptions) {
 		component = new Component(options);
@@ -35,11 +42,58 @@ class Context {
 			return true;
 		}).feed(menuAdd.visible.visible);
 
-		currentFragment = setFragmentStatus.toConsumer();
+		fragments = setFragmentStatus.toConsumer();
 		buttonAdd.enabled.value = false;
+
+		buttonRemove = toolbar.right.addButton('', Config.icons.remove);
+		buttonRemove.enabled.value = false;
+		buttonRemove.clicks.feed(function(_) {
+			switch field.value {
+				case Some(field):
+					currentFragment.component.properties.get(field.name).dispose();
+					field.destroy();
+					setAddMenuItems(currentFragment);
+				case _:
+			}
+		}.toConsumer());
+
+		field = new Value(None);
+		field.feed(function(option) {
+			switch option {
+				case Some(field):
+					buttonRemove.enabled.value = true;
+				case None:
+					buttonRemove.enabled.value = false;
+			}
+		}.toConsumer());
 	}
 
 	function setFragmentStatus(fragment : Fragment) {
+		currentFragment = fragment;
+		setFields(fragment);
+		setAddMenuItems(fragment);
+	}
+
+	function setFields(fragment : Fragment) {
+		pairs.innerHTML = '';
+		var fields = getAttachedPropertiesForFragment(fragment);
+		fields.map(addField);
+	}
+
+	public function addField(pair) {
+		var f = new ContextField({
+			container : pairs,
+			parent : component,
+			display : pair.display,
+			name : pair.name,
+			value : 'true'
+		});
+		f.focus.map(function(v) {
+			return v ? Some(f) : None;
+		}).feed(field);
+	}
+
+	function setAddMenuItems(fragment : Fragment) {
 		if(null == fragment) {
 			buttonAdd.enabled.value = false;
 			return;
@@ -58,7 +112,7 @@ class Context {
 		});
 	}
 
-	public function getVisiblePropertiesForFragment(fragment : Fragment) {
+	public function getAttachedPropertiesForFragment(fragment : Fragment) {
 		return getPropertiesForFragment(fragment).filter(function(pair) {
 			return fragment.component.properties.exists(pair.name);
 		});
@@ -75,14 +129,20 @@ class Context {
 			display : 'bold',
 			name : 'strong',
 			create : function(target : Component) {
-				return new ToggleClass(target, 'strong', 'strong', true);
-			}
+				var toggle = new ToggleClass(target, 'strong', 'strong');
+				toggle.toggleClassName.value = true;
+				return toggle;
+			},
+			type : BoolType
 		}, {
 			display : 'italic',
 			name : 'emphasis',
 			create : function(target : Component) {
-				return new ToggleClass(target, 'emphasis', 'emphasis', true);
-			}
+				var toggle = new ToggleClass(target, 'emphasis', 'emphasis');
+				toggle.toggleClassName.value = true;
+				return toggle;
+			},
+			type : BoolType
 		}];
 	}
 }

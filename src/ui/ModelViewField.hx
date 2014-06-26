@@ -7,7 +7,7 @@ import sui.components.ComponentOptions;
 import sui.properties.ToggleClass;
 import ui.TextEditor;
 
-class Field {
+class ModelViewField {
 	public var component(default, null) : Component;
 	public var key(default, null) : TextEditor;
 	public var value(default, null) : TextEditor;
@@ -15,7 +15,7 @@ class Field {
 
 	var classActive : ToggleClass;
 
-	public function new(options : FieldOptions) {
+	public function new(options : FieldEditableKeyOptions) {
 		if(null == options.template && null == options.el)
 			options.template = '<div class="field"><div class="key"></div><div class="value"></div></div>';
 
@@ -52,6 +52,6 @@ class Field {
 	}
 }
 
-typedef FieldOptions = {>ComponentOptions,
+typedef FieldEditableKeyOptions = {>ComponentOptions,
 	key : String
 }

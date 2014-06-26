@@ -15,7 +15,8 @@ class Card {
 			document = new Document({ el : Query.first('.doc', card.el) }),
 			context = new Context({ el : Query.first('.context', card.el) });
 
-		document.article.current.feed(context.currentFragment);
+		document.article.current.feed(context.fragments);
+		document.article.current.feed(document.fragments);
 
 		modelView.component.appendTo(Query.first('.model', card.el));
 

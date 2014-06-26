@@ -1,7 +1,10 @@
 + list available properties for block
 + display asssociated properties to block
-- add pairs for properties + expressions
++ add pairs for properties
+- add expression
 
+- transform expression into function
+- display syntax errors
 - evaluate expressions in context
 - create dependency between model values and context properties
 - refresh evaluation on change

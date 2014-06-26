@@ -550,6 +550,11 @@ haxe.ds.ObjectMap.prototype = {
 	}
 	,__class__: haxe.ds.ObjectMap
 };
+haxe.ds.Option = { __ename__ : ["haxe","ds","Option"], __constructs__ : ["Some","None"] };
+haxe.ds.Option.Some = function(v) { var $x = ["Some",0,v]; $x.__enum__ = haxe.ds.Option; $x.toString = $estr; return $x; };
+haxe.ds.Option.None = ["None",1];
+haxe.ds.Option.None.toString = $estr;
+haxe.ds.Option.None.__enum__ = haxe.ds.Option;
 haxe.ds.StringMap = function() {
 	this.h = { };
 };
@@ -1336,12 +1341,15 @@ steamer.Producer.prototype = {
 			}));
 		},this.endOnError);
 	}
-	,distinct: function() {
+	,distinct: function(equals) {
 		var _g = this;
 		var last = null;
+		if(null == equals) equals = function(a,b) {
+			return a == b;
+		};
 		return new steamer.Producer(function(forward) {
 			_g.feed(steamer.Bus.passOn(function(v) {
-				if(v == last) return;
+				if(equals(v,last)) return;
 				last = v;
 				forward(steamer.Pulse.Emit(v));
 			},forward));
@@ -1943,40 +1951,28 @@ sui.properties.Text.prototype = $extend(sui.properties.Property.prototype,{
 	}
 	,__class__: sui.properties.Text
 });
-sui.properties.ToggleClass = function(component,name,className,defaultHasClass) {
-	if(defaultHasClass == null) defaultHasClass = false;
-	this.defaultHasClass = defaultHasClass;
+sui.properties.ToggleClass = function(component,name,className) {
 	if(null == className) this.className = name; else this.className = className;
 	sui.properties.Property.call(this,component,name);
 };
 sui.properties.ToggleClass.__name__ = ["sui","properties","ToggleClass"];
-sui.properties.ToggleClass.asToggleEmphasis = function(component,name) {
-	return sui.properties.ToggleClass.asToggleClass(component,"emphasis");
-};
-sui.properties.ToggleClass.asToggleStrong = function(component,name) {
-	return sui.properties.ToggleClass.asToggleClass(component,"strong");
-};
 sui.properties.ToggleClass.asToggleClass = function(component,name) {
 	var property = component.properties.get(name);
-	thx.Assert["is"](property,sui.properties.ToggleClass,null,{ fileName : "ToggleClass.hx", lineNumber : 15, className : "sui.properties.ToggleClass", methodName : "asToggleClass"});
+	thx.Assert["is"](property,sui.properties.ToggleClass,null,{ fileName : "ToggleClass.hx", lineNumber : 11, className : "sui.properties.ToggleClass", methodName : "asToggleClass"});
 	return property;
-};
-sui.properties.ToggleClass.createStrong = function(component) {
-	return new sui.properties.ToggleClass(component,"strong");
-};
-sui.properties.ToggleClass.createEmphasis = function(component) {
-	return new sui.properties.ToggleClass(component,"emphasis");
 };
 sui.properties.ToggleClass.__super__ = sui.properties.Property;
 sui.properties.ToggleClass.prototype = $extend(sui.properties.Property.prototype,{
-	defaultHasClass: null
+	originalHasClass: null
 	,className: null
 	,toggleClassName: null
 	,init: function() {
 		var _g = this;
-		this.toggleClassName = new steamer.Value(this.defaultHasClass);
+		this.originalHasClass = this.component.el.classList.contains(this.className);
+		this.toggleClassName = new steamer.Value(this.originalHasClass);
 		this.toggleClassName.feed(steamer.dom.Dom.consumeToggleClass(this.component.el,this.className));
 		return function() {
+			if(_g.originalHasClass) _g.component.el.classList.add(_g.className); else _g.component.el.classList.remove(_g.className);
 			_g.toggleClassName.terminate();
 			_g.toggleClassName = null;
 		};
@@ -3293,16 +3289,18 @@ ui.Card.create = function(model,container) {
 	var modelView = new ui.ModelView();
 	var document = new ui.Document({ el : dom.Query.first(".doc",card.el)});
 	var context1 = new ui.Context({ el : dom.Query.first(".context",card.el)});
-	document.article.current.feed(context1.currentFragment);
+	document.article.current.feed(context1.fragments);
+	document.article.current.feed(document.fragments);
 	modelView.component.appendTo(dom.Query.first(".model",card.el));
 	modelView.schema.feed(model.schemaEventConsumer);
 	modelView.data.feed(model.dataEventConsumer);
 	card.appendTo(container);
 	model.data.stream.map(function(o) {
 		return JSON.stringify(o);
-	}).feed(new steamer.consumers.LoggerConsumer(null,{ fileName : "Card.hx", lineNumber : 27, className : "ui.Card", methodName : "create"}));
+	}).feed(new steamer.consumers.LoggerConsumer(null,{ fileName : "Card.hx", lineNumber : 28, className : "ui.Card", methodName : "create"}));
 };
 ui.Context = function(options) {
+	var _g = this;
 	this.component = new sui.components.Component(options);
 	this.toolbar = new ui.Toolbar({ parent : this.component, container : this.component.el});
 	this.pairs = dom.Html.parseList("<div class=\"fields\"><div></div></div>")[0];
@@ -3315,18 +3313,65 @@ ui.Context = function(options) {
 	this.buttonAdd.clicks.map(function(_) {
 		return true;
 	}).feed(this.menuAdd.visible.visible);
-	this.currentFragment = steamer.Consumers.toConsumer($bind(this,this.setFragmentStatus));
+	this.fragments = steamer.Consumers.toConsumer($bind(this,this.setFragmentStatus));
 	this.buttonAdd.enabled.set_value(false);
+	this.buttonRemove = this.toolbar.right.addButton("",Config.icons.remove);
+	this.buttonRemove.enabled.set_value(false);
+	this.buttonRemove.clicks.feed(steamer.Consumers.toConsumer(function(_1) {
+		{
+			var _g1 = _g.field.get_value();
+			switch(_g1[1]) {
+			case 0:
+				var field = _g1[2];
+				_g.currentFragment.component.properties.get(field.name).dispose();
+				field.destroy();
+				_g.setAddMenuItems(_g.currentFragment);
+				break;
+			default:
+			}
+		}
+	}));
+	this.field = new steamer.Value(haxe.ds.Option.None);
+	this.field.feed(steamer.Consumers.toConsumer(function(option) {
+		switch(option[1]) {
+		case 0:
+			var field1 = option[2];
+			_g.buttonRemove.enabled.set_value(true);
+			break;
+		case 1:
+			_g.buttonRemove.enabled.set_value(false);
+			break;
+		}
+	}));
 };
 ui.Context.__name__ = ["ui","Context"];
 ui.Context.prototype = {
 	component: null
 	,toolbar: null
+	,fragments: null
 	,currentFragment: null
 	,pairs: null
 	,menuAdd: null
 	,buttonAdd: null
+	,buttonRemove: null
+	,field: null
 	,setFragmentStatus: function(fragment) {
+		this.currentFragment = fragment;
+		this.setFields(fragment);
+		this.setAddMenuItems(fragment);
+	}
+	,setFields: function(fragment) {
+		this.pairs.innerHTML = "";
+		var fields = this.getAttachedPropertiesForFragment(fragment);
+		fields.map($bind(this,this.addField));
+	}
+	,addField: function(pair) {
+		var f = new ui.ContextField({ container : this.pairs, parent : this.component, display : pair.display, name : pair.name, value : "true"});
+		f.focus.map(function(v) {
+			if(v) return haxe.ds.Option.Some(f); else return haxe.ds.Option.None;
+		}).feed(this.field);
+	}
+	,setAddMenuItems: function(fragment) {
 		var _g = this;
 		if(null == fragment) {
 			this.buttonAdd.enabled.set_value(false);
@@ -3344,7 +3389,7 @@ ui.Context.prototype = {
 			}));
 		});
 	}
-	,getVisiblePropertiesForFragment: function(fragment) {
+	,getAttachedPropertiesForFragment: function(fragment) {
 		return this.getPropertiesForFragment(fragment).filter(function(pair) {
 			return fragment.component.properties.exists(pair.name);
 		});
@@ -3356,12 +3401,42 @@ ui.Context.prototype = {
 	}
 	,getPropertiesForFragment: function(fragment) {
 		return [{ display : "bold", name : "strong", create : function(target) {
-			return new sui.properties.ToggleClass(target,"strong","strong",true);
-		}},{ display : "italic", name : "emphasis", create : function(target1) {
-			return new sui.properties.ToggleClass(target1,"emphasis","emphasis",true);
-		}}];
+			var toggle = new sui.properties.ToggleClass(target,"strong","strong");
+			toggle.toggleClassName.set_value(true);
+			return toggle;
+		}, type : ui.SchemaType.BoolType},{ display : "italic", name : "emphasis", create : function(target1) {
+			var toggle1 = new sui.properties.ToggleClass(target1,"emphasis","emphasis");
+			toggle1.toggleClassName.set_value(true);
+			return toggle1;
+		}, type : ui.SchemaType.BoolType}];
 	}
 	,__class__: ui.Context
+};
+ui.ContextField = function(options) {
+	if(null == options.template && null == options.el) options.template = "<div class=\"field\"><div class=\"key\"></div><div class=\"value\"></div></div>";
+	this.component = new sui.components.Component(options);
+	var key = dom.Query.first(".key",this.component.el);
+	key.innerText = options.display;
+	this.name = options.name;
+	this.value = new ui.TextEditor({ el : dom.Query.first(".value",this.component.el), parent : this.component, defaultText : options.value});
+	this.focus = this.value.focus.debounce(250).distinct();
+	this.classActive = new sui.properties.ToggleClass(this.component,"active");
+	this.focus.feed(this.classActive.toggleClassName);
+};
+ui.ContextField.__name__ = ["ui","ContextField"];
+ui.ContextField.prototype = {
+	component: null
+	,value: null
+	,focus: null
+	,name: null
+	,classActive: null
+	,destroy: function() {
+		this.classActive.dispose();
+		this.component.destroy();
+		this.value = null;
+		this.focus = null;
+	}
+	,__class__: ui.ContextField
 };
 ui.Data = function(data) {
 	var _g = this;
@@ -3441,13 +3516,28 @@ ui.Document = function(options) {
 	this.toolbar = new ui.Toolbar({ parent : this.component, container : this.component.el});
 	this.article = new ui.Article({ parent : this.component, container : this.component.el});
 	this.statusbar = new ui.Statusbar({ parent : this.component, container : this.component.el});
+	var buttonRemove = this.toolbar.right.addButton("",Config.icons.remove);
+	var setFragment = function(fragment) {
+		_g.currentFragment = fragment;
+		buttonRemove.enabled.set_value(null != fragment);
+	};
+	this.fragments = steamer.Consumers.toConsumer(setFragment);
 	var buttonAdd = this.toolbar.left.addButton("",Config.icons.add);
 	buttonAdd.clicks.feed(steamer.Consumers.toConsumer(function(_) {
 		_g.article.addBlock();
 	}));
+	buttonRemove.enabled.set_value(false);
+	buttonRemove.clicks.feed(steamer.Consumers.toConsumer(function(_1) {
+		_g.currentFragment.component.destroy();
+		setFragment(null);
+	}));
 	this.article.current.map(function(v) {
 		return v.toString();
-	}).feed(new steamer.consumers.LoggerConsumer(null,{ fileName : "Document.hx", lineNumber : 26, className : "ui.Document", methodName : "new"}));
+	}).feed(new steamer.consumers.LoggerConsumer(null,{ fileName : "Document.hx", lineNumber : 44, className : "ui.Document", methodName : "new"}));
+	this.article.addBlock();
+	this.article.addBlock();
+	this.article.addBlock();
+	this.article.addBlock();
 };
 ui.Document.__name__ = ["ui","Document"];
 ui.Document.prototype = {
@@ -3455,6 +3545,8 @@ ui.Document.prototype = {
 	,toolbar: null
 	,article: null
 	,statusbar: null
+	,currentFragment: null
+	,fragments: null
 	,__class__: ui.Document
 };
 ui.Editor = function() { };
@@ -3463,32 +3555,6 @@ ui.Editor.prototype = {
 	value: null
 	,type: null
 	,__class__: ui.Editor
-};
-ui.Field = function(options) {
-	if(null == options.template && null == options.el) options.template = "<div class=\"field\"><div class=\"key\"></div><div class=\"value\"></div></div>";
-	this.component = new sui.components.Component(options);
-	this.key = new ui.TextEditor({ el : dom.Query.first(".key",this.component.el), parent : this.component, defaultText : options.key});
-	this.value = new ui.TextEditor({ el : dom.Query.first(".value",this.component.el), parent : this.component, defaultText : ""});
-	var f = this.key.focus.merge(this.value.focus);
-	this.focus = f.debounce(250).distinct();
-	this.classActive = new sui.properties.ToggleClass(this.component,"active");
-	f.feed(this.classActive.toggleClassName);
-};
-ui.Field.__name__ = ["ui","Field"];
-ui.Field.prototype = {
-	component: null
-	,key: null
-	,value: null
-	,focus: null
-	,classActive: null
-	,destroy: function() {
-		this.classActive.dispose();
-		this.component.destroy();
-		this.key = null;
-		this.value = null;
-		this.focus = null;
-	}
-	,__class__: ui.Field
 };
 ui.Menu = function(options) {
 	var _g = this;
@@ -3685,14 +3751,14 @@ ui.ModelView.prototype = {
 		this.removeField(field);
 	}
 	,removeField: function(field) {
-		thx.Assert.notNull(field,"when removing a field it should not be null",{ fileName : "ModelView.hx", lineNumber : 91, className : "ui.ModelView", methodName : "removeField"});
+		thx.Assert.notNull(field,"when removing a field it should not be null",{ fileName : "ModelView.hx", lineNumber : 92, className : "ui.ModelView", methodName : "removeField"});
 		var name = field.key.text.get_value();
 		field.destroy();
 		if(this.fields.remove(name)) this.feedSchema(steamer.Pulse.Emit(ui.SchemaEvent.DeleteField(name)));
 	}
 	,addField: function(name,type) {
 		var _g = this;
-		var field = new ui.Field({ container : this.pairs, parent : this.component, key : name});
+		var field = new ui.ModelViewField({ container : this.pairs, parent : this.component, key : name});
 		var oldname = null;
 		var createSetValue = function() {
 			return ui.DataEvent.SetValue(field.key.text.get_value(),field.value.value.get_value(),field.value.type);
@@ -3724,6 +3790,32 @@ ui.ModelView.prototype = {
 		this.fields.set(name,field);
 	}
 	,__class__: ui.ModelView
+};
+ui.ModelViewField = function(options) {
+	if(null == options.template && null == options.el) options.template = "<div class=\"field\"><div class=\"key\"></div><div class=\"value\"></div></div>";
+	this.component = new sui.components.Component(options);
+	this.key = new ui.TextEditor({ el : dom.Query.first(".key",this.component.el), parent : this.component, defaultText : options.key});
+	this.value = new ui.TextEditor({ el : dom.Query.first(".value",this.component.el), parent : this.component, defaultText : ""});
+	var f = this.key.focus.merge(this.value.focus);
+	this.focus = f.debounce(250).distinct();
+	this.classActive = new sui.properties.ToggleClass(this.component,"active");
+	f.feed(this.classActive.toggleClassName);
+};
+ui.ModelViewField.__name__ = ["ui","ModelViewField"];
+ui.ModelViewField.prototype = {
+	component: null
+	,key: null
+	,value: null
+	,focus: null
+	,classActive: null
+	,destroy: function() {
+		this.classActive.dispose();
+		this.component.destroy();
+		this.key = null;
+		this.value = null;
+		this.focus = null;
+	}
+	,__class__: ui.ModelViewField
 };
 ui.Schema = function() {
 	var _g = this;

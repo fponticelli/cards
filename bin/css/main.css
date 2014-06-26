@@ -95,7 +95,7 @@ a img {
   -moz-box-sizing: border-box;
   box-sizing: border-box;
   font-size: 8pt;
-  font-family: Verdana, Arial, Sans-serif;
+  font-family: "Helvetica Neue", Verdana, Arial, Sans-serif;
 }
 .card .fa,
 .card * .fa {

@@ -11,6 +11,7 @@ import sui.properties.Attribute;
 import sui.properties.Text;
 import thx.Assert;
 import ui.DataEvent;
+import ui.ModelViewField;
 import ui.SchemaEvent;
 import ui.SchemaType;
 import ui.TextEditor;
@@ -21,15 +22,15 @@ class ModelView {
 	public var schema(default, null) : Producer<SchemaEvent>;
 	public var data(default, null) : Producer<DataEvent>;
 	public var toolbar(default, null) : Toolbar;
-	public var currentField(default, null) : Null<Field>;
+	public var currentField(default, null) : Null<ModelViewField>;
 
 	var pairs : Element;
 
 	var feedSchema : Pulse<SchemaEvent> -> Void;
 	var feedData : Pulse<DataEvent> -> Void;
-	var fields : Map<String, Field>;
-	var fieldFocus : MultiProducer<Field>;
-	var fieldBlur : MultiProducer<Field>;
+	var fields : Map<String, ModelViewField>;
+	var fieldFocus : MultiProducer<ModelViewField>;
+	var fieldBlur : MultiProducer<ModelViewField>;
 
 	public function new() {
 		component = new Component({
@@ -87,7 +88,7 @@ class ModelView {
 		removeField(field);
 	}
 
-	public function removeField(field : Field) {
+	public function removeField(field : ModelViewField) {
 		Assert.notNull(field, 'when removing a field it should not be null');
 		var name = field.key.text.value;
 		field.destroy();
@@ -97,7 +98,7 @@ class ModelView {
 	}
 
 	public function addField(name : String, type : SchemaType) {
-		var field = new Field({
+		var field = new ModelViewField({
 			container : pairs,
 			parent : component,
 			key : name
