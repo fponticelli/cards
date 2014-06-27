@@ -98,15 +98,15 @@ class Context {
 		var exp = f.value.text
 				.debounce(250)
 				.distinct()
-				.map(Expressions.toExpression);
+				.map(function(code) return code.toExpression());
 
-		exp.feed(expressions.get(fieldInfo.name));
 		exp.map(function(e) {
 			return switch e {
 				case Fun(f): None;
 				case SyntaxError(e): Some(e);
 			};
 		}).feed(f.withError);
+		exp.feed(expressions.get(fieldInfo.name));
 	}
 
 	function setAddMenuItems(fragment : Fragment) {

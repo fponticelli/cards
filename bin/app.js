@@ -3430,8 +3430,9 @@ ui.Context.prototype = {
 		f.focus.map(function(v) {
 			if(v) return haxe.ds.Option.Some(f); else return haxe.ds.Option.None;
 		}).feed(this.field);
-		var exp = f.value.text.debounce(250).distinct().map(ui.Expressions.toExpression);
-		exp.feed(this.expressions.get(fieldInfo.name));
+		var exp = f.value.text.debounce(250).distinct().map(function(code) {
+			return ui.Expressions.toExpression(code);
+		});
 		exp.map(function(e) {
 			switch(e[1]) {
 			case 0:
@@ -3442,6 +3443,7 @@ ui.Context.prototype = {
 				return haxe.ds.Option.Some(e1);
 			}
 		}).feed(f.withError);
+		exp.feed(this.expressions.get(fieldInfo.name));
 	}
 	,setAddMenuItems: function(fragment) {
 		var _g = this;
