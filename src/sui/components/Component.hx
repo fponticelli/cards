@@ -27,7 +27,7 @@ class Component {
 			el = Html.parse(options.template);
 		}
 		if(null != options.classes)
-			el.classList.add(options.classes);
+			options.classes.split(' ').map(el.classList.add);
 		if(null != options.parent)
 			options.parent.add(this);
 		if(null != options.container)

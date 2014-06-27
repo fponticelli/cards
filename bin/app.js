@@ -1775,7 +1775,7 @@ sui.components.Component = function(options) {
 			if(null != this.el.parentElement) this.isAttached = true;
 		}
 	} else this.el = dom.Html.parseList(options.template)[0];
-	if(null != options.classes) this.el.classList.add(options.classes);
+	if(null != options.classes) options.classes.split(" ").map(($_=this.el.classList,$bind($_,$_.add)));
 	if(null != options.parent) options.parent.add(this);
 	if(null != options.container) this.appendTo(options.container);
 };
@@ -3194,6 +3194,34 @@ thx.ref.ValueRef.prototype = $extend(thx.ref.BaseRef.prototype,{
 	,__class__: thx.ref.ValueRef
 });
 var ui = {};
+ui.AnchorPoint = { __ename__ : ["ui","AnchorPoint"], __constructs__ : ["TopLeft","Top","TopRight","Left","Center","Right","BottomLeft","Bottom","BottomRight"] };
+ui.AnchorPoint.TopLeft = ["TopLeft",0];
+ui.AnchorPoint.TopLeft.toString = $estr;
+ui.AnchorPoint.TopLeft.__enum__ = ui.AnchorPoint;
+ui.AnchorPoint.Top = ["Top",1];
+ui.AnchorPoint.Top.toString = $estr;
+ui.AnchorPoint.Top.__enum__ = ui.AnchorPoint;
+ui.AnchorPoint.TopRight = ["TopRight",2];
+ui.AnchorPoint.TopRight.toString = $estr;
+ui.AnchorPoint.TopRight.__enum__ = ui.AnchorPoint;
+ui.AnchorPoint.Left = ["Left",3];
+ui.AnchorPoint.Left.toString = $estr;
+ui.AnchorPoint.Left.__enum__ = ui.AnchorPoint;
+ui.AnchorPoint.Center = ["Center",4];
+ui.AnchorPoint.Center.toString = $estr;
+ui.AnchorPoint.Center.__enum__ = ui.AnchorPoint;
+ui.AnchorPoint.Right = ["Right",5];
+ui.AnchorPoint.Right.toString = $estr;
+ui.AnchorPoint.Right.__enum__ = ui.AnchorPoint;
+ui.AnchorPoint.BottomLeft = ["BottomLeft",6];
+ui.AnchorPoint.BottomLeft.toString = $estr;
+ui.AnchorPoint.BottomLeft.__enum__ = ui.AnchorPoint;
+ui.AnchorPoint.Bottom = ["Bottom",7];
+ui.AnchorPoint.Bottom.toString = $estr;
+ui.AnchorPoint.Bottom.__enum__ = ui.AnchorPoint;
+ui.AnchorPoint.BottomRight = ["BottomRight",8];
+ui.AnchorPoint.BottomRight.toString = $estr;
+ui.AnchorPoint.BottomRight.__enum__ = ui.AnchorPoint;
 ui.Article = function(options) {
 	if(null == options.el && null == options.template) options.template = "<article></article>";
 	this.component = new sui.components.Component(options);
@@ -3449,7 +3477,119 @@ ui.Context.prototype = {
 	}
 	,__class__: ui.Context
 };
+ui.FrameOverlay = function(options) {
+	var _g = this;
+	if(null == options.el && null == options.template) options.template = "<div class=\"frame-overlay\"></div>";
+	this.component = new sui.components.Component(options);
+	this.visible = new sui.properties.Visible(this.component,false);
+	var clear = function(_) {
+		_g.visible.visible.set_value(false);
+	};
+	this.visible.visible.filter(function(b) {
+		return !b;
+	}).feed(steamer.Consumers.toConsumer(function(_1) {
+		window.document.removeEventListener("mouseup",clear,false);
+	}));
+	this.visible.visible.filter(function(b1) {
+		return b1;
+	}).feed(steamer.Consumers.toConsumer(function(_2) {
+		window.document.addEventListener("mouseup",clear,false);
+		_g.reposition();
+	}));
+	this.anchorElement = window.document.body;
+};
+ui.FrameOverlay.__name__ = ["ui","FrameOverlay"];
+ui.FrameOverlay.prototype = {
+	component: null
+	,visible: null
+	,anchorElement: null
+	,my: null
+	,at: null
+	,anchorTo: function(el,my,at) {
+		this.anchorElement = el;
+		if(null == my) this.my = ui.AnchorPoint.TopLeft; else this.my = my;
+		if(null == at) this.at = ui.AnchorPoint.BottomLeft; else this.at = at;
+		if(this.visible.visible.get_value()) this.reposition();
+	}
+	,reposition: function() {
+		if(!this.component.isAttached) {
+			var parent = [dom.Query.first(Config.selectors.app),window.document.body].filter(function(v) {
+				return null != v;
+			}).shift();
+			this.component.appendTo(parent);
+		}
+		var style = this.component.el.style;
+		style.position = "fixed";
+		var atrect = this.anchorElement.getBoundingClientRect();
+		var myrect = this.component.el.getBoundingClientRect();
+		var x = 0.0;
+		var y = 0.0;
+		var _g = this.at;
+		switch(_g[1]) {
+		case 0:case 1:case 2:
+			y = atrect.top;
+			break;
+		case 3:case 4:case 5:
+			y = atrect.top + atrect.height / 2;
+			break;
+		case 6:case 7:case 8:
+			y = atrect.top + atrect.height;
+			break;
+		}
+		var _g1 = this.at;
+		switch(_g1[1]) {
+		case 0:case 3:case 6:
+			x = atrect.left;
+			break;
+		case 1:case 4:case 7:
+			x = atrect.left + atrect.width / 2;
+			break;
+		case 2:case 5:case 8:
+			x = atrect.left + atrect.width;
+			break;
+		}
+		var _g2 = this.my;
+		switch(_g2[1]) {
+		case 0:case 1:case 2:
+			y -= 0;
+			break;
+		case 3:case 4:case 5:
+			y -= myrect.height / 2;
+			break;
+		case 6:case 7:case 8:
+			y -= myrect.height;
+			break;
+		}
+		var _g3 = this.my;
+		switch(_g3[1]) {
+		case 0:case 3:case 6:
+			x -= 0;
+			break;
+		case 1:case 4:case 7:
+			x -= myrect.width / 2;
+			break;
+		case 2:case 5:case 8:
+			x -= myrect.width;
+			break;
+		}
+		style.top = y + "px";
+		style.left = x + "px";
+	}
+	,__class__: ui.FrameOverlay
+};
+ui.Tooltip = function(options) {
+	ui.FrameOverlay.call(this,options);
+};
+ui.Tooltip.__name__ = ["ui","Tooltip"];
+ui.Tooltip.__super__ = ui.FrameOverlay;
+ui.Tooltip.prototype = $extend(ui.FrameOverlay.prototype,{
+	setContent: function(html) {
+		this.component.el.innerHTML = html;
+	}
+	,__class__: ui.Tooltip
+});
 ui.ContextField = function(options) {
+	var _g = this;
 	if(null == options.template && null == options.el) options.template = "<div class=\"field\"><div class=\"key\"></div><div class=\"value\"></div></div>";
 	this.component = new sui.components.Component(options);
 	var key = dom.Query.first(".key",this.component.el);
@@ -3469,6 +3609,18 @@ ui.ContextField = function(options) {
 			return true;
 		}
 	}).feed(hasError);
+	this.withError.feed(steamer.Consumers.toConsumer(function(o1) {
+		switch(o1[1]) {
+		case 0:
+			var err = o1[2];
+			ui.ContextField.tooltip.setContent(err);
+			ui.ContextField.tooltip.anchorTo(_g.component.el,ui.AnchorPoint.Top,ui.AnchorPoint.Bottom);
+			ui.ContextField.tooltip.visible.visible.set_value(true);
+			break;
+		default:
+			if(ui.ContextField.tooltip.anchorElement == _g.component.el) ui.ContextField.tooltip.visible.visible.set_value(false);
+		}
+	}));
 };
 ui.ContextField.__name__ = ["ui","ContextField"];
 ui.ContextField.prototype = {
@@ -3620,34 +3772,15 @@ ui.Expressions.toExpression = function(code) {
 	}
 };
 ui.Menu = function(options) {
-	var _g = this;
-	if(null == options.el && null == options.template) options.template = "<menu><ul></ul></menu>";
-	this.component = new sui.components.Component(options);
+	if(null == options.el && null == options.template) options.template = "<menu class=\"frame-overlay\"><ul></ul></menu>";
+	ui.FrameOverlay.call(this,options);
 	this.ul = dom.Query.first("ul",this.component.el);
 	this.items = new haxe.ds.ObjectMap();
-	this.visible = new sui.properties.Visible(this.component,false);
-	var clear = function(_) {
-		_g.visible.visible.set_value(false);
-	};
-	this.visible.visible.filter(function(b) {
-		return !b;
-	}).feed(steamer.Consumers.toConsumer(function(_1) {
-		window.document.removeEventListener("mouseup",clear,false);
-	}));
-	this.visible.visible.filter(function(b1) {
-		return b1;
-	}).feed(steamer.Consumers.toConsumer(function(_2) {
-		window.document.addEventListener("mouseup",clear,false);
-		_g.reposition();
-	}));
-	this.reference = window.document.body;
 };
 ui.Menu.__name__ = ["ui","Menu"];
-ui.Menu.prototype = {
-	component: null
-	,visible: null
-	,items: null
-	,reference: null
+ui.Menu.__super__ = ui.FrameOverlay;
+ui.Menu.prototype = $extend(ui.FrameOverlay.prototype,{
+	items: null
 	,ul: null
 	,clear: function() {
 		this.ul.innerHTML = "";
@@ -3663,31 +3796,14 @@ ui.Menu.prototype = {
 		this.items.set(item,el);
 	}
 	,removeItem: function(item) {
-		thx.Assert.notNull(item,null,{ fileName : "Menu.hx", lineNumber : 62, className : "ui.Menu", methodName : "removeItem"});
-		thx.Assert.isTrue(this.items.h.__keys__[item.__id__] != null,null,{ fileName : "Menu.hx", lineNumber : 63, className : "ui.Menu", methodName : "removeItem"});
+		thx.Assert.notNull(item,null,{ fileName : "Menu.hx", lineNumber : 40, className : "ui.Menu", methodName : "removeItem"});
+		thx.Assert.isTrue(this.items.h.__keys__[item.__id__] != null,null,{ fileName : "Menu.hx", lineNumber : 41, className : "ui.Menu", methodName : "removeItem"});
 		var el = this.items.h[item.__id__];
 		item.detach();
 		this.ul.removeChild(el);
 	}
-	,anchorTo: function(el) {
-		this.reference = el;
-		if(this.visible.visible.get_value()) this.reposition();
-	}
-	,reposition: function() {
-		if(!this.component.isAttached) {
-			var parent = [dom.Query.first(Config.selectors.app),window.document.body].filter(function(v) {
-				return null != v;
-			}).shift();
-			this.component.appendTo(parent);
-		}
-		var rect = this.reference.getBoundingClientRect();
-		var style = this.component.el.style;
-		style.position = "fixed";
-		style.top = rect.top + rect.height + "px";
-		style.left = rect.left + "px";
-	}
 	,__class__: ui.Menu
-};
+});
 ui.Model = function(data) {
 	var _g = this;
 	this.data = data;
@@ -4381,6 +4497,7 @@ thx.core.Strings.__digitsPattern = new EReg("^[0-9]+$","");
 thx.ref.EmptyParent.instance = new thx.ref.EmptyParent();
 thx.ref.Ref.reField = new EReg("^\\.?([^.\\[]+)","");
 thx.ref.Ref.reIndex = new EReg("^\\[(\\d+)\\]","");
+ui.ContextField.tooltip = new ui.Tooltip({ classes : "tooltip error"});
 Main.main();
 })(typeof window != "undefined" ? window : exports);
 

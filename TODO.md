@@ -1,7 +1,4 @@
-- create tooltip
-- create error tooltip
-- locate tooltip below
-
+- fixe evaluation
 - evaluate expressions in context
 - display syntax errors
 - display runtime errors
@@ -34,6 +31,9 @@ CV: add related properties
 
 DONE:
 
++ create tooltip
++ create error tooltip
++ locate tooltip below
 + transform expression into function
 + list available properties for block
 + display asssociated properties to block

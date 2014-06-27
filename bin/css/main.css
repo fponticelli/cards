@@ -251,8 +251,13 @@ a img {
   width: 100%;
   height: 50%;
 }
-.card .context .error {
-  background-color: #f00;
+.card .context .error > div {
+  background: -webkit-gradient(linear, left bottom, left top, color-stop(0, #b30), color-stop(0.1, #b30), color-stop(0.10099999999999999, #fff));
+  background: -webkit-linear-gradient(bottom, #b30 0%, #b30 10%, #fff 10.1%);
+  background: -moz-linear-gradient(bottom, #b30 0%, #b30 10%, #fff 10.1%);
+  background: -o-linear-gradient(bottom, #b30 0%, #b30 10%, #fff 10.1%);
+  background: -ms-linear-gradient(bottom, #b30 0%, #b30 10%, #fff 10.1%);
+  background: background: linear-gradient(bottom, #b30 0%, #b30 10%, #fff 10.1%);;
 }
 .card .doc {
   border-right: 1px solid #eee;
@@ -290,22 +295,24 @@ a img {
   width: 70%;
   border-bottom: 1px solid #f6f6f6;
 }
-.card menu {
+.card .frame-overlay {
   padding: 0.5em;
   margin: 0;
-  margin-top: 2px;
   background: #f6f6f6;
   z-index: 100;
   -webkit-box-shadow: inset 1px 1px 1px rgba(255,255,255,0.8), 0px 0px 1px rgba(0,0,0,0.3), 2px 2px 4px rgba(0,0,0,0.1);
   box-shadow: inset 1px 1px 1px rgba(255,255,255,0.8), 0px 0px 1px rgba(0,0,0,0.3), 2px 2px 4px rgba(0,0,0,0.1);
 }
-.card menu button {
+.card menu.frame-overlay {
+  margin-top: 2px;
+}
+.card menu.frame-overlay button {
   width: 100%;
 }
-.card menu li {
+.card menu.frame-overlay li {
   margin-bottom: 0.5em;
 }
-.card menu li:last-child {
+.card menu.frame-overlay li:last-child {
   margin-bottom: 0;
 }
 .card .model {
@@ -359,4 +366,12 @@ a img {
 .card .toolbar .btn-group :last-child {
   border-top-right-radius: 3px;
   border-bottom-right-radius: 3px;
+}
+.card .tooltip {
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
+  padding: 8px;
+}
+.card .tooltip.error {
+  border: 2px solid #b30;
 }

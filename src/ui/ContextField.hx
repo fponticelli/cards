@@ -7,13 +7,16 @@ import sui.components.Component;
 import dom.Dom;
 import sui.components.ComponentOptions;
 import sui.properties.ToggleClass;
+import ui.AnchorPoint;
 import ui.TextEditor;
 using steamer.Consumer;
 using ui.Expression;
 using steamer.dom.Dom;
 import haxe.ds.Option;
+import ui.Tooltip;
 
 class ContextField {
+	public static var tooltip(default, null) : Tooltip = new Tooltip({ classes : 'tooltip error' });
 	public var component(default, null) : Component;
 	public var value(default, null) : TextEditor;
 	public var focus(default, null) : Producer<Bool>;
@@ -55,6 +58,17 @@ class ContextField {
 				case Some(_): true;
 			}
 		}).feed(hasError);
+		withError.feed(function(o) {
+			switch o {
+				case Some(err):
+					tooltip.setContent(err);
+					tooltip.anchorTo(component.el, Top, Bottom);
+					tooltip.visible.visible.value = true;
+				case _:
+					if(tooltip.anchorElement == component.el)
+						tooltip.visible.visible.value = false;
+			}
+		}.toConsumer());
 	}
 
 	public function destroy() {
