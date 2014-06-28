@@ -83,7 +83,7 @@ class Context {
 		fields.map(addField);
 	}
 
-	public function addField(fieldInfo : FieldInfo) {
+	public function addField(fieldInfo : FieldInfo<Dynamic>) {
 		var f = new ContextField({
 			container : fieldsEl,
 			parent : component,
@@ -95,18 +95,24 @@ class Context {
 			.map(function(v) return v ? Some(f) : None)
 			.feed(field);
 
-		var exp = f.value.text
+		var expression = expressions.get(fieldInfo.name),
+			exp = f.value.text
 				.debounce(250)
 				.distinct()
 				.map(function(code) return code.toExpression());
 
-		exp.map(function(e) {
+		var mixed = exp.merge(expression);
+		mixed.map(function(e) {
 			return switch e {
-				case Fun(f): None;
-				case SyntaxError(e): Some(e);
+				case Fun(f):
+					None;
+				case SyntaxError(e):
+					Some(e);
+				case RuntimeError(e):
+					Some(e);
 			};
 		}).feed(f.withError);
-		exp.feed(expressions.get(fieldInfo.name));
+		exp.feed(expression);
 	}
 
 	function setAddMenuItems(fragment : Fragment) {
@@ -122,10 +128,46 @@ class Context {
 			var button = new Button('add ${fieldInfo.display}');
 			menuAdd.addItem(button.component);
 			button.clicks.feed(function(_) {
-				expressions.set(fieldInfo.name, fieldInfo.create(fragment.component));
+				var pair = createFeedExpression(fieldInfo.transform, fieldInfo.defaultf),
+					expression = pair.expression,
+					value = pair.value;
+				fieldInfo.create(fragment.component, value);
+				expressions.set(fieldInfo.name, expression);
 				setFragmentStatus(fragment);
 			}.toConsumer());
 		});
+	}
+
+	function createFeedExpression<T>(transform : Dynamic -> T, defaultf : Void -> Dynamic) {
+		var expression = new Value(Fun(defaultf)),
+			value = new Value(null),
+			state : Dynamic = null;
+
+		expression
+			.map(function(exp) {
+				return switch exp {
+					case Fun(f):
+						f;
+					case _:
+						null;
+				};
+			})
+			.filter(function(f) return f != null)
+			.filter(function(f) {
+				return try {
+					state = f();
+					true;
+				} catch(e : Dynamic) {
+					expression.value = RuntimeError(Std.string(e));
+					false;
+				};
+			})
+			.map(transform)
+			.feed(value);
+		return {
+			expression : expression,
+			value : value
+		};
 	}
 
 	public function getAttachedPropertiesForFragment(fragment : Fragment) {
@@ -141,53 +183,38 @@ class Context {
 	}
 
 	static function toggleClass(name : String) {
-		return function(target : Component) {
-			var toggle     = new ToggleClass(target, name, name),
-				expression = new Value(Fun(function() return false)),
-				state : Dynamic = null;
-			expression
-				.map(function(exp) {
-					return switch exp { case Fun(f): f; case _: null; };
-				})
-				.filter(function(f) return f != null)
-				.filter(function(f) {
-					return try {
-						state = f();
-						true;
-					} catch(e : Dynamic) {
-						trace(e);
-						false;
-					};
-				})
-				.map(function(_) {
-					return (untyped __js__("!!"))(state);
-				})
-				.feed(toggle.toggleClassName);
-			return expression;
+		return function(target : Component, value : Value<Bool>) {
+			var toggle = new ToggleClass(target, name, name);
+			value.feed(toggle.toggleClassName);
 		};
 	}
 
-	public function getPropertiesForFragment(fragment : Fragment) : Array<FieldInfo> {
-		return [{
-			display : 'bold',
-			name : 'strong',
-			create : toggleClass('strong'),
-			type : BoolType,
-			code : 'true'
-		}, {
-			display : 'italic',
-			name : 'emphasis',
-			create : toggleClass('emphasis'),
-			type : BoolType,
-			code : 'true'
-		}];
+	static function createToggleInfo(display : String, name : String) : FieldInfo<Bool> {
+		return {
+			display   : display,
+			name      : name,
+			create    : toggleClass(name),
+			type      : BoolType,
+			code      : 'true',
+			transform : function(v : Dynamic) : Dynamic return untyped __js__('!!')(v),
+			defaultf  : function() : Dynamic return false
+		};
+	}
+
+	public function getPropertiesForFragment(fragment : Fragment) : Array<FieldInfo<Dynamic>> {
+		return [
+			createToggleInfo('bold', 'strong'),
+			createToggleInfo('italic', 'emphasis')
+		];
 	}
 }
 
-typedef FieldInfo = {
+typedef FieldInfo<T> = {
 	display : String,
 	name : String,
-	create : Component -> Value<Expression>,
+	create : Component -> Value<T> -> Void,
 	type : SchemaType,
-	code : String
+	code : String,
+	transform : Dynamic -> T,
+	defaultf : Void -> T
 }

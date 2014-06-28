@@ -1,7 +1,4 @@
-- fixe evaluation
 - evaluate expressions in context
-- display syntax errors
-- display runtime errors
 
 - create dependency between model values and context properties
 - refresh evaluation on change
@@ -31,6 +28,8 @@ CV: add related properties
 
 DONE:
 
++ display runtime errors
++ display syntax errors
 + create tooltip
 + create error tooltip
 + locate tooltip below

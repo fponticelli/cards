@@ -426,54 +426,6 @@ haxe.CallStack.callStack = function() {
 haxe.CallStack.exceptionStack = function() {
 	return [];
 };
-haxe.CallStack.toString = function(stack) {
-	var b = new StringBuf();
-	var _g = 0;
-	while(_g < stack.length) {
-		var s = stack[_g];
-		++_g;
-		b.b += "\nCalled from ";
-		haxe.CallStack.itemToString(b,s);
-	}
-	return b.b;
-};
-haxe.CallStack.itemToString = function(b,s) {
-	switch(s[1]) {
-	case 0:
-		b.b += "a C function";
-		break;
-	case 1:
-		var m = s[2];
-		b.b += "module ";
-		if(m == null) b.b += "null"; else b.b += "" + m;
-		break;
-	case 2:
-		var line = s[4];
-		var file = s[3];
-		var s1 = s[2];
-		if(s1 != null) {
-			haxe.CallStack.itemToString(b,s1);
-			b.b += " (";
-		}
-		if(file == null) b.b += "null"; else b.b += "" + file;
-		b.b += " line ";
-		if(line == null) b.b += "null"; else b.b += "" + line;
-		if(s1 != null) b.b += ")";
-		break;
-	case 3:
-		var meth = s[3];
-		var cname = s[2];
-		if(cname == null) b.b += "null"; else b.b += "" + cname;
-		b.b += ".";
-		if(meth == null) b.b += "null"; else b.b += "" + meth;
-		break;
-	case 4:
-		var n = s[2];
-		b.b += "local function #";
-		if(n == null) b.b += "null"; else b.b += "" + n;
-		break;
-	}
-};
 haxe.CallStack.makeStack = function(s) {
 	if(typeof(s) == "string") {
 		var stack = s.split("\n");
@@ -2020,15 +1972,12 @@ thx.Error = function(message,stack,pos) {
 	this.pos = pos;
 };
 thx.Error.__name__ = ["thx","Error"];
-thx.Error.prototype = {
-	message: null
-	,stack: null
+thx.Error.__super__ = Error;
+thx.Error.prototype = $extend(Error.prototype,{
+	stack: null
 	,pos: null
-	,toString: function() {
-		return this.message + "from: " + this.pos.className + "." + this.pos.methodName + "() at " + this.pos.lineNumber + "\n\n" + haxe.CallStack.toString(this.stack);
-	}
 	,__class__: thx.Error
-};
+});
 thx.Assert = function() { };
 thx.Assert.__name__ = ["thx","Assert"];
 thx.Assert.isTrue = function(cond,msg,pos) {
@@ -3374,35 +3323,17 @@ ui.Context = function(options) {
 };
 ui.Context.__name__ = ["ui","Context"];
 ui.Context.toggleClass = function(name) {
-	return function(target) {
+	return function(target,value) {
 		var toggle = new sui.properties.ToggleClass(target,name,name);
-		var expression = new steamer.Value(ui.Expression.Fun(function() {
-			return false;
-		}));
-		var state = null;
-		expression.map(function(exp) {
-			switch(exp[1]) {
-			case 0:
-				var f = exp[2];
-				return f;
-			default:
-				return null;
-			}
-		}).filter(function(f1) {
-			return f1 != null;
-		}).filter(function(f2) {
-			try {
-				state = f2();
-				return true;
-			} catch( e ) {
-				haxe.Log.trace(e,{ fileName : "Context.hx", lineNumber : 158, className : "ui.Context", methodName : "toggleClass"});
-				return false;
-			}
-		}).map(function(_) {
-			return !!(state);
-		}).feed(toggle.toggleClassName);
-		return expression;
+		value.feed(toggle.toggleClassName);
 	};
+};
+ui.Context.createToggleInfo = function(display,name) {
+	return { display : display, name : name, create : ui.Context.toggleClass(name), type : ui.SchemaType.BoolType, code : "true", transform : function(v) {
+		return !!(v);
+	}, defaultf : function() {
+		return false;
+	}};
 };
 ui.Context.prototype = {
 	component: null
@@ -3430,10 +3361,12 @@ ui.Context.prototype = {
 		f.focus.map(function(v) {
 			if(v) return haxe.ds.Option.Some(f); else return haxe.ds.Option.None;
 		}).feed(this.field);
+		var expression = this.expressions.get(fieldInfo.name);
 		var exp = f.value.text.debounce(250).distinct().map(function(code) {
 			return ui.Expressions.toExpression(code);
 		});
-		exp.map(function(e) {
+		var mixed = exp.merge(expression);
+		mixed.map(function(e) {
 			switch(e[1]) {
 			case 0:
 				var f1 = e[2];
@@ -3441,9 +3374,12 @@ ui.Context.prototype = {
 			case 1:
 				var e1 = e[2];
 				return haxe.ds.Option.Some(e1);
+			case 2:
+				var e2 = e[2];
+				return haxe.ds.Option.Some(e2);
 			}
 		}).feed(f.withError);
-		exp.feed(this.expressions.get(fieldInfo.name));
+		exp.feed(expression);
 	}
 	,setAddMenuItems: function(fragment) {
 		var _g = this;
@@ -3458,11 +3394,39 @@ ui.Context.prototype = {
 			var button = new ui.Button("add " + fieldInfo.display);
 			_g.menuAdd.addItem(button.component);
 			button.clicks.feed(steamer.Consumers.toConsumer(function(_) {
-				var value = fieldInfo.create(fragment.component);
-				_g.expressions.set(fieldInfo.name,value);
+				var pair = _g.createFeedExpression(fieldInfo.transform,fieldInfo.defaultf);
+				var expression = pair.expression;
+				var value = pair.value;
+				fieldInfo.create(fragment.component,value);
+				_g.expressions.set(fieldInfo.name,expression);
 				_g.setFragmentStatus(fragment);
 			}));
 		});
+	}
+	,createFeedExpression: function(transform,defaultf) {
+		var expression = new steamer.Value(ui.Expression.Fun(defaultf));
+		var value = new steamer.Value(null);
+		var state = null;
+		expression.map(function(exp) {
+			switch(exp[1]) {
+			case 0:
+				var f = exp[2];
+				return f;
+			default:
+				return null;
+			}
+		}).filter(function(f1) {
+			return f1 != null;
+		}).filter(function(f2) {
+			try {
+				state = f2();
+				return true;
+			} catch( e ) {
+				expression.set_value(ui.Expression.RuntimeError(Std.string(e)));
+				return false;
+			}
+		}).map(transform).feed(value);
+		return { expression : expression, value : value};
 	}
 	,getAttachedPropertiesForFragment: function(fragment) {
 		return this.getPropertiesForFragment(fragment).filter(function(fieldInfo) {
@@ -3475,7 +3439,7 @@ ui.Context.prototype = {
 		});
 	}
 	,getPropertiesForFragment: function(fragment) {
-		return [{ display : "bold", name : "strong", create : ui.Context.toggleClass("strong"), type : ui.SchemaType.BoolType, code : "true"},{ display : "italic", name : "emphasis", create : ui.Context.toggleClass("emphasis"), type : ui.SchemaType.BoolType, code : "true"}];
+		return [ui.Context.createToggleInfo("bold","strong"),ui.Context.createToggleInfo("italic","emphasis")];
 	}
 	,__class__: ui.Context
 };
@@ -3758,9 +3722,10 @@ ui.Editor.prototype = {
 	,type: null
 	,__class__: ui.Editor
 };
-ui.Expression = { __ename__ : ["ui","Expression"], __constructs__ : ["Fun","SyntaxError"] };
+ui.Expression = { __ename__ : ["ui","Expression"], __constructs__ : ["Fun","SyntaxError","RuntimeError"] };
 ui.Expression.Fun = function(f) { var $x = ["Fun",0,f]; $x.__enum__ = ui.Expression; $x.toString = $estr; return $x; };
 ui.Expression.SyntaxError = function(msg) { var $x = ["SyntaxError",1,msg]; $x.__enum__ = ui.Expression; $x.toString = $estr; return $x; };
+ui.Expression.RuntimeError = function(msg) { var $x = ["RuntimeError",2,msg]; $x.__enum__ = ui.Expression; $x.toString = $estr; return $x; };
 ui.Expressions = function() { };
 ui.Expressions.__name__ = ["ui","Expressions"];
 ui.Expressions.createFunction = function(args,code) {
