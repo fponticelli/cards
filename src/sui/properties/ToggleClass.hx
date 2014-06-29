@@ -6,12 +6,6 @@ import sui.components.Component;
 import thx.Assert;
 
 class ToggleClass extends Property {
-	public static function asToggleClass(component : Component, name : String) : ToggleClass {
-		var property = component.properties.get(name);
-		Assert.is(property, ToggleClass);
-		return cast property;
-	}
-
 	public function new(component : Component, name : String, ?className : String) {
 		this.className = null == className ? name : className;
 		super(component, name);

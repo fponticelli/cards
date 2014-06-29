@@ -10,12 +10,6 @@ using steamer.dom.Dom;
 import thx.Assert;
 
 class Value extends Property {
-	public inline static function asValue(component : Component) : Value {
-		var property = component.properties.get('value');
-		Assert.is(property, Value);
-		return cast property;
-	}
-
 	public var defaultValue(default, null) : String;
 	public var eventName(default, null) : String;
 	public var value(default, null) : V<String>;

@@ -7,12 +7,6 @@ import sui.components.Component;
 import thx.Assert;
 
 class Text extends Property {
-	public static function asText(component : Component) : Text {
-		var property = component.properties.get('text');
-		Assert.is(property, Text);
-		return cast property;
-	}
-
 	public var defaultText(default, null) : String;
 	public var text(default, null) : Value<String>;
 

@@ -7,12 +7,6 @@ using steamer.dom.Dom;
 import thx.Assert;
 
 class Click extends Property {
-	public static function asClickable(component : Component) : Click {
-		var property = component.properties.get('click');
-		Assert.is(property, Click);
-		return cast property;
-	}
-
 	public function new(component : Component)
 		super(component, 'click');
 

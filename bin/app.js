@@ -1927,11 +1927,6 @@ sui.properties.Attribute = function(component,name,attributeName,defaultValue) {
 	sui.properties.Property.call(this,component,name);
 };
 sui.properties.Attribute.__name__ = ["sui","properties","Attribute"];
-sui.properties.Attribute.asAttribute = function(component,name) {
-	var property = component.properties.get(name);
-	thx.Assert["is"](property,sui.properties.Attribute,null,{ fileName : "Attribute.hx", lineNumber : 11, className : "sui.properties.Attribute", methodName : "asAttribute"});
-	return property;
-};
 sui.properties.Attribute.__super__ = sui.properties.Property;
 sui.properties.Attribute.prototype = $extend(sui.properties.Property.prototype,{
 	defaultValue: null
@@ -1968,11 +1963,6 @@ sui.properties.Text = function(component,defaultText) {
 	sui.properties.Property.call(this,component,"text");
 };
 sui.properties.Text.__name__ = ["sui","properties","Text"];
-sui.properties.Text.asText = function(component) {
-	var property = component.properties.get("text");
-	thx.Assert["is"](property,sui.properties.Text,null,{ fileName : "Text.hx", lineNumber : 12, className : "sui.properties.Text", methodName : "asText"});
-	return property;
-};
 sui.properties.Text.__super__ = sui.properties.Property;
 sui.properties.Text.prototype = $extend(sui.properties.Property.prototype,{
 	defaultText: null
@@ -1999,11 +1989,6 @@ sui.properties.ToggleClass = function(component,name,className) {
 	sui.properties.Property.call(this,component,name);
 };
 sui.properties.ToggleClass.__name__ = ["sui","properties","ToggleClass"];
-sui.properties.ToggleClass.asToggleClass = function(component,name) {
-	var property = component.properties.get(name);
-	thx.Assert["is"](property,sui.properties.ToggleClass,null,{ fileName : "ToggleClass.hx", lineNumber : 11, className : "sui.properties.ToggleClass", methodName : "asToggleClass"});
-	return property;
-};
 sui.properties.ToggleClass.__super__ = sui.properties.Property;
 sui.properties.ToggleClass.prototype = $extend(sui.properties.Property.prototype,{
 	originalHasClass: null
@@ -2027,17 +2012,6 @@ sui.properties.Visible = function(component,defaultValue) {
 	sui.properties.Property.call(this,component,"visible");
 };
 sui.properties.Visible.__name__ = ["sui","properties","Visible"];
-sui.properties.Visible.createVisible = function(component) {
-	return new sui.properties.Visible(component,true);
-};
-sui.properties.Visible.createInvisible = function(component) {
-	return new sui.properties.Visible(component,false);
-};
-sui.properties.Visible.asVisible = function(component) {
-	var property = component.properties.get("visible");
-	thx.Assert["is"](property,sui.properties.Visible,null,{ fileName : "Visible.hx", lineNumber : 16, className : "sui.properties.Visible", methodName : "asVisible"});
-	return property;
-};
 sui.properties.Visible.__super__ = sui.properties.Property;
 sui.properties.Visible.prototype = $extend(sui.properties.Property.prototype,{
 	defaultValue: null

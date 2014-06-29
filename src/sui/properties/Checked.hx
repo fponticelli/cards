@@ -7,12 +7,6 @@ import sui.components.Component;
 using steamer.dom.Dom;
 
 class Checked extends Property {
-	public static function asCheckable(component : Component) : Checked {
-		var property = component.properties.get('checked');
-		Assert.is(property, Checked);
-		return cast property;
-	}
-
 	public var defaultValue(default, null) : Bool;
 	public var checked(default, null) : Producer<Bool>;
 

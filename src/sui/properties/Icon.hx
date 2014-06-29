@@ -7,12 +7,6 @@ import sui.components.Component;
 import thx.Assert;
 
 class Icon extends Property {
-	public static function asIcon(component : Component) : Icon {
-		var property = component.properties.get('icon');
-		Assert.is(property, Icon);
-		return cast property;
-	}
-
 	static function getCurrentIcon(el : Element) {
 		for(i in 0...el.classList.length) {
 			var className = el.classList.item(i);

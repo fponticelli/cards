@@ -7,12 +7,6 @@ import sui.components.Component;
 import thx.Assert;
 
 class HTML extends Property {
-	public static function asHTML(component : Component) : HTML {
-		var property = component.properties.get('html');
-		Assert.is(property, HTML);
-		return cast property;
-	}
-
 	public function new(component : Component, defaultHtml : String) {
 		this.defaultHTML = defaultHTML;
 		super(component, 'html');

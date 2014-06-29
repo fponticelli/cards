@@ -6,12 +6,6 @@ import sui.components.Component;
 import thx.Assert;
 
 class Attribute extends Property {
-	public static function asAttribute<T>(component : Component, name : String) : Attribute {
-		var property = component.properties.get(name);
-		Assert.is(property, Attribute);
-		return cast property;
-	}
-
 	public function new(component : Component, name : String, ?attributeName : String, defaultValue : String) {
 		this.attributeName = null == attributeName ? name : attributeName;
 		this.defaultValue = defaultValue;

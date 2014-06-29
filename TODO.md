@@ -1,16 +1,19 @@
 - evaluate expressions in context
-
 - create dependency between model values and context properties
 - refresh evaluation on change
+
+- helper context (for excel like functions)
+
+- active state
+- focus state
+
+- inline fragment
 
 - more properties:
 	- text
 	- visible
 
-- inline fragment
 - bidirectional updates from property to model when possible
-
-- execute expression in special scope with utility functions
 
 DOC: drag and drop fragments
 
@@ -35,6 +38,8 @@ DOC: set focus to currently created block/fragment
 CV: current fragment/block
 CV: display associated properties
 CV: add related properties
+
+OPT: execute expression in special scope with utility functions
 
 DONE:
 
