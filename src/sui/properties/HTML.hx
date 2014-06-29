@@ -7,17 +7,11 @@ import sui.components.Component;
 import thx.Assert;
 
 class HTML extends ValueProperty<String> {
-	public function new(component : Component, defaultHtml : String) {
-		super(defaultHtml, component, 'html');
-	}
-
-	override function init() : Void -> Void {
-		var el       = component.el,
-			original = el.innerHTML;
+	public function new(component : Component, ?defaultHTML : String) {
+		super(null == defaultHTML ? component.el.innerHTML : defaultHTML, component, 'html');
 		value.feed({
-			emit : function(value) el.innerHTML = value,
-			end : function() el.innerHTML = original
+			emit : function(value) component.el.innerHTML = value,
+			end : function() component.el.innerHTML = defaultValue
 		});
-		return function() { };
 	}
 }

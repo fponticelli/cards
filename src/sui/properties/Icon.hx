@@ -18,9 +18,7 @@ class Icon extends ValueProperty {
 
 	public function new(component : Component, defaultIcon : String) {
 		super(defaultIcon, component, 'icon');
-	}
 
-	override function init() : Void -> Void {
 		var el       = component.el,
 			current  = getCurrentIcon(el),
 			original = current,
@@ -41,6 +39,5 @@ class Icon extends ValueProperty {
 					el.classList.add(original);
 			}
 		});
-		return function() { };
 	}
 }

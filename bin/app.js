@@ -1899,7 +1899,6 @@ sui.properties.Property = function(component,name) {
 	this.component = component;
 	this.name = name;
 	this.cancels = [];
-	this.cancels.push(this.init());
 	component.properties.add(this);
 };
 sui.properties.Property.__name__ = ["sui","properties","Property"];
@@ -1907,9 +1906,6 @@ sui.properties.Property.prototype = {
 	component: null
 	,name: null
 	,cancels: null
-	,init: function() {
-		throw "abstact function init, must override";
-	}
 	,dispose: function() {
 		while(this.cancels.length > 0) (this.cancels.shift())();
 		if(this.component.properties.exists(this.name)) {
@@ -1951,16 +1947,12 @@ sui.properties.ValueProperty.prototype = $extend(sui.properties.Property.prototy
 sui.properties.Attribute = function(component,name,attributeName,defaultValue) {
 	if(null == attributeName) this.attributeName = name; else this.attributeName = attributeName;
 	sui.properties.ValueProperty.call(this,defaultValue,component,name);
+	this.stream.feed(steamer.dom.Dom.consumeAttribute(component.el,attributeName));
 };
 sui.properties.Attribute.__name__ = ["sui","properties","Attribute"];
 sui.properties.Attribute.__super__ = sui.properties.ValueProperty;
 sui.properties.Attribute.prototype = $extend(sui.properties.ValueProperty.prototype,{
 	attributeName: null
-	,init: function() {
-		this.stream.feed(steamer.dom.Dom.consumeAttribute(this.component.el,this.attributeName));
-		return function() {
-		};
-	}
 	,__class__: sui.properties.Attribute
 });
 sui.properties._PropertyName = {};
@@ -1979,54 +1971,41 @@ sui.properties._PropertyName.PropertyName_Impl_.toString = function(this1) {
 	return this1;
 };
 sui.properties.Text = function(component,defaultText) {
-	sui.properties.ValueProperty.call(this,defaultText,component,"text");
+	var _g = this;
+	sui.properties.ValueProperty.call(this,null == defaultText?component.el.innerText:defaultText,component,"text");
+	this.stream.feed(steamer._Consumer.Consumer_Impl_.fromObject({ emit : function(value) {
+		component.el.innerText = value;
+	}, end : function() {
+		component.el.innerText = _g.get_defaultValue();
+	}}));
 };
 sui.properties.Text.__name__ = ["sui","properties","Text"];
 sui.properties.Text.__super__ = sui.properties.ValueProperty;
 sui.properties.Text.prototype = $extend(sui.properties.ValueProperty.prototype,{
-	init: function() {
-		var el = this.component.el;
-		var original = el.innerText;
-		this.stream.feed(steamer._Consumer.Consumer_Impl_.fromObject({ emit : function(value) {
-			el.innerText = value;
-		}, end : function() {
-			el.innerText = original;
-		}}));
-		return function() {
-		};
-	}
-	,__class__: sui.properties.Text
+	__class__: sui.properties.Text
 });
 sui.properties.ToggleClass = function(component,name,className) {
 	var defaultValue = component.el.classList.contains(className);
-	if(null == className) this.className = name; else this.className = className;
 	sui.properties.ValueProperty.call(this,defaultValue,component,name);
+	if(null == className) className = name; else className = className;
+	this.stream.feed(steamer.dom.Dom.consumeToggleClass(component.el,className));
+	this.cancels.push(function() {
+		if(defaultValue) component.el.classList.add(className); else component.el.classList.remove(className);
+	});
 };
 sui.properties.ToggleClass.__name__ = ["sui","properties","ToggleClass"];
 sui.properties.ToggleClass.__super__ = sui.properties.ValueProperty;
 sui.properties.ToggleClass.prototype = $extend(sui.properties.ValueProperty.prototype,{
-	className: null
-	,init: function() {
-		var _g = this;
-		this.stream.feed(steamer.dom.Dom.consumeToggleClass(this.component.el,this.className));
-		return function() {
-			if(_g.get_defaultValue()) _g.component.el.classList.add(_g.className); else _g.component.el.classList.remove(_g.className);
-		};
-	}
-	,__class__: sui.properties.ToggleClass
+	__class__: sui.properties.ToggleClass
 });
 sui.properties.Visible = function(component,defaultValue) {
 	sui.properties.ValueProperty.call(this,defaultValue,component,"visible");
+	this.stream.feed(steamer.dom.Dom.consumeToggleVisibility(component.el));
 };
 sui.properties.Visible.__name__ = ["sui","properties","Visible"];
 sui.properties.Visible.__super__ = sui.properties.ValueProperty;
 sui.properties.Visible.prototype = $extend(sui.properties.ValueProperty.prototype,{
-	init: function() {
-		this.stream.feed(steamer.dom.Dom.consumeToggleVisibility(this.component.el));
-		return function() {
-		};
-	}
-	,__class__: sui.properties.Visible
+	__class__: sui.properties.Visible
 });
 thx.Error = function(message,stack,pos) {
 	this.message = message;

@@ -7,17 +7,11 @@ import sui.components.Component;
 import thx.Assert;
 
 class Text extends ValueProperty<String> {
-	public function new(component : Component, defaultText : String) {
-		super(defaultText, component, 'text');
-	}
-
-	override function init() : Void -> Void {
-		var el       = component.el,
-			original = el.innerText;
+	public function new(component : Component, ?defaultText : String) {
+		super(null == defaultText ? component.el.innerText : defaultText, component, 'text');
 		stream.feed({
-			emit : function(value) el.innerText = value,
-			end : function() el.innerText = original
+			emit : function(value) component.el.innerText = value,
+			end : function() component.el.innerText = defaultValue
 		});
-		return function() {};
 	}
 }

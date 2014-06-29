@@ -10,10 +10,6 @@ class Attribute extends ValueProperty<String> {
 	public function new(component : Component, name : String, ?attributeName : String, defaultValue : String) {
 		this.attributeName = null == attributeName ? name : attributeName;
 		super(defaultValue, component, name);
-	}
-
-	override function init() : Void -> Void {
 		stream.feed(component.el.consumeAttribute(attributeName));
-		return function() { };
 	}
 }

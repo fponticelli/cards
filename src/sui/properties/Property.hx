@@ -11,12 +11,7 @@ class Property {
 		this.component = component;
 		this.name = name;
 		cancels = [];
-		cancels.push(init());
 		component.properties.add(this);
-	}
-
-	function init() : Void -> Void {
-		return throw "abstact function init, must override";
 	}
 
 	public function dispose() {

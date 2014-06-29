@@ -9,11 +9,10 @@ using steamer.dom.Dom;
 class Checked extends ValueProperty<Bool> {
 	public function new(component : Component, defaultValue : Bool) {
 		super(dafaultValue, component, 'checked');
-	}
-
-	override function init() {
 		var tuple = component.el.produceEvent('change');
-		checked = tuple.producer.map(function(_) return component.el.checked);
-		return tuple.cancel;
+		tuple.producer
+			.map(function(_) return component.el.checked)
+			.feed(stream);
+		cancels.push(tuple.cancel);
 	}
 }
