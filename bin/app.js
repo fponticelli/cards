@@ -81,6 +81,14 @@ EReg.prototype = {
 };
 var HxOverrides = function() { };
 HxOverrides.__name__ = ["HxOverrides"];
+HxOverrides.dateStr = function(date) {
+	var m = date.getMonth() + 1;
+	var d = date.getDate();
+	var h = date.getHours();
+	var mi = date.getMinutes();
+	var s = date.getSeconds();
+	return date.getFullYear() + "-" + (m < 10?"0" + m:"" + m) + "-" + (d < 10?"0" + d:"" + d) + " " + (h < 10?"0" + h:"" + h) + ":" + (mi < 10?"0" + mi:"" + mi) + ":" + (s < 10?"0" + s:"" + s);
+};
 HxOverrides.cca = function(s,index) {
 	var x = s.charCodeAt(index);
 	if(x != x) return undefined;
@@ -3347,11 +3355,19 @@ ui.Context.createTextInfo = function() {
 	return { display : "content", name : "text", create : function(target,value) {
 		var text = new sui.properties.Text(target,"");
 		value.feed(text.text);
-	}, type : ui.SchemaType.StringType, code : "\"franco\"", transform : function(v) {
-		return "" + Std.string(v);
-	}, defaultf : function() {
+	}, type : ui.SchemaType.StringType, code : "\"franco\"", transform : ui.Context.valueToString, defaultf : function() {
 		return "";
 	}};
+};
+ui.Context.valueToString = function(value) {
+	if(js.Boot.__instanceof(value,Date)) return HxOverrides.dateStr(value);
+	if(typeof(value) == "boolean") if(value) return "Yes"; else return "No";
+	if(typeof(value) == "string") return value;
+	if((value instanceof Array) && value.__enum__ == null) return value.map(ui.Context.valueToString).join(", ");
+	if(Reflect.isObject(value)) return Reflect.fields(value).map(function(field) {
+		return "" + field + ": " + ui.Context.valueToString(Reflect.field(value,field));
+	}).join(", ");
+	return "" + Std.string(value);
 };
 ui.Context.prototype = {
 	component: null

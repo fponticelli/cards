@@ -213,9 +213,30 @@ class Context {
 						},
 			type      : StringType,
 			code      : '"franco"',
-			transform : function(v : Dynamic) : Dynamic return ""+v,
+			transform : valueToString,
 			defaultf  : function() : Dynamic return ""
 		};
+	}
+
+	static function valueToString(value : Dynamic) {
+		if(Std.is(value, Date)) {
+			return (value : Date).toString();
+		}
+		if(Std.is(value, Bool)) {
+			return value ? 'Yes' : 'No';
+		}
+		if(Std.is(value, String)) {
+			return value;
+		}
+		if(Std.is(value, Array)) {
+			return (value : Array<Dynamic>).map(valueToString).join(', ');
+		}
+		if(Reflect.isObject(value)) {
+			return Reflect.fields(value).map(function(field) {
+				return '$field: ' + valueToString(Reflect.field(value, field));
+			}).join(', ');
+		}
+		return '' + value;
 	}
 
 	public function getPropertiesForFragment(fragment : Fragment) : Array<FieldInfo<Dynamic>> {
