@@ -1,6 +1,6 @@
 package ui;
 
-using steamer.Consumer;
+import steamer.Consumer;
 import steamer.Producer;
 import steamer.Pulse;
 import ui.DataEvent;
@@ -22,7 +22,7 @@ class Model {
 				case SetValue(path, value, type):
 					data.set(path, value);
 			}
-		}.toConsumer();
+		};
 		this.schemaEventConsumer = function(e : SchemaEvent) {
 			switch e {
 				case ListFields(list):
@@ -39,7 +39,7 @@ class Model {
 				case RetypeField(path, type):
 					schema.retype(path, type);
 			}
-		}.toConsumer();
+		};
 	}
 
 	function get_keys() {

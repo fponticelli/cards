@@ -5,7 +5,7 @@ import sui.components.ComponentOptions;
 import ui.Button;
 import ui.Fragment;
 import ui.Toolbar;
-using steamer.Consumer;
+import steamer.Consumer;
 
 class Document {
 	public var component(default, null) : Component;
@@ -28,18 +28,18 @@ class Document {
 			buttonRemove.enabled.value = null != fragment;
 		}
 
-		fragments = setFragment.toConsumer();
+		fragments = setFragment;
 
 		var buttonAdd = toolbar.left.addButton('', Config.icons.add);
 		buttonAdd.clicks.feed(function(_) {
 			article.addBlock();
-		}.toConsumer());
+		});
 
 		buttonRemove.enabled.value = false;
 		buttonRemove.clicks.feed(function(_) {
 			currentFragment.component.destroy();
 			setFragment(null);
-		}.toConsumer());
+		});
 
 		// TODO remove me
 		article.addReadonly();

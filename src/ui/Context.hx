@@ -13,7 +13,7 @@ import ui.Fragment;
 import ui.Menu;
 import ui.SchemaType;
 import ui.Toolbar;
-using steamer.Consumer;
+import steamer.Consumer;
 using ui.Expression;
 
 class Context {
@@ -44,7 +44,7 @@ class Context {
 			return true;
 		}).feed(menuAdd.visible.visible);
 
-		fragments = setFragmentStatus.toConsumer();
+		fragments = setFragmentStatus;
 		buttonAdd.enabled.value = false;
 
 		buttonRemove = toolbar.right.addButton('', Config.icons.remove);
@@ -57,7 +57,7 @@ class Context {
 					setAddMenuItems(currentFragment);
 				case _:
 			}
-		}.toConsumer());
+		});
 
 		field = new Value(None);
 		field.feed(function(option) {
@@ -67,7 +67,7 @@ class Context {
 				case None:
 					buttonRemove.enabled.value = false;
 			}
-		}.toConsumer());
+		});
 		expressions = new Map();
 	}
 
@@ -139,7 +139,7 @@ class Context {
 					code : new Value<String>(null)
 				});
 				setFragmentStatus(fragment);
-			}.toConsumer());
+			});
 		});
 	}
 

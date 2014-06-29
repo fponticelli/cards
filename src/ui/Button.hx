@@ -28,7 +28,7 @@ class Button {
 				component.el.removeAttribute("disabled");
 			else
 				component.el.setAttribute("disabled", "disabled");
-		}.toConsumer());
+		});
 	}
 
 	public function destroy() {

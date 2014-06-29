@@ -1015,18 +1015,52 @@ promhx.error.PromiseError = { __ename__ : ["promhx","error","PromiseError"], __c
 promhx.error.PromiseError.AlreadyResolved = function(message) { var $x = ["AlreadyResolved",0,message]; $x.__enum__ = promhx.error.PromiseError; $x.toString = $estr; return $x; };
 promhx.error.PromiseError.DownstreamNotFullfilled = function(message) { var $x = ["DownstreamNotFullfilled",1,message]; $x.__enum__ = promhx.error.PromiseError; $x.toString = $estr; return $x; };
 var steamer = {};
-steamer.Consumers = function() { };
-steamer.Consumers.__name__ = ["steamer","Consumers"];
-steamer.Consumers.toConsumer = function(handler) {
+steamer._Consumer = {};
+steamer._Consumer.Consumer_Impl_ = function() { };
+steamer._Consumer.Consumer_Impl_.__name__ = ["steamer","_Consumer","Consumer_Impl_"];
+steamer._Consumer.Consumer_Impl_._new = function(consumer) {
+	return consumer;
+};
+steamer._Consumer.Consumer_Impl_.fromConsumer = function(consumer) {
+	return consumer;
+};
+steamer._Consumer.Consumer_Impl_.fromFunction = function(f) {
 	return { onPulse : function(pulse) {
 		switch(pulse[1]) {
 		case 0:
 			var v = pulse[2];
-			handler(v);
+			f(v);
 			break;
 		default:
 		}
 	}};
+};
+steamer._Consumer.Consumer_Impl_.fromObject = function(o) {
+	if(null == o.emit) o.emit = function(_) {
+	};
+	if(null == o.end) o.end = function() {
+	};
+	if(null == o.error) o.error = function(e) {
+		throw e;
+	};
+	return { onPulse : function(pulse) {
+		switch(pulse[1]) {
+		case 0:
+			var v = pulse[2];
+			o.emit(v);
+			break;
+		case 1:
+			o.end();
+			break;
+		case 2:
+			var e1 = pulse[2];
+			o.error(e1);
+			break;
+		}
+	}};
+};
+steamer._Consumer.Consumer_Impl_.toImplementation = function(this1) {
+	return this1;
 };
 steamer.Producer = function(handler,endOnError) {
 	if(endOnError == null) endOnError = true;
@@ -1051,11 +1085,16 @@ steamer.Producer.negate = function(producer) {
 };
 steamer.Producer.flatMap = function(producer) {
 	return new steamer.Producer(function(forward) {
-		producer.feed(steamer.Bus.passOn(function(arr) {
-			arr.map(function(value) {
-				forward(steamer.Pulse.Emit(value));
-			});
-		},forward));
+		producer.feed((function($this) {
+			var $r;
+			var consumer = steamer.Bus.passOn(function(arr) {
+				arr.map(function(value) {
+					forward(steamer.Pulse.Emit(value));
+				});
+			},forward);
+			$r = consumer;
+			return $r;
+		}(this)));
 	},producer.endOnError);
 };
 steamer.Producer.ofArray = function(values) {
@@ -1071,19 +1110,24 @@ steamer.Producer.ofTimedArray = function(values,delay) {
 };
 steamer.Producer.delayed = function(producer,delay) {
 	return new steamer.Producer(function(forward) {
-		producer.feed(new steamer.Bus(function(v) {
-			thx.Timer.setTimeout(function() {
-				forward(steamer.Pulse.Emit(v));
-			},delay);
-		},function() {
-			thx.Timer.setTimeout(function() {
-				forward(steamer.Pulse.End);
-			},delay);
-		},function(error) {
-			thx.Timer.setTimeout(function() {
-				forward(steamer.Pulse.Fail(error));
-			},delay);
-		}));
+		producer.feed((function($this) {
+			var $r;
+			var consumer = new steamer.Bus(function(v) {
+				thx.Timer.setTimeout(function() {
+					forward(steamer.Pulse.Emit(v));
+				},delay);
+			},function() {
+				thx.Timer.setTimeout(function() {
+					forward(steamer.Pulse.End);
+				},delay);
+			},function(error) {
+				thx.Timer.setTimeout(function() {
+					forward(steamer.Pulse.Fail(error));
+				},delay);
+			});
+			$r = consumer;
+			return $r;
+		}(this)));
 	},producer.endOnError);
 };
 steamer.Producer.prototype = {
@@ -1100,17 +1144,17 @@ steamer.Producer.prototype = {
 						return function() {
 							return f(a1);
 						};
-					})($bind(consumer,consumer.onPulse),v));
+					})(($_=consumer,$bind($_,$_.onPulse)),v));
 					thx.Timer.setImmediate((function(f1,a11) {
 						return function() {
 							return f1(a11);
 						};
-					})($bind(consumer,consumer.onPulse),steamer.Pulse.End));
+					})(($_=consumer,$bind($_,$_.onPulse)),steamer.Pulse.End));
 				} else thx.Timer.setImmediate((function(f2,a12) {
 					return function() {
 						return f2(a12);
 					};
-				})($bind(consumer,consumer.onPulse),v));
+				})(($_=consumer,$bind($_,$_.onPulse)),v));
 				break;
 			case 1:
 				ended = true;
@@ -1118,14 +1162,14 @@ steamer.Producer.prototype = {
 					return function() {
 						return f3(a13);
 					};
-				})($bind(consumer,consumer.onPulse),steamer.Pulse.End));
+				})(($_=consumer,$bind($_,$_.onPulse)),steamer.Pulse.End));
 				break;
 			default:
 				thx.Timer.setImmediate((function(f2,a12) {
 					return function() {
 						return f2(a12);
 					};
-				})($bind(consumer,consumer.onPulse),v));
+				})(($_=consumer,$bind($_,$_.onPulse)),v));
 			}
 		};
 		this.handler(sendPulse);
@@ -1138,22 +1182,27 @@ steamer.Producer.prototype = {
 	,mapAsync: function(transform) {
 		var _g = this;
 		return new steamer.Producer(function(forward) {
-			_g.feed(steamer.Bus.passOn(function(value) {
-				try {
-					var t = function(v) {
-						forward(steamer.Pulse.Emit(v));
-					};
-					transform(value,t);
-				} catch( $e0 ) {
-					if( js.Boot.__instanceof($e0,thx.Error) ) {
-						var e = $e0;
-						forward(steamer.Pulse.Fail(e));
-					} else {
-					var e1 = $e0;
-					forward(steamer.Pulse.Fail(new thx.Error(Std.string(e1),null,{ fileName : "Producer.hx", lineNumber : 50, className : "steamer.Producer", methodName : "mapAsync"})));
+			_g.feed((function($this) {
+				var $r;
+				var consumer = steamer.Bus.passOn(function(value) {
+					try {
+						var t = function(v) {
+							forward(steamer.Pulse.Emit(v));
+						};
+						transform(value,t);
+					} catch( $e0 ) {
+						if( js.Boot.__instanceof($e0,thx.Error) ) {
+							var e = $e0;
+							forward(steamer.Pulse.Fail(e));
+						} else {
+						var e1 = $e0;
+						forward(steamer.Pulse.Fail(new thx.Error(Std.string(e1),null,{ fileName : "Producer.hx", lineNumber : 50, className : "steamer.Producer", methodName : "mapAsync"})));
+						}
 					}
-				}
-			},forward));
+				},forward);
+				$r = consumer;
+				return $r;
+			}(this)));
 		},this.endOnError);
 	}
 	,log: function(prefix,posInfo) {
@@ -1171,22 +1220,27 @@ steamer.Producer.prototype = {
 	,filterAsync: function(f) {
 		var _g = this;
 		return new steamer.Producer(function(forward) {
-			_g.feed(steamer.Bus.passOn(function(value) {
-				try {
-					var t = function(v) {
-						if(v) forward(steamer.Pulse.Emit(value));
-					};
-					f(value,t);
-				} catch( $e0 ) {
-					if( js.Boot.__instanceof($e0,thx.Error) ) {
-						var e = $e0;
-						forward(steamer.Pulse.Fail(e));
-					} else {
-					var e1 = $e0;
-					forward(steamer.Pulse.Fail(new thx.Error(Std.string(e1),null,{ fileName : "Producer.hx", lineNumber : 80, className : "steamer.Producer", methodName : "filterAsync"})));
+			_g.feed((function($this) {
+				var $r;
+				var consumer = steamer.Bus.passOn(function(value) {
+					try {
+						var t = function(v) {
+							if(v) forward(steamer.Pulse.Emit(value));
+						};
+						f(value,t);
+					} catch( $e0 ) {
+						if( js.Boot.__instanceof($e0,thx.Error) ) {
+							var e = $e0;
+							forward(steamer.Pulse.Fail(e));
+						} else {
+						var e1 = $e0;
+						forward(steamer.Pulse.Fail(new thx.Error(Std.string(e1),null,{ fileName : "Producer.hx", lineNumber : 80, className : "steamer.Producer", methodName : "filterAsync"})));
+						}
 					}
-				}
-			},forward));
+				},forward);
+				$r = consumer;
+				return $r;
+			}(this)));
 		},this.endOnError);
 	}
 	,merge: function(other) {
@@ -1202,8 +1256,18 @@ steamer.Producer.prototype = {
 			var fail = function(error) {
 				forward(steamer.Pulse.Fail(error));
 			};
-			_g.feed(new steamer.Bus(emit,end,fail));
-			other.feed(new steamer.Bus(emit,end,fail));
+			_g.feed((function($this) {
+				var $r;
+				var consumer = new steamer.Bus(emit,end,fail);
+				$r = consumer;
+				return $r;
+			}(this)));
+			other.feed((function($this) {
+				var $r;
+				var consumer1 = new steamer.Bus(emit,end,fail);
+				$r = consumer1;
+				return $r;
+			}(this)));
 		},this.endOnError);
 	}
 	,concat: function(other) {
@@ -1215,9 +1279,19 @@ steamer.Producer.prototype = {
 			var fail = function(error) {
 				forward(steamer.Pulse.Fail(error));
 			};
-			_g.feed(new steamer.Bus(emit,function() {
-				other.feed(steamer.Bus.passOn(emit,forward));
-			},fail));
+			_g.feed((function($this) {
+				var $r;
+				var consumer = new steamer.Bus(emit,function() {
+					other.feed((function($this) {
+						var $r;
+						var consumer1 = steamer.Bus.passOn(emit,forward);
+						$r = consumer1;
+						return $r;
+					}(this)));
+				},fail);
+				$r = consumer;
+				return $r;
+			}(this)));
 		},this.endOnError);
 	}
 	,zip: function(other) {
@@ -1238,26 +1312,36 @@ steamer.Producer.prototype = {
 				if(buffA.length == 0 || buffB.length == 0) return;
 				forward(steamer.Pulse.Emit({ left : buffA.shift(), right : buffB.shift()}));
 			};
-			_g.feed(new steamer.Bus(function(value) {
-				if(ended) return;
-				buffA.push(value);
-				produce();
-			},function() {
-				endA = true;
-				produce();
-			},function(error) {
-				forward(steamer.Pulse.Fail(error));
-			}));
-			other.feed(new steamer.Bus(function(value1) {
-				if(ended) return;
-				buffB.push(value1);
-				produce();
-			},function() {
-				endB = true;
-				produce();
-			},function(error1) {
-				forward(steamer.Pulse.Fail(error1));
-			}));
+			_g.feed((function($this) {
+				var $r;
+				var consumer = new steamer.Bus(function(value) {
+					if(ended) return;
+					buffA.push(value);
+					produce();
+				},function() {
+					endA = true;
+					produce();
+				},function(error) {
+					forward(steamer.Pulse.Fail(error));
+				});
+				$r = consumer;
+				return $r;
+			}(this)));
+			other.feed((function($this) {
+				var $r;
+				var consumer1 = new steamer.Bus(function(value1) {
+					if(ended) return;
+					buffB.push(value1);
+					produce();
+				},function() {
+					endB = true;
+					produce();
+				},function(error1) {
+					forward(steamer.Pulse.Fail(error1));
+				});
+				$r = consumer1;
+				return $r;
+			}(this)));
 		},this.endOnError);
 	}
 	,blend: function(other,f) {
@@ -1281,24 +1365,34 @@ steamer.Producer.prototype = {
 				if(buffA == null || buffB == null) return;
 				forward(steamer.Pulse.Emit({ left : buffA, right : buffB}));
 			};
-			_g.feed(new steamer.Bus(function(value) {
-				buffA = value;
-				produce();
-			},function() {
-				endA = true;
-				produce();
-			},function(error) {
-				forward(steamer.Pulse.Fail(error));
-			}));
-			other.feed(new steamer.Bus(function(value1) {
-				buffB = value1;
-				produce();
-			},function() {
-				endB = true;
-				produce();
-			},function(error1) {
-				forward(steamer.Pulse.Fail(error1));
-			}));
+			_g.feed((function($this) {
+				var $r;
+				var consumer = new steamer.Bus(function(value) {
+					buffA = value;
+					produce();
+				},function() {
+					endA = true;
+					produce();
+				},function(error) {
+					forward(steamer.Pulse.Fail(error));
+				});
+				$r = consumer;
+				return $r;
+			}(this)));
+			other.feed((function($this) {
+				var $r;
+				var consumer1 = new steamer.Bus(function(value1) {
+					buffB = value1;
+					produce();
+				},function() {
+					endB = true;
+					produce();
+				},function(error1) {
+					forward(steamer.Pulse.Fail(error1));
+				});
+				$r = consumer1;
+				return $r;
+			}(this)));
 		},this.endOnError);
 	}
 	,distinct: function(equals) {
@@ -1308,39 +1402,59 @@ steamer.Producer.prototype = {
 			return a == b;
 		};
 		return new steamer.Producer(function(forward) {
-			_g.feed(steamer.Bus.passOn(function(v) {
-				if(equals(v,last)) return;
-				last = v;
-				forward(steamer.Pulse.Emit(v));
-			},forward));
+			_g.feed((function($this) {
+				var $r;
+				var consumer = steamer.Bus.passOn(function(v) {
+					if(equals(v,last)) return;
+					last = v;
+					forward(steamer.Pulse.Emit(v));
+				},forward);
+				$r = consumer;
+				return $r;
+			}(this)));
 		},this.endOnError);
 	}
 	,debounce: function(delay) {
 		var _g = this;
 		var id = null;
 		return new steamer.Producer(function(forward) {
-			_g.feed(steamer.Bus.passOn(function(v) {
-				thx.Timer.clearTimer(id);
-				id = thx.Timer.setTimeout((function(f,a1) {
-					return function() {
-						return f(a1);
-					};
-				})(forward,steamer.Pulse.Emit(v)),delay);
-			},forward));
+			_g.feed((function($this) {
+				var $r;
+				var consumer = steamer.Bus.passOn(function(v) {
+					thx.Timer.clearTimer(id);
+					id = thx.Timer.setTimeout((function(f,a1) {
+						return function() {
+							return f(a1);
+						};
+					})(forward,steamer.Pulse.Emit(v)),delay);
+				},forward);
+				$r = consumer;
+				return $r;
+			}(this)));
 		},this.endOnError);
 	}
 	,sampleBy: function(sampler) {
 		var _g = this;
 		var latest = null;
 		return new steamer.Producer(function(forward) {
-			_g.feed(steamer.Bus.passOn(function(v) {
-				latest = v;
-			},forward));
-			sampler.feed(steamer.Bus.passOn(function(v1) {
-				if(null == latest) return;
-				forward(steamer.Pulse.Emit({ left : latest, right : v1}));
-				latest = null;
-			},forward));
+			_g.feed((function($this) {
+				var $r;
+				var consumer = steamer.Bus.passOn(function(v) {
+					latest = v;
+				},forward);
+				$r = consumer;
+				return $r;
+			}(this)));
+			sampler.feed((function($this) {
+				var $r;
+				var consumer1 = steamer.Bus.passOn(function(v1) {
+					if(null == latest) return;
+					forward(steamer.Pulse.Emit({ left : latest, right : v1}));
+					latest = null;
+				},forward);
+				$r = consumer1;
+				return $r;
+			}(this)));
 		},this.endOnError);
 	}
 	,__class__: steamer.Producer
@@ -1452,37 +1566,6 @@ steamer.Pulses.times = function(n,pulse) {
 		$r = _g;
 		return $r;
 	}(this))).concat([steamer.Pulse.End]);
-};
-steamer.SimpleConsumer = function(onEmit,onEnd,onFail) {
-	if(null == onEmit) this.onEmit = function(_) {
-	}; else this.onEmit = onEmit;
-	if(null == onEnd) this.onEnd = function() {
-	}; else this.onEnd = onEnd;
-	if(null == onFail) this.onFail = function(error) {
-		throw error;
-	}; else this.onFail = onFail;
-};
-steamer.SimpleConsumer.__name__ = ["steamer","SimpleConsumer"];
-steamer.SimpleConsumer.prototype = {
-	onEmit: null
-	,onEnd: null
-	,onFail: null
-	,onPulse: function(pulse) {
-		switch(pulse[1]) {
-		case 0:
-			var value = pulse[2];
-			this.onEmit(value);
-			break;
-		case 1:
-			this.onEnd;
-			break;
-		case 2:
-			var error = pulse[2];
-			this.onFail(error);
-			break;
-		}
-	}
-	,__class__: steamer.SimpleConsumer
 };
 steamer.Value = function(initialValue,defaultValue) {
 	var _g = this;
@@ -1637,70 +1720,70 @@ steamer.dom.Dom.consumeText = function(el) {
 	var consume = function(text) {
 		el.innerText = text;
 	};
-	return new steamer.SimpleConsumer(consume,(function(f,a1) {
+	return steamer._Consumer.Consumer_Impl_.fromObject({ emit : consume, end : (function(f,a1) {
 		return function() {
 			return f(a1);
 		};
-	})(consume,originalText));
+	})(consume,originalText)});
 };
 steamer.dom.Dom.consumeHtml = function(el) {
 	var originalHtml = el.innerHTML;
 	var consume = function(html) {
 		el.innerHTML = html;
 	};
-	return new steamer.SimpleConsumer(consume,(function(f,a1) {
+	return steamer._Consumer.Consumer_Impl_.fromObject({ emit : consume, end : (function(f,a1) {
 		return function() {
 			return f(a1);
 		};
-	})(consume,originalHtml));
+	})(consume,originalHtml)});
 };
 steamer.dom.Dom.consumeAttribute = function(el,name) {
 	var originalValue = el.getAttribute(name);
 	var consume = function(value) {
 		el.setAttribute(name,value);
 	};
-	return new steamer.SimpleConsumer(consume,null == originalValue?function() {
+	return steamer._Consumer.Consumer_Impl_.fromObject({ emit : consume, end : null == originalValue?function() {
 		el.removeAttribute(name);
 	}:(function(f,a1) {
 		return function() {
 			return f(a1);
 		};
-	})(consume,originalValue));
+	})(consume,originalValue)});
 };
 steamer.dom.Dom.consumeToggleAttribute = function(el,name) {
 	var originalValue = el.hasAttribute(name);
 	var consume = function(v) {
 		if(v) el.setAttribute(name,name); else el.removeAttribute(name);
 	};
-	return new steamer.SimpleConsumer(consume,(function(f,v1) {
+	return steamer._Consumer.Consumer_Impl_.fromObject({ emit : consume, end : (function(f,v1) {
 		return function() {
 			return f(v1);
 		};
-	})(consume,originalValue));
+	})(consume,originalValue)});
 };
 steamer.dom.Dom.consumeToggleClass = function(el,name) {
 	var originalValue = el.hasAttribute(name);
 	var consume = function(v) {
 		if(v) el.classList.add(name); else el.classList.remove(name);
 	};
-	return new steamer.SimpleConsumer(consume,(function(f,v1) {
+	return steamer._Consumer.Consumer_Impl_.fromObject({ emit : consume, end : (function(f,v1) {
 		return function() {
 			return f(v1);
 		};
-	})(consume,originalValue));
+	})(consume,originalValue)});
 };
 steamer.dom.Dom.consumeToggleVisibility = function(el) {
 	var originalDisplay = el.style.display;
-	thx.Assert.notNull(originalDisplay,"original element.style.display for visibility is NULL",{ fileName : "Dom.hx", lineNumber : 87, className : "steamer.dom.Dom", methodName : "consumeToggleVisibility"});
+	thx.Assert.notNull(originalDisplay,"original element.style.display for visibility is NULL",{ fileName : "Dom.hx", lineNumber : 86, className : "steamer.dom.Dom", methodName : "consumeToggleVisibility"});
 	if(originalDisplay == "none") originalDisplay = "";
 	var consume = function(value) {
 		if(value) el.style.display = originalDisplay; else el.style.display = "none";
 	};
-	return new steamer.SimpleConsumer(consume,(function(f,a1) {
+	return steamer._Consumer.Consumer_Impl_.fromObject({ emit : consume, end : (function(f,a1) {
 		return function() {
 			return f(a1);
 		};
-	})(consume,true));
+	})(consume,true)});
 };
 steamer.producers = {};
 steamer.producers.Interval = function(delay,times) {
@@ -1887,7 +1970,7 @@ sui.properties.Text = function(component,defaultText) {
 sui.properties.Text.__name__ = ["sui","properties","Text"];
 sui.properties.Text.asText = function(component) {
 	var property = component.properties.get("text");
-	thx.Assert["is"](property,sui.properties.Text,null,{ fileName : "Text.hx", lineNumber : 13, className : "sui.properties.Text", methodName : "asText"});
+	thx.Assert["is"](property,sui.properties.Text,null,{ fileName : "Text.hx", lineNumber : 12, className : "sui.properties.Text", methodName : "asText"});
 	return property;
 };
 sui.properties.Text.__super__ = sui.properties.Property;
@@ -1899,11 +1982,11 @@ sui.properties.Text.prototype = $extend(sui.properties.Property.prototype,{
 		var el = this.component.el;
 		var original = el.innerText;
 		this.text = new steamer.Value(this.defaultText);
-		this.text.feed(new steamer.SimpleConsumer(function(value) {
+		this.text.feed(steamer._Consumer.Consumer_Impl_.fromObject({ emit : function(value) {
 			el.innerText = value;
-		},function() {
+		}, end : function() {
 			el.innerText = original;
-		}));
+		}}));
 		return function() {
 			_g.text.terminate();
 			_g.text = null;
@@ -3261,9 +3344,22 @@ ui.Button = function(text,icon) {
 	this.clicks = pair.producer;
 	this.cancel = pair.cancel;
 	this.enabled = new steamer.Value(true);
-	this.enabled.feed(steamer.Consumers.toConsumer(function(value) {
-		if(value) _g.component.el.removeAttribute("disabled"); else _g.component.el.setAttribute("disabled","disabled");
-	}));
+	this.enabled.feed((function($this) {
+		var $r;
+		var f = function(value) {
+			if(value) _g.component.el.removeAttribute("disabled"); else _g.component.el.setAttribute("disabled","disabled");
+		};
+		$r = { onPulse : function(pulse) {
+			switch(pulse[1]) {
+			case 0:
+				var v = pulse[2];
+				f(v);
+				break;
+			default:
+			}
+		}};
+		return $r;
+	}(this)));
 };
 ui.Button.__name__ = ["ui","Button"];
 ui.Button.prototype = {
@@ -3293,7 +3389,12 @@ ui.Card.create = function(model,container) {
 	card.appendTo(container);
 	model.data.stream.map(function(o) {
 		return JSON.stringify(o);
-	}).feed(new steamer.consumers.LoggerConsumer(null,{ fileName : "Card.hx", lineNumber : 28, className : "ui.Card", methodName : "create"}));
+	}).feed((function($this) {
+		var $r;
+		var consumer = new steamer.consumers.LoggerConsumer(null,{ fileName : "Card.hx", lineNumber : 28, className : "ui.Card", methodName : "create"});
+		$r = consumer;
+		return $r;
+	}(this)));
 };
 ui.Context = function(options) {
 	var _g = this;
@@ -3308,36 +3409,71 @@ ui.Context = function(options) {
 	this.buttonAdd.clicks.map(function(_) {
 		return true;
 	}).feed(this.menuAdd.visible.visible);
-	this.fragments = steamer.Consumers.toConsumer($bind(this,this.setFragmentStatus));
+	var f = $bind(this,this.setFragmentStatus);
+	this.fragments = { onPulse : function(pulse) {
+		switch(pulse[1]) {
+		case 0:
+			var v = pulse[2];
+			f(v);
+			break;
+		default:
+		}
+	}};
 	this.buttonAdd.enabled.set_value(false);
 	this.buttonRemove = this.toolbar.right.addButton("",Config.icons.remove);
 	this.buttonRemove.enabled.set_value(false);
-	this.buttonRemove.clicks.feed(steamer.Consumers.toConsumer(function(_1) {
-		{
-			var _g1 = _g.field.get_value();
-			switch(_g1[1]) {
+	this.buttonRemove.clicks.feed((function($this) {
+		var $r;
+		var f1 = function(_1) {
+			{
+				var _g1 = _g.field.get_value();
+				switch(_g1[1]) {
+				case 0:
+					var field = _g1[2];
+					_g.currentFragment.component.properties.get(field.name).dispose();
+					field.destroy();
+					_g.setAddMenuItems(_g.currentFragment);
+					break;
+				default:
+				}
+			}
+		};
+		$r = { onPulse : function(pulse1) {
+			switch(pulse1[1]) {
 			case 0:
-				var field = _g1[2];
-				_g.currentFragment.component.properties.get(field.name).dispose();
-				field.destroy();
-				_g.setAddMenuItems(_g.currentFragment);
+				var v1 = pulse1[2];
+				f1(v1);
 				break;
 			default:
 			}
-		}
-	}));
+		}};
+		return $r;
+	}(this)));
 	this.field = new steamer.Value(haxe.ds.Option.None);
-	this.field.feed(steamer.Consumers.toConsumer(function(option) {
-		switch(option[1]) {
-		case 0:
-			var field1 = option[2];
-			_g.buttonRemove.enabled.set_value(true);
-			break;
-		case 1:
-			_g.buttonRemove.enabled.set_value(false);
-			break;
-		}
-	}));
+	this.field.feed((function($this) {
+		var $r;
+		var f2 = function(option) {
+			switch(option[1]) {
+			case 0:
+				var field1 = option[2];
+				_g.buttonRemove.enabled.set_value(true);
+				break;
+			case 1:
+				_g.buttonRemove.enabled.set_value(false);
+				break;
+			}
+		};
+		$r = { onPulse : function(pulse2) {
+			switch(pulse2[1]) {
+			case 0:
+				var v2 = pulse2[2];
+				f2(v2);
+				break;
+			default:
+			}
+		}};
+		return $r;
+	}(this)));
 	this.expressions = new haxe.ds.StringMap();
 };
 ui.Context.__name__ = ["ui","Context"];
@@ -3429,15 +3565,28 @@ ui.Context.prototype = {
 		attachables.map(function(fieldInfo) {
 			var button = new ui.Button("add " + fieldInfo.display);
 			_g.menuAdd.addItem(button.component);
-			button.clicks.feed(steamer.Consumers.toConsumer(function(_) {
-				var pair = _g.createFeedExpression(fieldInfo.transform,fieldInfo.defaultf);
-				var expression = pair.expression;
-				var value = pair.value;
-				fieldInfo.create(fragment.component,value);
-				var value1 = { expression : expression, code : new steamer.Value(null)};
-				_g.expressions.set(fieldInfo.name,value1);
-				_g.setFragmentStatus(fragment);
-			}));
+			button.clicks.feed((function($this) {
+				var $r;
+				var f = function(_) {
+					var pair = _g.createFeedExpression(fieldInfo.transform,fieldInfo.defaultf);
+					var expression = pair.expression;
+					var value = pair.value;
+					fieldInfo.create(fragment.component,value);
+					var value1 = { expression : expression, code : new steamer.Value(null)};
+					_g.expressions.set(fieldInfo.name,value1);
+					_g.setFragmentStatus(fragment);
+				};
+				$r = { onPulse : function(pulse) {
+					switch(pulse[1]) {
+					case 0:
+						var v = pulse[2];
+						f(v);
+						break;
+					default:
+					}
+				}};
+				return $r;
+			}(this)));
 		});
 	}
 	,createFeedExpression: function(transform,defaultf) {
@@ -3500,15 +3649,41 @@ ui.FrameOverlay = function(options) {
 	};
 	this.visible.visible.filter(function(b) {
 		return !b;
-	}).feed(steamer.Consumers.toConsumer(function(_1) {
-		window.document.removeEventListener("mouseup",clear,false);
-	}));
+	}).feed((function($this) {
+		var $r;
+		var f = function(_1) {
+			window.document.removeEventListener("mouseup",clear,false);
+		};
+		$r = { onPulse : function(pulse) {
+			switch(pulse[1]) {
+			case 0:
+				var v = pulse[2];
+				f(v);
+				break;
+			default:
+			}
+		}};
+		return $r;
+	}(this)));
 	this.visible.visible.filter(function(b1) {
 		return b1;
-	}).feed(steamer.Consumers.toConsumer(function(_2) {
-		window.document.addEventListener("mouseup",clear,false);
-		_g.reposition();
-	}));
+	}).feed((function($this) {
+		var $r;
+		var f1 = function(_2) {
+			window.document.addEventListener("mouseup",clear,false);
+			_g.reposition();
+		};
+		$r = { onPulse : function(pulse1) {
+			switch(pulse1[1]) {
+			case 0:
+				var v1 = pulse1[2];
+				f1(v1);
+				break;
+			default:
+			}
+		}};
+		return $r;
+	}(this)));
 	this.anchorElement = window.document.body;
 };
 ui.FrameOverlay.__name__ = ["ui","FrameOverlay"];
@@ -3622,18 +3797,31 @@ ui.ContextField = function(options) {
 			return true;
 		}
 	}).feed(hasError);
-	this.withError.feed(steamer.Consumers.toConsumer(function(o1) {
-		switch(o1[1]) {
-		case 0:
-			var err = o1[2];
-			ui.ContextField.tooltip.setContent(err);
-			ui.ContextField.tooltip.anchorTo(_g.component.el,ui.AnchorPoint.Top,ui.AnchorPoint.Bottom);
-			ui.ContextField.tooltip.visible.visible.set_value(true);
-			break;
-		default:
-			if(ui.ContextField.tooltip.anchorElement == _g.component.el) ui.ContextField.tooltip.visible.visible.set_value(false);
-		}
-	}));
+	this.withError.feed((function($this) {
+		var $r;
+		var f = function(o1) {
+			switch(o1[1]) {
+			case 0:
+				var err = o1[2];
+				ui.ContextField.tooltip.setContent(err);
+				ui.ContextField.tooltip.anchorTo(_g.component.el,ui.AnchorPoint.Top,ui.AnchorPoint.Bottom);
+				ui.ContextField.tooltip.visible.visible.set_value(true);
+				break;
+			default:
+				if(ui.ContextField.tooltip.anchorElement == _g.component.el) ui.ContextField.tooltip.visible.visible.set_value(false);
+			}
+		};
+		$r = { onPulse : function(pulse) {
+			switch(pulse[1]) {
+			case 0:
+				var v = pulse[2];
+				f(v);
+				break;
+			default:
+			}
+		}};
+		return $r;
+	}(this)));
 };
 ui.ContextField.__name__ = ["ui","ContextField"];
 ui.ContextField.prototype = {
@@ -3734,16 +3922,51 @@ ui.Document = function(options) {
 		_g.currentFragment = fragment;
 		buttonRemove.enabled.set_value(null != fragment);
 	};
-	this.fragments = steamer.Consumers.toConsumer(setFragment);
+	var f = setFragment;
+	this.fragments = { onPulse : function(pulse) {
+		switch(pulse[1]) {
+		case 0:
+			var v = pulse[2];
+			f(v);
+			break;
+		default:
+		}
+	}};
 	var buttonAdd = this.toolbar.left.addButton("",Config.icons.add);
-	buttonAdd.clicks.feed(steamer.Consumers.toConsumer(function(_) {
-		_g.article.addBlock();
-	}));
+	buttonAdd.clicks.feed((function($this) {
+		var $r;
+		var f1 = function(_) {
+			_g.article.addBlock();
+		};
+		$r = { onPulse : function(pulse1) {
+			switch(pulse1[1]) {
+			case 0:
+				var v1 = pulse1[2];
+				f1(v1);
+				break;
+			default:
+			}
+		}};
+		return $r;
+	}(this)));
 	buttonRemove.enabled.set_value(false);
-	buttonRemove.clicks.feed(steamer.Consumers.toConsumer(function(_1) {
-		_g.currentFragment.component.destroy();
-		setFragment(null);
-	}));
+	buttonRemove.clicks.feed((function($this) {
+		var $r;
+		var f2 = function(_1) {
+			_g.currentFragment.component.destroy();
+			setFragment(null);
+		};
+		$r = { onPulse : function(pulse2) {
+			switch(pulse2[1]) {
+			case 0:
+				var v2 = pulse2[2];
+				f2(v2);
+				break;
+			default:
+			}
+		}};
+		return $r;
+	}(this)));
 	this.article.addReadonly();
 	this.article.addBlock();
 	this.article.addBlock();
@@ -3820,15 +4043,24 @@ ui.Model = function(data) {
 	var _g = this;
 	this.data = data;
 	this.schema = new ui.Schema();
-	this.dataEventConsumer = steamer.Consumers.toConsumer(function(e) {
+	var f = function(e) {
 		{
 			var type = e[4];
 			var value = e[3];
 			var path = e[2];
 			data.set(path,value);
 		}
-	});
-	this.schemaEventConsumer = steamer.Consumers.toConsumer(function(e1) {
+	};
+	this.dataEventConsumer = { onPulse : function(pulse) {
+		switch(pulse[1]) {
+		case 0:
+			var v = pulse[2];
+			f(v);
+			break;
+		default:
+		}
+	}};
+	var f1 = function(e1) {
 		switch(e1[1]) {
 		case 0:
 			var list = e1[2];
@@ -3860,7 +4092,16 @@ ui.Model = function(data) {
 			_g.schema.retype(path3,type2);
 			break;
 		}
-	});
+	};
+	this.schemaEventConsumer = { onPulse : function(pulse1) {
+		switch(pulse1[1]) {
+		case 0:
+			var v1 = pulse1[2];
+			f1(v1);
+			break;
+		default:
+		}
+	}};
 };
 ui.Model.__name__ = ["ui","Model"];
 ui.Model.prototype = {
@@ -3881,13 +4122,39 @@ ui.ModelView = function() {
 	this.toolbar = new ui.Toolbar({ });
 	this.toolbar.component.appendTo(this.component.el);
 	var buttonAdd = this.toolbar.left.addButton("",Config.icons.add);
-	buttonAdd.clicks.feed(steamer.Consumers.toConsumer(function(_) {
-		_g.addField(_g.guessFieldName(),ui.SchemaType.StringType);
-	}));
+	buttonAdd.clicks.feed((function($this) {
+		var $r;
+		var f = function(_) {
+			_g.addField(_g.guessFieldName(),ui.SchemaType.StringType);
+		};
+		$r = { onPulse : function(pulse) {
+			switch(pulse[1]) {
+			case 0:
+				var v = pulse[2];
+				f(v);
+				break;
+			default:
+			}
+		}};
+		return $r;
+	}(this)));
 	var buttonRemove = this.toolbar.right.addButton("",Config.icons.remove);
-	buttonRemove.clicks.feed(steamer.Consumers.toConsumer(function(_1) {
-		_g.removeField(_g.currentField);
-	}));
+	buttonRemove.clicks.feed((function($this) {
+		var $r;
+		var f1 = function(_1) {
+			_g.removeField(_g.currentField);
+		};
+		$r = { onPulse : function(pulse1) {
+			switch(pulse1[1]) {
+			case 0:
+				var v1 = pulse1[2];
+				f1(v1);
+				break;
+			default:
+			}
+		}};
+		return $r;
+	}(this)));
 	buttonRemove.enabled.set_value(false);
 	this.pairs = dom.Html.parseList("<div class=\"fields\"><div></div></div>")[0];
 	this.component.el.appendChild(this.pairs);
@@ -3904,10 +4171,23 @@ ui.ModelView = function() {
 	});
 	this.fields = new haxe.ds.StringMap();
 	this.fieldFocus = new steamer.MultiProducer();
-	this.fieldFocus.feed(steamer.Consumers.toConsumer(function(field) {
-		_g.currentField = field;
-		buttonRemove.enabled.set_value(null != field);
-	}));
+	this.fieldFocus.feed((function($this) {
+		var $r;
+		var f2 = function(field) {
+			_g.currentField = field;
+			buttonRemove.enabled.set_value(null != field);
+		};
+		$r = { onPulse : function(pulse2) {
+			switch(pulse2[1]) {
+			case 0:
+				var v2 = pulse2[2];
+				f2(v2);
+				break;
+			default:
+			}
+		}};
+		return $r;
+	}(this)));
 };
 ui.ModelView.__name__ = ["ui","ModelView"];
 ui.ModelView.prototype = {
@@ -3971,10 +4251,20 @@ ui.ModelView.prototype = {
 				oldname = newname1;
 				return r;
 			}
-		}).feed(steamer.Bus.feed(this.feedSchema));
+		}).feed((function($this) {
+			var $r;
+			var consumer = steamer.Bus.feed($this.feedSchema);
+			$r = consumer;
+			return $r;
+		}(this)));
 		field.value.text.map(function(_) {
 			return createSetValue();
-		}).debounce(250).feed(steamer.Bus.feed(this.feedData));
+		}).debounce(250).feed((function($this) {
+			var $r;
+			var consumer1 = steamer.Bus.feed($this.feedData);
+			$r = consumer1;
+			return $r;
+		}(this)));
 		this.fieldFocus.add(field.focus.map(function(v1) {
 			if(v1) return field; else return null;
 		}));
@@ -4021,9 +4311,22 @@ ui.ReadonlyBlock = function(options) {
 	}).merge(this.blurEvent.producer.map(function(_1) {
 		return false;
 	})).feed(this.focus);
-	this.focus.feed(steamer.Consumers.toConsumer(function(focused) {
-		if(focused) _g.component.el.classList.add("active"); else _g.component.el.classList.remove("active");
-	}));
+	this.focus.feed((function($this) {
+		var $r;
+		var f = function(focused) {
+			if(focused) _g.component.el.classList.add("active"); else _g.component.el.classList.remove("active");
+		};
+		$r = { onPulse : function(pulse) {
+			switch(pulse[1]) {
+			case 0:
+				var v = pulse[2];
+				f(v);
+				break;
+			default:
+			}
+		}};
+		return $r;
+	}(this)));
 };
 ui.ReadonlyBlock.__name__ = ["ui","ReadonlyBlock"];
 ui.ReadonlyBlock.__interfaces__ = [ui.Fragment];

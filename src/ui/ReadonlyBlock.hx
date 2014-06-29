@@ -36,7 +36,7 @@ class ReadonlyBlock implements Fragment {
 				component.el.classList.add('active');
 			else
 				component.el.classList.remove('active');
-		}.toConsumer());
+		});
 	}
 
 	public function destroy() {

@@ -6,7 +6,7 @@ import sui.components.ComponentOptions;
 import js.html.Element;
 import sui.properties.Visible;
 import thx.Assert;
-using steamer.Consumer;
+import steamer.Consumer;
 import steamer.Value;
 using steamer.dom.Dom;
 import dom.Dom;
@@ -32,7 +32,7 @@ class FrameOverlay {
 			})
 			.feed(function(_) {
 				Browser.document.removeEventListener('mouseup', clear, false);
-			}.toConsumer());
+			});
 		visible.visible
 			.filter(function(b) {
 				return b;
@@ -40,7 +40,7 @@ class FrameOverlay {
 			.feed(function(_) {
 				Browser.document.addEventListener('mouseup', clear, false);
 				reposition();
-			}.toConsumer());
+			});
 		anchorElement = Browser.document.body;
 	}
 

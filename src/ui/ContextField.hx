@@ -9,7 +9,7 @@ import sui.components.ComponentOptions;
 import sui.properties.ToggleClass;
 import ui.AnchorPoint;
 import ui.TextEditor;
-using steamer.Consumer;
+import steamer.Consumer;
 using ui.Expression;
 using steamer.dom.Dom;
 import haxe.ds.Option;
@@ -68,7 +68,7 @@ class ContextField {
 					if(tooltip.anchorElement == component.el)
 						tooltip.visible.visible.value = false;
 			}
-		}.toConsumer());
+		});
 	}
 
 	public function destroy() {

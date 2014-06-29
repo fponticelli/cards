@@ -1,7 +1,7 @@
 package ui;
 
 import js.html.Element;
-using steamer.Consumer;
+import steamer.Consumer;
 using steamer.dom.Dom;
 import steamer.MultiProducer;
 using steamer.Producer;
@@ -42,12 +42,12 @@ class ModelView {
 		var buttonAdd = toolbar.left.addButton('', Config.icons.add);
 		buttonAdd.clicks.feed(function(_){
 			addField(guessFieldName(), StringType);
-		}.toConsumer());
+		});
 
 		var buttonRemove = toolbar.right.addButton('', Config.icons.remove);
 		buttonRemove.clicks.feed(function(_) {
 			removeField(currentField);
-		}.toConsumer());
+		});
 		buttonRemove.enabled.value = false;
 
 		pairs = Html.parse('<div class="fields"><div></div></div>');
@@ -70,7 +70,7 @@ class ModelView {
 		fieldFocus.feed(function(field) {
 			this.currentField = field;
 			buttonRemove.enabled.value = null != field;
-		}.toConsumer());
+		});
 	}
 
 	public function guessFieldName() {
