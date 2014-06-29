@@ -41,10 +41,8 @@ class Document {
 			setFragment(null);
 		}.toConsumer());
 
-		article.current.map(function(v) return v.toString()).feed(new steamer.consumers.LoggerConsumer());
-
-
 		// TODO remove me
+		article.addReadonly();
 		article.addBlock();
 		article.addBlock();
 		article.addBlock();

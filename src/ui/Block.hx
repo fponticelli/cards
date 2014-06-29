@@ -1,5 +1,6 @@
 package ui;
 
+import steamer.Value;
 import sui.components.Component;
 import sui.components.ComponentOptions;
 import sui.properties.ToggleClass;
@@ -9,6 +10,7 @@ class Block implements Fragment {
 	public var name(default, null) : String = 'block';
 	public var editor(default, null) : TextEditor;
 	public var component(default, null) : Component;
+	public var focus(default, null) : Value<Bool>;
 	var classActive : ToggleClass;
 	public function new(options : TextEditorOptions) {
 		if(null == options.el && null == options.template)
@@ -17,7 +19,7 @@ class Block implements Fragment {
 
 		classActive = new ToggleClass(editor.component, 'active');
 		editor.focus.feed(classActive.toggleClassName);
-
+		focus = editor.focus;
 		component = editor.component;
 	}
 

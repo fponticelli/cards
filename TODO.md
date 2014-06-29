@@ -3,6 +3,16 @@
 - create dependency between model values and context properties
 - refresh evaluation on change
 
+- more properties:
+	- text
+	- visible
+
+- inline fragment
+- bidirectional updates from property to model when possible
+
+- execute expression in special scope with utility functions
+
+DOC: drag and drop fragments
 
 MV: add support for multiple editor
 MV: change value type
@@ -28,6 +38,8 @@ CV: add related properties
 
 DONE:
 
++ make all fragments focusable
++ feed content
 + display runtime errors
 + display syntax errors
 + create tooltip

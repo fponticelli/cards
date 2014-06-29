@@ -11,7 +11,7 @@ using steamer.dom.Dom;
 class TextEditor implements Editor {
 	public var component(default, null) : Component;
 	public var text(default, null) : Value<String>;
-	public var focus(default, null) : Producer<Bool>;
+	public var focus(default, null) : Value<Bool>;
 	public var value(default, null) : Value<Dynamic>;
 	public var type(default, null) : SchemaType;
 	var cancel : Void -> Void;
@@ -36,12 +36,13 @@ class TextEditor implements Editor {
 			.map(function(_) return text.component.el.textContent)
 			.feed(this.text);
 
-		focus = focusPair.producer
+		focus = new Value(false);
+		focusPair.producer
 			.map(function(_) return true)
 			.merge(
 				blurPair.producer
 					.map(function(_) return false)
-			);
+			).feed(focus);
 		cancel = function() {
 			text.dispose();
 			inputPair.cancel();

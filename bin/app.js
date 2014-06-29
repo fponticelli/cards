@@ -3174,31 +3174,39 @@ ui.AnchorPoint.BottomRight.__enum__ = ui.AnchorPoint;
 ui.Article = function(options) {
 	if(null == options.el && null == options.template) options.template = "<article></article>";
 	this.component = new sui.components.Component(options);
-	this.blocks = new haxe.ds.ObjectMap();
+	this.fragments = new haxe.ds.ObjectMap();
 	this.current = new steamer.MultiProducer();
 };
 ui.Article.__name__ = ["ui","Article"];
 ui.Article.prototype = {
 	component: null
 	,current: null
-	,blocks: null
-	,addBlock: function() {
+	,fragments: null
+	,addFragment: function(fragment) {
 		var _g = this;
-		var block = new ui.Block({ parent : this.component, container : this.component.el, defaultText : "block"});
-		var addFocus = block.editor.focus.filter(function(v) {
+		var addFocus = fragment.focus.filter(function(v) {
 			return v;
 		}).map(function(_) {
-			return block;
+			return fragment;
 		});
 		this.current.add(addFocus);
-		this.blocks.set(block,function() {
+		this.fragments.set(fragment,function() {
 			_g.current.remove(addFocus);
 		});
-		return block;
 	}
-	,removeBlock: function(block) {
-		var finalizer = this.blocks.h[block.__id__];
-		thx.Assert.notNull(finalizer,null,{ fileName : "Article.hx", lineNumber : 42, className : "ui.Article", methodName : "removeBlock"});
+	,addBlock: function() {
+		var fragment = new ui.Block({ parent : this.component, container : this.component.el, defaultText : "block"});
+		this.addFragment(fragment);
+		return fragment;
+	}
+	,addReadonly: function() {
+		var fragment = new ui.ReadonlyBlock({ parent : this.component, container : this.component.el});
+		this.addFragment(fragment);
+		return fragment;
+	}
+	,removeFragment: function(fragment) {
+		var finalizer = this.fragments.h[fragment.__id__];
+		thx.Assert.notNull(finalizer,null,{ fileName : "Article.hx", lineNumber : 57, className : "ui.Article", methodName : "removeFragment"});
 		finalizer();
 	}
 	,__class__: ui.Article
@@ -3208,6 +3216,7 @@ ui.Fragment.__name__ = ["ui","Fragment"];
 ui.Fragment.prototype = {
 	name: null
 	,component: null
+	,focus: null
 	,toString: null
 	,__class__: ui.Fragment
 };
@@ -3217,6 +3226,7 @@ ui.Block = function(options) {
 	this.editor = new ui.TextEditor(options);
 	this.classActive = new sui.properties.ToggleClass(this.editor.component,"active");
 	this.editor.focus.feed(this.classActive.toggleClassName);
+	this.focus = this.editor.focus;
 	this.component = this.editor.component;
 };
 ui.Block.__name__ = ["ui","Block"];
@@ -3225,6 +3235,7 @@ ui.Block.prototype = {
 	name: null
 	,editor: null
 	,component: null
+	,focus: null
 	,classActive: null
 	,destroy: function() {
 		this.editor.destroy();
@@ -3322,17 +3333,24 @@ ui.Context = function(options) {
 	this.expressions = new haxe.ds.StringMap();
 };
 ui.Context.__name__ = ["ui","Context"];
-ui.Context.toggleClass = function(name) {
-	return function(target,value) {
+ui.Context.createToggleInfo = function(display,name) {
+	return { display : display, name : name, create : function(target,value) {
 		var toggle = new sui.properties.ToggleClass(target,name,name);
 		value.feed(toggle.toggleClassName);
-	};
-};
-ui.Context.createToggleInfo = function(display,name) {
-	return { display : display, name : name, create : ui.Context.toggleClass(name), type : ui.SchemaType.BoolType, code : "true", transform : function(v) {
+	}, type : ui.SchemaType.BoolType, code : "true", transform : function(v) {
 		return !!(v);
 	}, defaultf : function() {
 		return false;
+	}};
+};
+ui.Context.createTextInfo = function() {
+	return { display : "content", name : "text", create : function(target,value) {
+		var text = new sui.properties.Text(target,"");
+		value.feed(text.text);
+	}, type : ui.SchemaType.StringType, code : "\"franco\"", transform : function(v) {
+		return "" + Std.string(v);
+	}, defaultf : function() {
+		return "";
 	}};
 };
 ui.Context.prototype = {
@@ -3357,14 +3375,16 @@ ui.Context.prototype = {
 		fields.map($bind(this,this.addField));
 	}
 	,addField: function(fieldInfo) {
-		var f = new ui.ContextField({ container : this.fieldsEl, parent : this.component, display : fieldInfo.display, name : fieldInfo.name, value : fieldInfo.code});
+		var pair = this.expressions.get(fieldInfo.name);
+		var f = new ui.ContextField({ container : this.fieldsEl, parent : this.component, display : fieldInfo.display, name : fieldInfo.name, value : null == pair.code.get_value()?fieldInfo.code:pair.code.get_value()});
 		f.focus.map(function(v) {
 			if(v) return haxe.ds.Option.Some(f); else return haxe.ds.Option.None;
 		}).feed(this.field);
-		var expression = this.expressions.get(fieldInfo.name);
+		var expression = pair.expression;
 		var exp = f.value.text.debounce(250).distinct().map(function(code) {
 			return ui.Expressions.toExpression(code);
 		});
+		f.value.text.feed(pair.code);
 		var mixed = exp.merge(expression);
 		mixed.map(function(e) {
 			switch(e[1]) {
@@ -3398,7 +3418,8 @@ ui.Context.prototype = {
 				var expression = pair.expression;
 				var value = pair.value;
 				fieldInfo.create(fragment.component,value);
-				_g.expressions.set(fieldInfo.name,expression);
+				var value1 = { expression : expression, code : new steamer.Value(null)};
+				_g.expressions.set(fieldInfo.name,value1);
 				_g.setFragmentStatus(fragment);
 			}));
 		});
@@ -3425,6 +3446,8 @@ ui.Context.prototype = {
 				expression.set_value(ui.Expression.RuntimeError(Std.string(e)));
 				return false;
 			}
+		}).map(function(_) {
+			return state;
 		}).map(transform).feed(value);
 		return { expression : expression, value : value};
 	}
@@ -3439,7 +3462,15 @@ ui.Context.prototype = {
 		});
 	}
 	,getPropertiesForFragment: function(fragment) {
-		return [ui.Context.createToggleInfo("bold","strong"),ui.Context.createToggleInfo("italic","emphasis")];
+		var _g = fragment.name;
+		switch(_g) {
+		case "block":
+			return [ui.Context.createToggleInfo("bold","strong"),ui.Context.createToggleInfo("italic","emphasis")];
+		case "readonly":
+			return [ui.Context.createToggleInfo("bold","strong"),ui.Context.createToggleInfo("italic","emphasis"),ui.Context.createTextInfo()];
+		default:
+			return [];
+		}
 	}
 	,__class__: ui.Context
 };
@@ -3697,9 +3728,7 @@ ui.Document = function(options) {
 		_g.currentFragment.component.destroy();
 		setFragment(null);
 	}));
-	this.article.current.map(function(v) {
-		return v.toString();
-	}).feed(new steamer.consumers.LoggerConsumer(null,{ fileName : "Document.hx", lineNumber : 44, className : "ui.Document", methodName : "new"}));
+	this.article.addReadonly();
 	this.article.addBlock();
 	this.article.addBlock();
 	this.article.addBlock();
@@ -3963,6 +3992,41 @@ ui.ModelViewField.prototype = {
 	}
 	,__class__: ui.ModelViewField
 };
+ui.ReadonlyBlock = function(options) {
+	this.name = "readonly";
+	var _g = this;
+	if(null == options.el && null == options.template) options.template = "<section class=\"readonly block\" tabindex=\"0\">readonly</div>";
+	this.component = new sui.components.Component(options);
+	this.focus = new steamer.Value(false);
+	this.focusEvent = steamer.dom.Dom.produceEvent(this.component.el,"focus");
+	this.blurEvent = steamer.dom.Dom.produceEvent(this.component.el,"blur");
+	this.focusEvent.producer.map(function(_) {
+		return true;
+	}).merge(this.blurEvent.producer.map(function(_1) {
+		return false;
+	})).feed(this.focus);
+	this.focus.feed(steamer.Consumers.toConsumer(function(focused) {
+		if(focused) _g.component.el.classList.add("active"); else _g.component.el.classList.remove("active");
+	}));
+};
+ui.ReadonlyBlock.__name__ = ["ui","ReadonlyBlock"];
+ui.ReadonlyBlock.__interfaces__ = [ui.Fragment];
+ui.ReadonlyBlock.prototype = {
+	name: null
+	,component: null
+	,focus: null
+	,focusEvent: null
+	,blurEvent: null
+	,destroy: function() {
+		this.focusEvent.cancel();
+		this.blurEvent.cancel();
+		this.component.destroy();
+	}
+	,toString: function() {
+		return this.name;
+	}
+	,__class__: ui.ReadonlyBlock
+};
 ui.Schema = function() {
 	var _g = this;
 	this.fields = new haxe.ds.StringMap();
@@ -4091,11 +4155,12 @@ ui.TextEditor = function(options) {
 	inputPair.producer.map(function(_) {
 		return text.component.el.textContent;
 	}).feed(this.text);
-	this.focus = focusPair.producer.map(function(_1) {
+	this.focus = new steamer.Value(false);
+	focusPair.producer.map(function(_1) {
 		return true;
 	}).merge(blurPair.producer.map(function(_2) {
 		return false;
-	}));
+	})).feed(this.focus);
 	this.cancel = function() {
 		text.dispose();
 		inputPair.cancel();

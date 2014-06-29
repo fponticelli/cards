@@ -6,39 +6,54 @@ import sui.components.Component;
 import sui.components.ComponentOptions;
 import thx.Assert;
 import ui.Block;
+import ui.ReadonlyBlock;
+import ui.Fragment;
 
 class Article {
 	public var component(default, null) : Component;
 	public var current(default, null) : MultiProducer<Fragment>;
 
-	var blocks : Map<Block, Void -> Void>;
+	var fragments : Map<Fragment, Void -> Void>;
 	public function new(options : ComponentOptions) {
 		if(null == options.el && null == options.template)
 			options.template = '<article></article>';
 		component = new Component(options);
-		blocks = new Map();
+		fragments = new Map();
 		current = new MultiProducer();
 	}
 
-	public function addBlock() {
-		var block = new Block({
-			parent : component,
-			container : component.el,
-			defaultText : 'block'
-		});
-		var addFocus = block.editor
+	function addFragment(fragment : Fragment) {
+		var addFocus = fragment
 			.focus
 			.filter(function(v) return v)
-			.map(function(_) : Fragment return block);
+			.map(function(_) : Fragment return fragment);
 		current.add(addFocus);
-		blocks.set(block, function() {
+		fragments.set(fragment, function() {
 			current.remove(addFocus);
 		});
-		return block;
 	}
 
-	public function removeBlock(block : Block) {
-		var finalizer = blocks.get(block);
+	public function addBlock() {
+		var fragment = new Block({
+				parent : component,
+				container : component.el,
+				defaultText : 'block'
+			});
+		addFragment(fragment);
+		return fragment;
+	}
+
+	public function addReadonly() {
+		var fragment = new ReadonlyBlock({
+				parent : component,
+				container : component.el
+			});
+		addFragment(fragment);
+		return fragment;
+	}
+
+	public function removeFragment(fragment : Fragment) {
+		var finalizer = fragments.get(fragment);
 		Assert.notNull(finalizer);
 		finalizer();
 	}

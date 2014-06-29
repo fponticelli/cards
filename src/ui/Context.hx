@@ -25,7 +25,7 @@ class Context {
 	var menuAdd : Menu;
 	var buttonAdd : Button;
 	var buttonRemove : Button;
-	var expressions : Map<String, Value<Expression>>;
+	var expressions : Map<String, { expression : Value<Expression>, code : Value<String> }>;
 
 	public var field(default, null) : Value<Option<ContextField>>;
 
@@ -84,23 +84,25 @@ class Context {
 	}
 
 	public function addField(fieldInfo : FieldInfo<Dynamic>) {
-		var f = new ContextField({
-			container : fieldsEl,
-			parent : component,
-			display : fieldInfo.display,
-			name : fieldInfo.name,
-			value : fieldInfo.code
-		});
+		var pair = expressions.get(fieldInfo.name),
+			f = new ContextField({
+				container : fieldsEl,
+				parent : component,
+				display : fieldInfo.display,
+				name : fieldInfo.name,
+				value : null == pair.code.value ? fieldInfo.code : pair.code.value
+			});
 		f.focus
 			.map(function(v) return v ? Some(f) : None)
 			.feed(field);
 
-		var expression = expressions.get(fieldInfo.name),
+		var expression = pair.expression,
 			exp = f.value.text
-				.debounce(250)
-				.distinct()
-				.map(function(code) return code.toExpression());
+					.debounce(250)
+					.distinct()
+					.map(function(code) return code.toExpression());
 
+		f.value.text.feed(pair.code);
 		var mixed = exp.merge(expression);
 		mixed.map(function(e) {
 			return switch e {
@@ -132,7 +134,10 @@ class Context {
 					expression = pair.expression,
 					value = pair.value;
 				fieldInfo.create(fragment.component, value);
-				expressions.set(fieldInfo.name, expression);
+				expressions.set(fieldInfo.name, {
+					expression : expression,
+					code : new Value<String>(null)
+				});
 				setFragmentStatus(fragment);
 			}.toConsumer());
 		});
@@ -162,6 +167,7 @@ class Context {
 					false;
 				};
 			})
+			.map(function(_) return state)
 			.map(transform)
 			.feed(value);
 		return {
@@ -182,18 +188,14 @@ class Context {
 		});
 	}
 
-	static function toggleClass(name : String) {
-		return function(target : Component, value : Value<Bool>) {
-			var toggle = new ToggleClass(target, name, name);
-			value.feed(toggle.toggleClassName);
-		};
-	}
-
 	static function createToggleInfo(display : String, name : String) : FieldInfo<Bool> {
 		return {
 			display   : display,
 			name      : name,
-			create    : toggleClass(name),
+			create    : function(target : Component, value : Value<Bool>) {
+							var toggle = new sui.properties.ToggleClass(target, name, name);
+							value.feed(toggle.toggleClassName);
+						},
 			type      : BoolType,
 			code      : 'true',
 			transform : function(v : Dynamic) : Dynamic return untyped __js__('!!')(v),
@@ -201,11 +203,36 @@ class Context {
 		};
 	}
 
+	static function createTextInfo() : FieldInfo<String> {
+		return {
+			display   : 'content',
+			name      : 'text',
+			create    : function(target : Component, value : Value<String>) {
+							var text = new sui.properties.Text(target, '');
+							value.feed(text.text);
+						},
+			type      : StringType,
+			code      : '"franco"',
+			transform : function(v : Dynamic) : Dynamic return ""+v,
+			defaultf  : function() : Dynamic return ""
+		};
+	}
+
 	public function getPropertiesForFragment(fragment : Fragment) : Array<FieldInfo<Dynamic>> {
-		return [
-			createToggleInfo('bold', 'strong'),
-			createToggleInfo('italic', 'emphasis')
-		];
+		return switch fragment.name {
+			case 'block':
+				[
+					createToggleInfo('bold', 'strong'),
+					createToggleInfo('italic', 'emphasis'),
+				];
+			case 'readonly':
+				[
+					createToggleInfo('bold', 'strong'),
+					createToggleInfo('italic', 'emphasis'),
+					createTextInfo()
+				];
+			case _: [];
+		}
 	}
 }
 
