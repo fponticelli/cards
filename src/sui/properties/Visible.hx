@@ -5,21 +5,13 @@ import steamer.Value;
 import sui.components.Component;
 import thx.Assert;
 
-class Visible extends Property {
-	public var defaultValue(default, null) : Bool;
-	public var visible(default, null) : Value<Bool>;
-
+class Visible extends ValueProperty<Bool> {
 	public function new(component : Component, defaultValue : Bool) {
-		this.defaultValue = defaultValue;
-		super(component, 'visible');
+		super(defaultValue, component, 'visible');
 	}
 
 	override function init() : Void -> Void {
-		visible = new Value(defaultValue);
-		visible.feed(component.el.consumeToggleVisibility());
-		return function() {
-			visible.terminate();
-			visible = null;
-		};
+		stream.feed(component.el.consumeToggleVisibility());
+		return function() { };
 	}
 }

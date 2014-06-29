@@ -6,13 +6,9 @@ import thx.Assert;
 import sui.components.Component;
 using steamer.dom.Dom;
 
-class Checked extends Property {
-	public var defaultValue(default, null) : Bool;
-	public var checked(default, null) : Producer<Bool>;
-
-	public function new(target : Component) {
-		this.defaultValue = dafaultValue;
-		super(target, 'checked');
+class Checked extends ValueProperty<Bool> {
+	public function new(component : Component, defaultValue : Bool) {
+		super(dafaultValue, component, 'checked');
 	}
 
 	override function init() {

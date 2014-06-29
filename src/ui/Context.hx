@@ -42,7 +42,7 @@ class Context {
 		menuAdd.anchorTo(buttonAdd.component.el);
 		buttonAdd.clicks.map(function(_) {
 			return true;
-		}).feed(menuAdd.visible.visible);
+		}).feed(menuAdd.visible.stream);
 
 		fragments = setFragmentStatus;
 		buttonAdd.enabled.value = false;
@@ -194,7 +194,7 @@ class Context {
 			name      : name,
 			create    : function(target : Component, value : Value<Bool>) {
 							var toggle = new sui.properties.ToggleClass(target, name, name);
-							value.feed(toggle.toggleClassName);
+							value.feed(toggle.stream);
 						},
 			type      : BoolType,
 			code      : 'true',
@@ -209,7 +209,7 @@ class Context {
 			name      : 'text',
 			create    : function(target : Component, value : Value<String>) {
 							var text = new sui.properties.Text(target, '');
-							value.feed(text.text);
+							value.feed(text.stream);
 						},
 			type      : StringType,
 			code      : '"franco"',

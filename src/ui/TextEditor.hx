@@ -29,7 +29,7 @@ class TextEditor implements Editor {
 			focusPair = component.el.produceEvent('focus'),
 			blurPair  = component.el.produceEvent('blur');
 
-		this.text = text.text;
+		this.text = text.stream;
 		this.value = new Value(options.defaultText);
 		this.text.feed(this.value);
 		inputPair.producer

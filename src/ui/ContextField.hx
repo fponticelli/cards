@@ -48,7 +48,7 @@ class ContextField {
 		// and not have lost focus in the meanwhile
 		focus = value.focus.debounce(250).distinct();
 		classActive = new ToggleClass(component, 'active');
-		focus.feed(classActive.toggleClassName);
+		focus.feed(classActive.stream);
 
 		var hasError = component.el.consumeToggleClass('error');
 		withError = new Value(None);
@@ -63,10 +63,10 @@ class ContextField {
 				case Some(err):
 					tooltip.setContent(err);
 					tooltip.anchorTo(component.el, Top, Bottom);
-					tooltip.visible.visible.value = true;
+					tooltip.visible.value = true;
 				case _:
 					if(tooltip.anchorElement == component.el)
-						tooltip.visible.visible.value = false;
+						tooltip.visible.value = false;
 			}
 		});
 	}

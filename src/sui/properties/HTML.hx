@@ -6,26 +6,18 @@ import steamer.Value;
 import sui.components.Component;
 import thx.Assert;
 
-class HTML extends Property {
+class HTML extends ValueProperty<String> {
 	public function new(component : Component, defaultHtml : String) {
-		this.defaultHTML = defaultHTML;
-		super(component, 'html');
+		super(defaultHtml, component, 'html');
 	}
-
-	public var html(default, null) : Value<String>;
-	public var defaultHTML(default, null) : String;
 
 	override function init() : Void -> Void {
 		var el       = component.el,
 			original = el.innerHTML;
-		html = new Value(defaultHTML);
-		html.feed(new SimpleConsumer(
-			function(value) el.innerHTML = value,
-			function() el.innerHTML = original
-		));
-		return function() {
-			html.terminate();
-			html = null;
-		};
+		value.feed({
+			emit : function(value) el.innerHTML = value,
+			end : function() el.innerHTML = original
+		});
+		return function() { };
 	}
 }

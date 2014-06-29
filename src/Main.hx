@@ -5,6 +5,8 @@ import steamer.*;
 import ui.*;
 import ui.Card;
 
+import sui.properties.ValueProperty;
+
 class Main {
 	public static function main() {
 		Dom.ready().then(function(_) {

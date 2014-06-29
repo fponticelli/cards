@@ -1,17 +1,17 @@
 package sui.properties;
 
 import sui.components.Component;
-using thx.core.Functions;
 
 @:access(sui.components.Properties)
 class Property {
 	public var component(default, null) : Component;
 	public var name(default, null) : String;
-	var _dispose : Void -> Void;
+	var cancels : Array<Void -> Void>;
 	public function new(component : Component, name : String) {
 		this.component = component;
-		this.name  = name;
-		this._dispose  = init().once();
+		this.name = name;
+		cancels = [];
+		cancels.push(init());
 		component.properties.add(this);
 	}
 
@@ -20,7 +20,8 @@ class Property {
 	}
 
 	public function dispose() {
-		_dispose();
+		while(cancels.length > 0)
+			cancels.shift()();
 		if(this.component.properties.exists(name)) {
 			this.component.properties.remove(name);
 			this.component = null;

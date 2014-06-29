@@ -18,7 +18,7 @@ class Block implements Fragment {
 		editor = new TextEditor(options);
 
 		classActive = new ToggleClass(editor.component, 'active');
-		editor.focus.feed(classActive.toggleClassName);
+		editor.focus.feed(classActive.stream);
 		focus = editor.focus;
 		component = editor.component;
 	}

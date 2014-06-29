@@ -40,7 +40,7 @@ class ModelViewField {
 		var f = key.focus.merge(value.focus);
 		focus = f.debounce(250).distinct();
 		classActive = new ToggleClass(component, 'active');
-		f.feed(classActive.toggleClassName);
+		f.feed(classActive.stream);
 	}
 
 	public function destroy() {

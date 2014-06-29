@@ -24,16 +24,16 @@ class FrameOverlay {
 		component = new Component(options);
 		visible = new Visible(component, false);
 		function clear(_) {
-			visible.visible.value = false;
+			visible.value = false;
 		}
-		visible.visible
+		visible.stream
 			.filter(function(b) {
 				return !b;
 			})
 			.feed(function(_) {
 				Browser.document.removeEventListener('mouseup', clear, false);
 			});
-		visible.visible
+		visible.stream
 			.filter(function(b) {
 				return b;
 			})
@@ -48,7 +48,7 @@ class FrameOverlay {
 		anchorElement = el;
 		this.my = null == my ? TopLeft : my;
 		this.at = null == at ? BottomLeft : at;
-		if(visible.visible.value)
+		if(visible.value)
 			reposition();
 	}
 

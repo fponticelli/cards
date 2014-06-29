@@ -1898,19 +1898,20 @@ sui.properties = {};
 sui.properties.Property = function(component,name) {
 	this.component = component;
 	this.name = name;
-	this._dispose = thx.core.F0.once(this.init());
+	this.cancels = [];
+	this.cancels.push(this.init());
 	component.properties.add(this);
 };
 sui.properties.Property.__name__ = ["sui","properties","Property"];
 sui.properties.Property.prototype = {
 	component: null
 	,name: null
-	,_dispose: null
+	,cancels: null
 	,init: function() {
 		throw "abstact function init, must override";
 	}
 	,dispose: function() {
-		this._dispose();
+		while(this.cancels.length > 0) (this.cancels.shift())();
 		if(this.component.properties.exists(this.name)) {
 			this.component.properties.remove(this.name);
 			this.component = null;
@@ -1921,24 +1922,43 @@ sui.properties.Property.prototype = {
 	}
 	,__class__: sui.properties.Property
 };
-sui.properties.Attribute = function(component,name,attributeName,defaultValue) {
-	if(null == attributeName) this.attributeName = name; else this.attributeName = attributeName;
-	this.defaultValue = defaultValue;
+sui.properties.ValueProperty = function(defaultValue,component,name) {
+	this.stream = new steamer.Value(defaultValue);
 	sui.properties.Property.call(this,component,name);
 };
-sui.properties.Attribute.__name__ = ["sui","properties","Attribute"];
-sui.properties.Attribute.__super__ = sui.properties.Property;
-sui.properties.Attribute.prototype = $extend(sui.properties.Property.prototype,{
+sui.properties.ValueProperty.__name__ = ["sui","properties","ValueProperty"];
+sui.properties.ValueProperty.__super__ = sui.properties.Property;
+sui.properties.ValueProperty.prototype = $extend(sui.properties.Property.prototype,{
 	defaultValue: null
-	,attributeName: null
-	,attribute: null
+	,stream: null
+	,dispose: function() {
+		this.stream.terminate();
+		sui.properties.Property.prototype.dispose.call(this);
+		this.set_value(null);
+		this.stream = null;
+	}
+	,get_defaultValue: function() {
+		return this.stream.defaultValue;
+	}
+	,get_value: function() {
+		return this.stream.get_value();
+	}
+	,set_value: function(value) {
+		return this.stream.set_value(value);
+	}
+	,__class__: sui.properties.ValueProperty
+});
+sui.properties.Attribute = function(component,name,attributeName,defaultValue) {
+	if(null == attributeName) this.attributeName = name; else this.attributeName = attributeName;
+	sui.properties.ValueProperty.call(this,defaultValue,component,name);
+};
+sui.properties.Attribute.__name__ = ["sui","properties","Attribute"];
+sui.properties.Attribute.__super__ = sui.properties.ValueProperty;
+sui.properties.Attribute.prototype = $extend(sui.properties.ValueProperty.prototype,{
+	attributeName: null
 	,init: function() {
-		var _g = this;
-		this.attribute = new steamer.Value(this.defaultValue);
-		this.attribute.feed(steamer.dom.Dom.consumeAttribute(this.component.el,this.attributeName));
+		this.stream.feed(steamer.dom.Dom.consumeAttribute(this.component.el,this.attributeName));
 		return function() {
-			_g.attribute.terminate();
-			_g.attribute = null;
 		};
 	}
 	,__class__: sui.properties.Attribute
@@ -1959,70 +1979,51 @@ sui.properties._PropertyName.PropertyName_Impl_.toString = function(this1) {
 	return this1;
 };
 sui.properties.Text = function(component,defaultText) {
-	this.defaultText = defaultText;
-	sui.properties.Property.call(this,component,"text");
+	sui.properties.ValueProperty.call(this,defaultText,component,"text");
 };
 sui.properties.Text.__name__ = ["sui","properties","Text"];
-sui.properties.Text.__super__ = sui.properties.Property;
-sui.properties.Text.prototype = $extend(sui.properties.Property.prototype,{
-	defaultText: null
-	,text: null
-	,init: function() {
-		var _g = this;
+sui.properties.Text.__super__ = sui.properties.ValueProperty;
+sui.properties.Text.prototype = $extend(sui.properties.ValueProperty.prototype,{
+	init: function() {
 		var el = this.component.el;
 		var original = el.innerText;
-		this.text = new steamer.Value(this.defaultText);
-		this.text.feed(steamer._Consumer.Consumer_Impl_.fromObject({ emit : function(value) {
+		this.stream.feed(steamer._Consumer.Consumer_Impl_.fromObject({ emit : function(value) {
 			el.innerText = value;
 		}, end : function() {
 			el.innerText = original;
 		}}));
 		return function() {
-			_g.text.terminate();
-			_g.text = null;
 		};
 	}
 	,__class__: sui.properties.Text
 });
 sui.properties.ToggleClass = function(component,name,className) {
+	var defaultValue = component.el.classList.contains(className);
 	if(null == className) this.className = name; else this.className = className;
-	sui.properties.Property.call(this,component,name);
+	sui.properties.ValueProperty.call(this,defaultValue,component,name);
 };
 sui.properties.ToggleClass.__name__ = ["sui","properties","ToggleClass"];
-sui.properties.ToggleClass.__super__ = sui.properties.Property;
-sui.properties.ToggleClass.prototype = $extend(sui.properties.Property.prototype,{
-	originalHasClass: null
-	,className: null
-	,toggleClassName: null
+sui.properties.ToggleClass.__super__ = sui.properties.ValueProperty;
+sui.properties.ToggleClass.prototype = $extend(sui.properties.ValueProperty.prototype,{
+	className: null
 	,init: function() {
 		var _g = this;
-		this.originalHasClass = this.component.el.classList.contains(this.className);
-		this.toggleClassName = new steamer.Value(this.originalHasClass);
-		this.toggleClassName.feed(steamer.dom.Dom.consumeToggleClass(this.component.el,this.className));
+		this.stream.feed(steamer.dom.Dom.consumeToggleClass(this.component.el,this.className));
 		return function() {
-			if(_g.originalHasClass) _g.component.el.classList.add(_g.className); else _g.component.el.classList.remove(_g.className);
-			_g.toggleClassName.terminate();
-			_g.toggleClassName = null;
+			if(_g.get_defaultValue()) _g.component.el.classList.add(_g.className); else _g.component.el.classList.remove(_g.className);
 		};
 	}
 	,__class__: sui.properties.ToggleClass
 });
 sui.properties.Visible = function(component,defaultValue) {
-	this.defaultValue = defaultValue;
-	sui.properties.Property.call(this,component,"visible");
+	sui.properties.ValueProperty.call(this,defaultValue,component,"visible");
 };
 sui.properties.Visible.__name__ = ["sui","properties","Visible"];
-sui.properties.Visible.__super__ = sui.properties.Property;
-sui.properties.Visible.prototype = $extend(sui.properties.Property.prototype,{
-	defaultValue: null
-	,visible: null
-	,init: function() {
-		var _g = this;
-		this.visible = new steamer.Value(this.defaultValue);
-		this.visible.feed(steamer.dom.Dom.consumeToggleVisibility(this.component.el));
+sui.properties.Visible.__super__ = sui.properties.ValueProperty;
+sui.properties.Visible.prototype = $extend(sui.properties.ValueProperty.prototype,{
+	init: function() {
+		this.stream.feed(steamer.dom.Dom.consumeToggleVisibility(this.component.el));
 		return function() {
-			_g.visible.terminate();
-			_g.visible = null;
 		};
 	}
 	,__class__: sui.properties.Visible
@@ -2606,34 +2607,6 @@ thx.core.Assertion.Error = function(e,stack) { var $x = ["Error",2,e,stack]; $x.
 thx.core.Assertion.PreConditionError = function(e,stack) { var $x = ["PreConditionError",3,e,stack]; $x.__enum__ = thx.core.Assertion; $x.toString = $estr; return $x; };
 thx.core.Assertion.PostConditionError = function(e,stack) { var $x = ["PostConditionError",4,e,stack]; $x.__enum__ = thx.core.Assertion; $x.toString = $estr; return $x; };
 thx.core.Assertion.Warning = function(msg) { var $x = ["Warning",5,msg]; $x.__enum__ = thx.core.Assertion; $x.toString = $estr; return $x; };
-thx.core.F0 = function() { };
-thx.core.F0.__name__ = ["thx","core","F0"];
-thx.core.F0.join = function(fa,fb) {
-	return function() {
-		fa();
-		fb();
-	};
-};
-thx.core.F0.once = function(f) {
-	return function() {
-		f();
-		f = function() {
-		};
-	};
-};
-thx.core.F1 = function() { };
-thx.core.F1.__name__ = ["thx","core","F1"];
-thx.core.F1.compose = function(fa,fb) {
-	return function(v) {
-		return fa(fb(v));
-	};
-};
-thx.core.F1.join = function(fa,fb) {
-	return function(v) {
-		fa(v);
-		fb(v);
-	};
-};
 thx.core.Ints = function() { };
 thx.core.Ints.__name__ = ["thx","core","Ints"];
 thx.core.Ints.clamp = function(v,min,max) {
@@ -3290,7 +3263,7 @@ ui.Block = function(options) {
 	if(null == options.el && null == options.template) options.template = "<section class=\"block\"></div>";
 	this.editor = new ui.TextEditor(options);
 	this.classActive = new sui.properties.ToggleClass(this.editor.component,"active");
-	this.editor.focus.feed(this.classActive.toggleClassName);
+	this.editor.focus.feed(this.classActive.stream);
 	this.focus = this.editor.focus;
 	this.component = this.editor.component;
 };
@@ -3382,7 +3355,7 @@ ui.Context = function(options) {
 	this.menuAdd.anchorTo(this.buttonAdd.component.el);
 	this.buttonAdd.clicks.map(function(_) {
 		return true;
-	}).feed(this.menuAdd.visible.visible);
+	}).feed(this.menuAdd.visible.stream);
 	var f = $bind(this,this.setFragmentStatus);
 	this.fragments = { onPulse : function(pulse) {
 		switch(pulse[1]) {
@@ -3454,7 +3427,7 @@ ui.Context.__name__ = ["ui","Context"];
 ui.Context.createToggleInfo = function(display,name) {
 	return { display : display, name : name, create : function(target,value) {
 		var toggle = new sui.properties.ToggleClass(target,name,name);
-		value.feed(toggle.toggleClassName);
+		value.feed(toggle.stream);
 	}, type : ui.SchemaType.BoolType, code : "true", transform : function(v) {
 		return !!(v);
 	}, defaultf : function() {
@@ -3464,7 +3437,7 @@ ui.Context.createToggleInfo = function(display,name) {
 ui.Context.createTextInfo = function() {
 	return { display : "content", name : "text", create : function(target,value) {
 		var text = new sui.properties.Text(target,"");
-		value.feed(text.text);
+		value.feed(text.stream);
 	}, type : ui.SchemaType.StringType, code : "\"franco\"", transform : ui.Context.valueToString, defaultf : function() {
 		return "";
 	}};
@@ -3619,9 +3592,9 @@ ui.FrameOverlay = function(options) {
 	this.component = new sui.components.Component(options);
 	this.visible = new sui.properties.Visible(this.component,false);
 	var clear = function(_) {
-		_g.visible.visible.set_value(false);
+		_g.visible.set_value(false);
 	};
-	this.visible.visible.filter(function(b) {
+	this.visible.stream.filter(function(b) {
 		return !b;
 	}).feed((function($this) {
 		var $r;
@@ -3639,7 +3612,7 @@ ui.FrameOverlay = function(options) {
 		}};
 		return $r;
 	}(this)));
-	this.visible.visible.filter(function(b1) {
+	this.visible.stream.filter(function(b1) {
 		return b1;
 	}).feed((function($this) {
 		var $r;
@@ -3671,7 +3644,7 @@ ui.FrameOverlay.prototype = {
 		this.anchorElement = el;
 		if(null == my) this.my = ui.AnchorPoint.TopLeft; else this.my = my;
 		if(null == at) this.at = ui.AnchorPoint.BottomLeft; else this.at = at;
-		if(this.visible.visible.get_value()) this.reposition();
+		if(this.visible.get_value()) this.reposition();
 	}
 	,reposition: function() {
 		if(!this.component.isAttached) {
@@ -3760,7 +3733,7 @@ ui.ContextField = function(options) {
 	this.value = new ui.TextEditor({ el : dom.Query.first(".value",this.component.el), parent : this.component, defaultText : options.value});
 	this.focus = this.value.focus.debounce(250).distinct();
 	this.classActive = new sui.properties.ToggleClass(this.component,"active");
-	this.focus.feed(this.classActive.toggleClassName);
+	this.focus.feed(this.classActive.stream);
 	var hasError = steamer.dom.Dom.consumeToggleClass(this.component.el,"error");
 	this.withError = new steamer.Value(haxe.ds.Option.None);
 	this.withError.map(function(o) {
@@ -3779,10 +3752,10 @@ ui.ContextField = function(options) {
 				var err = o1[2];
 				ui.ContextField.tooltip.setContent(err);
 				ui.ContextField.tooltip.anchorTo(_g.component.el,ui.AnchorPoint.Top,ui.AnchorPoint.Bottom);
-				ui.ContextField.tooltip.visible.visible.set_value(true);
+				ui.ContextField.tooltip.visible.set_value(true);
 				break;
 			default:
-				if(ui.ContextField.tooltip.anchorElement == _g.component.el) ui.ContextField.tooltip.visible.visible.set_value(false);
+				if(ui.ContextField.tooltip.anchorElement == _g.component.el) ui.ContextField.tooltip.visible.set_value(false);
 			}
 		};
 		$r = { onPulse : function(pulse) {
@@ -4254,7 +4227,7 @@ ui.ModelViewField = function(options) {
 	var f = this.key.focus.merge(this.value.focus);
 	this.focus = f.debounce(250).distinct();
 	this.classActive = new sui.properties.ToggleClass(this.component,"active");
-	f.feed(this.classActive.toggleClassName);
+	f.feed(this.classActive.stream);
 };
 ui.ModelViewField.__name__ = ["ui","ModelViewField"];
 ui.ModelViewField.prototype = {
@@ -4442,7 +4415,7 @@ ui.TextEditor = function(options) {
 	var inputPair = steamer.dom.Dom.produceEvent(this.component.el,"input");
 	var focusPair = steamer.dom.Dom.produceEvent(this.component.el,"focus");
 	var blurPair = steamer.dom.Dom.produceEvent(this.component.el,"blur");
-	this.text = text.text;
+	this.text = text.stream;
 	this.value = new steamer.Value(options.defaultText);
 	this.text.feed(this.value);
 	inputPair.producer.map(function(_) {
