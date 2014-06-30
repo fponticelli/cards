@@ -12,7 +12,7 @@ class Card {
 			context = Query.first('.context', card.el),
 			modelView = new ModelView(),
 			document = new Document({ el : Query.first('.doc', card.el) }),
-			context = new Context({ el : Query.first('.context', card.el) });
+			context = new ContextView(document, { el : Query.first('.context', card.el) });
 
 		document.article.current.feed(context.fragments);
 		document.article.current.feed(document.fragments);
