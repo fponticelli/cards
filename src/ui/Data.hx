@@ -1,9 +1,6 @@
 package ui;
 
 import haxe.Json;
-using thx.core.Arrays;
-using thx.core.Iterators;
-using thx.core.Strings;
 import steamer.Producer;
 import steamer.Pulse;
 import thx.ref.ObjectRef;

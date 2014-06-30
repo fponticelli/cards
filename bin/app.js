@@ -30,53 +30,6 @@ EReg.prototype = {
 		var sz = this.r.m.index + this.r.m[0].length;
 		return this.r.s.substr(sz,this.r.s.length - sz);
 	}
-	,matchedPos: function() {
-		if(this.r.m == null) throw "No string matched";
-		return { pos : this.r.m.index, len : this.r.m[0].length};
-	}
-	,matchSub: function(s,pos,len) {
-		if(len == null) len = -1;
-		if(this.r.global) {
-			this.r.lastIndex = pos;
-			this.r.m = this.r.exec(len < 0?s:HxOverrides.substr(s,0,pos + len));
-			var b = this.r.m != null;
-			if(b) this.r.s = s;
-			return b;
-		} else {
-			var b1 = this.match(len < 0?HxOverrides.substr(s,pos,null):HxOverrides.substr(s,pos,len));
-			if(b1) {
-				this.r.s = s;
-				this.r.m.index += pos;
-			}
-			return b1;
-		}
-	}
-	,split: function(s) {
-		var d = "#__delim__#";
-		return s.replace(this.r,d).split(d);
-	}
-	,replace: function(s,by) {
-		return s.replace(this.r,by);
-	}
-	,map: function(s,f) {
-		var offset = 0;
-		var buf = new StringBuf();
-		do {
-			if(offset >= s.length) break; else if(!this.matchSub(s,offset)) {
-				buf.add(HxOverrides.substr(s,offset,null));
-				break;
-			}
-			var p = this.matchedPos();
-			buf.add(HxOverrides.substr(s,offset,p.pos - offset));
-			buf.add(f(this));
-			if(p.len == 0) {
-				buf.add(HxOverrides.substr(s,p.pos,1));
-				offset = p.pos + 1;
-			} else offset = p.pos + p.len;
-		} while(this.r.global);
-		if(!this.r.global && offset > 0 && offset < s.length) buf.add(HxOverrides.substr(s,offset,null));
-		return buf.b;
-	}
 	,__class__: EReg
 };
 var HxOverrides = function() { };
@@ -230,38 +183,8 @@ Std.parseInt = function(x) {
 	if(isNaN(v)) return null;
 	return v;
 };
-var StringBuf = function() {
-	this.b = "";
-};
-StringBuf.__name__ = ["StringBuf"];
-StringBuf.prototype = {
-	b: null
-	,add: function(x) {
-		this.b += Std.string(x);
-	}
-	,__class__: StringBuf
-};
 var StringTools = function() { };
 StringTools.__name__ = ["StringTools"];
-StringTools.isSpace = function(s,pos) {
-	var c = HxOverrides.cca(s,pos);
-	return c > 8 && c < 14 || c == 32;
-};
-StringTools.ltrim = function(s) {
-	var l = s.length;
-	var r = 0;
-	while(r < l && StringTools.isSpace(s,r)) r++;
-	if(r > 0) return HxOverrides.substr(s,r,l - r); else return s;
-};
-StringTools.rtrim = function(s) {
-	var l = s.length;
-	var r = 0;
-	while(r < l && StringTools.isSpace(s,l - r - 1)) r++;
-	if(r > 0) return HxOverrides.substr(s,0,l - r); else return s;
-};
-StringTools.trim = function(s) {
-	return StringTools.ltrim(StringTools.rtrim(s));
-};
 StringTools.replace = function(s,sub,by) {
 	return s.split(sub).join(by);
 };
@@ -1918,6 +1841,21 @@ sui.properties.Property.prototype = {
 	}
 	,__class__: sui.properties.Property
 };
+sui.properties._PropertyName = {};
+sui.properties._PropertyName.PropertyName_Impl_ = function() { };
+sui.properties._PropertyName.PropertyName_Impl_.__name__ = ["sui","properties","_PropertyName","PropertyName_Impl_"];
+sui.properties._PropertyName.PropertyName_Impl_.fromProperty = function(property) {
+	return property.name;
+};
+sui.properties._PropertyName.PropertyName_Impl_.fromString = function(name) {
+	return name;
+};
+sui.properties._PropertyName.PropertyName_Impl_._new = function(name) {
+	return name;
+};
+sui.properties._PropertyName.PropertyName_Impl_.toString = function(this1) {
+	return this1;
+};
 sui.properties.ValueProperty = function(defaultValue,component,name) {
 	this.stream = new steamer.Value(defaultValue);
 	sui.properties.Property.call(this,component,name);
@@ -1944,32 +1882,6 @@ sui.properties.ValueProperty.prototype = $extend(sui.properties.Property.prototy
 	}
 	,__class__: sui.properties.ValueProperty
 });
-sui.properties.Attribute = function(component,name,attributeName,defaultValue) {
-	if(null == attributeName) this.attributeName = name; else this.attributeName = attributeName;
-	sui.properties.ValueProperty.call(this,defaultValue,component,name);
-	this.stream.feed(steamer.dom.Dom.consumeAttribute(component.el,attributeName));
-};
-sui.properties.Attribute.__name__ = ["sui","properties","Attribute"];
-sui.properties.Attribute.__super__ = sui.properties.ValueProperty;
-sui.properties.Attribute.prototype = $extend(sui.properties.ValueProperty.prototype,{
-	attributeName: null
-	,__class__: sui.properties.Attribute
-});
-sui.properties._PropertyName = {};
-sui.properties._PropertyName.PropertyName_Impl_ = function() { };
-sui.properties._PropertyName.PropertyName_Impl_.__name__ = ["sui","properties","_PropertyName","PropertyName_Impl_"];
-sui.properties._PropertyName.PropertyName_Impl_.fromProperty = function(property) {
-	return property.name;
-};
-sui.properties._PropertyName.PropertyName_Impl_.fromString = function(name) {
-	return name;
-};
-sui.properties._PropertyName.PropertyName_Impl_._new = function(name) {
-	return name;
-};
-sui.properties._PropertyName.PropertyName_Impl_.toString = function(this1) {
-	return this1;
-};
 sui.properties.Text = function(component,defaultText) {
 	var _g = this;
 	sui.properties.ValueProperty.call(this,null == defaultText?component.el.innerText:defaultText,component,"text");
@@ -2679,147 +2591,6 @@ thx.core.Objects.__name__ = ["thx","core","Objects"];
 thx.core.Objects.isEmpty = function(o) {
 	return Reflect.fields(o).length == 0;
 };
-thx.core.Strings = function() { };
-thx.core.Strings.__name__ = ["thx","core","Strings"];
-thx.core.Strings.upTo = function(value,searchFor) {
-	var pos = value.indexOf(searchFor);
-	if(pos < 0) return value; else return HxOverrides.substr(value,0,pos);
-};
-thx.core.Strings.startFrom = function(value,searchFor) {
-	var pos = value.indexOf(searchFor);
-	if(pos < 0) return value; else return HxOverrides.substr(value,pos + searchFor.length,null);
-};
-thx.core.Strings.rtrim = function(value,charlist) {
-	var len = value.length;
-	while(len > 0) {
-		var c = HxOverrides.substr(value,len - 1,1);
-		if(charlist.indexOf(c) < 0) break;
-		len--;
-	}
-	return HxOverrides.substr(value,0,len);
-};
-thx.core.Strings.ltrim = function(value,charlist) {
-	var start = 0;
-	while(start < value.length) {
-		var c = HxOverrides.substr(value,start,1);
-		if(charlist.indexOf(c) < 0) break;
-		start++;
-	}
-	return HxOverrides.substr(value,start,null);
-};
-thx.core.Strings.trim = function(value,charlist) {
-	return thx.core.Strings.rtrim(thx.core.Strings.ltrim(value,charlist),charlist);
-};
-thx.core.Strings.collapse = function(value) {
-	return thx.core.Strings._reCollapse.replace(StringTools.trim(value)," ");
-};
-thx.core.Strings.ucfirst = function(value) {
-	if(value == null) return null; else return value.charAt(0).toUpperCase() + HxOverrides.substr(value,1,null);
-};
-thx.core.Strings.lcfirst = function(value) {
-	if(value == null) return null; else return value.charAt(0).toLowerCase() + HxOverrides.substr(value,1,null);
-};
-thx.core.Strings.empty = function(value) {
-	return value == null || value == "";
-};
-thx.core.Strings.isAlphaNum = function(value) {
-	if(value == null) return false; else return thx.core.Strings.__alphaNumPattern.match(value);
-};
-thx.core.Strings.digitsOnly = function(value) {
-	if(value == null) return false; else return thx.core.Strings.__digitsPattern.match(value);
-};
-thx.core.Strings.ucwords = function(value) {
-	return thx.core.Strings.__ucwordsPattern.map(value == null?null:value.charAt(0).toUpperCase() + HxOverrides.substr(value,1,null),thx.core.Strings.__upperMatch);
-};
-thx.core.Strings.ucwordsws = function(value) {
-	return thx.core.Strings.__ucwordswsPattern.map(value == null?null:value.charAt(0).toUpperCase() + HxOverrides.substr(value,1,null),thx.core.Strings.__upperMatch);
-};
-thx.core.Strings.__upperMatch = function(re) {
-	return re.matched(0).toUpperCase();
-};
-thx.core.Strings.humanize = function(s) {
-	return StringTools.replace(thx.core.Strings.underscore(s),"_"," ");
-};
-thx.core.Strings.capitalize = function(s) {
-	return HxOverrides.substr(s,0,1).toUpperCase() + HxOverrides.substr(s,1,null);
-};
-thx.core.Strings.succ = function(s) {
-	return HxOverrides.substr(s,0,-1) + String.fromCharCode((function($this) {
-		var $r;
-		var _this = HxOverrides.substr(s,-1,null);
-		$r = HxOverrides.cca(_this,0);
-		return $r;
-	}(this)) + 1);
-};
-thx.core.Strings.underscore = function(s) {
-	s = new EReg("::","g").replace(s,"/");
-	s = new EReg("([A-Z]+)([A-Z][a-z])","g").replace(s,"$1_$2");
-	s = new EReg("([a-z\\d])([A-Z])","g").replace(s,"$1_$2");
-	s = new EReg("-","g").replace(s,"_");
-	return s.toLowerCase();
-};
-thx.core.Strings.dasherize = function(s) {
-	return StringTools.replace(s,"_","-");
-};
-thx.core.Strings.repeat = function(s,times) {
-	var b = [];
-	var _g = 0;
-	while(_g < times) {
-		var i = _g++;
-		b.push(s);
-	}
-	return b.join("");
-};
-thx.core.Strings.wrapColumns = function(s,columns,indent,newline) {
-	if(newline == null) newline = "\n";
-	if(indent == null) indent = "";
-	if(columns == null) columns = 78;
-	var parts = thx.core.Strings._reSplitWC.split(s);
-	var result = [];
-	var _g = 0;
-	while(_g < parts.length) {
-		var part = parts[_g];
-		++_g;
-		result.push(thx.core.Strings._wrapColumns(StringTools.trim(thx.core.Strings._reReduceWS.replace(part," ")),columns,indent,newline));
-	}
-	return result.join(newline);
-};
-thx.core.Strings._wrapColumns = function(s,columns,indent,newline) {
-	var parts = [];
-	var pos = 0;
-	var len = s.length;
-	var ilen = indent.length;
-	columns -= ilen;
-	while(true) {
-		if(pos + columns >= len - ilen) {
-			parts.push(HxOverrides.substr(s,pos,null));
-			break;
-		}
-		var i = 0;
-		while(!StringTools.isSpace(s,pos + columns - i) && i < columns) i++;
-		if(i == columns) {
-			i = 0;
-			while(!StringTools.isSpace(s,pos + columns + i) && pos + columns + i < len) i++;
-			parts.push(HxOverrides.substr(s,pos,columns + i));
-			pos += columns + i + 1;
-		} else {
-			parts.push(HxOverrides.substr(s,pos,columns - i));
-			pos += columns - i + 1;
-		}
-	}
-	return indent + parts.join(newline + indent);
-};
-thx.core.Strings.stripTags = function(s) {
-	return thx.core.Strings._reStripTags.replace(s,"");
-};
-thx.core.Strings.ellipsis = function(s,maxlen,symbol) {
-	if(symbol == null) symbol = "...";
-	if(maxlen == null) maxlen = 20;
-	if(s.length > maxlen) return HxOverrides.substr(s,0,symbol.length > maxlen - symbol.length?symbol.length:maxlen - symbol.length) + symbol; else return s;
-};
-thx.core.Strings.compare = function(a,b) {
-	if(a < b) return -1; else if(a > b) return 1; else return 0;
-};
 thx.core.Types = function() { };
 thx.core.Types.__name__ = ["thx","core","Types"];
 thx.core.Types.isAnonymousObject = function(v) {
@@ -3160,34 +2931,6 @@ thx.ref.ValueRef.prototype = $extend(thx.ref.BaseRef.prototype,{
 	,__class__: thx.ref.ValueRef
 });
 var ui = {};
-ui.AnchorPoint = { __ename__ : ["ui","AnchorPoint"], __constructs__ : ["TopLeft","Top","TopRight","Left","Center","Right","BottomLeft","Bottom","BottomRight"] };
-ui.AnchorPoint.TopLeft = ["TopLeft",0];
-ui.AnchorPoint.TopLeft.toString = $estr;
-ui.AnchorPoint.TopLeft.__enum__ = ui.AnchorPoint;
-ui.AnchorPoint.Top = ["Top",1];
-ui.AnchorPoint.Top.toString = $estr;
-ui.AnchorPoint.Top.__enum__ = ui.AnchorPoint;
-ui.AnchorPoint.TopRight = ["TopRight",2];
-ui.AnchorPoint.TopRight.toString = $estr;
-ui.AnchorPoint.TopRight.__enum__ = ui.AnchorPoint;
-ui.AnchorPoint.Left = ["Left",3];
-ui.AnchorPoint.Left.toString = $estr;
-ui.AnchorPoint.Left.__enum__ = ui.AnchorPoint;
-ui.AnchorPoint.Center = ["Center",4];
-ui.AnchorPoint.Center.toString = $estr;
-ui.AnchorPoint.Center.__enum__ = ui.AnchorPoint;
-ui.AnchorPoint.Right = ["Right",5];
-ui.AnchorPoint.Right.toString = $estr;
-ui.AnchorPoint.Right.__enum__ = ui.AnchorPoint;
-ui.AnchorPoint.BottomLeft = ["BottomLeft",6];
-ui.AnchorPoint.BottomLeft.toString = $estr;
-ui.AnchorPoint.BottomLeft.__enum__ = ui.AnchorPoint;
-ui.AnchorPoint.Bottom = ["Bottom",7];
-ui.AnchorPoint.Bottom.toString = $estr;
-ui.AnchorPoint.Bottom.__enum__ = ui.AnchorPoint;
-ui.AnchorPoint.BottomRight = ["BottomRight",8];
-ui.AnchorPoint.BottomRight.toString = $estr;
-ui.AnchorPoint.BottomRight.__enum__ = ui.AnchorPoint;
 ui.Article = function(options) {
 	if(null == options.el && null == options.template) options.template = "<article></article>";
 	this.component = new sui.components.Component(options);
@@ -3212,92 +2955,21 @@ ui.Article.prototype = {
 		});
 	}
 	,addBlock: function() {
-		var fragment = new ui.Block({ parent : this.component, container : this.component.el, defaultText : "block"});
+		var fragment = new ui.fragments.Block({ parent : this.component, container : this.component.el, defaultText : "block"});
 		this.addFragment(fragment);
 		return fragment;
 	}
 	,addReadonly: function() {
-		var fragment = new ui.ReadonlyBlock({ parent : this.component, container : this.component.el});
+		var fragment = new ui.fragments.ReadonlyBlock({ parent : this.component, container : this.component.el});
 		this.addFragment(fragment);
 		return fragment;
 	}
 	,removeFragment: function(fragment) {
 		var finalizer = this.fragments.h[fragment.__id__];
-		thx.Assert.notNull(finalizer,null,{ fileName : "Article.hx", lineNumber : 57, className : "ui.Article", methodName : "removeFragment"});
+		thx.Assert.notNull(finalizer,null,{ fileName : "Article.hx", lineNumber : 56, className : "ui.Article", methodName : "removeFragment"});
 		finalizer();
 	}
 	,__class__: ui.Article
-};
-ui.Fragment = function() { };
-ui.Fragment.__name__ = ["ui","Fragment"];
-ui.Fragment.prototype = {
-	name: null
-	,component: null
-	,focus: null
-	,toString: null
-	,__class__: ui.Fragment
-};
-ui.Block = function(options) {
-	this.name = "block";
-	if(null == options.el && null == options.template) options.template = "<section class=\"block\"></div>";
-	this.editor = new ui.TextEditor(options);
-	this.classActive = new sui.properties.ToggleClass(this.editor.component,"active");
-	this.editor.focus.feed(this.classActive.stream);
-	this.focus = this.editor.focus;
-	this.component = this.editor.component;
-};
-ui.Block.__name__ = ["ui","Block"];
-ui.Block.__interfaces__ = [ui.Fragment];
-ui.Block.prototype = {
-	name: null
-	,editor: null
-	,component: null
-	,focus: null
-	,classActive: null
-	,destroy: function() {
-		this.editor.destroy();
-	}
-	,toString: function() {
-		return this.name;
-	}
-	,__class__: ui.Block
-};
-ui.Button = function(text,icon) {
-	if(text == null) text = "";
-	var _g = this;
-	this.component = new sui.components.Component({ template : null == icon?"<button>" + text + "</button>":"<button class=\"fa fa-" + icon + "\">" + text + "</button>"});
-	var pair = steamer.dom.Dom.produceEvent(this.component.el,"click");
-	this.clicks = pair.producer;
-	this.cancel = pair.cancel;
-	this.enabled = new steamer.Value(true);
-	this.enabled.feed((function($this) {
-		var $r;
-		var f = function(value) {
-			if(value) _g.component.el.removeAttribute("disabled"); else _g.component.el.setAttribute("disabled","disabled");
-		};
-		$r = { onPulse : function(pulse) {
-			switch(pulse[1]) {
-			case 0:
-				var v = pulse[2];
-				f(v);
-				break;
-			default:
-			}
-		}};
-		return $r;
-	}(this)));
-};
-ui.Button.__name__ = ["ui","Button"];
-ui.Button.prototype = {
-	component: null
-	,clicks: null
-	,enabled: null
-	,cancel: null
-	,destroy: function() {
-		this.cancel();
-		this.component.destroy();
-	}
-	,__class__: ui.Button
 };
 ui.Card = function() { };
 ui.Card.__name__ = ["ui","Card"];
@@ -3317,7 +2989,7 @@ ui.Card.create = function(model,container) {
 		return JSON.stringify(o);
 	}).feed((function($this) {
 		var $r;
-		var consumer = new steamer.consumers.LoggerConsumer(null,{ fileName : "Card.hx", lineNumber : 28, className : "ui.Card", methodName : "create"});
+		var consumer = new steamer.consumers.LoggerConsumer(null,{ fileName : "Card.hx", lineNumber : 27, className : "ui.Card", methodName : "create"});
 		$r = consumer;
 		return $r;
 	}(this)));
@@ -3325,12 +2997,12 @@ ui.Card.create = function(model,container) {
 ui.Context = function(options) {
 	var _g = this;
 	this.component = new sui.components.Component(options);
-	this.toolbar = new ui.Toolbar({ parent : this.component, container : this.component.el});
+	this.toolbar = new ui.widgets.Toolbar({ parent : this.component, container : this.component.el});
 	this.fieldsEl = dom.Html.parseList("<div class=\"fields\"><div></div></div>")[0];
 	this.component.el.appendChild(this.fieldsEl);
 	this.fieldsEl = dom.Query.first("div",this.fieldsEl);
 	this.buttonAdd = this.toolbar.left.addButton("add property",Config.icons.dropDown);
-	this.menuAdd = new ui.Menu({ parent : this.component});
+	this.menuAdd = new ui.widgets.Menu({ parent : this.component});
 	this.menuAdd.anchorTo(this.buttonAdd.component.el);
 	this.buttonAdd.clicks.map(function(_) {
 		return true;
@@ -3407,6 +3079,7 @@ ui.Context.createToggleInfo = function(display,name) {
 	return { display : display, name : name, create : function(target,value) {
 		var toggle = new sui.properties.ToggleClass(target,name,name);
 		value.feed(toggle.stream);
+		return toggle;
 	}, type : ui.SchemaType.BoolType, code : "true", transform : function(v) {
 		return !!(v);
 	}, defaultf : function() {
@@ -3417,6 +3090,7 @@ ui.Context.createTextInfo = function() {
 	return { display : "content", name : "text", create : function(target,value) {
 		var text = new sui.properties.Text(target,"");
 		value.feed(text.stream);
+		return text;
 	}, type : ui.SchemaType.StringType, code : "\"franco\"", transform : ui.Context.valueToString, defaultf : function() {
 		return "";
 	}};
@@ -3489,7 +3163,7 @@ ui.Context.prototype = {
 		this.buttonAdd.enabled.set_value(attachables.length > 0);
 		this.menuAdd.clear();
 		attachables.map(function(fieldInfo) {
-			var button = new ui.Button("add " + fieldInfo.display);
+			var button = new ui.widgets.Button("add " + fieldInfo.display);
 			_g.menuAdd.addItem(button.component);
 			button.clicks.feed((function($this) {
 				var $r;
@@ -3497,7 +3171,7 @@ ui.Context.prototype = {
 					var pair = _g.createFeedExpression(fieldInfo.transform,fieldInfo.defaultf);
 					var expression = pair.expression;
 					var value = pair.value;
-					fieldInfo.create(fragment.component,value);
+					var valueProperty = fieldInfo.create(fragment.component,value);
 					var value1 = { expression : expression, code : new steamer.Value(null)};
 					_g.expressions.set(fieldInfo.name,value1);
 					_g.setFragmentStatus(fragment);
@@ -3565,7 +3239,8 @@ ui.Context.prototype = {
 	}
 	,__class__: ui.Context
 };
-ui.FrameOverlay = function(options) {
+ui.widgets = {};
+ui.widgets.FrameOverlay = function(options) {
 	var _g = this;
 	if(null == options.el && null == options.template) options.template = "<div class=\"frame-overlay\"></div>";
 	this.component = new sui.components.Component(options);
@@ -3612,8 +3287,8 @@ ui.FrameOverlay = function(options) {
 	}(this)));
 	this.anchorElement = window.document.body;
 };
-ui.FrameOverlay.__name__ = ["ui","FrameOverlay"];
-ui.FrameOverlay.prototype = {
+ui.widgets.FrameOverlay.__name__ = ["ui","widgets","FrameOverlay"];
+ui.widgets.FrameOverlay.prototype = {
 	component: null
 	,visible: null
 	,anchorElement: null
@@ -3621,8 +3296,8 @@ ui.FrameOverlay.prototype = {
 	,at: null
 	,anchorTo: function(el,my,at) {
 		this.anchorElement = el;
-		if(null == my) this.my = ui.AnchorPoint.TopLeft; else this.my = my;
-		if(null == at) this.at = ui.AnchorPoint.BottomLeft; else this.at = at;
+		if(null == my) this.my = ui.widgets.AnchorPoint.TopLeft; else this.my = my;
+		if(null == at) this.at = ui.widgets.AnchorPoint.BottomLeft; else this.at = at;
 		if(this.visible.get_value()) this.reposition();
 	}
 	,reposition: function() {
@@ -3689,18 +3364,18 @@ ui.FrameOverlay.prototype = {
 		style.top = y + "px";
 		style.left = x + "px";
 	}
-	,__class__: ui.FrameOverlay
+	,__class__: ui.widgets.FrameOverlay
 };
-ui.Tooltip = function(options) {
-	ui.FrameOverlay.call(this,options);
+ui.widgets.Tooltip = function(options) {
+	ui.widgets.FrameOverlay.call(this,options);
 };
-ui.Tooltip.__name__ = ["ui","Tooltip"];
-ui.Tooltip.__super__ = ui.FrameOverlay;
-ui.Tooltip.prototype = $extend(ui.FrameOverlay.prototype,{
+ui.widgets.Tooltip.__name__ = ["ui","widgets","Tooltip"];
+ui.widgets.Tooltip.__super__ = ui.widgets.FrameOverlay;
+ui.widgets.Tooltip.prototype = $extend(ui.widgets.FrameOverlay.prototype,{
 	setContent: function(html) {
 		this.component.el.innerHTML = html;
 	}
-	,__class__: ui.Tooltip
+	,__class__: ui.widgets.Tooltip
 });
 ui.ContextField = function(options) {
 	var _g = this;
@@ -3709,7 +3384,7 @@ ui.ContextField = function(options) {
 	var key = dom.Query.first(".key",this.component.el);
 	key.innerText = options.display;
 	this.name = options.name;
-	this.value = new ui.TextEditor({ el : dom.Query.first(".value",this.component.el), parent : this.component, defaultText : options.value});
+	this.value = new ui.editors.TextEditor({ el : dom.Query.first(".value",this.component.el), parent : this.component, defaultText : options.value});
 	this.focus = this.value.focus.debounce(250).distinct();
 	this.classActive = new sui.properties.ToggleClass(this.component,"active");
 	this.focus.feed(this.classActive.stream);
@@ -3730,7 +3405,7 @@ ui.ContextField = function(options) {
 			case 0:
 				var err = o1[2];
 				ui.ContextField.tooltip.setContent(err);
-				ui.ContextField.tooltip.anchorTo(_g.component.el,ui.AnchorPoint.Top,ui.AnchorPoint.Bottom);
+				ui.ContextField.tooltip.anchorTo(_g.component.el,ui.widgets.AnchorPoint.Top,ui.widgets.AnchorPoint.Bottom);
 				ui.ContextField.tooltip.visible.set_value(true);
 				break;
 			default:
@@ -3840,9 +3515,9 @@ ui.DataEvent.SetValue = function(path,value,type) { var $x = ["SetValue",0,path,
 ui.Document = function(options) {
 	var _g = this;
 	this.component = new sui.components.Component(options);
-	this.toolbar = new ui.Toolbar({ parent : this.component, container : this.component.el});
+	this.toolbar = new ui.widgets.Toolbar({ parent : this.component, container : this.component.el});
 	this.article = new ui.Article({ parent : this.component, container : this.component.el});
-	this.statusbar = new ui.Statusbar({ parent : this.component, container : this.component.el});
+	this.statusbar = new ui.widgets.Statusbar({ parent : this.component, container : this.component.el});
 	var buttonRemove = this.toolbar.right.addButton("",Config.icons.remove);
 	var setFragment = function(fragment) {
 		_g.currentFragment = fragment;
@@ -3909,13 +3584,6 @@ ui.Document.prototype = {
 	,fragments: null
 	,__class__: ui.Document
 };
-ui.Editor = function() { };
-ui.Editor.__name__ = ["ui","Editor"];
-ui.Editor.prototype = {
-	value: null
-	,type: null
-	,__class__: ui.Editor
-};
 ui.Expression = { __ename__ : ["ui","Expression"], __constructs__ : ["Fun","SyntaxError","RuntimeError"] };
 ui.Expression.Fun = function(f) { var $x = ["Fun",0,f]; $x.__enum__ = ui.Expression; $x.toString = $estr; return $x; };
 ui.Expression.SyntaxError = function(msg) { var $x = ["SyntaxError",1,msg]; $x.__enum__ = ui.Expression; $x.toString = $estr; return $x; };
@@ -3932,39 +3600,6 @@ ui.Expressions.toExpression = function(code) {
 		return ui.Expression.SyntaxError(Std.string(e));
 	}
 };
-ui.Menu = function(options) {
-	if(null == options.el && null == options.template) options.template = "<menu class=\"frame-overlay\"><ul></ul></menu>";
-	ui.FrameOverlay.call(this,options);
-	this.ul = dom.Query.first("ul",this.component.el);
-	this.items = new haxe.ds.ObjectMap();
-};
-ui.Menu.__name__ = ["ui","Menu"];
-ui.Menu.__super__ = ui.FrameOverlay;
-ui.Menu.prototype = $extend(ui.FrameOverlay.prototype,{
-	items: null
-	,ul: null
-	,clear: function() {
-		this.ul.innerHTML = "";
-		this.items = new haxe.ds.ObjectMap();
-	}
-	,addItem: function(item) {
-		var el;
-		var _this = window.document;
-		el = _this.createElement("li");
-		item.appendTo(el);
-		this.component.add(item);
-		this.ul.appendChild(el);
-		this.items.set(item,el);
-	}
-	,removeItem: function(item) {
-		thx.Assert.notNull(item,null,{ fileName : "Menu.hx", lineNumber : 40, className : "ui.Menu", methodName : "removeItem"});
-		thx.Assert.isTrue(this.items.h.__keys__[item.__id__] != null,null,{ fileName : "Menu.hx", lineNumber : 41, className : "ui.Menu", methodName : "removeItem"});
-		var el = this.items.h[item.__id__];
-		item.detach();
-		this.ul.removeChild(el);
-	}
-	,__class__: ui.Menu
-});
 ui.Model = function(data) {
 	var _g = this;
 	this.data = data;
@@ -4045,7 +3680,7 @@ ui.ModelChange = { __ename__ : ["ui","ModelChange"], __constructs__ : [] };
 ui.ModelView = function() {
 	var _g = this;
 	this.component = new sui.components.Component({ template : "<div class=\"modelview\"></div>"});
-	this.toolbar = new ui.Toolbar({ });
+	this.toolbar = new ui.widgets.Toolbar({ });
 	this.toolbar.component.appendTo(this.component.el);
 	var buttonAdd = this.toolbar.left.addButton("",Config.icons.add);
 	buttonAdd.clicks.feed((function($this) {
@@ -4148,7 +3783,7 @@ ui.ModelView.prototype = {
 		this.removeField(field);
 	}
 	,removeField: function(field) {
-		thx.Assert.notNull(field,"when removing a field it should not be null",{ fileName : "ModelView.hx", lineNumber : 92, className : "ui.ModelView", methodName : "removeField"});
+		thx.Assert.notNull(field,"when removing a field it should not be null",{ fileName : "ModelView.hx", lineNumber : 86, className : "ui.ModelView", methodName : "removeField"});
 		var name = field.key.text.get_value();
 		field.destroy();
 		if(this.fields.remove(name)) this.feedSchema(steamer.Pulse.Emit(ui.SchemaEvent.DeleteField(name)));
@@ -4201,8 +3836,8 @@ ui.ModelView.prototype = {
 ui.ModelViewField = function(options) {
 	if(null == options.template && null == options.el) options.template = "<div class=\"field\"><div class=\"key\"></div><div class=\"value\"></div></div>";
 	this.component = new sui.components.Component(options);
-	this.key = new ui.TextEditor({ el : dom.Query.first(".key",this.component.el), parent : this.component, defaultText : options.key});
-	this.value = new ui.TextEditor({ el : dom.Query.first(".value",this.component.el), parent : this.component, defaultText : ""});
+	this.key = new ui.editors.TextEditor({ el : dom.Query.first(".key",this.component.el), parent : this.component, defaultText : options.key});
+	this.value = new ui.editors.TextEditor({ el : dom.Query.first(".value",this.component.el), parent : this.component, defaultText : ""});
 	var f = this.key.focus.merge(this.value.focus);
 	this.focus = f.debounce(250).distinct();
 	this.classActive = new sui.properties.ToggleClass(this.component,"active");
@@ -4224,54 +3859,6 @@ ui.ModelViewField.prototype = {
 	}
 	,__class__: ui.ModelViewField
 };
-ui.ReadonlyBlock = function(options) {
-	this.name = "readonly";
-	var _g = this;
-	if(null == options.el && null == options.template) options.template = "<section class=\"readonly block\" tabindex=\"0\">readonly</div>";
-	this.component = new sui.components.Component(options);
-	this.focus = new steamer.Value(false);
-	this.focusEvent = steamer.dom.Dom.produceEvent(this.component.el,"focus");
-	this.blurEvent = steamer.dom.Dom.produceEvent(this.component.el,"blur");
-	this.focusEvent.producer.map(function(_) {
-		return true;
-	}).merge(this.blurEvent.producer.map(function(_1) {
-		return false;
-	})).feed(this.focus);
-	this.focus.feed((function($this) {
-		var $r;
-		var f = function(focused) {
-			if(focused) _g.component.el.classList.add("active"); else _g.component.el.classList.remove("active");
-		};
-		$r = { onPulse : function(pulse) {
-			switch(pulse[1]) {
-			case 0:
-				var v = pulse[2];
-				f(v);
-				break;
-			default:
-			}
-		}};
-		return $r;
-	}(this)));
-};
-ui.ReadonlyBlock.__name__ = ["ui","ReadonlyBlock"];
-ui.ReadonlyBlock.__interfaces__ = [ui.Fragment];
-ui.ReadonlyBlock.prototype = {
-	name: null
-	,component: null
-	,focus: null
-	,focusEvent: null
-	,blurEvent: null
-	,destroy: function() {
-		this.focusEvent.cancel();
-		this.blurEvent.cancel();
-		this.component.destroy();
-	}
-	,toString: function() {
-		return this.name;
-	}
-	,__class__: ui.ReadonlyBlock
-};
 ui.Schema = function() {
 	var _g = this;
 	this.fields = new haxe.ds.StringMap();
@@ -4287,7 +3874,7 @@ ui.Schema.prototype = {
 	,stream: null
 	,feed: null
 	,add: function(name,type) {
-		if(this.fields.exists(name)) throw new thx.Error("Schema already contains a field \"" + name + "\"",null,{ fileName : "Schema.hx", lineNumber : 26, className : "ui.Schema", methodName : "add"});
+		if(this.fields.exists(name)) throw new thx.Error("Schema already contains a field \"" + name + "\"",null,{ fileName : "Schema.hx", lineNumber : 25, className : "ui.Schema", methodName : "add"});
 		this.fields.set(name,type);
 		this.feed(steamer.Pulse.Emit(ui.SchemaEvent.AddField(name,type)));
 	}
@@ -4301,19 +3888,19 @@ ui.Schema.prototype = {
 		this.feed(steamer.Pulse.Emit(ui.SchemaEvent.ListFields(list.slice())));
 	}
 	,'delete': function(name) {
-		if(!this.fields.exists(name)) throw new thx.Error("Schema does not contain a field \"" + name + "\"",null,{ fileName : "Schema.hx", lineNumber : 43, className : "ui.Schema", methodName : "delete"});
+		if(!this.fields.exists(name)) throw new thx.Error("Schema does not contain a field \"" + name + "\"",null,{ fileName : "Schema.hx", lineNumber : 42, className : "ui.Schema", methodName : "delete"});
 		this.fields.remove(name);
 		this.feed(steamer.Pulse.Emit(ui.SchemaEvent.DeleteField(name)));
 	}
 	,rename: function(oldname,newname) {
-		if(!this.fields.exists(oldname)) throw new thx.Error("Schema does not contain a field \"" + oldname + "\"",null,{ fileName : "Schema.hx", lineNumber : 50, className : "ui.Schema", methodName : "rename"});
+		if(!this.fields.exists(oldname)) throw new thx.Error("Schema does not contain a field \"" + oldname + "\"",null,{ fileName : "Schema.hx", lineNumber : 49, className : "ui.Schema", methodName : "rename"});
 		var type = this.fields.get(oldname);
 		this.fields.remove(oldname);
 		this.fields.set(newname,type);
 		this.feed(steamer.Pulse.Emit(ui.SchemaEvent.RenameField(oldname,newname)));
 	}
 	,retype: function(name,type) {
-		if(!this.fields.exists(name)) throw new thx.Error("Schema does not contain a field \"" + name + "\"",null,{ fileName : "Schema.hx", lineNumber : 59, className : "ui.Schema", methodName : "retype"});
+		if(!this.fields.exists(name)) throw new thx.Error("Schema does not contain a field \"" + name + "\"",null,{ fileName : "Schema.hx", lineNumber : 58, className : "ui.Schema", methodName : "retype"});
 		this.fields.set(name,type);
 		this.feed(steamer.Pulse.Emit(ui.SchemaEvent.RetypeField(name,type)));
 	}
@@ -4375,16 +3962,15 @@ ui.SchemaType.ObjectType = function(fields) { var $x = ["ObjectType",4,fields]; 
 ui.SchemaType.StringType = ["StringType",5];
 ui.SchemaType.StringType.toString = $estr;
 ui.SchemaType.StringType.__enum__ = ui.SchemaType;
-ui.Statusbar = function(options) {
-	if(null == options.el && null == options.template) options.template = "<footer class=\"statusbar\"></footer>";
-	this.component = new sui.components.Component(options);
+ui.editors = {};
+ui.editors.Editor = function() { };
+ui.editors.Editor.__name__ = ["ui","editors","Editor"];
+ui.editors.Editor.prototype = {
+	value: null
+	,type: null
+	,__class__: ui.editors.Editor
 };
-ui.Statusbar.__name__ = ["ui","Statusbar"];
-ui.Statusbar.prototype = {
-	component: null
-	,__class__: ui.Statusbar
-};
-ui.TextEditor = function(options) {
+ui.editors.TextEditor = function(options) {
 	this.type = ui.SchemaType.StringType;
 	if(null == options.defaultText) options.defaultText = "";
 	if(null == options.el && null == options.template) options.template = "<span></span>";
@@ -4413,9 +3999,9 @@ ui.TextEditor = function(options) {
 		blurPair.cancel();
 	};
 };
-ui.TextEditor.__name__ = ["ui","TextEditor"];
-ui.TextEditor.__interfaces__ = [ui.Editor];
-ui.TextEditor.prototype = {
+ui.editors.TextEditor.__name__ = ["ui","editors","TextEditor"];
+ui.editors.TextEditor.__interfaces__ = [ui.editors.Editor];
+ui.editors.TextEditor.prototype = {
 	component: null
 	,text: null
 	,focus: null
@@ -4427,39 +4013,229 @@ ui.TextEditor.prototype = {
 		this.component.destroy();
 		this.cancel();
 	}
-	,__class__: ui.TextEditor
+	,__class__: ui.editors.TextEditor
 };
-ui.Toolbar = function(options) {
+ui.fragments = {};
+ui.fragments.Fragment = function() { };
+ui.fragments.Fragment.__name__ = ["ui","fragments","Fragment"];
+ui.fragments.Fragment.prototype = {
+	name: null
+	,component: null
+	,focus: null
+	,toString: null
+	,__class__: ui.fragments.Fragment
+};
+ui.fragments.Block = function(options) {
+	this.name = "block";
+	if(null == options.el && null == options.template) options.template = "<section class=\"block\"></div>";
+	this.editor = new ui.editors.TextEditor(options);
+	this.classActive = new sui.properties.ToggleClass(this.editor.component,"active");
+	this.editor.focus.feed(this.classActive.stream);
+	this.focus = this.editor.focus;
+	this.component = this.editor.component;
+};
+ui.fragments.Block.__name__ = ["ui","fragments","Block"];
+ui.fragments.Block.__interfaces__ = [ui.fragments.Fragment];
+ui.fragments.Block.prototype = {
+	name: null
+	,editor: null
+	,component: null
+	,focus: null
+	,classActive: null
+	,destroy: function() {
+		this.editor.destroy();
+	}
+	,toString: function() {
+		return this.name;
+	}
+	,__class__: ui.fragments.Block
+};
+ui.fragments.ReadonlyBlock = function(options) {
+	this.name = "readonly";
+	var _g = this;
+	if(null == options.el && null == options.template) options.template = "<section class=\"readonly block\" tabindex=\"0\">readonly</div>";
+	this.component = new sui.components.Component(options);
+	this.focus = new steamer.Value(false);
+	this.focusEvent = steamer.dom.Dom.produceEvent(this.component.el,"focus");
+	this.blurEvent = steamer.dom.Dom.produceEvent(this.component.el,"blur");
+	this.focusEvent.producer.map(function(_) {
+		return true;
+	}).merge(this.blurEvent.producer.map(function(_1) {
+		return false;
+	})).feed(this.focus);
+	this.focus.feed((function($this) {
+		var $r;
+		var f = function(focused) {
+			if(focused) _g.component.el.classList.add("active"); else _g.component.el.classList.remove("active");
+		};
+		$r = { onPulse : function(pulse) {
+			switch(pulse[1]) {
+			case 0:
+				var v = pulse[2];
+				f(v);
+				break;
+			default:
+			}
+		}};
+		return $r;
+	}(this)));
+};
+ui.fragments.ReadonlyBlock.__name__ = ["ui","fragments","ReadonlyBlock"];
+ui.fragments.ReadonlyBlock.__interfaces__ = [ui.fragments.Fragment];
+ui.fragments.ReadonlyBlock.prototype = {
+	name: null
+	,component: null
+	,focus: null
+	,focusEvent: null
+	,blurEvent: null
+	,destroy: function() {
+		this.focusEvent.cancel();
+		this.blurEvent.cancel();
+		this.component.destroy();
+	}
+	,toString: function() {
+		return this.name;
+	}
+	,__class__: ui.fragments.ReadonlyBlock
+};
+ui.widgets.AnchorPoint = { __ename__ : ["ui","widgets","AnchorPoint"], __constructs__ : ["TopLeft","Top","TopRight","Left","Center","Right","BottomLeft","Bottom","BottomRight"] };
+ui.widgets.AnchorPoint.TopLeft = ["TopLeft",0];
+ui.widgets.AnchorPoint.TopLeft.toString = $estr;
+ui.widgets.AnchorPoint.TopLeft.__enum__ = ui.widgets.AnchorPoint;
+ui.widgets.AnchorPoint.Top = ["Top",1];
+ui.widgets.AnchorPoint.Top.toString = $estr;
+ui.widgets.AnchorPoint.Top.__enum__ = ui.widgets.AnchorPoint;
+ui.widgets.AnchorPoint.TopRight = ["TopRight",2];
+ui.widgets.AnchorPoint.TopRight.toString = $estr;
+ui.widgets.AnchorPoint.TopRight.__enum__ = ui.widgets.AnchorPoint;
+ui.widgets.AnchorPoint.Left = ["Left",3];
+ui.widgets.AnchorPoint.Left.toString = $estr;
+ui.widgets.AnchorPoint.Left.__enum__ = ui.widgets.AnchorPoint;
+ui.widgets.AnchorPoint.Center = ["Center",4];
+ui.widgets.AnchorPoint.Center.toString = $estr;
+ui.widgets.AnchorPoint.Center.__enum__ = ui.widgets.AnchorPoint;
+ui.widgets.AnchorPoint.Right = ["Right",5];
+ui.widgets.AnchorPoint.Right.toString = $estr;
+ui.widgets.AnchorPoint.Right.__enum__ = ui.widgets.AnchorPoint;
+ui.widgets.AnchorPoint.BottomLeft = ["BottomLeft",6];
+ui.widgets.AnchorPoint.BottomLeft.toString = $estr;
+ui.widgets.AnchorPoint.BottomLeft.__enum__ = ui.widgets.AnchorPoint;
+ui.widgets.AnchorPoint.Bottom = ["Bottom",7];
+ui.widgets.AnchorPoint.Bottom.toString = $estr;
+ui.widgets.AnchorPoint.Bottom.__enum__ = ui.widgets.AnchorPoint;
+ui.widgets.AnchorPoint.BottomRight = ["BottomRight",8];
+ui.widgets.AnchorPoint.BottomRight.toString = $estr;
+ui.widgets.AnchorPoint.BottomRight.__enum__ = ui.widgets.AnchorPoint;
+ui.widgets.Button = function(text,icon) {
+	if(text == null) text = "";
+	var _g = this;
+	this.component = new sui.components.Component({ template : null == icon?"<button>" + text + "</button>":"<button class=\"fa fa-" + icon + "\">" + text + "</button>"});
+	var pair = steamer.dom.Dom.produceEvent(this.component.el,"click");
+	this.clicks = pair.producer;
+	this.cancel = pair.cancel;
+	this.enabled = new steamer.Value(true);
+	this.enabled.feed((function($this) {
+		var $r;
+		var f = function(value) {
+			if(value) _g.component.el.removeAttribute("disabled"); else _g.component.el.setAttribute("disabled","disabled");
+		};
+		$r = { onPulse : function(pulse) {
+			switch(pulse[1]) {
+			case 0:
+				var v = pulse[2];
+				f(v);
+				break;
+			default:
+			}
+		}};
+		return $r;
+	}(this)));
+};
+ui.widgets.Button.__name__ = ["ui","widgets","Button"];
+ui.widgets.Button.prototype = {
+	component: null
+	,clicks: null
+	,enabled: null
+	,cancel: null
+	,destroy: function() {
+		this.cancel();
+		this.component.destroy();
+	}
+	,__class__: ui.widgets.Button
+};
+ui.widgets.Menu = function(options) {
+	if(null == options.el && null == options.template) options.template = "<menu class=\"frame-overlay\"><ul></ul></menu>";
+	ui.widgets.FrameOverlay.call(this,options);
+	this.ul = dom.Query.first("ul",this.component.el);
+	this.items = new haxe.ds.ObjectMap();
+};
+ui.widgets.Menu.__name__ = ["ui","widgets","Menu"];
+ui.widgets.Menu.__super__ = ui.widgets.FrameOverlay;
+ui.widgets.Menu.prototype = $extend(ui.widgets.FrameOverlay.prototype,{
+	items: null
+	,ul: null
+	,clear: function() {
+		this.ul.innerHTML = "";
+		this.items = new haxe.ds.ObjectMap();
+	}
+	,addItem: function(item) {
+		var el;
+		var _this = window.document;
+		el = _this.createElement("li");
+		item.appendTo(el);
+		this.component.add(item);
+		this.ul.appendChild(el);
+		this.items.set(item,el);
+	}
+	,removeItem: function(item) {
+		thx.Assert.notNull(item,null,{ fileName : "Menu.hx", lineNumber : 35, className : "ui.widgets.Menu", methodName : "removeItem"});
+		thx.Assert.isTrue(this.items.h.__keys__[item.__id__] != null,null,{ fileName : "Menu.hx", lineNumber : 36, className : "ui.widgets.Menu", methodName : "removeItem"});
+		var el = this.items.h[item.__id__];
+		item.detach();
+		this.ul.removeChild(el);
+	}
+	,__class__: ui.widgets.Menu
+});
+ui.widgets.Statusbar = function(options) {
+	if(null == options.el && null == options.template) options.template = "<footer class=\"statusbar\"></footer>";
+	this.component = new sui.components.Component(options);
+};
+ui.widgets.Statusbar.__name__ = ["ui","widgets","Statusbar"];
+ui.widgets.Statusbar.prototype = {
+	component: null
+	,__class__: ui.widgets.Statusbar
+};
+ui.widgets.Toolbar = function(options) {
 	if(null == options.el && null == options.template) options.template = "<header class=\"toolbar\"><div><div class=\"left\"></div><div class=\"center\"></div><div class=\"right\"></div></div></header>";
 	this.component = new sui.components.Component(options);
-	this.left = new ui.ToolbarGroup(dom.Query.first(".left",this.component.el),this.component);
-	this.center = new ui.ToolbarGroup(dom.Query.first(".center",this.component.el),this.component);
-	this.right = new ui.ToolbarGroup(dom.Query.first(".right",this.component.el),this.component);
+	this.left = new ui.widgets.ToolbarGroup(dom.Query.first(".left",this.component.el),this.component);
+	this.center = new ui.widgets.ToolbarGroup(dom.Query.first(".center",this.component.el),this.component);
+	this.right = new ui.widgets.ToolbarGroup(dom.Query.first(".right",this.component.el),this.component);
 };
-ui.Toolbar.__name__ = ["ui","Toolbar"];
-ui.Toolbar.prototype = {
+ui.widgets.Toolbar.__name__ = ["ui","widgets","Toolbar"];
+ui.widgets.Toolbar.prototype = {
 	component: null
 	,left: null
 	,center: null
 	,right: null
-	,__class__: ui.Toolbar
+	,__class__: ui.widgets.Toolbar
 };
-ui.ToolbarGroup = function(el,component) {
+ui.widgets.ToolbarGroup = function(el,component) {
 	this.el = el;
 	this.component = component;
 };
-ui.ToolbarGroup.__name__ = ["ui","ToolbarGroup"];
-ui.ToolbarGroup.prototype = {
+ui.widgets.ToolbarGroup.__name__ = ["ui","widgets","ToolbarGroup"];
+ui.widgets.ToolbarGroup.prototype = {
 	el: null
 	,component: null
 	,addButton: function(text,icon) {
 		if(text == null) text = "";
-		var button = new ui.Button(text,icon);
+		var button = new ui.widgets.Button(text,icon);
 		button.component.appendTo(this.el);
 		this.component.add(button.component);
 		return button;
 	}
-	,__class__: ui.ToolbarGroup
+	,__class__: ui.widgets.ToolbarGroup
 };
 function $iterator(o) { if( o instanceof Array ) return function() { return HxOverrides.iter(o); }; return typeof(o.iterator) == 'function' ? $bind(o,o.iterator) : o.iterator; }
 var $_, $fid = 0;
@@ -4763,18 +4539,10 @@ promhx.base.AsyncBase.id_ctr = 0;
 promhx.base.EventLoop.queue = new List();
 steamer.Pulses.nil = steamer.Pulse.Emit(thx.Nil.nil);
 thx.core.Ints.pattern_parse = new EReg("^[+-]?(\\d+|0x[0-9A-F]+)$","i");
-thx.core.Strings._reSplitWC = new EReg("(\r\n|\n\r|\n|\r)","g");
-thx.core.Strings._reReduceWS = new EReg("\\s+","");
-thx.core.Strings._reStripTags = new EReg("(<[a-z]+[^>/]*/?>|</[a-z]+>)","i");
-thx.core.Strings._reCollapse = new EReg("\\s+","g");
-thx.core.Strings.__ucwordsPattern = new EReg("[^a-zA-Z]([a-z])","g");
-thx.core.Strings.__ucwordswsPattern = new EReg("\\s[a-z]","g");
-thx.core.Strings.__alphaNumPattern = new EReg("^[a-z0-9]+$","i");
-thx.core.Strings.__digitsPattern = new EReg("^[0-9]+$","");
 thx.ref.EmptyParent.instance = new thx.ref.EmptyParent();
 thx.ref.Ref.reField = new EReg("^\\.?([^.\\[]+)","");
 thx.ref.Ref.reIndex = new EReg("^\\[(\\d+)\\]","");
-ui.ContextField.tooltip = new ui.Tooltip({ classes : "tooltip error"});
+ui.ContextField.tooltip = new ui.widgets.Tooltip({ classes : "tooltip error"});
 Main.main();
 })(typeof window != "undefined" ? window : exports);
 

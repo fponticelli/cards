@@ -3,7 +3,6 @@ package ui;
 import js.html.Element;
 import sui.components.Component;
 import dom.Dom;
-import ui.Document;
 
 class Card {
 	public static function create(model : Model, container : Element) {

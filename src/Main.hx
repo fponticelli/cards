@@ -1,9 +1,5 @@
 import dom.Dom;
-import sui.components.*;
-import sui.properties.*;
-import steamer.*;
 import ui.*;
-import ui.Card;
 
 class Main {
 	public static function main() {

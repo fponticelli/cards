@@ -106,62 +106,6 @@ a img {
   width: 100%;
   height: 100%;
 }
-.card article {
-  background: -webkit-gradient(linear, left bottom, left top, color-stop(0, #eee), color-stop(1, #f0f0f6));
-  background: -webkit-linear-gradient(bottom, #eee 0%, #f0f0f6 100%);
-  background: -moz-linear-gradient(bottom, #eee 0%, #f0f0f6 100%);
-  background: -o-linear-gradient(bottom, #eee 0%, #f0f0f6 100%);
-  background: -ms-linear-gradient(bottom, #eee 0%, #f0f0f6 100%);
-  background: linear-gradient(bottom, #eee 0%, #f0f0f6 100%);
-}
-.card article * {
-  font-size: 14pt;
-}
-.card article a {
-  color: #039;
-  text-decoration: none;
-}
-.card article a:hover {
-  text-decoration: underline;
-}
-.card article .strong {
-  font-weight: bold;
-}
-.card article .emphasis {
-  font-style: italic;
-}
-.card article .strike {
-  text-decoration: line-through;
-}
-.card article [title]:before {
-  display: block;
-  position: absolute;
-  top: -0.2em;
-  left: -0.5em;
-  z-index: -1;
-  color: #f96;
-  content: "\f069";
-  font-family: FontAwesome;
-  font-style: normal;
-  font-weight: normal;
-  line-height: 1;
-  font-size: 0.3em;
-  -webkit-font-smoothing: antialiased;
-}
-.card article .content {
-  white-space: pre-wrap;
-  position: relative;
-  border-bottom: 2px solid transparent;
-}
-.card article .content.empty {
-  padding: 0 0.25em;
-  background-color: rgba(255,235,215,0.5);
-}
-.card article .content.empty:focus,
-.card article .content:focus {
-  background-color: rgba(240,220,200,0.25);
-  border-bottom: 2px solid #cba;
-}
 .card .block {
   padding: 0.25em 0.5em;
 }
@@ -235,6 +179,135 @@ a img {
 .card button[disabled]:hover {
   background-color: #f0f0f0;
 }
+.card .frame-overlay {
+  padding: 0.5em;
+  margin: 0;
+  background: #f6f6f6;
+  z-index: 100;
+  -webkit-box-shadow: inset 1px 1px 1px rgba(255,255,255,0.8), 0px 0px 1px rgba(0,0,0,0.3), 2px 2px 4px rgba(0,0,0,0.1);
+  box-shadow: inset 1px 1px 1px rgba(255,255,255,0.8), 0px 0px 1px rgba(0,0,0,0.3), 2px 2px 4px rgba(0,0,0,0.1);
+}
+.card menu.frame-overlay {
+  margin-top: 2px;
+}
+.card menu.frame-overlay button {
+  width: 100%;
+}
+.card menu.frame-overlay li {
+  margin-bottom: 0.5em;
+}
+.card menu.frame-overlay li:last-child {
+  margin-bottom: 0;
+}
+.card .statusbar {
+  height: 22px;
+  background-color: #f6f6f6;
+  position: absolute;
+  width: 100%;
+  top: calc(100% - 22px);
+  -webkit-box-shadow: inset 1px 1px 1px rgba(255,255,255,0.8), 0px 0px 1px rgba(0,0,0,0.1), 0px -1px 2px rgba(0,0,0,0.1);
+  box-shadow: inset 1px 1px 1px rgba(255,255,255,0.8), 0px 0px 1px rgba(0,0,0,0.1), 0px -1px 2px rgba(0,0,0,0.1);
+}
+.card .toolbar {
+  background-color: #f6f6f6;
+  width: 100%;
+  display: table;
+  padding: 2px;
+  height: 22px;
+  z-index: 10;
+  position: absolute;
+  -webkit-box-shadow: inset 1px 1px 1px rgba(255,255,255,0.8), 0px 0px 1px rgba(0,0,0,0.1), 0px 1px 2px rgba(0,0,0,0.1);
+  box-shadow: inset 1px 1px 1px rgba(255,255,255,0.8), 0px 0px 1px rgba(0,0,0,0.1), 0px 1px 2px rgba(0,0,0,0.1);
+}
+.card .toolbar > div {
+  display: table-row;
+}
+.card .toolbar > div > div {
+  display: table-cell;
+}
+.card .toolbar .center {
+  text-align: center;
+}
+.card .toolbar .right {
+  text-align: right;
+}
+.card .toolbar .btn-group > * {
+  margin-right: 0;
+  -webkit-border-radius: 0;
+  border-radius: 0;
+}
+.card .toolbar .btn-group :first-child {
+  border-top-left-radius: 3px;
+  border-bottom-left-radius: 3px;
+}
+.card .toolbar .btn-group :last-child {
+  border-top-right-radius: 3px;
+  border-bottom-right-radius: 3px;
+}
+.card .tooltip {
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
+  padding: 8px;
+}
+.card .tooltip.error {
+  border: 2px solid #b30;
+}
+.card article {
+  background: -webkit-gradient(linear, left bottom, left top, color-stop(0, #eee), color-stop(1, #f0f0f6));
+  background: -webkit-linear-gradient(bottom, #eee 0%, #f0f0f6 100%);
+  background: -moz-linear-gradient(bottom, #eee 0%, #f0f0f6 100%);
+  background: -o-linear-gradient(bottom, #eee 0%, #f0f0f6 100%);
+  background: -ms-linear-gradient(bottom, #eee 0%, #f0f0f6 100%);
+  background: linear-gradient(bottom, #eee 0%, #f0f0f6 100%);
+}
+.card article * {
+  font-size: 14pt;
+}
+.card article a {
+  color: #039;
+  text-decoration: none;
+}
+.card article a:hover {
+  text-decoration: underline;
+}
+.card article .strong {
+  font-weight: bold;
+}
+.card article .emphasis {
+  font-style: italic;
+}
+.card article .strike {
+  text-decoration: line-through;
+}
+.card article [title]:before {
+  display: block;
+  position: absolute;
+  top: -0.2em;
+  left: -0.5em;
+  z-index: -1;
+  color: #f96;
+  content: "\f069";
+  font-family: FontAwesome;
+  font-style: normal;
+  font-weight: normal;
+  line-height: 1;
+  font-size: 0.3em;
+  -webkit-font-smoothing: antialiased;
+}
+.card article .content {
+  white-space: pre-wrap;
+  position: relative;
+  border-bottom: 2px solid transparent;
+}
+.card article .content.empty {
+  padding: 0 0.25em;
+  background-color: rgba(255,235,215,0.5);
+}
+.card article .content.empty:focus,
+.card article .content:focus {
+  background-color: rgba(240,220,200,0.25);
+  border-bottom: 2px solid #cba;
+}
 .card .doc {
   position: absolute;
   height: 100%;
@@ -295,83 +368,10 @@ a img {
   width: 70%;
   border-bottom: 1px solid #f6f6f6;
 }
-.card .frame-overlay {
-  padding: 0.5em;
-  margin: 0;
-  background: #f6f6f6;
-  z-index: 100;
-  -webkit-box-shadow: inset 1px 1px 1px rgba(255,255,255,0.8), 0px 0px 1px rgba(0,0,0,0.3), 2px 2px 4px rgba(0,0,0,0.1);
-  box-shadow: inset 1px 1px 1px rgba(255,255,255,0.8), 0px 0px 1px rgba(0,0,0,0.3), 2px 2px 4px rgba(0,0,0,0.1);
-}
-.card menu.frame-overlay {
-  margin-top: 2px;
-}
-.card menu.frame-overlay button {
-  width: 100%;
-}
-.card menu.frame-overlay li {
-  margin-bottom: 0.5em;
-}
-.card menu.frame-overlay li:last-child {
-  margin-bottom: 0;
-}
 .card .model {
   position: absolute;
   width: 100%;
   height: 50%;
   top: 50%;
   border-top: 1px solid #eee;
-}
-.card .statusbar {
-  height: 22px;
-  background-color: #f6f6f6;
-  position: absolute;
-  width: 100%;
-  top: calc(100% - 22px);
-  -webkit-box-shadow: inset 1px 1px 1px rgba(255,255,255,0.8), 0px 0px 1px rgba(0,0,0,0.1), 0px -1px 2px rgba(0,0,0,0.1);
-  box-shadow: inset 1px 1px 1px rgba(255,255,255,0.8), 0px 0px 1px rgba(0,0,0,0.1), 0px -1px 2px rgba(0,0,0,0.1);
-}
-.card .toolbar {
-  background-color: #f6f6f6;
-  width: 100%;
-  display: table;
-  padding: 2px;
-  height: 22px;
-  z-index: 10;
-  position: absolute;
-  -webkit-box-shadow: inset 1px 1px 1px rgba(255,255,255,0.8), 0px 0px 1px rgba(0,0,0,0.1), 0px 1px 2px rgba(0,0,0,0.1);
-  box-shadow: inset 1px 1px 1px rgba(255,255,255,0.8), 0px 0px 1px rgba(0,0,0,0.1), 0px 1px 2px rgba(0,0,0,0.1);
-}
-.card .toolbar > div {
-  display: table-row;
-}
-.card .toolbar > div > div {
-  display: table-cell;
-}
-.card .toolbar .center {
-  text-align: center;
-}
-.card .toolbar .right {
-  text-align: right;
-}
-.card .toolbar .btn-group > * {
-  margin-right: 0;
-  -webkit-border-radius: 0;
-  border-radius: 0;
-}
-.card .toolbar .btn-group :first-child {
-  border-top-left-radius: 3px;
-  border-bottom-left-radius: 3px;
-}
-.card .toolbar .btn-group :last-child {
-  border-top-right-radius: 3px;
-  border-bottom-right-radius: 3px;
-}
-.card .tooltip {
-  -webkit-border-radius: 5px;
-  border-radius: 5px;
-  padding: 8px;
-}
-.card .tooltip.error {
-  border: 2px solid #b30;
 }

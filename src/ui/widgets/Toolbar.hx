@@ -1,4 +1,4 @@
-package ui;
+package ui.widgets;
 
 import dom.Dom;
 import js.html.Element;

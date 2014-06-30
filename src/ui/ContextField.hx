@@ -1,19 +1,15 @@
 package ui;
 
-import js.html.Element;
 import steamer.Producer;
 import steamer.Value;
 import sui.components.Component;
-import dom.Dom;
 import sui.components.ComponentOptions;
+import dom.Dom;
 import sui.properties.ToggleClass;
-import ui.AnchorPoint;
-import ui.TextEditor;
-import steamer.Consumer;
-using ui.Expression;
+import ui.editors.TextEditor;
 using steamer.dom.Dom;
 import haxe.ds.Option;
-import ui.Tooltip;
+import ui.widgets.Tooltip;
 
 class ContextField {
 	public static var tooltip(default, null) : Tooltip = new Tooltip({ classes : 'tooltip error' });

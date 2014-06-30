@@ -1,4 +1,4 @@
-package ui;
+package ui.widgets;
 
 enum AnchorPoint {
 	TopLeft;

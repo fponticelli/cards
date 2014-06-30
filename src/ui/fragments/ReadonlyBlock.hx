@@ -1,12 +1,9 @@
-package ui;
+package ui.fragments;
 
 import steamer.Value;
 import sui.components.Component;
 import sui.components.ComponentOptions;
-import sui.properties.ToggleClass;
-import ui.TextEditor;
 using steamer.dom.Dom;
-using steamer.Consumer;
 
 class ReadonlyBlock implements Fragment {
 	public var name(default, null) : String = 'readonly';

@@ -1,4 +1,4 @@
-package ui;
+package ui.fragments;
 
 import steamer.Value;
 import sui.components.Component;

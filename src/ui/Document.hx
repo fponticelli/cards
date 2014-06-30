@@ -2,9 +2,9 @@ package ui;
 
 import sui.components.Component;
 import sui.components.ComponentOptions;
-import ui.Button;
-import ui.Fragment;
-import ui.Toolbar;
+import ui.fragments.Fragment;
+import ui.widgets.Toolbar;
+import ui.widgets.Statusbar;
 import steamer.Consumer;
 
 class Document {

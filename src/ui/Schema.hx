@@ -5,7 +5,6 @@ import steamer.Producer;
 import steamer.Pulse;
 import thx.Error;
 import ui.SchemaEvent;
-import ui.SchemaType;
 
 class Schema {
 	var fields : Map<String, SchemaType>;

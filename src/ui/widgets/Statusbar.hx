@@ -1,4 +1,4 @@
-package ui;
+package ui.widgets;
 
 import sui.components.Component;
 import sui.components.ComponentOptions;

@@ -1,13 +1,12 @@
 package ui;
 
 import steamer.MultiProducer;
-import steamer.Producer;
 import sui.components.Component;
 import sui.components.ComponentOptions;
 import thx.Assert;
-import ui.Block;
-import ui.ReadonlyBlock;
-import ui.Fragment;
+import ui.fragments.Block;
+import ui.fragments.ReadonlyBlock;
+import ui.fragments.Fragment;
 
 class Article {
 	public var component(default, null) : Component;

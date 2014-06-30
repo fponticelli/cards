@@ -1,16 +1,11 @@
-package ui;
+package ui.widgets;
 
 import js.Browser;
 import sui.components.Component;
 import sui.components.ComponentOptions;
 import js.html.Element;
 import sui.properties.Visible;
-import thx.Assert;
-import steamer.Consumer;
-import steamer.Value;
-using steamer.dom.Dom;
 import dom.Dom;
-import ui.AnchorPoint;
 
 class FrameOverlay {
 	public var component(default, null) : Component;

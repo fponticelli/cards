@@ -1,16 +1,11 @@
-package ui;
+package ui.widgets;
 
 import js.Browser;
 import sui.components.Component;
 import sui.components.ComponentOptions;
 import js.html.Element;
-import sui.properties.Visible;
 import thx.Assert;
-using steamer.Consumer;
-import steamer.Value;
-using steamer.dom.Dom;
 import dom.Dom;
-import ui.FrameOverlay;
 
 class Menu extends FrameOverlay {
 	var items : Map<Component, Element>;

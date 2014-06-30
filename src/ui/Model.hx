@@ -1,10 +1,6 @@
 package ui;
 
 import steamer.Consumer;
-import steamer.Producer;
-import steamer.Pulse;
-import ui.DataEvent;
-import ui.Schema;
 
 class Model {
 	public var data(default, null) : Data;

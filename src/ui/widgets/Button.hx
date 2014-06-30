@@ -1,11 +1,10 @@
-package ui;
+package ui.widgets;
 
 import js.html.Event;
 import steamer.Producer;
 import steamer.Value;
 import sui.components.Component;
 using steamer.dom.Dom;
-using steamer.Consumer;
 
 class Button {
 	public var component(default, null) : Component;

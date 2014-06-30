@@ -1,20 +1,14 @@
 package ui;
 
 import js.html.Element;
-import steamer.Consumer;
-using steamer.dom.Dom;
 import steamer.MultiProducer;
 using steamer.Producer;
 import steamer.Pulse;
 import sui.components.Component;
-import sui.properties.Attribute;
-import sui.properties.Text;
 import thx.Assert;
 import ui.DataEvent;
-import ui.ModelViewField;
 import ui.SchemaEvent;
-import ui.SchemaType;
-import ui.TextEditor;
+import ui.widgets.Toolbar;
 import dom.Dom;
 
 class ModelView {

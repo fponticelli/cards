@@ -1,11 +1,11 @@
 package ui;
 
 import steamer.Producer;
-import sui.components.Component;
 import dom.Dom;
+import sui.components.Component;
 import sui.components.ComponentOptions;
 import sui.properties.ToggleClass;
-import ui.TextEditor;
+import ui.editors.TextEditor;
 
 class ModelViewField {
 	public var component(default, null) : Component;

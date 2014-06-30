@@ -6,13 +6,12 @@ import js.html.Element;
 import steamer.Value;
 import sui.components.Component;
 import sui.components.ComponentOptions;
-import sui.properties.ToggleClass;
-import ui.Button;
+import sui.properties.ValueProperty;
+import ui.widgets.Button;
 import ui.Expression;
-import ui.Fragment;
-import ui.Menu;
-import ui.SchemaType;
-import ui.Toolbar;
+import ui.fragments.Fragment;
+import ui.widgets.Menu;
+import ui.widgets.Toolbar;
 import steamer.Consumer;
 using ui.Expression;
 
@@ -132,8 +131,8 @@ class Context {
 			button.clicks.feed(function(_) {
 				var pair = createFeedExpression(fieldInfo.transform, fieldInfo.defaultf),
 					expression = pair.expression,
-					value = pair.value;
-				fieldInfo.create(fragment.component, value);
+					value = pair.value,
+					valueProperty = fieldInfo.create(fragment.component, value);
 				expressions.set(fieldInfo.name, {
 					expression : expression,
 					code : new Value<String>(null)
@@ -195,6 +194,7 @@ class Context {
 			create    : function(target : Component, value : Value<Bool>) {
 							var toggle = new sui.properties.ToggleClass(target, name, name);
 							value.feed(toggle.stream);
+							return toggle;
 						},
 			type      : BoolType,
 			code      : 'true',
@@ -210,6 +210,7 @@ class Context {
 			create    : function(target : Component, value : Value<String>) {
 							var text = new sui.properties.Text(target, '');
 							value.feed(text.stream);
+							return text;
 						},
 			type      : StringType,
 			code      : '"franco"',
@@ -260,7 +261,7 @@ class Context {
 typedef FieldInfo<T> = {
 	display : String,
 	name : String,
-	create : Component -> Value<T> -> Void,
+	create : Component -> Value<T> -> ValueProperty<T>,
 	type : SchemaType,
 	code : String,
 	transform : Dynamic -> T,

@@ -1,10 +1,9 @@
-package ui;
+package ui.fragments;
 
 import steamer.Value;
 import sui.components.Component;
-import sui.components.ComponentOptions;
 import sui.properties.ToggleClass;
-import ui.TextEditor;
+import ui.editors.TextEditor;
 
 class Block implements Fragment {
 	public var name(default, null) : String = 'block';

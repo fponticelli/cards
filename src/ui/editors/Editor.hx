@@ -1,4 +1,4 @@
-package ui;
+package ui.editors;
 
 import steamer.Value;
 
