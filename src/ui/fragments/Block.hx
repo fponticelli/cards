@@ -10,14 +10,13 @@ class Block implements Fragment {
 	public var editor(default, null) : TextEditor;
 	public var component(default, null) : Component;
 	public var focus(default, null) : Value<Bool>;
-	var classActive : ToggleClass;
+	public var active(default, null) : Value<Bool>;
 	public function new(options : TextEditorOptions) {
 		if(null == options.el && null == options.template)
 			options.template = '<section class="block"></div>';
 		editor = new TextEditor(options);
-
-		classActive = new ToggleClass(editor.component, 'active');
-		editor.focus.feed(classActive.stream);
+		active = new Value(false);
+		active.feed(new ToggleClass(editor.component, 'active').stream);
 		focus = editor.focus;
 		component = editor.component;
 	}

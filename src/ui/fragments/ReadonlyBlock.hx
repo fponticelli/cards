@@ -9,6 +9,7 @@ class ReadonlyBlock implements Fragment {
 	public var name(default, null) : String = 'readonly';
 	public var component(default, null) : Component;
 	public var focus(default, null) : Value<Bool>;
+	public var active(default, null) : Value<Bool>;
 
 	var focusEvent : EventProducer;
 	var blurEvent : EventProducer;
@@ -18,6 +19,7 @@ class ReadonlyBlock implements Fragment {
 
 		component = new Component(options);
 		focus = new Value(false);
+		active = new Value(false);
 		focusEvent = component.el.produceEvent('focus');
 		blurEvent  = component.el.produceEvent('blur');
 
@@ -28,8 +30,8 @@ class ReadonlyBlock implements Fragment {
 				.map(function(_) return false))
 			.feed(focus);
 
-		focus.feed(function(focused) {
-			if(focused)
+		active.feed(function(isActive) {
+			if(isActive)
 				component.el.classList.add('active');
 			else
 				component.el.classList.remove('active');
