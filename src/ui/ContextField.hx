@@ -6,7 +6,7 @@ import sui.components.Component;
 import sui.components.ComponentOptions;
 import dom.Dom;
 import sui.properties.ToggleClass;
-import ui.editors.TextEditor;
+import ui.editors.CodeEditor;
 using steamer.dom.Dom;
 import haxe.ds.Option;
 import ui.widgets.Tooltip;
@@ -14,7 +14,7 @@ import ui.widgets.Tooltip;
 class ContextField {
 	public static var tooltip(default, null) : Tooltip = new Tooltip({ classes : 'tooltip error' });
 	public var component(default, null) : Component;
-	public var value(default, null) : TextEditor;
+	public var value(default, null) : CodeEditor;
 	public var focus(default, null) : Producer<Bool>;
 	public var name(default, null) : String;
 	public var withError(default, null) : Value<Option<String>>;
@@ -34,7 +34,7 @@ class ContextField {
 
 		// setup field value
 		// TODO support multiple editors data types
-		value = new TextEditor({
+		value = new CodeEditor({
 			el : Query.first('.value', component.el),
 			parent : component,
 			defaultText : options.value
