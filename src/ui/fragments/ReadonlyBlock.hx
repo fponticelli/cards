@@ -10,10 +10,11 @@ class ReadonlyBlock implements Fragment {
 	public var component(default, null) : Component;
 	public var focus(default, null) : Value<Bool>;
 	public var active(default, null) : Value<Bool>;
+	public var uid(default, null) : String;
 
 	var focusEvent : EventProducer;
 	var blurEvent : EventProducer;
-	public function new(options : ComponentOptions) {
+	public function new(options : FragmentOptions) {
 		if(null == options.el && null == options.template)
 			options.template = '<section class="readonly block" tabindex="0">readonly</div>';
 
@@ -22,6 +23,7 @@ class ReadonlyBlock implements Fragment {
 		active = new Value(false);
 		focusEvent = component.el.produceEvent('focus');
 		blurEvent  = component.el.produceEvent('blur');
+		uid = null != options.uid ? options.uid : thx.core.UUID.create();
 
 		focusEvent.producer
 			.map(function(_) return true)

@@ -11,9 +11,11 @@ class Block implements Fragment {
 	public var component(default, null) : Component;
 	public var focus(default, null) : Value<Bool>;
 	public var active(default, null) : Value<Bool>;
-	public function new(options : TextEditorOptions) {
+	public var uid(default, null) : String;
+	public function new(options : BlockOptions) {
 		if(null == options.el && null == options.template)
 			options.template = '<section class="block"></div>';
+		uid = null != options.uid ? options.uid : thx.core.UUID.create();
 		editor = new TextEditor(options);
 		active = new Value(false);
 		active.feed(new ToggleClass(editor.component, 'active').stream);
@@ -27,4 +29,8 @@ class Block implements Fragment {
 
 	public function toString()
 		return name;
+}
+
+typedef BlockOptions = {> TextEditorOptions,
+	?uid : String
 }

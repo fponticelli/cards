@@ -8,5 +8,6 @@ interface Fragment {
 	public var component(default, null) : Component;
 	public var focus(default, null) : Value<Bool>;
 	public var active(default, null) : Value<Bool>;
+	public var uid(default, null) : String;
 	public function toString() : String;
 }
