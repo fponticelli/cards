@@ -15,8 +15,6 @@ class ValueProperty<T> extends Property {
 	override public function dispose() {
 		stream.terminate();
 		super.dispose();
-		value  = null;
-		stream = null;
 	}
 
 	function get_defaultValue()

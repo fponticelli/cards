@@ -10,6 +10,7 @@ import ui.fragments.Fragment;
 import steamer.Value;
 import haxe.ds.Option;
 using thx.core.Options;
+using steamer.Producer;
 
 class Article {
 	public var component(default, null) : Component;
@@ -26,6 +27,13 @@ class Article {
 		fragmentStream = new MultiProducer();
 		fragment = new Value(None);
 		fragmentStream.mapToOption().feed(fragment);
+		var filtered = fragment.filterOption();
+		filtered.previous().feed(function(fragment : Fragment) {
+			fragment.active.value = false;
+		});
+		filtered.feed(function(fragment : Fragment) {
+			fragment.active.value = true;
+		});
 	}
 
 	function addFragment(fragment : Fragment) {

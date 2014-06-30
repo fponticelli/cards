@@ -116,7 +116,7 @@ a img {
   padding-bottom: 0.5em;
 }
 .card .block.active {
-  background-color: #f9f9f9;
+  background-color: #fcfcfc;
 }
 .card .block:focus {
   outline: none;

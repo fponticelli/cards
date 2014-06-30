@@ -1473,6 +1473,22 @@ steamer.Producer.prototype = {
 			}(this)));
 		},this.endOnError);
 	}
+	,previous: function() {
+		var _g = this;
+		return new steamer.Producer(function(forward) {
+			var isFirst = true;
+			var state = null;
+			_g.feed((function($this) {
+				var $r;
+				var consumer = steamer.Bus.passOn(function(v) {
+					if(isFirst) isFirst = false; else forward(steamer.Pulse.Emit(state));
+					state = v;
+				},forward);
+				$r = consumer;
+				return $r;
+			}(this)));
+		},this.endOnError);
+	}
 	,__class__: steamer.Producer
 };
 steamer.MultiProducer = function(endOnError) {
@@ -1961,8 +1977,6 @@ sui.properties.ValueProperty.prototype = $extend(sui.properties.Property.prototy
 	,dispose: function() {
 		this.stream.terminate();
 		sui.properties.Property.prototype.dispose.call(this);
-		this.set_value(null);
-		this.stream = null;
 	}
 	,get_defaultValue: function() {
 		return this.stream.defaultValue;
@@ -3297,6 +3311,39 @@ ui.Article = function(options) {
 	this.fragmentStream = new steamer.MultiProducer();
 	this.fragment = new steamer.Value(haxe.ds.Option.None);
 	this.fragmentStream.mapToOption().feed(this.fragment);
+	var filtered = steamer.Producer.filterOption(this.fragment);
+	filtered.previous().feed((function($this) {
+		var $r;
+		var f = function(fragment) {
+			fragment.active.set_value(false);
+		};
+		$r = { onPulse : function(pulse) {
+			switch(pulse[1]) {
+			case 0:
+				var v = pulse[2];
+				f(v);
+				break;
+			default:
+			}
+		}};
+		return $r;
+	}(this)));
+	filtered.feed((function($this) {
+		var $r;
+		var f1 = function(fragment1) {
+			fragment1.active.set_value(true);
+		};
+		$r = { onPulse : function(pulse1) {
+			switch(pulse1[1]) {
+			case 0:
+				var v1 = pulse1[2];
+				f1(v1);
+				break;
+			default:
+			}
+		}};
+		return $r;
+	}(this)));
 };
 ui.Article.__name__ = ["ui","Article"];
 ui.Article.prototype = {
@@ -3329,7 +3376,7 @@ ui.Article.prototype = {
 	,removeFragment: function(fragment) {
 		if(thx.core.Options.equalsValue(this.fragment.get_value(),fragment)) this.fragment.set_value(haxe.ds.Option.None);
 		var finalizer = this.fragments.h[fragment.__id__];
-		thx.Assert.notNull(finalizer,null,{ fileName : "Article.hx", lineNumber : 65, className : "ui.Article", methodName : "removeFragment"});
+		thx.Assert.notNull(finalizer,null,{ fileName : "Article.hx", lineNumber : 73, className : "ui.Article", methodName : "removeFragment"});
 		finalizer();
 	}
 	,__class__: ui.Article
