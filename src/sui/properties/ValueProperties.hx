@@ -26,9 +26,9 @@ class ValueProperties {
 		return map.get(name);
 	}
 
-	public function ensure(name : String, component : Component) {
+	public function ensure(name : String, component : Component) : ValueProperty<Dynamic> {
 		return if(component.properties.exists(name))
-			component.properties.get(name);
+			cast(component.properties.get(name), ValueProperty<Dynamic>);
 		else
 			get(name).create(component);
 	}
@@ -38,6 +38,7 @@ class ValueProperties {
 }
 
 typedef ValuePropertyInfo<T> = {
+	name    : String,
 	display : String,
 	create  : Component -> ValueProperty<T>,
 	type    : SchemaType

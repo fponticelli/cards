@@ -151,17 +151,19 @@ PropertyFeeder.feedProperties = function(properties) {
 	properties.add("text",PropertyFeeder.createText());
 };
 PropertyFeeder.feedFragments = function(fragments) {
-	fragments.associateMany("block",["strong","emphasis"]);
+	fragments.associateMany("block",["strong","emphasis","text"]);
 	fragments.associateMany("readonly",["strong","emphasis","text"]);
 };
 PropertyFeeder.createToggleClass = function(display,name) {
-	return { display : display, type : ui.SchemaType.BoolType, create : function(component) {
-		return new sui.properties.ToggleClass(component,name,name);
+	return { name : name, display : display, type : ui.SchemaType.BoolType, create : function(component) {
+		var cls = new sui.properties.ToggleClass(component,name,name);
+		cls.set_value(true);
+		return cls;
 	}};
 };
 PropertyFeeder.createText = function() {
-	return { display : "content", type : ui.SchemaType.StringType, create : function(component) {
-		return new sui.properties.Text(component,"");
+	return { name : "text", display : "content", type : ui.SchemaType.StringType, create : function(component) {
+		return new sui.properties.Text(component,null);
 	}};
 };
 var Reflect = function() { };
@@ -209,6 +211,9 @@ Std.parseInt = function(x) {
 	if(v == 0 && (HxOverrides.cca(x,1) == 120 || HxOverrides.cca(x,1) == 88)) v = parseInt(x);
 	if(isNaN(v)) return null;
 	return v;
+};
+Std.parseFloat = function(x) {
+	return parseFloat(x);
 };
 var StringTools = function() { };
 StringTools.__name__ = ["StringTools"];
@@ -672,6 +677,9 @@ js.Boot.__instanceof = function(o,cl) {
 		if(cl == Enum && o.__ename__ != null) return true;
 		return o.__enum__ == cl;
 	}
+};
+js.Boot.__cast = function(o,t) {
+	if(js.Boot.__instanceof(o,t)) return o; else throw "Cannot cast " + Std.string(o) + " to " + Std.string(t);
 };
 var promhx = {};
 promhx.base = {};
@@ -2107,7 +2115,7 @@ sui.properties.ValueProperties.prototype = {
 		return this.map.get(name);
 	}
 	,ensure: function(name,component) {
-		if(component.properties.exists(name)) return component.properties.get(name); else return this.get(name).create(component);
+		if(component.properties.exists(name)) return js.Boot.__cast(component.properties.get(name) , sui.properties.ValueProperty); else return this.get(name).create(component);
 	}
 	,list: function() {
 		return this.map.keys();
@@ -2959,6 +2967,49 @@ thx.core.ValueTypes.typeInheritance = function(type) {
 		return null;
 	}
 };
+thx.core.UUID = function() { };
+thx.core.UUID.__name__ = ["thx","core","UUID"];
+thx.core.UUID.random = function() {
+	return Math.floor(Math.random() * 16);
+};
+thx.core.UUID.srandom = function() {
+	return "" + Math.floor(Math.random() * 16);
+};
+thx.core.UUID.create = function() {
+	var s = [];
+	var _g = 0;
+	while(_g < 8) {
+		var i = _g++;
+		s[i] = "" + Math.floor(Math.random() * 16);
+	}
+	s[8] = "-";
+	var _g1 = 9;
+	while(_g1 < 13) {
+		var i1 = _g1++;
+		s[i1] = "" + Math.floor(Math.random() * 16);
+	}
+	s[13] = "-";
+	s[14] = "4";
+	var _g2 = 15;
+	while(_g2 < 18) {
+		var i2 = _g2++;
+		s[i2] = "" + Math.floor(Math.random() * 16);
+	}
+	s[18] = "-";
+	s[19] = "" + (Math.floor(Math.random() * 16) & 3 | 8);
+	var _g3 = 20;
+	while(_g3 < 23) {
+		var i3 = _g3++;
+		s[i3] = "" + Math.floor(Math.random() * 16);
+	}
+	s[23] = "-";
+	var _g4 = 24;
+	while(_g4 < 36) {
+		var i4 = _g4++;
+		s[i4] = "" + Math.floor(Math.random() * 16);
+	}
+	return s.join("");
+};
 thx.ref = {};
 thx.ref.BaseRef = function(parent) {
 	if(null != parent) this.parent = parent; else this.parent = thx.ref.EmptyParent.instance;
@@ -3238,80 +3289,81 @@ var types = {};
 types.ArrayTransform = function() { };
 types.ArrayTransform.__name__ = ["types","ArrayTransform"];
 types.ArrayTransform.toArray = function(value) {
-	return value;
+	if(null != value) return value; else return [];
 };
 types.ArrayTransform.toBool = function(value) {
-	return value.length > 0;
+	return types.ArrayTransform.toArray(value).length > 0;
 };
 types.ArrayTransform.toDate = function(value) {
 	var defaults = [2000,0,1,0,0,0];
-	var values = value.map(types.DynamicTransform.toFloat).map(function(v) {
+	var values = types.ArrayTransform.toArray(value).map(types.DynamicTransform.toFloat).map(function(v) {
 		return Math.round(v);
 	}).slice(0,defaults.length);
 	values = values.concat(defaults.slice(values.length));
 	return new Date(values[0],values[1],values[2],values[3],values[4],values[5]);
 };
 types.ArrayTransform.toFloat = function(value) {
-	return value.length;
+	return types.ArrayTransform.toArray(value).length;
 };
 types.ArrayTransform.toObject = function(value) {
 	var obj = { };
-	value.map(function(v,i) {
+	thx.core.Arrays.mapi(types.ArrayTransform.toArray(value),function(v,i) {
 		obj["field_" + (i + 1)] = v;
 	});
 	return obj;
 };
 types.ArrayTransform.toString = function(value) {
-	return value.map(types.DynamicTransform.toString).join(", ");
+	return types.ArrayTransform.toArray(value).map(types.DynamicTransform.toString).join(", ");
 };
 types.ArrayTransform.toCode = function(value) {
-	return "[" + value.map(types.DynamicTransform.toCode).join(",") + "]";
+	return "[" + types.ArrayTransform.toArray(value).map(types.DynamicTransform.toCode).join(",") + "]";
 };
 types.BoolTransform = function() { };
 types.BoolTransform.__name__ = ["types","BoolTransform"];
 types.BoolTransform.toArray = function(value) {
-	return [value];
+	return [types.BoolTransform.toBool(value)?false:value];
 };
 types.BoolTransform.toBool = function(value) {
-	return value;
+	return null != value && value;
 };
 types.BoolTransform.toDate = function(value) {
 	return new Date();
 };
 types.BoolTransform.toFloat = function(value) {
-	if(value) return 1; else return 0;
+	if(types.BoolTransform.toBool(value)) return 1; else return 0;
 };
 types.BoolTransform.toObject = function(value) {
-	return types.ArrayTransform.toObject([value]);
+	return types.ArrayTransform.toObject([types.BoolTransform.toBool(value)]);
 };
 types.BoolTransform.toString = function(value) {
-	if(value) return "Yes"; else return "No";
+	if(types.BoolTransform.toBool(value)) return "Yes"; else return "No";
 };
 types.BoolTransform.toCode = function(value) {
-	if(value) return "true"; else return "false";
+	if(types.BoolTransform.toBool(value)) return "true"; else return "false";
 };
 types.DateTransform = function() { };
 types.DateTransform.__name__ = ["types","DateTransform"];
 types.DateTransform.toArray = function(value) {
-	return [value];
+	return [types.DateTransform.toDate(value)];
 };
 types.DateTransform.toBool = function(value) {
 	return false;
 };
 types.DateTransform.toDate = function(value) {
-	return value;
+	if(null != value) return value; else return new Date();
 };
 types.DateTransform.toFloat = function(value) {
-	return value.getTime();
+	return types.DateTransform.toDate(value).getTime();
 };
 types.DateTransform.toObject = function(value) {
-	return types.ArrayTransform.toObject([value]);
+	return types.ArrayTransform.toObject([types.DateTransform.toDate(value)]);
 };
 types.DateTransform.toString = function(value) {
-	return HxOverrides.dateStr(value);
+	var _this = types.DateTransform.toDate(value);
+	return HxOverrides.dateStr(_this);
 };
 types.DateTransform.toCode = function(value) {
-	return "new Date(" + value.getTime() + ")";
+	return "new Date(" + types.DateTransform.toDate(value).getTime() + ")";
 };
 types.DynamicTransform = function() { };
 types.DynamicTransform.__name__ = ["types","DynamicTransform"];
@@ -3388,75 +3440,78 @@ types.DynamicTransform.toCode = function(value) {
 types.FloatTransform = function() { };
 types.FloatTransform.__name__ = ["types","FloatTransform"];
 types.FloatTransform.toArray = function(value) {
-	return [value];
+	return [types.FloatTransform.toFloat(value)];
 };
 types.FloatTransform.toBool = function(value) {
-	return value != 0;
+	return types.FloatTransform.toFloat(value) != 0;
 };
 types.FloatTransform.toDate = function(value) {
-	return new Date();
+	var t = types.FloatTransform.toFloat(value);
+	var d = new Date();
+	d.setTime(t);
+	return d;
 };
 types.FloatTransform.toFloat = function(value) {
-	return value;
+	if(null != value) return value; else return 0.0;
 };
 types.FloatTransform.toObject = function(value) {
-	return types.ArrayTransform.toObject([value]);
+	return types.ArrayTransform.toObject([types.FloatTransform.toFloat(value)]);
 };
 types.FloatTransform.toString = function(value) {
-	return "" + value;
+	return "" + types.FloatTransform.toFloat(value);
 };
 types.FloatTransform.toCode = function(value) {
-	return "" + value;
+	return "" + types.FloatTransform.toFloat(value);
 };
 types.ObjectTransform = function() { };
 types.ObjectTransform.__name__ = ["types","ObjectTransform"];
 types.ObjectTransform.toArray = function(value) {
-	return [value];
+	return [types.ObjectTransform.toObject(value)];
 };
 types.ObjectTransform.toBool = function(value) {
-	return !(Reflect.fields(value).length == 0);
+	return !thx.core.Objects.isEmpty(types.ObjectTransform.toObject(value));
 };
 types.ObjectTransform.toDate = function(value) {
 	return new Date();
 };
 types.ObjectTransform.toFloat = function(value) {
-	return Reflect.fields(value).length;
+	return Reflect.fields(types.ObjectTransform.toObject(value)).length;
 };
 types.ObjectTransform.toObject = function(value) {
-	return value;
+	if(null != value) return value; else return { };
 };
 types.ObjectTransform.toString = function(value) {
-	return Reflect.fields(value).map(function(field) {
+	return Reflect.fields(types.ObjectTransform.toObject(value)).map(function(field) {
 		return "" + field + ": " + types.DynamicTransform.toString(Reflect.field(value,field));
 	}).join(", ");
 };
 types.ObjectTransform.toCode = function(value) {
-	return "{" + Reflect.fields(value).map(function(field) {
+	return "{" + Reflect.fields(types.ObjectTransform.toObject(value)).map(function(field) {
 		return "\"" + field + "\" : " + types.DynamicTransform.toCode(Reflect.field(value,field));
 	}).join(", ") + "}";
 };
 types.StringTransform = function() { };
 types.StringTransform.__name__ = ["types","StringTransform"];
 types.StringTransform.toArray = function(value) {
-	return [value];
+	return [types.StringTransform.toString(value)];
 };
 types.StringTransform.toBool = function(value) {
-	return StringTools.trim(value) != "";
+	return StringTools.trim(types.StringTransform.toString(value)) != "";
 };
 types.StringTransform.toDate = function(value) {
 	return new Date();
 };
 types.StringTransform.toFloat = function(value) {
-	return 0;
+	return Std.parseFloat(types.StringTransform.toString(value));
 };
 types.StringTransform.toObject = function(value) {
-	return types.ArrayTransform.toObject([value]);
+	return types.ArrayTransform.toObject([types.StringTransform.toString(value)]);
 };
 types.StringTransform.toString = function(value) {
-	return value;
+	if(null != value) return value; else return "";
 };
 types.StringTransform.toCode = function(value) {
-	return "\"" + StringTools.replace(value,"\"","\\\"") + "\"";
+	return "\"" + StringTools.replace(types.StringTransform.toString(value),"\"","\\\"") + "\"";
 };
 var ui = {};
 ui.Article = function(options) {
@@ -3702,7 +3757,7 @@ ui.ContextField = function(options) {
 	var key = dom.Query.first(".key",this.component.el);
 	key.innerText = options.display;
 	this.name = options.name;
-	this.value = new ui.editors.TextEditor({ el : dom.Query.first(".value",this.component.el), parent : this.component, defaultText : options.value});
+	this.value = new ui.editors.CodeEditor({ el : dom.Query.first(".value",this.component.el), parent : this.component, defaultText : options.value});
 	this.focus = this.value.focus.debounce(250).distinct();
 	this.classActive = new sui.properties.ToggleClass(this.component,"active");
 	this.focus.feed(this.classActive.stream);
@@ -3800,23 +3855,37 @@ ui.ContextView = function(document,mapper,options) {
 	document.article.fragment.feed(steamer._Consumer.Consumer_Impl_.fromOption({ some : $bind(this,this.setFragmentStatus), none : $bind(this,this.resetFragmentStatus)}));
 };
 ui.ContextView.__name__ = ["ui","ContextView"];
-ui.ContextView.createToggleInfo = function(display,name) {
-	return { display : display, name : name, create : function(target,value) {
-		var toggle = new sui.properties.ToggleClass(target,name,name);
-		value.feed(toggle.stream);
-		return toggle;
-	}, type : ui.SchemaType.BoolType, code : "true", transform : types.DynamicTransform.toBool, defaultf : function() {
-		return false;
-	}};
+ui.ContextView.valueToCode = function(type) {
+	switch(type[1]) {
+	case 0:
+		return types.ArrayTransform.toCode;
+	case 1:
+		return types.BoolTransform.toCode;
+	case 2:
+		return types.DateTransform.toCode;
+	case 3:
+		return types.FloatTransform.toCode;
+	case 4:
+		return types.ObjectTransform.toCode;
+	case 5:
+		return types.StringTransform.toCode;
+	}
 };
-ui.ContextView.createTextInfo = function() {
-	return { display : "content", name : "text", create : function(target,value) {
-		var text = new sui.properties.Text(target,"");
-		value.feed(text.stream);
-		return text;
-	}, type : ui.SchemaType.StringType, code : "\"franco\"", transform : types.DynamicTransform.toString, defaultf : function() {
-		return "";
-	}};
+ui.ContextView.typeTransform = function(type) {
+	switch(type[1]) {
+	case 0:
+		return types.DynamicTransform.toArray;
+	case 1:
+		return types.DynamicTransform.toBool;
+	case 2:
+		return types.DynamicTransform.toDate;
+	case 3:
+		return types.DynamicTransform.toFloat;
+	case 4:
+		return types.DynamicTransform.toObject;
+	case 5:
+		return types.DynamicTransform.toString;
+	}
 };
 ui.ContextView.prototype = {
 	component: null
@@ -3841,15 +3910,20 @@ ui.ContextView.prototype = {
 		this.fieldsEl.innerHTML = "";
 	}
 	,setFields: function(fragment) {
+		var _g = this;
 		this.resetFields();
-		var fields = this.getAttachedPropertiesForFragment(fragment);
-		fields.map($bind(this,this.addField));
+		this.mapper.getAttachedPropertiesForFragment(fragment).map(function(info) {
+			var value;
+			value = js.Boot.__cast(fragment.component.properties.get(info.name) , sui.properties.ValueProperty);
+			_g.addField(fragment,info,value);
+		});
 	}
-	,addField: function(fieldInfo) {
-		var pair = this.expressions.get(fieldInfo.name);
-		var f = new ui.ContextField({ container : this.fieldsEl, parent : this.component, display : fieldInfo.display, name : fieldInfo.name, value : null == pair.code.get_value()?fieldInfo.code:pair.code.get_value()});
-		f.focus.map(function(v) {
-			if(v) return haxe.ds.Option.Some(f); else return haxe.ds.Option.None;
+	,addField: function(fragment,info,value) {
+		var temp = value.get_value();
+		var pair = this.ensureFeedExpression(fragment,info,value);
+		var f = new ui.ContextField({ container : this.fieldsEl, parent : this.component, display : info.display, name : info.name, value : (ui.ContextView.valueToCode(info.type))(temp)});
+		f.focus.map(function(b) {
+			if(b) return haxe.ds.Option.Some(f); else return haxe.ds.Option.None;
 		}).feed(this.field);
 		var expression = pair.expression;
 		var exp = f.value.text.debounce(250).distinct().map(function(code) {
@@ -3879,20 +3953,15 @@ ui.ContextView.prototype = {
 	,setAddMenuItems: function(fragment) {
 		var _g = this;
 		this.resetAddMenuItems();
-		var attachables = this.getAttachablePropertiesForFragment(fragment);
+		var attachables = this.mapper.getAttachablePropertiesForFragment(fragment);
 		this.buttonAdd.enabled.set_value(attachables.length > 0);
-		attachables.map(function(fieldInfo) {
-			var button = new ui.widgets.Button("add " + fieldInfo.display);
+		attachables.map(function(info) {
+			var button = new ui.widgets.Button("add " + info.display);
 			_g.menuAdd.addItem(button.component);
 			button.clicks.feed((function($this) {
 				var $r;
 				var f = function(_) {
-					var pair = _g.createFeedExpression(fieldInfo.transform,fieldInfo.defaultf);
-					var expression = pair.expression;
-					var value = pair.value;
-					var valueProperty = fieldInfo.create(fragment.component,value);
-					var value1 = { expression : expression, code : new steamer.Value(null)};
-					_g.expressions.set(fieldInfo.name,value1);
+					_g.mapper.values.ensure(info.name,fragment.component);
 					_g.setFragmentStatus(fragment);
 				};
 				$r = { onPulse : function(pulse) {
@@ -3908,8 +3977,19 @@ ui.ContextView.prototype = {
 			}(this)));
 		});
 	}
-	,createFeedExpression: function(transform,defaultf) {
-		var expression = new steamer.Value(ui.Expression.Fun(defaultf,""));
+	,ensureFeedExpression: function(fragment,info,value) {
+		var key = "" + fragment.uid + ":" + info.name;
+		var pair = this.expressions.get(key);
+		if(null == pair) {
+			var e = this.createFeedExpression(ui.ContextView.typeTransform(info.type),types.DynamicTransform.toCode(value.get_value()));
+			e.value.feed(value.stream);
+			var value1 = pair = { expression : e.expression, code : new steamer.Value(types.DynamicTransform.toCode(value.get_value()))};
+			this.expressions.set(key,value1);
+		}
+		return pair;
+	}
+	,createFeedExpression: function(transform,code) {
+		var expression = new steamer.Value(ui.Expressions.toExpression(code));
 		var value = new steamer.Value(null);
 		var state = null;
 		expression.map(function(exp) {
@@ -3934,27 +4014,6 @@ ui.ContextView.prototype = {
 			return state;
 		}).map(transform).feed(value);
 		return { expression : expression, value : value};
-	}
-	,getAttachedPropertiesForFragment: function(fragment) {
-		return this.getPropertiesForFragment(fragment).filter(function(fieldInfo) {
-			return fragment.component.properties.exists(fieldInfo.name);
-		});
-	}
-	,getAttachablePropertiesForFragment: function(fragment) {
-		return this.getPropertiesForFragment(fragment).filter(function(fieldInfo) {
-			return !fragment.component.properties.exists(fieldInfo.name);
-		});
-	}
-	,getPropertiesForFragment: function(fragment) {
-		var _g = fragment.name;
-		switch(_g) {
-		case "block":
-			return [ui.ContextView.createToggleInfo("bold","strong"),ui.ContextView.createToggleInfo("italic","emphasis")];
-		case "readonly":
-			return [ui.ContextView.createToggleInfo("bold","strong"),ui.ContextView.createToggleInfo("italic","emphasis"),ui.ContextView.createTextInfo()];
-		default:
-			return [];
-		}
 	}
 	,__class__: ui.ContextView
 };
@@ -4478,6 +4537,7 @@ ui.editors.TextEditor = function(options) {
 	if(null == options.defaultText) options.defaultText = "";
 	if(null == options.el && null == options.template) options.template = "<span></span>";
 	this.component = new sui.components.Component(options);
+	this.component.el.classList.add("editor");
 	this.component.el.setAttribute("contenteditable",true);
 	var text = new sui.properties.Text(this.component,options.defaultText);
 	var inputPair = steamer.dom.Dom.produceEvent(this.component.el,"input");
@@ -4518,6 +4578,15 @@ ui.editors.TextEditor.prototype = {
 	}
 	,__class__: ui.editors.TextEditor
 };
+ui.editors.CodeEditor = function(options) {
+	ui.editors.TextEditor.call(this,options);
+	this.component.el.classList.add("code");
+};
+ui.editors.CodeEditor.__name__ = ["ui","editors","CodeEditor"];
+ui.editors.CodeEditor.__super__ = ui.editors.TextEditor;
+ui.editors.CodeEditor.prototype = $extend(ui.editors.TextEditor.prototype,{
+	__class__: ui.editors.CodeEditor
+});
 ui.fragments = {};
 ui.fragments.Fragment = function() { };
 ui.fragments.Fragment.__name__ = ["ui","fragments","Fragment"];
@@ -4526,12 +4595,14 @@ ui.fragments.Fragment.prototype = {
 	,component: null
 	,focus: null
 	,active: null
+	,uid: null
 	,toString: null
 	,__class__: ui.fragments.Fragment
 };
 ui.fragments.Block = function(options) {
 	this.name = "block";
 	if(null == options.el && null == options.template) options.template = "<section class=\"block\"></div>";
+	if(null != options.uid) this.uid = options.uid; else this.uid = thx.core.UUID.create();
 	this.editor = new ui.editors.TextEditor(options);
 	this.active = new steamer.Value(false);
 	this.active.feed(new sui.properties.ToggleClass(this.editor.component,"active").stream);
@@ -4546,6 +4617,7 @@ ui.fragments.Block.prototype = {
 	,component: null
 	,focus: null
 	,active: null
+	,uid: null
 	,destroy: function() {
 		this.editor.destroy();
 	}
@@ -4629,6 +4701,7 @@ ui.fragments.ReadonlyBlock = function(options) {
 	this.active = new steamer.Value(false);
 	this.focusEvent = steamer.dom.Dom.produceEvent(this.component.el,"focus");
 	this.blurEvent = steamer.dom.Dom.produceEvent(this.component.el,"blur");
+	if(null != options.uid) this.uid = options.uid; else this.uid = thx.core.UUID.create();
 	this.focusEvent.producer.map(function(_) {
 		return true;
 	}).merge(this.blurEvent.producer.map(function(_1) {
@@ -4658,6 +4731,7 @@ ui.fragments.ReadonlyBlock.prototype = {
 	,component: null
 	,focus: null
 	,active: null
+	,uid: null
 	,focusEvent: null
 	,blurEvent: null
 	,destroy: function() {
@@ -5105,13 +5179,14 @@ thx.Assert.results = { add : function(assertion) {
 }};
 Config.icons = { add : "plus", remove : "minus", dropDown : "arrow-down"};
 Config.selectors = { app : ".card"};
-PropertyFeeder.classes = [{ display : "bold", name : "strong"},{ display : "italis", name : "emphasis"}];
+PropertyFeeder.classes = [{ display : "bold", name : "strong"},{ display : "italic", name : "emphasis"}];
 dom.Query.doc = document;
 haxe.ds.ObjectMap.count = 0;
 promhx.base.AsyncBase.id_ctr = 0;
 promhx.base.EventLoop.queue = new List();
 steamer.Pulses.nil = steamer.Pulse.Emit(thx.Nil.nil);
 thx.core.Ints.pattern_parse = new EReg("^[+-]?(\\d+|0x[0-9A-F]+)$","i");
+thx.core.UUID.itoh = "0123456789ABCDEF";
 thx.ref.EmptyParent.instance = new thx.ref.EmptyParent();
 thx.ref.Ref.reField = new EReg("^\\.?([^.\\[]+)","");
 thx.ref.Ref.reIndex = new EReg("^\\[(\\d+)\\]","");

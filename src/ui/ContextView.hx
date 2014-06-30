@@ -6,8 +6,9 @@ import js.html.Element;
 import steamer.Value;
 import sui.components.Component;
 import sui.components.ComponentOptions;
+import sui.properties.ValueProperties;
 import sui.properties.ValueProperty;
-import types.DynamicTransform;
+import types.*;
 import ui.fragments.FragmentMapper;
 import ui.widgets.Button;
 import ui.fragments.Fragment;
@@ -83,21 +84,26 @@ class ContextView {
 
 	function setFields(fragment : Fragment) {
 		resetFields();
-		var fields = getAttachedPropertiesForFragment(fragment);
-		fields.map(addField);
+		mapper
+			.getAttachedPropertiesForFragment(fragment)
+			.map(function(info) {
+				var value = cast(fragment.component.properties.get(info.name), ValueProperty<Dynamic>);
+				addField(fragment, info, value);
+			});
 	}
 
-	public function addField(fieldInfo : FieldInfo<Dynamic>) {
-		var pair = expressions.get(fieldInfo.name),
+	function addField(fragment : Fragment, info : ValuePropertyInfo<Dynamic>, value : ValueProperty<Dynamic>) {
+		var temp = value.value;
+		var pair = ensureFeedExpression(fragment, info, value),
 			f = new ContextField({
 				container : fieldsEl,
 				parent : component,
-				display : fieldInfo.display,
-				name : fieldInfo.name,
-				value : null == pair.code.value ? fieldInfo.code : pair.code.value
+				display : info.display,
+				name : info.name,
+				value : valueToCode(info.type)(temp)
 			});
 		f.focus
-			.map(function(v) return v ? Some(f) : None)
+			.map(function(b) return b ? Some(f) : None)
 			.feed(field);
 
 		var expression = pair.expression,
@@ -128,27 +134,56 @@ class ContextView {
 
 	function setAddMenuItems(fragment : Fragment) {
 		resetAddMenuItems();
-		var attachables = getAttachablePropertiesForFragment(fragment);
+		var attachables = mapper.getAttachablePropertiesForFragment(fragment);
 		buttonAdd.enabled.value = attachables.length > 0;
-		attachables.map(function(fieldInfo) {
-			var button = new Button('add ${fieldInfo.display}');
+		attachables.map(function(info) {
+			var button = new Button('add ${info.display}');
 			menuAdd.addItem(button.component);
 			button.clicks.feed(function(_) {
-				var pair = createFeedExpression(fieldInfo.transform, fieldInfo.defaultf),
-					expression = pair.expression,
-					value = pair.value,
-					valueProperty = fieldInfo.create(fragment.component, value);
-				expressions.set(fieldInfo.name, {
-					expression : expression,
-					code : new Value<String>(null)
-				});
+				mapper.values.ensure(info.name, fragment.component);
 				setFragmentStatus(fragment);
 			});
 		});
 	}
 
-	function createFeedExpression<T>(transform : Dynamic -> T, defaultf : Void -> Dynamic) {
-		var expression = new Value(Fun(defaultf, '')),
+	function ensureFeedExpression(fragment : Fragment, info : ValuePropertyInfo<Dynamic>, value : ValueProperty<Dynamic>) {
+		var key  = '${fragment.uid}:${info.name}',
+			pair = expressions.get(key);
+		if(null == pair) {
+			var e = createFeedExpression(
+				typeTransform(info.type),
+				DynamicTransform.toCode(value.value)
+			);
+			e.value.feed(value.stream);
+			expressions.set(key, pair = { expression : e.expression, code : new Value<String>(DynamicTransform.toCode(value.value)) });
+		}
+		return pair;
+	}
+
+	static function valueToCode(type : SchemaType) : Dynamic -> String {
+		return switch type {
+			case ArrayType(_): ArrayTransform.toCode;
+			case BoolType: BoolTransform.toCode;
+			case DateType: DateTransform.toCode;
+			case FloatType: FloatTransform.toCode;
+			case ObjectType(_): ObjectTransform.toCode;
+			case StringType: StringTransform.toCode;
+		};
+	}
+
+	static function typeTransform(type : SchemaType) : Dynamic -> Dynamic {
+		return switch type {
+			case ArrayType(_): DynamicTransform.toArray;
+			case BoolType: DynamicTransform.toBool;
+			case DateType: DynamicTransform.toDate;
+			case FloatType: DynamicTransform.toFloat;
+			case ObjectType(_): DynamicTransform.toObject;
+			case StringType: DynamicTransform.toString;
+		};
+	}
+
+	function createFeedExpression<T>(transform : Dynamic -> T, code : String) {
+		var expression = new Value(Expressions.toExpression(code)),
 			value = new Value(null),
 			state : Dynamic = null;
 
@@ -179,75 +214,4 @@ class ContextView {
 			value : value
 		};
 	}
-
-	public function getAttachedPropertiesForFragment(fragment : Fragment) {
-		return getPropertiesForFragment(fragment).filter(function(fieldInfo) {
-			return fragment.component.properties.exists(fieldInfo.name);
-		});
-	}
-
-	public function getAttachablePropertiesForFragment(fragment : Fragment) {
-		return getPropertiesForFragment(fragment).filter(function(fieldInfo) {
-			return !fragment.component.properties.exists(fieldInfo.name);
-		});
-	}
-
-	static function createToggleInfo(display : String, name : String) : FieldInfo<Bool> {
-		return {
-			display   : display,
-			name      : name,
-			create    : function(target : Component, value : Value<Bool>) {
-							var toggle = new sui.properties.ToggleClass(target, name, name);
-							value.feed(toggle.stream);
-							return toggle;
-						},
-			type      : BoolType,
-			code      : 'true',
-			transform : DynamicTransform.toBool,
-			defaultf  : function() : Dynamic return false
-		};
-	}
-
-	static function createTextInfo() : FieldInfo<String> {
-		return {
-			display   : 'content',
-			name      : 'text',
-			create    : function(target : Component, value : Value<String>) {
-							var text = new sui.properties.Text(target, '');
-							value.feed(text.stream);
-							return text;
-						},
-			type      : StringType,
-			code      : '"franco"',
-			transform : DynamicTransform.toString,
-			defaultf  : function() : Dynamic return ""
-		};
-	}
-
-	public function getPropertiesForFragment(fragment : Fragment) : Array<FieldInfo<Dynamic>> {
-		return switch fragment.name {
-			case 'block':
-				[
-					createToggleInfo('bold', 'strong'),
-					createToggleInfo('italic', 'emphasis'),
-				];
-			case 'readonly':
-				[
-					createToggleInfo('bold', 'strong'),
-					createToggleInfo('italic', 'emphasis'),
-					createTextInfo()
-				];
-			case _: [];
-		}
-	}
-}
-
-typedef FieldInfo<T> = {
-	display : String,
-	name : String,
-	create : Component -> Value<T> -> ValueProperty<T>,
-	type : SchemaType,
-	code : String,
-	transform : Dynamic -> T,
-	defaultf : Void -> T
 }
