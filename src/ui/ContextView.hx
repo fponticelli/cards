@@ -8,6 +8,7 @@ import sui.components.Component;
 import sui.components.ComponentOptions;
 import sui.properties.ValueProperty;
 import types.DynamicTransform;
+import ui.fragments.FragmentMapper;
 import ui.widgets.Button;
 import ui.fragments.Fragment;
 import ui.widgets.Menu;
@@ -25,11 +26,13 @@ class ContextView {
 	var buttonAdd : Button;
 	var buttonRemove : Button;
 	var expressions : Map<String, { expression : Value<Expression>, code : Value<String> }>;
+	var mapper : FragmentMapper;
 
 	public var field(default, null) : Value<Option<ContextField>>;
 
-	public function new(document : Document, options : ComponentOptions) {
+	public function new(document : Document, mapper : FragmentMapper, options : ComponentOptions) {
 		this.document = document;
+		this.mapper = mapper;
 		component = new Component(options);
 		toolbar   = new Toolbar({ parent : component, container : component.el });
 		fieldsEl = Html.parse('<div class="fields"><div></div></div>');

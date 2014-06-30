@@ -128,15 +128,42 @@ var Main = function() { };
 Main.__name__ = ["Main"];
 Main.main = function() {
 	dom.Dom.ready().then(function(_) {
+		var values = new sui.properties.ValueProperties();
+		var fragments = new ui.fragments.FragmentProperties();
+		var mapper = new ui.fragments.FragmentMapper(fragments,values);
+		PropertyFeeder.feedProperties(values);
+		PropertyFeeder.feedFragments(fragments);
 		var container = dom.Query.first(".container");
 		var data = new ui.Data({ });
 		var model = new ui.Model(data);
-		ui.Card.create(model,container);
+		ui.Card.create(model,container,mapper);
 	});
 };
 var IMap = function() { };
 IMap.__name__ = ["IMap"];
 Math.__name__ = ["Math"];
+var PropertyFeeder = function() { };
+PropertyFeeder.__name__ = ["PropertyFeeder"];
+PropertyFeeder.feedProperties = function(properties) {
+	PropertyFeeder.classes.map(function(p) {
+		properties.add(p.name,PropertyFeeder.createToggleClass(p.display,p.name));
+	});
+	properties.add("text",PropertyFeeder.createText());
+};
+PropertyFeeder.feedFragments = function(fragments) {
+	fragments.associateMany("block",["strong","emphasis"]);
+	fragments.associateMany("readonly",["strong","emphasis","text"]);
+};
+PropertyFeeder.createToggleClass = function(display,name) {
+	return { display : display, type : ui.SchemaType.BoolType, create : function(component) {
+		return new sui.properties.ToggleClass(component,name,name);
+	}};
+};
+PropertyFeeder.createText = function() {
+	return { display : "content", type : ui.SchemaType.StringType, create : function(component) {
+		return new sui.properties.Text(component,"");
+	}};
+};
 var Reflect = function() { };
 Reflect.__name__ = ["Reflect"];
 Reflect.field = function(o,field) {
@@ -2061,6 +2088,32 @@ sui.properties.ToggleClass.__super__ = sui.properties.ValueProperty;
 sui.properties.ToggleClass.prototype = $extend(sui.properties.ValueProperty.prototype,{
 	__class__: sui.properties.ToggleClass
 });
+sui.properties.ValueProperties = function() {
+	this.map = new haxe.ds.StringMap();
+};
+sui.properties.ValueProperties.__name__ = ["sui","properties","ValueProperties"];
+sui.properties.ValueProperties.prototype = {
+	map: null
+	,add: function(name,info) {
+		thx.Assert.isFalse(this.map.exists(name),"ValueProperties already contains \"" + name + "\"",{ fileName : "ValueProperties.hx", lineNumber : 15, className : "sui.properties.ValueProperties", methodName : "add"});
+		this.map.set(name,info);
+	}
+	,remove: function(name) {
+		thx.Assert.isTrue(this.map.exists(name),"ValueProperties does not contain \"" + name + "\"",{ fileName : "ValueProperties.hx", lineNumber : 20, className : "sui.properties.ValueProperties", methodName : "remove"});
+		this.map.remove(name);
+	}
+	,get: function(name) {
+		thx.Assert.isTrue(this.map.exists(name),"ValueProperties does not contain \"" + name + "\"",{ fileName : "ValueProperties.hx", lineNumber : 25, className : "sui.properties.ValueProperties", methodName : "get"});
+		return this.map.get(name);
+	}
+	,ensure: function(name,component) {
+		if(component.properties.exists(name)) return component.properties.get(name); else return this.get(name).create(component);
+	}
+	,list: function() {
+		return this.map.keys();
+	}
+	,__class__: sui.properties.ValueProperties
+};
 sui.properties.Visible = function(component,defaultValue) {
 	sui.properties.ValueProperty.call(this,defaultValue,component,"visible");
 	this.stream.feed(steamer.dom.Dom.consumeToggleVisibility(component.el));
@@ -2690,6 +2743,9 @@ thx.core.Iterables.reducei = function(it,callback,initial) {
 thx.core.Iterables.isEmpty = function(it) {
 	return thx.core.Iterators.isEmpty($iterator(it)());
 };
+thx.core.Iterables.filter = function(it,predicate) {
+	return thx.core.Iterators.filter($iterator(it)(),predicate);
+};
 thx.core.Iterators = function() { };
 thx.core.Iterators.__name__ = ["thx","core","Iterators"];
 thx.core.Iterators.map = function(it,f) {
@@ -2737,6 +2793,12 @@ thx.core.Iterators.reducei = function(it,callback,initial) {
 thx.core.Iterators.isEmpty = function(it) {
 	return !it.hasNext();
 };
+thx.core.Iterators.filter = function(it,predicate) {
+	return thx.core.Iterators.reduce(it,function(acc,item) {
+		if(predicate(item)) acc.push(item);
+		return acc;
+	},[]);
+};
 thx.core.Objects = function() { };
 thx.core.Objects.__name__ = ["thx","core","Objects"];
 thx.core.Objects.isEmpty = function(o) {
@@ -2783,6 +2845,55 @@ thx.core.Options.equals = function(a,b,eq) {
 };
 thx.core.Options.equalsValue = function(a,b,eq) {
 	return thx.core.Options.equals(a,thx.core.Options.toOption(b));
+};
+thx.core.Set = function() {
+	this._v = [];
+	this.length = 0;
+};
+thx.core.Set.__name__ = ["thx","core","Set"];
+thx.core.Set.ofArray = function(arr) {
+	var set = new thx.core.Set();
+	var _g = 0;
+	while(_g < arr.length) {
+		var item = arr[_g];
+		++_g;
+		set.add(item);
+	}
+	return set;
+};
+thx.core.Set.prototype = {
+	length: null
+	,_v: null
+	,add: function(v) {
+		HxOverrides.remove(this._v,v);
+		this._v.push(v);
+		this.length = this._v.length;
+	}
+	,remove: function(v) {
+		var t = HxOverrides.remove(this._v,v);
+		this.length = this._v.length;
+		return t;
+	}
+	,exists: function(v) {
+		var _g = 0;
+		var _g1 = this._v;
+		while(_g < _g1.length) {
+			var t = _g1[_g];
+			++_g;
+			if(t == v) return true;
+		}
+		return false;
+	}
+	,iterator: function() {
+		return HxOverrides.iter(this._v);
+	}
+	,array: function() {
+		return this._v.slice();
+	}
+	,toString: function() {
+		return "{" + this._v.join(", ") + "}";
+	}
+	,__class__: thx.core.Set
 };
 thx.core.Types = function() { };
 thx.core.Types.__name__ = ["thx","core","Types"];
@@ -3427,12 +3538,12 @@ ui.Article.prototype = {
 };
 ui.Card = function() { };
 ui.Card.__name__ = ["ui","Card"];
-ui.Card.create = function(model,container) {
+ui.Card.create = function(model,container,mapper) {
 	var card = new sui.components.Component({ template : "<div class=\"card\"><div class=\"doc\"></div><aside><div class=\"context\"></div><div class=\"model\"></div></aside></div>"});
 	var context = dom.Query.first(".context",card.el);
 	var modelView = new ui.ModelView();
 	var document = new ui.Document({ el : dom.Query.first(".doc",card.el)});
-	var context1 = new ui.ContextView(document,{ el : dom.Query.first(".context",card.el)});
+	var context1 = new ui.ContextView(document,mapper,{ el : dom.Query.first(".context",card.el)});
 	modelView.component.appendTo(dom.Query.first(".model",card.el));
 	modelView.schema.feed(model.schemaEventConsumer);
 	modelView.data.feed(model.dataEventConsumer);
@@ -3441,7 +3552,7 @@ ui.Card.create = function(model,container) {
 		return JSON.stringify(o);
 	}).feed((function($this) {
 		var $r;
-		var consumer = new steamer.consumers.LoggerConsumer(null,{ fileName : "Card.hx", lineNumber : 25, className : "ui.Card", methodName : "create"});
+		var consumer = new steamer.consumers.LoggerConsumer(null,{ fileName : "Card.hx", lineNumber : 26, className : "ui.Card", methodName : "create"});
 		$r = consumer;
 		return $r;
 	}(this)));
@@ -3647,9 +3758,10 @@ ui.ContextField.prototype = {
 	}
 	,__class__: ui.ContextField
 };
-ui.ContextView = function(document,options) {
+ui.ContextView = function(document,mapper,options) {
 	var _g = this;
 	this.document = document;
+	this.mapper = mapper;
 	this.component = new sui.components.Component(options);
 	this.toolbar = new ui.widgets.Toolbar({ parent : this.component, container : this.component.el});
 	this.fieldsEl = dom.Html.parseList("<div class=\"fields\"><div></div></div>")[0];
@@ -3715,6 +3827,7 @@ ui.ContextView.prototype = {
 	,buttonAdd: null
 	,buttonRemove: null
 	,expressions: null
+	,mapper: null
 	,field: null
 	,resetFragmentStatus: function() {
 		this.resetFields();
@@ -4441,6 +4554,72 @@ ui.fragments.Block.prototype = {
 	}
 	,__class__: ui.fragments.Block
 };
+ui.fragments.FragmentMapper = function(fragments,values) {
+	this.fragments = fragments;
+	this.values = values;
+};
+ui.fragments.FragmentMapper.__name__ = ["ui","fragments","FragmentMapper"];
+ui.fragments.FragmentMapper.prototype = {
+	fragments: null
+	,values: null
+	,getValuePropertyInfoForFragment: function(fragment) {
+		return thx.core.Iterators.map(this.fragments.getAssociations(fragment),($_=this.values,$bind($_,$_.get)));
+	}
+	,getAttachedPropertiesForFragment: function(fragment) {
+		return thx.core.Iterators.filter(this.fragments.getAssociations(fragment.name),function(name) {
+			return fragment.component.properties.exists(name);
+		}).map(($_=this.values,$bind($_,$_.get)));
+	}
+	,getAttachablePropertiesForFragment: function(fragment) {
+		return thx.core.Iterators.filter(this.fragments.getAssociations(fragment.name),function(name) {
+			return !fragment.component.properties.exists(name);
+		}).map(($_=this.values,$bind($_,$_.get)));
+	}
+	,__class__: ui.fragments.FragmentMapper
+};
+ui.fragments._FragmentName = {};
+ui.fragments._FragmentName.FragmentName_Impl_ = function() { };
+ui.fragments._FragmentName.FragmentName_Impl_.__name__ = ["ui","fragments","_FragmentName","FragmentName_Impl_"];
+ui.fragments._FragmentName.FragmentName_Impl_.fromFragment = function(fragment) {
+	return fragment.name;
+};
+ui.fragments._FragmentName.FragmentName_Impl_.fromString = function(name) {
+	return name;
+};
+ui.fragments._FragmentName.FragmentName_Impl_._new = function(name) {
+	return name;
+};
+ui.fragments._FragmentName.FragmentName_Impl_.toString = function(this1) {
+	return this1;
+};
+ui.fragments.FragmentProperties = function() {
+	this.map = new haxe.ds.StringMap();
+};
+ui.fragments.FragmentProperties.__name__ = ["ui","fragments","FragmentProperties"];
+ui.fragments.FragmentProperties.prototype = {
+	map: null
+	,associate: function(fragment,property) {
+		var s = this.map.get(fragment);
+		if(null == s) {
+			var value = s = new thx.core.Set();
+			this.map.set(fragment,value);
+		}
+		s.add(property);
+	}
+	,associateMany: function(fragment,properties) {
+		thx.core.Iterables.map(properties,(function(f,a1) {
+			return function(a2) {
+				return f(a1,a2);
+			};
+		})($bind(this,this.associate),fragment));
+	}
+	,getAssociations: function(fragment) {
+		var s = this.map.get(fragment);
+		if(s == null) s = new thx.core.Set();
+		return s.iterator();
+	}
+	,__class__: ui.fragments.FragmentProperties
+};
 ui.fragments.ReadonlyBlock = function(options) {
 	this.name = "readonly";
 	var _g = this;
@@ -4926,6 +5105,7 @@ thx.Assert.results = { add : function(assertion) {
 }};
 Config.icons = { add : "plus", remove : "minus", dropDown : "arrow-down"};
 Config.selectors = { app : ".card"};
+PropertyFeeder.classes = [{ display : "bold", name : "strong"},{ display : "italis", name : "emphasis"}];
 dom.Query.doc = document;
 haxe.ds.ObjectMap.count = 0;
 promhx.base.AsyncBase.id_ctr = 0;
