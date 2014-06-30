@@ -4,7 +4,7 @@ import ui.Expression;
 
 class DateTransform {
 	public static function toArray(value : Date) : Array<Dynamic> {
-		return [value];
+		return [toDate(value)];
 	}
 
 	public static function toBool(value : Date) : Bool {
@@ -12,22 +12,22 @@ class DateTransform {
 	}
 
 	public static function toDate(value : Date) : Date {
-		return value;
+		return null != value ? value : Date.now();
 	}
 
 	public static function toFloat(value : Date) : Float {
-		return value.getTime();
+		return toDate(value).getTime();
 	}
 
 	public static function toObject(value : Date) : {} {
-		return ArrayTransform.toObject([value]);
+		return ArrayTransform.toObject([toDate(value)]);
 	}
 
 	public static function toString(value : Date) : String {
-		return value.toString();
+		return toDate(value).toString();
 	}
 
 	public static function toCode(value : Date) : String {
-		return 'new Date(${value.getTime()})';
+		return 'new Date(${toDate(value).getTime()})';
 	}
 }

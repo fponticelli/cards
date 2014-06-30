@@ -5,11 +5,11 @@ using StringTools;
 
 class StringTransform {
 	public static function toArray(value : String) : Array<Dynamic> {
-		return [value];
+		return [toString(value)];
 	}
 
 	public static function toBool(value : String) : Bool {
-		return value.trim() != '';
+		return toString(value).trim() != '';
 	}
 
 	public static function toDate(value : String) : Date {
@@ -17,18 +17,18 @@ class StringTransform {
 	}
 
 	public static function toFloat(value : String) : Float {
-		return 0;
+		return Std.parseFloat(toString(value));
 	}
 
 	public static function toObject(value : String) : {} {
-		return ArrayTransform.toObject([value]);
+		return ArrayTransform.toObject([toString(value)]);
 	}
 
 	public static function toString(value : String) : String {
-		return value;
+		return null != value ? value : '';
 	}
 
 	public static function toCode(value : String) : String {
-		return '"' + value.replace('"', '\\"') + '"';
+		return '"' + toString(value).replace('"', '\\"') + '"';
 	}
 }

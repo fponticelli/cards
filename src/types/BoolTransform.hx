@@ -4,11 +4,11 @@ import ui.Expression;
 
 class BoolTransform {
 	public static function toArray(value : Bool) : Array<Dynamic> {
-		return [value];
+		return [toBool(value) ? false : value];
 	}
 
 	public static function toBool(value : Bool) : Bool {
-		return value;
+		return null != value && value;
 	}
 
 	public static function toDate(value : Bool) : Date {
@@ -16,18 +16,18 @@ class BoolTransform {
 	}
 
 	public static function toFloat(value : Bool) : Float {
-		return value ? 1 : 0;
+		return toBool(value) ? 1 : 0;
 	}
 
 	public static function toObject(value : Bool) : {} {
-		return ArrayTransform.toObject([value]);
+		return ArrayTransform.toObject([toBool(value)]);
 	}
 
 	public static function toString(value : Bool) : String {
-		return value ? 'Yes' : 'No';
+		return toBool(value) ? 'Yes' : 'No';
 	}
 
 	public static function toCode<T>(value : Bool) : String {
-		return value ? 'true' : 'false';
+		return toBool(value) ? 'true' : 'false';
 	}
 }
