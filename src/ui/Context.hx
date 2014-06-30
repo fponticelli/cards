@@ -105,11 +105,11 @@ class Context {
 		var mixed = exp.merge(expression);
 		mixed.map(function(e) {
 			return switch e {
-				case Fun(f):
+				case Fun(f, _):
 					None;
-				case SyntaxError(e):
+				case SyntaxError(e, _):
 					Some(e);
-				case RuntimeError(e):
+				case RuntimeError(e, _):
 					Some(e);
 			};
 		}).feed(f.withError);
@@ -143,14 +143,14 @@ class Context {
 	}
 
 	function createFeedExpression<T>(transform : Dynamic -> T, defaultf : Void -> Dynamic) {
-		var expression = new Value(Fun(defaultf)),
+		var expression = new Value(Fun(defaultf, '')),
 			value = new Value(null),
 			state : Dynamic = null;
 
 		expression
 			.map(function(exp) {
 				return switch exp {
-					case Fun(f):
+					case Fun(f, _):
 						f;
 					case _:
 						null;
@@ -162,7 +162,7 @@ class Context {
 					state = f();
 					true;
 				} catch(e : Dynamic) {
-					expression.value = RuntimeError(Std.string(e));
+					expression.value = RuntimeError(Std.string(e), '');
 					false;
 				};
 			})
