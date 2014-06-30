@@ -7,7 +7,7 @@ import steamer.Value;
 import sui.components.Component;
 import sui.components.ComponentOptions;
 import sui.properties.ValueProperty;
-import types.Dynamics;
+import types.DynamicTransform;
 import ui.widgets.Button;
 import ui.Expression;
 import ui.fragments.Fragment;
@@ -199,7 +199,7 @@ class Context {
 						},
 			type      : BoolType,
 			code      : 'true',
-			transform : Dynamics.toBool,
+			transform : DynamicTransform.toBool,
 			defaultf  : function() : Dynamic return false
 		};
 	}
@@ -215,7 +215,7 @@ class Context {
 						},
 			type      : StringType,
 			code      : '"franco"',
-			transform : Dynamics.toString,
+			transform : DynamicTransform.toString,
 			defaultf  : function() : Dynamic return ""
 		};
 	}
