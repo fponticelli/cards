@@ -16,11 +16,12 @@ import ui.widgets.Toolbar;
 import steamer.Consumer;
 using ui.Expression;
 
-class Context {
+class ContextView {
 	public var component(default, null) : Component;
 	public var toolbar(default, null) : Toolbar;
+	public var document(default, null) : Document;
 	public var fragments(default, null) : Consumer<Fragment>;
-	public var currentFragment(default, null) : Null<Fragment>;
+	public var activeFragment(default, null) : Null<Fragment>;
 	var fieldsEl : Element;
 	var menuAdd : Menu;
 	var buttonAdd : Button;
@@ -29,7 +30,8 @@ class Context {
 
 	public var field(default, null) : Value<Option<ContextField>>;
 
-	public function new(options : ComponentOptions) {
+	public function new(document : Document, options : ComponentOptions) {
+		this.document = document;
 		component = new Component(options);
 		toolbar   = new Toolbar({ parent : component, container : component.el });
 		fieldsEl = Html.parse('<div class="fields"><div></div></div>');
@@ -52,9 +54,9 @@ class Context {
 		buttonRemove.clicks.feed(function(_) {
 			switch field.value {
 				case Some(field):
-					currentFragment.component.properties.get(field.name).dispose();
+					activeFragment.component.properties.get(field.name).dispose();
 					field.destroy();
-					setAddMenuItems(currentFragment);
+					setAddMenuItems(activeFragment);
 				case _:
 			}
 		});
@@ -72,7 +74,7 @@ class Context {
 	}
 
 	function setFragmentStatus(fragment : Fragment) {
-		currentFragment = fragment;
+		activeFragment = fragment;
 		setFields(fragment);
 		setAddMenuItems(fragment);
 	}
