@@ -1,9 +1,7 @@
 package sui.properties;
 
-using steamer.dom.Dom;
-import steamer.Value;
 import sui.components.Component;
-import thx.Assert;
+using steamer.dom.Dom;
 
 class Attribute extends ValueProperty<String> {
 	public var attributeName(default, null) : String;

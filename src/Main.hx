@@ -5,8 +5,6 @@ import steamer.*;
 import ui.*;
 import ui.Card;
 
-import sui.properties.ValueProperty;
-
 class Main {
 	public static function main() {
 		Dom.ready().then(function(_) {
@@ -14,7 +12,7 @@ class Main {
 				data      = new Data({}),
 				model     = new Model(data);
 
-				// Card
+			// Card
 			Card.create(model, container);
 		});
 	}

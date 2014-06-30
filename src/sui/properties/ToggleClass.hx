@@ -1,9 +1,7 @@
 package sui.properties;
 
 using steamer.dom.Dom;
-import steamer.Value;
 import sui.components.Component;
-import thx.Assert;
 
 class ToggleClass extends ValueProperty<Bool> {
 	public function new(component : Component, name : String, ?className : String) {

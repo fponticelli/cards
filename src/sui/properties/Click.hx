@@ -4,7 +4,6 @@ import js.html.Event;
 import steamer.Producer;
 import sui.components.Component;
 using steamer.dom.Dom;
-import thx.Assert;
 
 class Click extends Property {
 	public var clicks(default, null) : Producer<Event>;

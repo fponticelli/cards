@@ -1,13 +1,8 @@
 package sui.properties;
 
-import js.html.Element;
 import js.html.InputElement;
-import steamer.Pulse.End;
-import steamer.Value;
 import sui.components.Component;
-import steamer.SimpleConsumer;
 using steamer.dom.Dom;
-import thx.Assert;
 
 class ValueAttribute extends ValueProperty<String> {
 	public function new(component : Component, eventName : String) {

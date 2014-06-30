@@ -1,8 +1,5 @@
 package sui.properties;
 
-import js.html.Event;
-import steamer.Producer;
-import thx.Assert;
 import sui.components.Component;
 using steamer.dom.Dom;
 
