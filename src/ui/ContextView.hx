@@ -9,13 +9,12 @@ import sui.components.ComponentOptions;
 import sui.properties.ValueProperty;
 import types.DynamicTransform;
 import ui.widgets.Button;
-import ui.Expression;
 import ui.fragments.Fragment;
 import ui.widgets.Menu;
 import ui.widgets.Toolbar;
-import steamer.Consumer;
 using ui.Expression;
 using thx.core.Options;
+using steamer.Producer;
 
 class ContextView {
 	public var component(default, null) : Component;
@@ -41,43 +40,27 @@ class ContextView {
 		menuAdd = new Menu({ parent : component });
 
 		menuAdd.anchorTo(buttonAdd.component.el);
-		buttonAdd.clicks.map(function(_) {
-			return true;
-		}).feed(menuAdd.visible.stream);
+		buttonAdd.clicks.toTrue().feed(menuAdd.visible.stream);
 
 		buttonAdd.enabled.value = false;
 
 		buttonRemove = toolbar.right.addButton('', Config.icons.remove);
 		buttonRemove.enabled.value = false;
 		buttonRemove.clicks.feed(function(_) {
-			switch field.value {
-				case Some(field):
-					var fragment = document.article.fragment.value.toValue();
-					fragment.component.properties.get(field.name).dispose();
-					field.destroy();
-					setAddMenuItems(fragment);
-				case _:
-			}
+			var field = field.value.toValue(),
+				fragment = document.article.fragment.value.toValue();
+			fragment.component.properties.get(field.name).dispose();
+			field.destroy();
+			setAddMenuItems(fragment);
 		});
 
 		field = new Value(None);
-		field.feed(function(option) {
-			switch option {
-				case Some(field):
-					buttonRemove.enabled.value = true;
-				case None:
-					buttonRemove.enabled.value = false;
-			}
-		});
+		field.toBool().feed(buttonRemove.enabled);
 		expressions = new Map();
 
-		document.article.fragment.feed(function(opt) {
-			switch opt {
-				case Some(fragment):
-					setFragmentStatus(fragment);
-				case None:
-					resetFragmentStatus();
-			}
+		document.article.fragment.feed({
+			some : setFragmentStatus,
+			none : resetFragmentStatus
 		});
 	}
 

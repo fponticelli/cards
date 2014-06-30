@@ -1001,6 +1001,40 @@ steamer._Consumer.Consumer_Impl_.fromObject = function(o) {
 		}
 	}};
 };
+steamer._Consumer.Consumer_Impl_.fromOption = function(o) {
+	if(null == o.some) o.some = function(_) {
+	};
+	if(null == o.none) o.none = function() {
+	};
+	if(null == o.end) o.end = function() {
+	};
+	if(null == o.error) o.error = function(e) {
+		throw e;
+	};
+	return { onPulse : function(pulse) {
+		switch(pulse[1]) {
+		case 0:
+			var opt = pulse[2];
+			switch(opt[1]) {
+			case 0:
+				var v = opt[2];
+				o.some(v);
+				break;
+			case 1:
+				o.none();
+				break;
+			}
+			break;
+		case 1:
+			o.end();
+			break;
+		case 2:
+			var e1 = pulse[2];
+			o.error(e1);
+			break;
+		}
+	}};
+};
 steamer._Consumer.Consumer_Impl_.toImplementation = function(this1) {
 	return this1;
 };
@@ -1197,6 +1231,16 @@ steamer.Producer.prototype = {
 			}(this)));
 		},this.endOnError);
 	}
+	,toTrue: function() {
+		return this.map(function(_) {
+			return true;
+		});
+	}
+	,toFalse: function() {
+		return this.map(function(_) {
+			return false;
+		});
+	}
 	,log: function(prefix,posInfo) {
 		if(prefix == null) prefix = ""; else prefix = "" + prefix + ": ";
 		return this.map(function(v) {
@@ -1234,7 +1278,7 @@ steamer.Producer.prototype = {
 							forward(steamer.Pulse.Fail(e));
 						} else {
 						var e1 = $e0;
-						forward(steamer.Pulse.Fail(new thx.Error(Std.string(e1),null,{ fileName : "Producer.hx", lineNumber : 90, className : "steamer.Producer", methodName : "filterAsync"})));
+						forward(steamer.Pulse.Fail(new thx.Error(Std.string(e1),null,{ fileName : "Producer.hx", lineNumber : 98, className : "steamer.Producer", methodName : "filterAsync"})));
 						}
 					}
 				},forward);
@@ -3614,28 +3658,18 @@ ui.ContextView = function(document,options) {
 	this.buttonAdd = this.toolbar.left.addButton("add property",Config.icons.dropDown);
 	this.menuAdd = new ui.widgets.Menu({ parent : this.component});
 	this.menuAdd.anchorTo(this.buttonAdd.component.el);
-	this.buttonAdd.clicks.map(function(_) {
-		return true;
-	}).feed(this.menuAdd.visible.stream);
+	this.buttonAdd.clicks.toTrue().feed(this.menuAdd.visible.stream);
 	this.buttonAdd.enabled.set_value(false);
 	this.buttonRemove = this.toolbar.right.addButton("",Config.icons.remove);
 	this.buttonRemove.enabled.set_value(false);
 	this.buttonRemove.clicks.feed((function($this) {
 		var $r;
-		var f = function(_1) {
-			{
-				var _g1 = _g.field.get_value();
-				switch(_g1[1]) {
-				case 0:
-					var field = _g1[2];
-					var fragment = thx.core.Options.toValue(document.article.fragment.get_value());
-					fragment.component.properties.get(field.name).dispose();
-					field.destroy();
-					_g.setAddMenuItems(fragment);
-					break;
-				default:
-				}
-			}
+		var f = function(_) {
+			var field = thx.core.Options.toValue(_g.field.get_value());
+			var fragment = thx.core.Options.toValue(document.article.fragment.get_value());
+			fragment.component.properties.get(field.name).dispose();
+			field.destroy();
+			_g.setAddMenuItems(fragment);
 		};
 		$r = { onPulse : function(pulse) {
 			switch(pulse[1]) {
@@ -3649,55 +3683,9 @@ ui.ContextView = function(document,options) {
 		return $r;
 	}(this)));
 	this.field = new steamer.Value(haxe.ds.Option.None);
-	this.field.feed((function($this) {
-		var $r;
-		var f1 = function(option) {
-			switch(option[1]) {
-			case 0:
-				var field1 = option[2];
-				_g.buttonRemove.enabled.set_value(true);
-				break;
-			case 1:
-				_g.buttonRemove.enabled.set_value(false);
-				break;
-			}
-		};
-		$r = { onPulse : function(pulse1) {
-			switch(pulse1[1]) {
-			case 0:
-				var v1 = pulse1[2];
-				f1(v1);
-				break;
-			default:
-			}
-		}};
-		return $r;
-	}(this)));
+	steamer.Producer.toBool(this.field).feed(this.buttonRemove.enabled);
 	this.expressions = new haxe.ds.StringMap();
-	document.article.fragment.feed((function($this) {
-		var $r;
-		var f2 = function(opt) {
-			switch(opt[1]) {
-			case 0:
-				var fragment1 = opt[2];
-				_g.setFragmentStatus(fragment1);
-				break;
-			case 1:
-				_g.resetFragmentStatus();
-				break;
-			}
-		};
-		$r = { onPulse : function(pulse2) {
-			switch(pulse2[1]) {
-			case 0:
-				var v2 = pulse2[2];
-				f2(v2);
-				break;
-			default:
-			}
-		}};
-		return $r;
-	}(this)));
+	document.article.fragment.feed(steamer._Consumer.Consumer_Impl_.fromOption({ some : $bind(this,this.setFragmentStatus), none : $bind(this,this.resetFragmentStatus)}));
 };
 ui.ContextView.__name__ = ["ui","ContextView"];
 ui.ContextView.createToggleInfo = function(display,name) {

@@ -4,8 +4,9 @@
 
 - helper context (for excel like functions)
 
-- active state
-- focus state
+- active state for fields
+- focus state for fields
+
 
 - inline fragment
 
@@ -43,6 +44,8 @@ OPT: execute expression in special scope with utility functions
 
 DONE:
 
++ active state for fragments
++ focus state for fragments
 + make all fragments focusable
 + feed content
 + display runtime errors
