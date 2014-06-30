@@ -22,6 +22,7 @@ class TextEditor implements Editor {
 		if(null == options.el && null == options.template)
 			options.template = '<span></span>';
 		component = new Component(options);
+		component.el.classList.add('editor');
 		component.el.setAttribute('contenteditable', cast true);
 
 		var text      = new Text(component, options.defaultText),
