@@ -7,18 +7,25 @@ import thx.Assert;
 import ui.fragments.Block;
 import ui.fragments.ReadonlyBlock;
 import ui.fragments.Fragment;
+import steamer.Value;
+import haxe.ds.Option;
+using thx.core.Options;
 
 class Article {
 	public var component(default, null) : Component;
-	public var current(default, null) : MultiProducer<Fragment>;
+	public var fragment(default, null) : Value<Option<Fragment>>;
 
+	var fragmentStream : MultiProducer<Fragment>;
 	var fragments : Map<Fragment, Void -> Void>;
+
 	public function new(options : ComponentOptions) {
 		if(null == options.el && null == options.template)
 			options.template = '<article></article>';
 		component = new Component(options);
 		fragments = new Map();
-		current = new MultiProducer();
+		fragmentStream = new MultiProducer();
+		fragment = new Value(None);
+		fragmentStream.mapToOption().feed(fragment);
 	}
 
 	function addFragment(fragment : Fragment) {
@@ -26,9 +33,9 @@ class Article {
 			.focus
 			.filter(function(v) return v)
 			.map(function(_) : Fragment return fragment);
-		current.add(addFocus);
+		fragmentStream.add(addFocus);
 		fragments.set(fragment, function() {
-			current.remove(addFocus);
+			fragmentStream.remove(addFocus);
 		});
 	}
 
@@ -52,6 +59,8 @@ class Article {
 	}
 
 	public function removeFragment(fragment : Fragment) {
+		if(this.fragment.value.equalsValue(fragment))
+			this.fragment.value = None;
 		var finalizer = fragments.get(fragment);
 		Assert.notNull(finalizer);
 		finalizer();

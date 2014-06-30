@@ -15,13 +15,12 @@ import ui.widgets.Menu;
 import ui.widgets.Toolbar;
 import steamer.Consumer;
 using ui.Expression;
+using thx.core.Options;
 
 class ContextView {
 	public var component(default, null) : Component;
 	public var toolbar(default, null) : Toolbar;
 	public var document(default, null) : Document;
-	public var fragments(default, null) : Consumer<Fragment>;
-	public var activeFragment(default, null) : Null<Fragment>;
 	var fieldsEl : Element;
 	var menuAdd : Menu;
 	var buttonAdd : Button;
@@ -46,7 +45,6 @@ class ContextView {
 			return true;
 		}).feed(menuAdd.visible.stream);
 
-		fragments = setFragmentStatus;
 		buttonAdd.enabled.value = false;
 
 		buttonRemove = toolbar.right.addButton('', Config.icons.remove);
@@ -54,9 +52,10 @@ class ContextView {
 		buttonRemove.clicks.feed(function(_) {
 			switch field.value {
 				case Some(field):
-					activeFragment.component.properties.get(field.name).dispose();
+					var fragment = document.article.fragment.value.toValue();
+					fragment.component.properties.get(field.name).dispose();
 					field.destroy();
-					setAddMenuItems(activeFragment);
+					setAddMenuItems(fragment);
 				case _:
 			}
 		});
@@ -71,16 +70,33 @@ class ContextView {
 			}
 		});
 		expressions = new Map();
+
+		document.article.fragment.feed(function(opt) {
+			switch opt {
+				case Some(fragment):
+					setFragmentStatus(fragment);
+				case None:
+					resetFragmentStatus();
+			}
+		});
+	}
+
+	function resetFragmentStatus() {
+		resetFields();
+		resetAddMenuItems();
 	}
 
 	function setFragmentStatus(fragment : Fragment) {
-		activeFragment = fragment;
 		setFields(fragment);
 		setAddMenuItems(fragment);
 	}
 
-	function setFields(fragment : Fragment) {
+	function resetFields() {
 		fieldsEl.innerHTML = '';
+	}
+
+	function setFields(fragment : Fragment) {
+		resetFields();
 		var fields = getAttachedPropertiesForFragment(fragment);
 		fields.map(addField);
 	}
@@ -119,15 +135,15 @@ class ContextView {
 		exp.feed(expression);
 	}
 
-	function setAddMenuItems(fragment : Fragment) {
-		if(null == fragment) {
-			buttonAdd.enabled.value = false;
-			return;
-		}
+	function resetAddMenuItems() {
+		buttonAdd.enabled.value = false;
+		menuAdd.clear();
+	}
 
+	function setAddMenuItems(fragment : Fragment) {
+		resetAddMenuItems();
 		var attachables = getAttachablePropertiesForFragment(fragment);
 		buttonAdd.enabled.value = attachables.length > 0;
-		menuAdd.clear();
 		attachables.map(function(fieldInfo) {
 			var button = new Button('add ${fieldInfo.display}');
 			menuAdd.addItem(button.component);

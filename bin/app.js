@@ -1010,6 +1010,51 @@ steamer.Producer = function(handler,endOnError) {
 	this.endOnError = endOnError;
 };
 steamer.Producer.__name__ = ["steamer","Producer"];
+steamer.Producer.filterOption = function(producer) {
+	return producer.filter(function(opt) {
+		switch(opt[1]) {
+		case 0:
+			return true;
+		case 1:
+			return false;
+		}
+	}).map(function(opt1) {
+		switch(opt1[1]) {
+		case 0:
+			var v = opt1[2];
+			return v;
+		case 1:
+			throw "filterOption failed";
+			break;
+		}
+	});
+};
+steamer.Producer.toValue = function(producer) {
+	return producer.map(function(opt) {
+		switch(opt[1]) {
+		case 0:
+			var v = opt[2];
+			return v;
+		case 1:
+			return null;
+		}
+	});
+};
+steamer.Producer.toBool = function(producer) {
+	return producer.map(function(opt) {
+		switch(opt[1]) {
+		case 0:
+			return true;
+		case 1:
+			return false;
+		}
+	});
+};
+steamer.Producer.skipNull = function(producer) {
+	return producer.filter(function(value) {
+		return null != value;
+	});
+};
 steamer.Producer.left = function(producer) {
 	return producer.map(function(v) {
 		return v.left;
@@ -1079,7 +1124,7 @@ steamer.Producer.prototype = {
 		var _g = this;
 		var ended = false;
 		var sendPulse = function(v) {
-			if(ended) throw new thx.Error("Feed already reached end but still receiving pulses: ${v}",null,{ fileName : "Producer.hx", lineNumber : 22, className : "steamer.Producer", methodName : "feed"}); else switch(v[1]) {
+			if(ended) throw new thx.Error("Feed already reached end but still receiving pulses: ${v}",null,{ fileName : "Producer.hx", lineNumber : 23, className : "steamer.Producer", methodName : "feed"}); else switch(v[1]) {
 			case 2:
 				if(_g.endOnError) {
 					thx.Timer.setImmediate((function(f,a1) {
@@ -1116,6 +1161,11 @@ steamer.Producer.prototype = {
 		};
 		this.handler(sendPulse);
 	}
+	,mapToOption: function() {
+		return this.map(function(v) {
+			if(null == v) return haxe.ds.Option.None; else return haxe.ds.Option.Some(v);
+		});
+	}
 	,map: function(transform) {
 		return this.mapAsync(function(v,t) {
 			t(transform(v));
@@ -1138,7 +1188,7 @@ steamer.Producer.prototype = {
 							forward(steamer.Pulse.Fail(e));
 						} else {
 						var e1 = $e0;
-						forward(steamer.Pulse.Fail(new thx.Error(Std.string(e1),null,{ fileName : "Producer.hx", lineNumber : 50, className : "steamer.Producer", methodName : "mapAsync"})));
+						forward(steamer.Pulse.Fail(new thx.Error(Std.string(e1),null,{ fileName : "Producer.hx", lineNumber : 55, className : "steamer.Producer", methodName : "mapAsync"})));
 						}
 					}
 				},forward);
@@ -1153,6 +1203,14 @@ steamer.Producer.prototype = {
 			haxe.Log.trace(v,posInfo);
 			return v;
 		});
+	}
+	,filterMap: function(transform) {
+		return this.filterMapAsync(function(v,t) {
+			t(transform(v));
+		});
+	}
+	,filterMapAsync: function(transform) {
+		return steamer.Producer.filterOption(this.mapAsync(transform));
 	}
 	,filter: function(f) {
 		return this.filterAsync(function(v,t) {
@@ -1176,7 +1234,7 @@ steamer.Producer.prototype = {
 							forward(steamer.Pulse.Fail(e));
 						} else {
 						var e1 = $e0;
-						forward(steamer.Pulse.Fail(new thx.Error(Std.string(e1),null,{ fileName : "Producer.hx", lineNumber : 80, className : "steamer.Producer", methodName : "filterAsync"})));
+						forward(steamer.Pulse.Fail(new thx.Error(Std.string(e1),null,{ fileName : "Producer.hx", lineNumber : 90, className : "steamer.Producer", methodName : "filterAsync"})));
 						}
 					}
 				},forward);
@@ -1377,8 +1435,8 @@ steamer.Producer.prototype = {
 	}
 	,sampleBy: function(sampler) {
 		var _g = this;
-		var latest = null;
 		return new steamer.Producer(function(forward) {
+			var latest = null;
 			_g.feed((function($this) {
 				var $r;
 				var consumer = steamer.Bus.passOn(function(v) {
@@ -1395,6 +1453,22 @@ steamer.Producer.prototype = {
 					latest = null;
 				},forward);
 				$r = consumer1;
+				return $r;
+			}(this)));
+		},this.endOnError);
+	}
+	,keep: function(n) {
+		var _g = this;
+		return new steamer.Producer(function(forward) {
+			var acc = [];
+			_g.feed((function($this) {
+				var $r;
+				var consumer = steamer.Bus.passOn(function(v) {
+					acc.push(v);
+					if(acc.length > n) acc.shift();
+					forward(steamer.Pulse.Emit(acc));
+				},forward);
+				$r = consumer;
 				return $r;
 			}(this)));
 		},this.endOnError);
@@ -2610,6 +2684,48 @@ thx.core.Objects.__name__ = ["thx","core","Objects"];
 thx.core.Objects.isEmpty = function(o) {
 	return Reflect.fields(o).length == 0;
 };
+thx.core.Options = function() { };
+thx.core.Options.__name__ = ["thx","core","Options"];
+thx.core.Options.toValue = function(option) {
+	switch(option[1]) {
+	case 1:
+		return null;
+	case 0:
+		var v = option[2];
+		return v;
+	}
+};
+thx.core.Options.toOption = function(value) {
+	if(null == value) return haxe.ds.Option.None; else return haxe.ds.Option.Some(value);
+};
+thx.core.Options.equals = function(a,b,eq) {
+	switch(a[1]) {
+	case 1:
+		switch(b[1]) {
+		case 1:
+			return true;
+		default:
+			return false;
+		}
+		break;
+	case 0:
+		switch(b[1]) {
+		case 0:
+			var a1 = a[2];
+			var b1 = b[2];
+			if(null == eq) eq = function(a2,b2) {
+				return a2 == b2;
+			};
+			return eq(a1,b1);
+		default:
+			return false;
+		}
+		break;
+	}
+};
+thx.core.Options.equalsValue = function(a,b,eq) {
+	return thx.core.Options.equals(a,thx.core.Options.toOption(b));
+};
 thx.core.Types = function() { };
 thx.core.Types.__name__ = ["thx","core","Types"];
 thx.core.Types.isAnonymousObject = function(v) {
@@ -3178,12 +3294,15 @@ ui.Article = function(options) {
 	if(null == options.el && null == options.template) options.template = "<article></article>";
 	this.component = new sui.components.Component(options);
 	this.fragments = new haxe.ds.ObjectMap();
-	this.current = new steamer.MultiProducer();
+	this.fragmentStream = new steamer.MultiProducer();
+	this.fragment = new steamer.Value(haxe.ds.Option.None);
+	this.fragmentStream.mapToOption().feed(this.fragment);
 };
 ui.Article.__name__ = ["ui","Article"];
 ui.Article.prototype = {
 	component: null
-	,current: null
+	,fragment: null
+	,fragmentStream: null
 	,fragments: null
 	,addFragment: function(fragment) {
 		var _g = this;
@@ -3192,9 +3311,9 @@ ui.Article.prototype = {
 		}).map(function(_) {
 			return fragment;
 		});
-		this.current.add(addFocus);
+		this.fragmentStream.add(addFocus);
 		this.fragments.set(fragment,function() {
-			_g.current.remove(addFocus);
+			_g.fragmentStream.remove(addFocus);
 		});
 	}
 	,addBlock: function() {
@@ -3208,8 +3327,9 @@ ui.Article.prototype = {
 		return fragment;
 	}
 	,removeFragment: function(fragment) {
+		if(thx.core.Options.equalsValue(this.fragment.get_value(),fragment)) this.fragment.set_value(haxe.ds.Option.None);
 		var finalizer = this.fragments.h[fragment.__id__];
-		thx.Assert.notNull(finalizer,null,{ fileName : "Article.hx", lineNumber : 56, className : "ui.Article", methodName : "removeFragment"});
+		thx.Assert.notNull(finalizer,null,{ fileName : "Article.hx", lineNumber : 65, className : "ui.Article", methodName : "removeFragment"});
 		finalizer();
 	}
 	,__class__: ui.Article
@@ -3221,9 +3341,7 @@ ui.Card.create = function(model,container) {
 	var context = dom.Query.first(".context",card.el);
 	var modelView = new ui.ModelView();
 	var document = new ui.Document({ el : dom.Query.first(".doc",card.el)});
-	var context1 = new ui.Context({ el : dom.Query.first(".context",card.el)});
-	document.article.current.feed(context1.fragments);
-	document.article.current.feed(document.fragments);
+	var context1 = new ui.ContextView(document,{ el : dom.Query.first(".context",card.el)});
 	modelView.component.appendTo(dom.Query.first(".model",card.el));
 	modelView.schema.feed(model.schemaEventConsumer);
 	modelView.data.feed(model.dataEventConsumer);
@@ -3232,243 +3350,10 @@ ui.Card.create = function(model,container) {
 		return JSON.stringify(o);
 	}).feed((function($this) {
 		var $r;
-		var consumer = new steamer.consumers.LoggerConsumer(null,{ fileName : "Card.hx", lineNumber : 27, className : "ui.Card", methodName : "create"});
+		var consumer = new steamer.consumers.LoggerConsumer(null,{ fileName : "Card.hx", lineNumber : 25, className : "ui.Card", methodName : "create"});
 		$r = consumer;
 		return $r;
 	}(this)));
-};
-ui.Context = function(options) {
-	var _g = this;
-	this.component = new sui.components.Component(options);
-	this.toolbar = new ui.widgets.Toolbar({ parent : this.component, container : this.component.el});
-	this.fieldsEl = dom.Html.parseList("<div class=\"fields\"><div></div></div>")[0];
-	this.component.el.appendChild(this.fieldsEl);
-	this.fieldsEl = dom.Query.first("div",this.fieldsEl);
-	this.buttonAdd = this.toolbar.left.addButton("add property",Config.icons.dropDown);
-	this.menuAdd = new ui.widgets.Menu({ parent : this.component});
-	this.menuAdd.anchorTo(this.buttonAdd.component.el);
-	this.buttonAdd.clicks.map(function(_) {
-		return true;
-	}).feed(this.menuAdd.visible.stream);
-	var f = $bind(this,this.setFragmentStatus);
-	this.fragments = { onPulse : function(pulse) {
-		switch(pulse[1]) {
-		case 0:
-			var v = pulse[2];
-			f(v);
-			break;
-		default:
-		}
-	}};
-	this.buttonAdd.enabled.set_value(false);
-	this.buttonRemove = this.toolbar.right.addButton("",Config.icons.remove);
-	this.buttonRemove.enabled.set_value(false);
-	this.buttonRemove.clicks.feed((function($this) {
-		var $r;
-		var f1 = function(_1) {
-			{
-				var _g1 = _g.field.get_value();
-				switch(_g1[1]) {
-				case 0:
-					var field = _g1[2];
-					_g.currentFragment.component.properties.get(field.name).dispose();
-					field.destroy();
-					_g.setAddMenuItems(_g.currentFragment);
-					break;
-				default:
-				}
-			}
-		};
-		$r = { onPulse : function(pulse1) {
-			switch(pulse1[1]) {
-			case 0:
-				var v1 = pulse1[2];
-				f1(v1);
-				break;
-			default:
-			}
-		}};
-		return $r;
-	}(this)));
-	this.field = new steamer.Value(haxe.ds.Option.None);
-	this.field.feed((function($this) {
-		var $r;
-		var f2 = function(option) {
-			switch(option[1]) {
-			case 0:
-				var field1 = option[2];
-				_g.buttonRemove.enabled.set_value(true);
-				break;
-			case 1:
-				_g.buttonRemove.enabled.set_value(false);
-				break;
-			}
-		};
-		$r = { onPulse : function(pulse2) {
-			switch(pulse2[1]) {
-			case 0:
-				var v2 = pulse2[2];
-				f2(v2);
-				break;
-			default:
-			}
-		}};
-		return $r;
-	}(this)));
-	this.expressions = new haxe.ds.StringMap();
-};
-ui.Context.__name__ = ["ui","Context"];
-ui.Context.createToggleInfo = function(display,name) {
-	return { display : display, name : name, create : function(target,value) {
-		var toggle = new sui.properties.ToggleClass(target,name,name);
-		value.feed(toggle.stream);
-		return toggle;
-	}, type : ui.SchemaType.BoolType, code : "true", transform : types.DynamicTransform.toBool, defaultf : function() {
-		return false;
-	}};
-};
-ui.Context.createTextInfo = function() {
-	return { display : "content", name : "text", create : function(target,value) {
-		var text = new sui.properties.Text(target,"");
-		value.feed(text.stream);
-		return text;
-	}, type : ui.SchemaType.StringType, code : "\"franco\"", transform : types.DynamicTransform.toString, defaultf : function() {
-		return "";
-	}};
-};
-ui.Context.prototype = {
-	component: null
-	,toolbar: null
-	,fragments: null
-	,currentFragment: null
-	,fieldsEl: null
-	,menuAdd: null
-	,buttonAdd: null
-	,buttonRemove: null
-	,expressions: null
-	,field: null
-	,setFragmentStatus: function(fragment) {
-		this.currentFragment = fragment;
-		this.setFields(fragment);
-		this.setAddMenuItems(fragment);
-	}
-	,setFields: function(fragment) {
-		this.fieldsEl.innerHTML = "";
-		var fields = this.getAttachedPropertiesForFragment(fragment);
-		fields.map($bind(this,this.addField));
-	}
-	,addField: function(fieldInfo) {
-		var pair = this.expressions.get(fieldInfo.name);
-		var f = new ui.ContextField({ container : this.fieldsEl, parent : this.component, display : fieldInfo.display, name : fieldInfo.name, value : null == pair.code.get_value()?fieldInfo.code:pair.code.get_value()});
-		f.focus.map(function(v) {
-			if(v) return haxe.ds.Option.Some(f); else return haxe.ds.Option.None;
-		}).feed(this.field);
-		var expression = pair.expression;
-		var exp = f.value.text.debounce(250).distinct().map(function(code) {
-			return ui.Expressions.toExpression(code);
-		});
-		f.value.text.feed(pair.code);
-		var mixed = exp.merge(expression);
-		mixed.map(function(e) {
-			switch(e[1]) {
-			case 0:
-				var f1 = e[2];
-				return haxe.ds.Option.None;
-			case 1:
-				var e1 = e[2];
-				return haxe.ds.Option.Some(e1);
-			case 2:
-				var e2 = e[2];
-				return haxe.ds.Option.Some(e2);
-			}
-		}).feed(f.withError);
-		exp.feed(expression);
-	}
-	,setAddMenuItems: function(fragment) {
-		var _g = this;
-		if(null == fragment) {
-			this.buttonAdd.enabled.set_value(false);
-			return;
-		}
-		var attachables = this.getAttachablePropertiesForFragment(fragment);
-		this.buttonAdd.enabled.set_value(attachables.length > 0);
-		this.menuAdd.clear();
-		attachables.map(function(fieldInfo) {
-			var button = new ui.widgets.Button("add " + fieldInfo.display);
-			_g.menuAdd.addItem(button.component);
-			button.clicks.feed((function($this) {
-				var $r;
-				var f = function(_) {
-					var pair = _g.createFeedExpression(fieldInfo.transform,fieldInfo.defaultf);
-					var expression = pair.expression;
-					var value = pair.value;
-					var valueProperty = fieldInfo.create(fragment.component,value);
-					var value1 = { expression : expression, code : new steamer.Value(null)};
-					_g.expressions.set(fieldInfo.name,value1);
-					_g.setFragmentStatus(fragment);
-				};
-				$r = { onPulse : function(pulse) {
-					switch(pulse[1]) {
-					case 0:
-						var v = pulse[2];
-						f(v);
-						break;
-					default:
-					}
-				}};
-				return $r;
-			}(this)));
-		});
-	}
-	,createFeedExpression: function(transform,defaultf) {
-		var expression = new steamer.Value(ui.Expression.Fun(defaultf,""));
-		var value = new steamer.Value(null);
-		var state = null;
-		expression.map(function(exp) {
-			switch(exp[1]) {
-			case 0:
-				var f = exp[2];
-				return f;
-			default:
-				return null;
-			}
-		}).filter(function(f1) {
-			return f1 != null;
-		}).filter(function(f2) {
-			try {
-				state = f2();
-				return true;
-			} catch( e ) {
-				expression.set_value(ui.Expression.RuntimeError(Std.string(e),""));
-				return false;
-			}
-		}).map(function(_) {
-			return state;
-		}).map(transform).feed(value);
-		return { expression : expression, value : value};
-	}
-	,getAttachedPropertiesForFragment: function(fragment) {
-		return this.getPropertiesForFragment(fragment).filter(function(fieldInfo) {
-			return fragment.component.properties.exists(fieldInfo.name);
-		});
-	}
-	,getAttachablePropertiesForFragment: function(fragment) {
-		return this.getPropertiesForFragment(fragment).filter(function(fieldInfo) {
-			return !fragment.component.properties.exists(fieldInfo.name);
-		});
-	}
-	,getPropertiesForFragment: function(fragment) {
-		var _g = fragment.name;
-		switch(_g) {
-		case "block":
-			return [ui.Context.createToggleInfo("bold","strong"),ui.Context.createToggleInfo("italic","emphasis")];
-		case "readonly":
-			return [ui.Context.createToggleInfo("bold","strong"),ui.Context.createToggleInfo("italic","emphasis"),ui.Context.createTextInfo()];
-		default:
-			return [];
-		}
-	}
-	,__class__: ui.Context
 };
 ui.widgets = {};
 ui.widgets.FrameOverlay = function(options) {
@@ -3671,6 +3556,260 @@ ui.ContextField.prototype = {
 	}
 	,__class__: ui.ContextField
 };
+ui.ContextView = function(document,options) {
+	var _g = this;
+	this.document = document;
+	this.component = new sui.components.Component(options);
+	this.toolbar = new ui.widgets.Toolbar({ parent : this.component, container : this.component.el});
+	this.fieldsEl = dom.Html.parseList("<div class=\"fields\"><div></div></div>")[0];
+	this.component.el.appendChild(this.fieldsEl);
+	this.fieldsEl = dom.Query.first("div",this.fieldsEl);
+	this.buttonAdd = this.toolbar.left.addButton("add property",Config.icons.dropDown);
+	this.menuAdd = new ui.widgets.Menu({ parent : this.component});
+	this.menuAdd.anchorTo(this.buttonAdd.component.el);
+	this.buttonAdd.clicks.map(function(_) {
+		return true;
+	}).feed(this.menuAdd.visible.stream);
+	this.buttonAdd.enabled.set_value(false);
+	this.buttonRemove = this.toolbar.right.addButton("",Config.icons.remove);
+	this.buttonRemove.enabled.set_value(false);
+	this.buttonRemove.clicks.feed((function($this) {
+		var $r;
+		var f = function(_1) {
+			{
+				var _g1 = _g.field.get_value();
+				switch(_g1[1]) {
+				case 0:
+					var field = _g1[2];
+					var fragment = thx.core.Options.toValue(document.article.fragment.get_value());
+					fragment.component.properties.get(field.name).dispose();
+					field.destroy();
+					_g.setAddMenuItems(fragment);
+					break;
+				default:
+				}
+			}
+		};
+		$r = { onPulse : function(pulse) {
+			switch(pulse[1]) {
+			case 0:
+				var v = pulse[2];
+				f(v);
+				break;
+			default:
+			}
+		}};
+		return $r;
+	}(this)));
+	this.field = new steamer.Value(haxe.ds.Option.None);
+	this.field.feed((function($this) {
+		var $r;
+		var f1 = function(option) {
+			switch(option[1]) {
+			case 0:
+				var field1 = option[2];
+				_g.buttonRemove.enabled.set_value(true);
+				break;
+			case 1:
+				_g.buttonRemove.enabled.set_value(false);
+				break;
+			}
+		};
+		$r = { onPulse : function(pulse1) {
+			switch(pulse1[1]) {
+			case 0:
+				var v1 = pulse1[2];
+				f1(v1);
+				break;
+			default:
+			}
+		}};
+		return $r;
+	}(this)));
+	this.expressions = new haxe.ds.StringMap();
+	document.article.fragment.feed((function($this) {
+		var $r;
+		var f2 = function(opt) {
+			switch(opt[1]) {
+			case 0:
+				var fragment1 = opt[2];
+				_g.setFragmentStatus(fragment1);
+				break;
+			case 1:
+				_g.resetFragmentStatus();
+				break;
+			}
+		};
+		$r = { onPulse : function(pulse2) {
+			switch(pulse2[1]) {
+			case 0:
+				var v2 = pulse2[2];
+				f2(v2);
+				break;
+			default:
+			}
+		}};
+		return $r;
+	}(this)));
+};
+ui.ContextView.__name__ = ["ui","ContextView"];
+ui.ContextView.createToggleInfo = function(display,name) {
+	return { display : display, name : name, create : function(target,value) {
+		var toggle = new sui.properties.ToggleClass(target,name,name);
+		value.feed(toggle.stream);
+		return toggle;
+	}, type : ui.SchemaType.BoolType, code : "true", transform : types.DynamicTransform.toBool, defaultf : function() {
+		return false;
+	}};
+};
+ui.ContextView.createTextInfo = function() {
+	return { display : "content", name : "text", create : function(target,value) {
+		var text = new sui.properties.Text(target,"");
+		value.feed(text.stream);
+		return text;
+	}, type : ui.SchemaType.StringType, code : "\"franco\"", transform : types.DynamicTransform.toString, defaultf : function() {
+		return "";
+	}};
+};
+ui.ContextView.prototype = {
+	component: null
+	,toolbar: null
+	,document: null
+	,fieldsEl: null
+	,menuAdd: null
+	,buttonAdd: null
+	,buttonRemove: null
+	,expressions: null
+	,field: null
+	,resetFragmentStatus: function() {
+		this.resetFields();
+		this.resetAddMenuItems();
+	}
+	,setFragmentStatus: function(fragment) {
+		this.setFields(fragment);
+		this.setAddMenuItems(fragment);
+	}
+	,resetFields: function() {
+		this.fieldsEl.innerHTML = "";
+	}
+	,setFields: function(fragment) {
+		this.resetFields();
+		var fields = this.getAttachedPropertiesForFragment(fragment);
+		fields.map($bind(this,this.addField));
+	}
+	,addField: function(fieldInfo) {
+		var pair = this.expressions.get(fieldInfo.name);
+		var f = new ui.ContextField({ container : this.fieldsEl, parent : this.component, display : fieldInfo.display, name : fieldInfo.name, value : null == pair.code.get_value()?fieldInfo.code:pair.code.get_value()});
+		f.focus.map(function(v) {
+			if(v) return haxe.ds.Option.Some(f); else return haxe.ds.Option.None;
+		}).feed(this.field);
+		var expression = pair.expression;
+		var exp = f.value.text.debounce(250).distinct().map(function(code) {
+			return ui.Expressions.toExpression(code);
+		});
+		f.value.text.feed(pair.code);
+		var mixed = exp.merge(expression);
+		mixed.map(function(e) {
+			switch(e[1]) {
+			case 0:
+				var f1 = e[2];
+				return haxe.ds.Option.None;
+			case 1:
+				var e1 = e[2];
+				return haxe.ds.Option.Some(e1);
+			case 2:
+				var e2 = e[2];
+				return haxe.ds.Option.Some(e2);
+			}
+		}).feed(f.withError);
+		exp.feed(expression);
+	}
+	,resetAddMenuItems: function() {
+		this.buttonAdd.enabled.set_value(false);
+		this.menuAdd.clear();
+	}
+	,setAddMenuItems: function(fragment) {
+		var _g = this;
+		this.resetAddMenuItems();
+		var attachables = this.getAttachablePropertiesForFragment(fragment);
+		this.buttonAdd.enabled.set_value(attachables.length > 0);
+		attachables.map(function(fieldInfo) {
+			var button = new ui.widgets.Button("add " + fieldInfo.display);
+			_g.menuAdd.addItem(button.component);
+			button.clicks.feed((function($this) {
+				var $r;
+				var f = function(_) {
+					var pair = _g.createFeedExpression(fieldInfo.transform,fieldInfo.defaultf);
+					var expression = pair.expression;
+					var value = pair.value;
+					var valueProperty = fieldInfo.create(fragment.component,value);
+					var value1 = { expression : expression, code : new steamer.Value(null)};
+					_g.expressions.set(fieldInfo.name,value1);
+					_g.setFragmentStatus(fragment);
+				};
+				$r = { onPulse : function(pulse) {
+					switch(pulse[1]) {
+					case 0:
+						var v = pulse[2];
+						f(v);
+						break;
+					default:
+					}
+				}};
+				return $r;
+			}(this)));
+		});
+	}
+	,createFeedExpression: function(transform,defaultf) {
+		var expression = new steamer.Value(ui.Expression.Fun(defaultf,""));
+		var value = new steamer.Value(null);
+		var state = null;
+		expression.map(function(exp) {
+			switch(exp[1]) {
+			case 0:
+				var f = exp[2];
+				return f;
+			default:
+				return null;
+			}
+		}).filter(function(f1) {
+			return f1 != null;
+		}).filter(function(f2) {
+			try {
+				state = f2();
+				return true;
+			} catch( e ) {
+				expression.set_value(ui.Expression.RuntimeError(Std.string(e),""));
+				return false;
+			}
+		}).map(function(_) {
+			return state;
+		}).map(transform).feed(value);
+		return { expression : expression, value : value};
+	}
+	,getAttachedPropertiesForFragment: function(fragment) {
+		return this.getPropertiesForFragment(fragment).filter(function(fieldInfo) {
+			return fragment.component.properties.exists(fieldInfo.name);
+		});
+	}
+	,getAttachablePropertiesForFragment: function(fragment) {
+		return this.getPropertiesForFragment(fragment).filter(function(fieldInfo) {
+			return !fragment.component.properties.exists(fieldInfo.name);
+		});
+	}
+	,getPropertiesForFragment: function(fragment) {
+		var _g = fragment.name;
+		switch(_g) {
+		case "block":
+			return [ui.ContextView.createToggleInfo("bold","strong"),ui.ContextView.createToggleInfo("italic","emphasis")];
+		case "readonly":
+			return [ui.ContextView.createToggleInfo("bold","strong"),ui.ContextView.createToggleInfo("italic","emphasis"),ui.ContextView.createTextInfo()];
+		default:
+			return [];
+		}
+	}
+	,__class__: ui.ContextView
+};
 ui.Data = function(data) {
 	var _g = this;
 	this.feed = function(p) {
@@ -3750,31 +3889,18 @@ ui.Document = function(options) {
 	this.article = new ui.Article({ parent : this.component, container : this.component.el});
 	this.statusbar = new ui.widgets.Statusbar({ parent : this.component, container : this.component.el});
 	var buttonRemove = this.toolbar.right.addButton("",Config.icons.remove);
-	var setFragment = function(fragment) {
-		_g.currentFragment = fragment;
-		buttonRemove.enabled.set_value(null != fragment);
-	};
-	var f = setFragment;
-	this.fragments = { onPulse : function(pulse) {
-		switch(pulse[1]) {
-		case 0:
-			var v = pulse[2];
-			f(v);
-			break;
-		default:
-		}
-	}};
+	steamer.Producer.toBool(this.article.fragment).feed(buttonRemove.enabled);
 	var buttonAdd = this.toolbar.left.addButton("",Config.icons.add);
 	buttonAdd.clicks.feed((function($this) {
 		var $r;
-		var f1 = function(_) {
+		var f = function(_) {
 			_g.article.addBlock();
 		};
-		$r = { onPulse : function(pulse1) {
-			switch(pulse1[1]) {
+		$r = { onPulse : function(pulse) {
+			switch(pulse[1]) {
 			case 0:
-				var v1 = pulse1[2];
-				f1(v1);
+				var v = pulse[2];
+				f(v);
 				break;
 			default:
 			}
@@ -3784,15 +3910,15 @@ ui.Document = function(options) {
 	buttonRemove.enabled.set_value(false);
 	buttonRemove.clicks.feed((function($this) {
 		var $r;
-		var f2 = function(_1) {
-			_g.currentFragment.component.destroy();
-			setFragment(null);
+		var f1 = function(_1) {
+			thx.core.Options.toValue(_g.article.fragment.get_value()).component.destroy();
+			_g.article.fragment.set_value(haxe.ds.Option.None);
 		};
-		$r = { onPulse : function(pulse2) {
-			switch(pulse2[1]) {
+		$r = { onPulse : function(pulse1) {
+			switch(pulse1[1]) {
 			case 0:
-				var v2 = pulse2[2];
-				f2(v2);
+				var v1 = pulse1[2];
+				f1(v1);
 				break;
 			default:
 			}
@@ -3811,8 +3937,6 @@ ui.Document.prototype = {
 	,toolbar: null
 	,article: null
 	,statusbar: null
-	,currentFragment: null
-	,fragments: null
 	,__class__: ui.Document
 };
 ui.Expression = { __ename__ : ["ui","Expression"], __constructs__ : ["Fun","SyntaxError","RuntimeError"] };
@@ -4253,6 +4377,7 @@ ui.fragments.Fragment.prototype = {
 	name: null
 	,component: null
 	,focus: null
+	,active: null
 	,toString: null
 	,__class__: ui.fragments.Fragment
 };
@@ -4260,8 +4385,8 @@ ui.fragments.Block = function(options) {
 	this.name = "block";
 	if(null == options.el && null == options.template) options.template = "<section class=\"block\"></div>";
 	this.editor = new ui.editors.TextEditor(options);
-	this.classActive = new sui.properties.ToggleClass(this.editor.component,"active");
-	this.editor.focus.feed(this.classActive.stream);
+	this.active = new steamer.Value(false);
+	this.active.feed(new sui.properties.ToggleClass(this.editor.component,"active").stream);
 	this.focus = this.editor.focus;
 	this.component = this.editor.component;
 };
@@ -4272,7 +4397,7 @@ ui.fragments.Block.prototype = {
 	,editor: null
 	,component: null
 	,focus: null
-	,classActive: null
+	,active: null
 	,destroy: function() {
 		this.editor.destroy();
 	}
@@ -4287,6 +4412,7 @@ ui.fragments.ReadonlyBlock = function(options) {
 	if(null == options.el && null == options.template) options.template = "<section class=\"readonly block\" tabindex=\"0\">readonly</div>";
 	this.component = new sui.components.Component(options);
 	this.focus = new steamer.Value(false);
+	this.active = new steamer.Value(false);
 	this.focusEvent = steamer.dom.Dom.produceEvent(this.component.el,"focus");
 	this.blurEvent = steamer.dom.Dom.produceEvent(this.component.el,"blur");
 	this.focusEvent.producer.map(function(_) {
@@ -4294,10 +4420,10 @@ ui.fragments.ReadonlyBlock = function(options) {
 	}).merge(this.blurEvent.producer.map(function(_1) {
 		return false;
 	})).feed(this.focus);
-	this.focus.feed((function($this) {
+	this.active.feed((function($this) {
 		var $r;
-		var f = function(focused) {
-			if(focused) _g.component.el.classList.add("active"); else _g.component.el.classList.remove("active");
+		var f = function(isActive) {
+			if(isActive) _g.component.el.classList.add("active"); else _g.component.el.classList.remove("active");
 		};
 		$r = { onPulse : function(pulse) {
 			switch(pulse[1]) {
@@ -4317,6 +4443,7 @@ ui.fragments.ReadonlyBlock.prototype = {
 	name: null
 	,component: null
 	,focus: null
+	,active: null
 	,focusEvent: null
 	,blurEvent: null
 	,destroy: function() {

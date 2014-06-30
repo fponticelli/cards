@@ -6,14 +6,15 @@ import ui.fragments.Fragment;
 import ui.widgets.Toolbar;
 import ui.widgets.Statusbar;
 import steamer.Consumer;
+using steamer.Producer;
+using thx.core.Options;
+using steamer.dom.Dom;
 
 class Document {
 	public var component(default, null) : Component;
 	public var toolbar(default, null) : Toolbar;
 	public var article(default, null) : Article;
 	public var statusbar(default, null) : Statusbar;
-	public var currentFragment(default, null) : Null<Fragment>;
-	public var fragments(default, null) : Consumer<Fragment>;
 
 	public function new(options : ComponentOptions) {
 		component = new Component(options);
@@ -22,13 +23,7 @@ class Document {
 		statusbar = new Statusbar({ parent : component, container : component.el });
 
 		var buttonRemove = toolbar.right.addButton('', Config.icons.remove);
-
-		function setFragment(fragment) {
-			currentFragment = fragment;
-			buttonRemove.enabled.value = null != fragment;
-		}
-
-		fragments = setFragment;
+		article.fragment.toBool().feed(buttonRemove.enabled);
 
 		var buttonAdd = toolbar.left.addButton('', Config.icons.add);
 		buttonAdd.clicks.feed(function(_) {
@@ -37,8 +32,8 @@ class Document {
 
 		buttonRemove.enabled.value = false;
 		buttonRemove.clicks.feed(function(_) {
-			currentFragment.component.destroy();
-			setFragment(null);
+			article.fragment.value.toValue().component.destroy();
+			article.fragment.value = None;
 		});
 
 		// TODO remove me
