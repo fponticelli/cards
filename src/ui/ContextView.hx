@@ -22,10 +22,9 @@ class ContextView {
 	public var component(default, null) : Component;
 	public var toolbar(default, null) : Toolbar;
 	public var document(default, null) : Document;
-	var fieldsEl : Element;
-	var menuAdd : Menu;
-	var buttonAdd : Button;
-	var buttonRemove : Button;
+	var el : Element;
+	var add : { menu : Menu, button : Button };
+	var remove : { button : Button };
 	var expressions : Map<String, { runtime : Value<Runtime>, code : Value<String> }>;
 	var mapper : FragmentMapper;
 
@@ -36,21 +35,23 @@ class ContextView {
 		this.mapper = mapper;
 		component = new Component(options);
 		toolbar   = new Toolbar({ parent : component, container : component.el });
-		fieldsEl = Html.parse('<div class="fields"><div></div></div>');
-		component.el.appendChild(fieldsEl);
-		fieldsEl = Query.first('div', fieldsEl);
+		el = Html.parse('<div class="fields"><div></div></div>');
+		component.el.appendChild(el);
+		el = Query.first('div', el);
 
-		buttonAdd = toolbar.left.addButton('add property', Config.icons.dropDown);
-		menuAdd = new Menu({ parent : component });
+		add = {
+			button : toolbar.left.addButton('add property', Config.icons.dropDown),
+			menu : new Menu({ parent : component })
+		};
 
-		menuAdd.anchorTo(buttonAdd.component.el);
-		buttonAdd.clicks.toTrue().feed(menuAdd.visible.stream);
+		add.menu.anchorTo(add.button.component.el);
+		add.button.clicks.toTrue().feed(add.menu.visible.stream);
 
-		buttonAdd.enabled.value = false;
+		add.button.enabled.value = false;
 
-		buttonRemove = toolbar.right.addButton('', Config.icons.remove);
-		buttonRemove.enabled.value = false;
-		buttonRemove.clicks.feed(function(_) {
+		remove = { button : toolbar.right.addButton('', Config.icons.remove) };
+		remove.button.enabled.value = false;
+		remove.button.clicks.feed(function(_) {
 			var field = field.value.toValue(),
 				fragment = document.article.fragment.value.toValue();
 			fragment.component.properties.get(field.name).dispose();
@@ -59,7 +60,7 @@ class ContextView {
 		});
 
 		field = new Value(None);
-		field.toBool().feed(buttonRemove.enabled);
+		field.toBool().feed(remove.button.enabled);
 		expressions = new Map();
 
 		document.article.fragment.feed({
@@ -79,7 +80,7 @@ class ContextView {
 	}
 
 	function resetFields() {
-		fieldsEl.innerHTML = '';
+		el.innerHTML = '';
 	}
 
 	function setFields(fragment : Fragment) {
@@ -96,7 +97,7 @@ class ContextView {
 		var temp = value.value,
 			pair = ensureFeedExpression(fragment, info, value),
 			f = new ContextField({
-				container : fieldsEl,
+				container : el,
 				parent : component,
 				display : info.display,
 				name : info.name,
@@ -126,17 +127,17 @@ class ContextView {
 	}
 
 	function resetAddMenuItems() {
-		buttonAdd.enabled.value = false;
-		menuAdd.clear();
+		add.button.enabled.value = false;
+		add.menu.clear();
 	}
 
 	function setAddMenuItems(fragment : Fragment) {
 		resetAddMenuItems();
 		var attachables = mapper.getAttachablePropertiesForFragment(fragment);
-		buttonAdd.enabled.value = attachables.length > 0;
+		add.button.enabled.value = attachables.length > 0;
 		attachables.map(function(info) {
 			var button = new Button('add ${info.display}');
-			menuAdd.addItem(button.component);
+			add.menu.addItem(button.component);
 			button.clicks.feed(function(_) {
 				mapper.values.ensure(info.name, fragment.component);
 				setFragmentStatus(fragment);

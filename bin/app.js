@@ -3819,17 +3819,16 @@ ui.ContextView = function(document,mapper,options) {
 	this.mapper = mapper;
 	this.component = new sui.components.Component(options);
 	this.toolbar = new ui.widgets.Toolbar({ parent : this.component, container : this.component.el});
-	this.fieldsEl = dom.Html.parseList("<div class=\"fields\"><div></div></div>")[0];
-	this.component.el.appendChild(this.fieldsEl);
-	this.fieldsEl = dom.Query.first("div",this.fieldsEl);
-	this.buttonAdd = this.toolbar.left.addButton("add property",Config.icons.dropDown);
-	this.menuAdd = new ui.widgets.Menu({ parent : this.component});
-	this.menuAdd.anchorTo(this.buttonAdd.component.el);
-	this.buttonAdd.clicks.toTrue().feed(this.menuAdd.visible.stream);
-	this.buttonAdd.enabled.set_value(false);
-	this.buttonRemove = this.toolbar.right.addButton("",Config.icons.remove);
-	this.buttonRemove.enabled.set_value(false);
-	this.buttonRemove.clicks.feed((function($this) {
+	this.el = dom.Html.parseList("<div class=\"fields\"><div></div></div>")[0];
+	this.component.el.appendChild(this.el);
+	this.el = dom.Query.first("div",this.el);
+	this.add = { button : this.toolbar.left.addButton("add property",Config.icons.dropDown), menu : new ui.widgets.Menu({ parent : this.component})};
+	this.add.menu.anchorTo(this.add.button.component.el);
+	this.add.button.clicks.toTrue().feed(this.add.menu.visible.stream);
+	this.add.button.enabled.set_value(false);
+	this.remove = { button : this.toolbar.right.addButton("",Config.icons.remove)};
+	this.remove.button.enabled.set_value(false);
+	this.remove.button.clicks.feed((function($this) {
 		var $r;
 		var f = function(_) {
 			var field = thx.core.Options.toValue(_g.field.get_value());
@@ -3850,7 +3849,7 @@ ui.ContextView = function(document,mapper,options) {
 		return $r;
 	}(this)));
 	this.field = new steamer.Value(haxe.ds.Option.None);
-	steamer.Producer.toBool(this.field).feed(this.buttonRemove.enabled);
+	steamer.Producer.toBool(this.field).feed(this.remove.button.enabled);
 	this.expressions = new haxe.ds.StringMap();
 	document.article.fragment.feed(steamer._Consumer.Consumer_Impl_.fromOption({ some : $bind(this,this.setFragmentStatus), none : $bind(this,this.resetFragmentStatus)}));
 };
@@ -3891,10 +3890,9 @@ ui.ContextView.prototype = {
 	component: null
 	,toolbar: null
 	,document: null
-	,fieldsEl: null
-	,menuAdd: null
-	,buttonAdd: null
-	,buttonRemove: null
+	,el: null
+	,add: null
+	,remove: null
 	,expressions: null
 	,mapper: null
 	,field: null
@@ -3907,7 +3905,7 @@ ui.ContextView.prototype = {
 		this.setAddMenuItems(fragment);
 	}
 	,resetFields: function() {
-		this.fieldsEl.innerHTML = "";
+		this.el.innerHTML = "";
 	}
 	,setFields: function(fragment) {
 		var _g = this;
@@ -3921,7 +3919,7 @@ ui.ContextView.prototype = {
 	,addField: function(fragment,info,value) {
 		var temp = value.get_value();
 		var pair = this.ensureFeedExpression(fragment,info,value);
-		var f = new ui.ContextField({ container : this.fieldsEl, parent : this.component, display : info.display, name : info.name, value : (ui.ContextView.valueToCode(info.type))(temp)});
+		var f = new ui.ContextField({ container : this.el, parent : this.component, display : info.display, name : info.name, value : (ui.ContextView.valueToCode(info.type))(temp)});
 		var expression = f.value.text.debounce(250).distinct().map(function(code) {
 			return ui.Runtimes.toRuntime(code);
 		});
@@ -3949,17 +3947,17 @@ ui.ContextView.prototype = {
 		expression.feed(pair.runtime);
 	}
 	,resetAddMenuItems: function() {
-		this.buttonAdd.enabled.set_value(false);
-		this.menuAdd.clear();
+		this.add.button.enabled.set_value(false);
+		this.add.menu.clear();
 	}
 	,setAddMenuItems: function(fragment) {
 		var _g = this;
 		this.resetAddMenuItems();
 		var attachables = this.mapper.getAttachablePropertiesForFragment(fragment);
-		this.buttonAdd.enabled.set_value(attachables.length > 0);
+		this.add.button.enabled.set_value(attachables.length > 0);
 		attachables.map(function(info) {
 			var button = new ui.widgets.Button("add " + info.display);
-			_g.menuAdd.addItem(button.component);
+			_g.add.menu.addItem(button.component);
 			button.clicks.feed((function($this) {
 				var $r;
 				var f = function(_) {
