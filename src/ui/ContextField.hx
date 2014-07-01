@@ -7,6 +7,7 @@ import sui.components.ComponentOptions;
 import dom.Dom;
 import sui.properties.ToggleClass;
 import sui.properties.ValueProperty;
+import ui.editors.CodeEditor;
 import ui.editors.Editor;
 import ui.editors.EditorPicker;
 using steamer.dom.Dom;
@@ -17,12 +18,11 @@ import ui.widgets.Tooltip;
 class ContextField {
 	public static var tooltip(default, null) : Tooltip = new Tooltip({ classes : 'tooltip error' });
 	public var component(default, null) : Component;
-	public var value(default, null) : Editor<Dynamic>;
-	public var focus(default, null) : Producer<Bool>;
+	public var editor(default, null) : Editor<Dynamic>;
+	public var focus(default, null) : Value<Bool>;
+	public var active(default, null) : Value<Bool>;
 	public var name(default, null) : String;
 	public var withError(default, null) : Value<Option<String>>;
-
-	var classActive : ToggleClass;
 
 	public function new(options : ContextFieldOptions) {
 		if(null == options.template && null == options.el)
@@ -37,7 +37,7 @@ class ContextField {
 
 		// setup field value
 		// TODO support multiple editors data types
-		value = EditorPicker.pick(
+		editor = EditorPicker.pick(
 			options.type,
 			Query.first('.value', component.el),
 			component,
@@ -46,9 +46,10 @@ class ContextField {
 		// 250 is kind of a magic value and it is enough
 		// to be able to click on a button
 		// and not have lost focus in the meanwhile
-		focus = value.focus.debounce(250).distinct();
-		classActive = new ToggleClass(component, 'active');
-		focus.feed(classActive.stream);
+		focus  = new Value(false);
+		active = new Value(false);
+		editor.focus.debounce(250).distinct().feed(focus);
+		active.feed(component.el.consumeToggleClass('active'));
 
 		var hasError = component.el.consumeToggleClass('error');
 		withError = new Value(None);
@@ -70,15 +71,14 @@ class ContextField {
 			}
 		});
 
-		this.value.value.feed(options.value.stream);
+		editor.value.feed(options.value.stream);
 		// TODO does this leak?
-		options.value.stream.feed(this.value.value);
+		options.value.stream.feed(editor.value);
 	}
 
 	public function destroy() {
-		classActive.dispose();
 		component.destroy();
-		value = null;
+		editor = null;
 		focus = null;
 	}
 }

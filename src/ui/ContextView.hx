@@ -20,12 +20,11 @@ class ContextView {
 	public var component(default, null) : Component;
 	public var toolbar(default, null) : Toolbar;
 	public var document(default, null) : Document;
+	public var field(default, null) : Value<Option<ContextField>>;
 	var el : Element;
 	var add : { menu : Menu, button : Button };
 	var remove : { button : Button };
 	var mapper : FragmentMapper;
-
-	public var field(default, null) : Value<Option<ContextField>>;
 
 	public function new(document : Document, mapper : FragmentMapper, options : ComponentOptions) {
 		this.document = document;
@@ -47,7 +46,6 @@ class ContextView {
 		add.button.enabled.value = false;
 
 		remove = { button : toolbar.right.addButton('', Config.icons.remove) };
-		remove.button.enabled.value = false;
 		remove.button.clicks.feed(function(_) {
 			var field = field.value.toValue(),
 				fragment = document.article.fragment.value.toValue();
@@ -57,7 +55,14 @@ class ContextView {
 		});
 
 		field = new Value(None);
-		field.toBool().feed(remove.button.enabled);
+		field.toBool().debounce(50).feed(remove.button.enabled);
+		var filtered = field.filterOption();
+		filtered.previous().feed(function(field : ContextField) {
+			field.active.value = false;
+		});
+		filtered.feed(function(field : ContextField) {
+			field.active.value = true;
+		});
 
 		document.article.fragment.feed({
 			some : setFragmentStatus,
@@ -100,11 +105,13 @@ class ContextView {
 			});
 
 		f.focus
+			.filterValue(true)
 			.map(function(b) return b ? Some(f) : None)
 			.feed(field);
 	}
 
 	function resetAddMenuItems() {
+		remove.button.enabled.value = false;
 		add.button.enabled.value = false;
 		add.menu.clear();
 	}

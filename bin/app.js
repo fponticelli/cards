@@ -1266,6 +1266,11 @@ steamer.Producer.prototype = {
 			t(f(v));
 		});
 	}
+	,filterValue: function(value) {
+		return this.filterAsync(function(v,t) {
+			t(v == value);
+		});
+	}
 	,filterAsync: function(f) {
 		var _g = this;
 		return new steamer.Producer(function(forward) {
@@ -1283,7 +1288,7 @@ steamer.Producer.prototype = {
 							forward(steamer.Pulse.Fail(e));
 						} else {
 						var e1 = $e0;
-						forward(steamer.Pulse.Fail(new thx.Error(Std.string(e1),null,{ fileName : "Producer.hx", lineNumber : 98, className : "steamer.Producer", methodName : "filterAsync"})));
+						forward(steamer.Pulse.Fail(new thx.Error(Std.string(e1),null,{ fileName : "Producer.hx", lineNumber : 101, className : "steamer.Producer", methodName : "filterAsync"})));
 						}
 					}
 				},forward);
@@ -3568,10 +3573,11 @@ ui.ContextField = function(options) {
 	var key = dom.Query.first(".key",this.component.el);
 	key.innerText = options.display;
 	this.name = options.name;
-	this.value = ui.editors.EditorPicker.pick(options.type,dom.Query.first(".value",this.component.el),this.component,options.value.get_value());
-	this.focus = this.value.focus.debounce(250).distinct();
-	this.classActive = new sui.properties.ToggleClass(this.component,"active");
-	this.focus.feed(this.classActive.stream);
+	this.editor = ui.editors.EditorPicker.pick(options.type,dom.Query.first(".value",this.component.el),this.component,options.value.get_value());
+	this.focus = new steamer.Value(false);
+	this.active = new steamer.Value(false);
+	this.editor.focus.debounce(250).distinct().feed(this.focus);
+	this.active.feed(steamer.dom.Dom.consumeToggleClass(this.component.el,"active"));
 	var hasError = steamer.dom.Dom.consumeToggleClass(this.component.el,"error");
 	this.withError = new steamer.Value(haxe.ds.Option.None);
 	this.withError.map(function(o) {
@@ -3607,21 +3613,20 @@ ui.ContextField = function(options) {
 		}};
 		return $r;
 	}(this)));
-	this.value.value.feed(options.value.stream);
-	options.value.stream.feed(this.value.value);
+	this.editor.value.feed(options.value.stream);
+	options.value.stream.feed(this.editor.value);
 };
 ui.ContextField.__name__ = ["ui","ContextField"];
 ui.ContextField.prototype = {
 	component: null
-	,value: null
+	,editor: null
 	,focus: null
+	,active: null
 	,name: null
 	,withError: null
-	,classActive: null
 	,destroy: function() {
-		this.classActive.dispose();
 		this.component.destroy();
-		this.value = null;
+		this.editor = null;
 		this.focus = null;
 	}
 	,__class__: ui.ContextField
@@ -3640,7 +3645,6 @@ ui.ContextView = function(document,mapper,options) {
 	this.add.button.clicks.toTrue().feed(this.add.menu.visible.stream);
 	this.add.button.enabled.set_value(false);
 	this.remove = { button : this.toolbar.right.addButton("",Config.icons.remove)};
-	this.remove.button.enabled.set_value(false);
 	this.remove.button.clicks.feed((function($this) {
 		var $r;
 		var f = function(_) {
@@ -3662,7 +3666,40 @@ ui.ContextView = function(document,mapper,options) {
 		return $r;
 	}(this)));
 	this.field = new steamer.Value(haxe.ds.Option.None);
-	steamer.Producer.toBool(this.field).feed(this.remove.button.enabled);
+	steamer.Producer.toBool(this.field).debounce(50).feed(this.remove.button.enabled);
+	var filtered = steamer.Producer.filterOption(this.field);
+	filtered.previous().feed((function($this) {
+		var $r;
+		var f1 = function(field1) {
+			field1.active.set_value(false);
+		};
+		$r = { onPulse : function(pulse1) {
+			switch(pulse1[1]) {
+			case 0:
+				var v1 = pulse1[2];
+				f1(v1);
+				break;
+			default:
+			}
+		}};
+		return $r;
+	}(this)));
+	filtered.feed((function($this) {
+		var $r;
+		var f2 = function(field2) {
+			field2.active.set_value(true);
+		};
+		$r = { onPulse : function(pulse2) {
+			switch(pulse2[1]) {
+			case 0:
+				var v2 = pulse2[2];
+				f2(v2);
+				break;
+			default:
+			}
+		}};
+		return $r;
+	}(this)));
 	document.article.fragment.feed(steamer._Consumer.Consumer_Impl_.fromOption({ some : $bind(this,this.setFragmentStatus), none : $bind(this,this.resetFragmentStatus)}));
 };
 ui.ContextView.__name__ = ["ui","ContextView"];
@@ -3670,11 +3707,11 @@ ui.ContextView.prototype = {
 	component: null
 	,toolbar: null
 	,document: null
+	,field: null
 	,el: null
 	,add: null
 	,remove: null
 	,mapper: null
-	,field: null
 	,resetFragmentStatus: function() {
 		this.resetFields();
 		this.resetAddMenuItems();
@@ -3697,11 +3734,12 @@ ui.ContextView.prototype = {
 	}
 	,addField: function(info,value) {
 		var f = new ui.ContextField({ container : this.el, parent : this.component, display : info.display, name : info.name, type : info.type, value : value});
-		f.focus.map(function(b) {
+		f.focus.filterValue(true).map(function(b) {
 			if(b) return haxe.ds.Option.Some(f); else return haxe.ds.Option.None;
 		}).feed(this.field);
 	}
 	,resetAddMenuItems: function() {
+		this.remove.button.enabled.set_value(false);
 		this.add.button.enabled.set_value(false);
 		this.add.menu.clear();
 	}
