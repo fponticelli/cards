@@ -24,5 +24,17 @@ class Card {
 		card.appendTo(container);
 
 		model.data.stream.map(function(o) return haxe.Json.stringify(o)).feed(new steamer.consumers.LoggerConsumer());
+
+
+		// TODO remove me
+		document.article.addReadonly();
+		var block = document.article.addBlock();
+		mapper.values.ensure('strong', block.component);
+		block = document.article.addBlock();
+		mapper.values.ensure('emphasis', block.component);
+		block = document.article.addBlock();
+		mapper.values.ensure('strong', block.component);
+		mapper.values.ensure('emphasis', block.component);
+		document.article.addBlock();
 	}
 }

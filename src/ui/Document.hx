@@ -35,12 +35,5 @@ class Document {
 			article.fragment.value.toValue().component.destroy();
 			article.fragment.value = None;
 		});
-
-		// TODO remove me
-		article.addReadonly();
-		article.addBlock();
-		article.addBlock();
-		article.addBlock();
-		article.addBlock();
 	}
 }
