@@ -107,14 +107,14 @@ class ContextView {
 			expression = f.value.value
 				.debounce(100)
 				.distinct()
-				.map(Runtimes.toRuntime);
+				.map(Runtime.toRuntime);
 		f.focus
 			.map(function(b) return b ? Some(f) : None)
 			.feed(field);
 
 		expression
 			.merge(runtime)
-			.map(Runtimes.toErrorOption)
+			.map(Runtime.toErrorOption)
 			.feed(f.withError);
 		expression.feed(runtime);
 	}
@@ -184,7 +184,7 @@ class ContextView {
 
 		runtime
 			.map(function(r) {
-				return switch r.runtime {
+				return switch r.expression {
 					case Fun(f):
 						f;
 					case _:
@@ -197,10 +197,7 @@ class ContextView {
 					state = f();
 					true;
 				} catch(e : Dynamic) {
-					runtime.value = {
-						runtime : RuntimeError(Std.string(e)),
-						code : runtime.value.code
-					};
+					runtime.value = new Runtime(RuntimeError(Std.string(e)), runtime.value.code);
 					false;
 				};
 			})

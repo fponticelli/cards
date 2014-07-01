@@ -3924,11 +3924,11 @@ ui.ContextView.prototype = {
 		var temp = value.get_value();
 		var runtime = this.ensureRuntime(fragment,info,value);
 		var f = new ui.ContextField({ container : this.el, parent : this.component, display : info.display, name : info.name, type : info.type, value : (ui.ContextView.valueToCode(info.type))(temp)});
-		var expression = f.value.value.debounce(100).distinct().map(ui.Runtimes.toRuntime);
+		var expression = f.value.value.debounce(100).distinct().map(ui.Runtime.toRuntime);
 		f.focus.map(function(b) {
 			if(b) return haxe.ds.Option.Some(f); else return haxe.ds.Option.None;
 		}).feed(this.field);
-		expression.merge(runtime).map(ui.Runtimes.toErrorOption).feed(f.withError);
+		expression.merge(runtime).map(ui.Runtime.toErrorOption).feed(f.withError);
 		expression.feed(runtime);
 	}
 	,resetAddMenuItems: function() {
@@ -3974,12 +3974,12 @@ ui.ContextView.prototype = {
 		return runtime;
 	}
 	,createFeedExpression: function(transform,code) {
-		var runtime = new steamer.Value(ui.Runtimes.toRuntime(code));
+		var runtime = new steamer.Value(ui.Runtime.toRuntime(code));
 		var value = new steamer.Value(null);
 		var state = null;
 		runtime.map(function(r) {
 			{
-				var _g = r.runtime;
+				var _g = r.expression;
 				switch(_g[1]) {
 				case 0:
 					var f = _g[2];
@@ -3995,7 +3995,7 @@ ui.ContextView.prototype = {
 				state = f2();
 				return true;
 			} catch( e ) {
-				runtime.set_value({ runtime : ui.Expression.RuntimeError(Std.string(e)), code : runtime.get_value().code});
+				runtime.set_value(new ui.Runtime(ui.Expression.RuntimeError(Std.string(e)),runtime.get_value().code));
 				return false;
 			}
 		}).map(function(_) {
@@ -4397,33 +4397,30 @@ ui.ModelViewField.prototype = {
 	}
 	,__class__: ui.ModelViewField
 };
-ui.Runtimes = function() { };
-ui.Runtimes.__name__ = ["ui","Runtimes"];
-ui.Runtimes.createFunction = function(args,code) {
+ui.Runtime = function(expression,code) {
+	this.expression = expression;
+	this.code = code;
+};
+ui.Runtime.__name__ = ["ui","Runtime"];
+ui.Runtime.createFunction = function(args,code) {
 	return new Function(args.join(","),code);
 };
-ui.Runtimes.formatCode = function(code) {
+ui.Runtime.formatCode = function(code) {
 	return "return " + code;
 };
-ui.Runtimes.toRuntime = function(code) {
-	return { runtime : (function($this) {
-		var $r;
-		try {
-			$r = (function($this) {
-				var $r;
-				var formatted = ui.Runtimes.formatCode(code);
-				$r = ui.Expression.Fun(ui.Runtimes.createFunction([],formatted));
-				return $r;
-			}($this));
-		} catch( e ) {
-			$r = ui.Expression.SyntaxError(Std.string(e));
-		}
-		return $r;
-	}(this)), code : code};
+ui.Runtime.toRuntime = function(code) {
+	var expression;
+	try {
+		var formatted = ui.Runtime.formatCode(code);
+		expression = ui.Expression.Fun(ui.Runtime.createFunction([],formatted));
+	} catch( e ) {
+		expression = ui.Expression.SyntaxError(Std.string(e));
+	}
+	return new ui.Runtime(expression,code);
 };
-ui.Runtimes.toErrorOption = function(runtime) {
+ui.Runtime.toErrorOption = function(runtime) {
 	{
-		var _g = runtime.runtime;
+		var _g = runtime.expression;
 		switch(_g[1]) {
 		case 1:
 			var e = _g[2];
@@ -4435,6 +4432,11 @@ ui.Runtimes.toErrorOption = function(runtime) {
 			return haxe.ds.Option.None;
 		}
 	}
+};
+ui.Runtime.prototype = {
+	expression: null
+	,code: null
+	,__class__: ui.Runtime
 };
 ui.Schema = function() {
 	var _g = this;
