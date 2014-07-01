@@ -26,7 +26,7 @@ class Article {
 		fragments = new Map();
 		fragmentStream = new MultiProducer();
 		fragment = new Value(None);
-		fragmentStream.mapToOption().feed(fragment);
+		fragmentStream.toOption().feed(fragment);
 		var filtered = fragment.filterOption();
 		filtered.previous().feed(function(fragment : Fragment) {
 			fragment.active.value = false;
