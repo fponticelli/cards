@@ -8,11 +8,10 @@ import sui.properties.Text;
 import ui.SchemaType;
 using steamer.dom.Dom;
 
-class TextEditor implements Editor {
+class TextEditor implements Editor<String> {
 	public var component(default, null) : Component;
-	public var text(default, null) : Value<String>;
 	public var focus(default, null) : Value<Bool>;
-	public var value(default, null) : Value<Dynamic>;
+	public var value(default, null) : Value<String>;
 	public var type(default, null) : SchemaType;
 	var cancel : Void -> Void;
 	public function new(options : TextEditorOptions) {
@@ -30,12 +29,10 @@ class TextEditor implements Editor {
 			focusPair = component.el.produceEvent('focus'),
 			blurPair  = component.el.produceEvent('blur');
 
-		this.text = text.stream;
-		this.value = new Value(options.defaultText);
-		this.text.feed(this.value);
+		this.value = text.stream;
 		inputPair.producer
 			.map(function(_) return text.component.el.textContent)
-			.feed(this.text);
+			.feed(this.value);
 
 		focus = new Value(false);
 		focusPair.producer
@@ -53,7 +50,7 @@ class TextEditor implements Editor {
 	}
 
 	public function destroy() {
-		text.terminate();
+		value.terminate();
 		component.destroy();
 		cancel();
 	}

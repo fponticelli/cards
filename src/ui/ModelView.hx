@@ -84,7 +84,7 @@ class ModelView {
 
 	public function removeField(field : ModelViewField) {
 		Assert.notNull(field, 'when removing a field it should not be null');
-		var name = field.key.text.value;
+		var name = field.key.value.value;
 		field.destroy();
 		if(fields.remove(name)) {
 			feedSchema(Emit(DeleteField(name)));
@@ -102,15 +102,15 @@ class ModelView {
 		var oldname = null;
 
 		function createSetValue() {
-			return SetValue(field.key.text.value, field.value.value.value, field.value.type);
+			return SetValue(field.key.value.value, field.value.value.value, field.value.type);
 		}
 
-		field.key.text
+		field.key.value
 			.filter(function(newname : String) {
 				// check that it doesn't exist already
 				if(fields.exists(newname)) {
 					// if exists revert and don't propagate
-					field.key.text.value = oldname;
+					field.key.value.value = oldname;
 					return false;
 				} else {
 					return true;
@@ -138,7 +138,7 @@ class ModelView {
 		// the debounce is not only practical to avoid too many calls
 		// but also helps so that data events occur after schema
 		// events (not the best synch mechanism ever)
-		field.value.text.map(function(_ : String) {
+		field.value.value.map(function(_ : String) {
 			return createSetValue();
 		}).debounce(250).feed(Bus.feed(feedData));
 		fieldFocus.add(field.focus.map(function(v) return v ? field : null));

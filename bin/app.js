@@ -1279,7 +1279,7 @@ steamer.Producer.prototype = {
 	,log: function(prefix,posInfo) {
 		if(prefix == null) prefix = ""; else prefix = "" + prefix + ": ";
 		return this.map(function(v) {
-			haxe.Log.trace(v,posInfo);
+			haxe.Log.trace("" + prefix + Std.string(v),posInfo);
 			return v;
 		});
 	}
@@ -3918,17 +3918,13 @@ ui.ContextView.prototype = {
 	}
 	,addField: function(fragment,info,value) {
 		var temp = value.get_value();
-		var pair = this.ensureFeedExpression(fragment,info,value);
+		var runtime = this.ensureRuntime(fragment,info,value);
 		var f = new ui.ContextField({ container : this.el, parent : this.component, display : info.display, name : info.name, value : (ui.ContextView.valueToCode(info.type))(temp)});
-		var expression = f.value.text.debounce(250).distinct().map(function(code) {
-			return ui.Runtimes.toRuntime(code);
-		});
+		var expression = f.value.value.debounce(250).distinct().map(ui.Runtimes.toRuntime);
 		f.focus.map(function(b) {
 			if(b) return haxe.ds.Option.Some(f); else return haxe.ds.Option.None;
 		}).feed(this.field);
-		f.value.text.feed(pair.code);
-		var mixed = expression.merge(pair.runtime);
-		mixed.map(function(e) {
+		expression.merge(runtime).map(function(e) {
 			{
 				var _g = e.runtime;
 				switch(_g[1]) {
@@ -3944,7 +3940,7 @@ ui.ContextView.prototype = {
 				}
 			}
 		}).feed(f.withError);
-		expression.feed(pair.runtime);
+		expression.feed(runtime);
 	}
 	,resetAddMenuItems: function() {
 		this.add.button.enabled.set_value(false);
@@ -3977,16 +3973,16 @@ ui.ContextView.prototype = {
 			}(this)));
 		});
 	}
-	,ensureFeedExpression: function(fragment,info,value) {
+	,ensureRuntime: function(fragment,info,value) {
 		var key = "" + fragment.uid + ":" + info.name;
-		var pair = this.expressions.get(key);
-		if(null == pair) {
+		var runtime = this.expressions.get(key);
+		if(null == runtime) {
 			var e = this.createFeedExpression(ui.ContextView.typeTransform(info.type),types.DynamicTransform.toCode(value.get_value()));
 			e.value.feed(value.stream);
-			var value1 = pair = { runtime : e.runtime, code : new steamer.Value(types.DynamicTransform.toCode(value.get_value()))};
-			this.expressions.set(key,value1);
+			runtime = e.runtime;
+			this.expressions.set(key,runtime);
 		}
-		return pair;
+		return runtime;
 	}
 	,createFeedExpression: function(transform,code) {
 		var runtime = new steamer.Value(ui.Runtimes.toRuntime(code));
@@ -4337,7 +4333,7 @@ ui.ModelView.prototype = {
 	}
 	,removeField: function(field) {
 		thx.Assert.notNull(field,"when removing a field it should not be null",{ fileName : "ModelView.hx", lineNumber : 86, className : "ui.ModelView", methodName : "removeField"});
-		var name = field.key.text.get_value();
+		var name = field.key.value.get_value();
 		field.destroy();
 		if(this.fields.remove(name)) this.feedSchema(steamer.Pulse.Emit(ui.SchemaEvent.DeleteField(name)));
 	}
@@ -4346,11 +4342,11 @@ ui.ModelView.prototype = {
 		var field = new ui.ModelViewField({ container : this.pairs, parent : this.component, key : name});
 		var oldname = null;
 		var createSetValue = function() {
-			return ui.DataEvent.SetValue(field.key.text.get_value(),field.value.value.get_value(),field.value.type);
+			return ui.DataEvent.SetValue(field.key.value.get_value(),field.value.value.get_value(),field.value.type);
 		};
-		field.key.text.filter(function(newname) {
+		field.key.value.filter(function(newname) {
 			if(_g.fields.exists(newname)) {
-				field.key.text.set_value(oldname);
+				field.key.value.set_value(oldname);
 				return false;
 			} else return true;
 		}).map(function(newname1) {
@@ -4371,7 +4367,7 @@ ui.ModelView.prototype = {
 			$r = consumer;
 			return $r;
 		}(this)));
-		field.value.text.map(function(_) {
+		field.value.value.map(function(_) {
 			return createSetValue();
 		}).debounce(250).feed((function($this) {
 			var $r;
@@ -4545,6 +4541,7 @@ ui.editors.Editor.__name__ = ["ui","editors","Editor"];
 ui.editors.Editor.prototype = {
 	value: null
 	,type: null
+	,focus: null
 	,__class__: ui.editors.Editor
 };
 ui.editors.TextEditor = function(options) {
@@ -4558,12 +4555,10 @@ ui.editors.TextEditor = function(options) {
 	var inputPair = steamer.dom.Dom.produceEvent(this.component.el,"input");
 	var focusPair = steamer.dom.Dom.produceEvent(this.component.el,"focus");
 	var blurPair = steamer.dom.Dom.produceEvent(this.component.el,"blur");
-	this.text = text.stream;
-	this.value = new steamer.Value(options.defaultText);
-	this.text.feed(this.value);
+	this.value = text.stream;
 	inputPair.producer.map(function(_) {
 		return text.component.el.textContent;
-	}).feed(this.text);
+	}).feed(this.value);
 	this.focus = new steamer.Value(false);
 	focusPair.producer.map(function(_1) {
 		return true;
@@ -4581,13 +4576,12 @@ ui.editors.TextEditor.__name__ = ["ui","editors","TextEditor"];
 ui.editors.TextEditor.__interfaces__ = [ui.editors.Editor];
 ui.editors.TextEditor.prototype = {
 	component: null
-	,text: null
 	,focus: null
 	,value: null
 	,type: null
 	,cancel: null
 	,destroy: function() {
-		this.text.terminate();
+		this.value.terminate();
 		this.component.destroy();
 		this.cancel();
 	}

@@ -1,3 +1,13 @@
+- add BoolEditor
+- add FloatEditor
+- add DateEditor
+
+- context: switch editor button
+- context: switch between native editor and code editor
+- model: switch editor button
+- model: switch editor menu
+- model: switch between any 2 editors
+
 - move expression evaluation away from contextview
 - evaluate expressions in context
 - create dependency between model values and context properties

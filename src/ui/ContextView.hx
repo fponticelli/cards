@@ -25,7 +25,7 @@ class ContextView {
 	var el : Element;
 	var add : { menu : Menu, button : Button };
 	var remove : { button : Button };
-	var expressions : Map<String, { runtime : Value<Runtime>, code : Value<String> }>;
+	var expressions : Map<String, Value<Runtime>>;
 	var mapper : FragmentMapper;
 
 	public var field(default, null) : Value<Option<ContextField>>;
@@ -95,7 +95,7 @@ class ContextView {
 
 	function addField(fragment : Fragment, info : ValuePropertyInfo<Dynamic>, value : ValueProperty<Dynamic>) {
 		var temp = value.value,
-			pair = ensureFeedExpression(fragment, info, value),
+			runtime = ensureRuntime(fragment, info, value),
 			f = new ContextField({
 				container : el,
 				parent : component,
@@ -103,27 +103,28 @@ class ContextView {
 				name : info.name,
 				value : valueToCode(info.type)(temp)
 			}),
-			expression = f.value.text
+			expression = f.value.value
 				.debounce(250)
 				.distinct()
-				.map(function(code) return code.toRuntime());
+				.map(Runtimes.toRuntime);
 		f.focus
 			.map(function(b) return b ? Some(f) : None)
 			.feed(field);
 
-		f.value.text.feed(pair.code);
-		var mixed = expression.merge(pair.runtime);
-		mixed.map(function(e) {
-			return switch e.runtime {
-				case Fun(f):
-					None;
-				case SyntaxError(e):
-					Some(e);
-				case RuntimeError(e):
-					Some(e);
-			};
-		}).feed(f.withError);
-		expression.feed(pair.runtime);
+		expression
+			.merge(runtime)
+			.map(function(e) {
+				return switch e.runtime {
+					case Fun(f):
+						None;
+					case SyntaxError(e):
+						Some(e);
+					case RuntimeError(e):
+						Some(e);
+				};
+			})
+			.feed(f.withError);
+		expression.feed(runtime);
 	}
 
 	function resetAddMenuItems() {
@@ -145,18 +146,19 @@ class ContextView {
 		});
 	}
 
-	function ensureFeedExpression(fragment : Fragment, info : ValuePropertyInfo<Dynamic>, value : ValueProperty<Dynamic>) {
-		var key  = '${fragment.uid}:${info.name}',
-			pair = expressions.get(key);
-		if(null == pair) {
+	function ensureRuntime(fragment : Fragment, info : ValuePropertyInfo<Dynamic>, value : ValueProperty<Dynamic>) {
+		var key     = '${fragment.uid}:${info.name}',
+			runtime = expressions.get(key);
+		if(null == runtime) {
 			var e = createFeedExpression(
 				typeTransform(info.type),
 				DynamicTransform.toCode(value.value)
 			);
 			e.value.feed(value.stream);
-			expressions.set(key, pair = { runtime : e.runtime, code : new Value<String>(DynamicTransform.toCode(value.value)) });
+			runtime = e.runtime;
+			expressions.set(key, runtime);
 		}
-		return pair;
+		return runtime;
 	}
 
 	static function valueToCode(type : SchemaType) : Dynamic -> String {
