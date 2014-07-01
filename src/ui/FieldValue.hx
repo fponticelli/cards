@@ -10,7 +10,7 @@ import dom.Dom;
 import types.TypeTransform;
 
 class FieldValue {
-	var type : SchemaType;
+	public var type(default, null) : SchemaType;
 	var editor : Editor<Dynamic>;
 	var parent : Component;
 	var container : Element;

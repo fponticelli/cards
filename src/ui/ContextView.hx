@@ -9,6 +9,7 @@ import sui.components.ComponentOptions;
 import sui.properties.ValueProperties;
 import sui.properties.ValueProperty;
 import ui.fragments.FragmentMapper;
+import ui.SchemaType;
 import ui.widgets.Button;
 import ui.fragments.Fragment;
 import ui.widgets.Menu;
@@ -24,7 +25,8 @@ class ContextView {
 	var el : Element;
 	var button : {
 		add : Button,
-		remove : Button
+		remove : Button,
+		switchType : Button
 	};
 	var menu : {
 		add : Menu
@@ -42,6 +44,7 @@ class ContextView {
 
 		button = {
 			add : toolbar.left.addButton('add property', Config.icons.dropdown),
+			switchType : toolbar.right.addButton('', Config.icons.switchtype),
 			remove : toolbar.right.addButton('', Config.icons.remove)
 		};
 		menu = {
@@ -61,8 +64,25 @@ class ContextView {
 			setAddMenuItems(fragment);
 		});
 
+		button.switchType.clicks.feed(function(_) {
+			var field = field.value.toValue(),
+				type  = field.fieldValue.type;
+			switch type {
+				case CodeType:
+					field.fieldValue.setEditor(field.type);
+				case _:
+					field.fieldValue.setEditor(CodeType);
+			}
+		});
+
 		field = new Value(None);
-		field.toBool().debounce(10).feed(button.remove.enabled);
+		var delayed = field
+			.toBool()
+			.debounce(10);
+
+		delayed.feed(button.remove.enabled);
+		delayed.feed(button.switchType.enabled);
+
 		var filtered = field.filterOption();
 		filtered.previous().feed(function(field : ContextField) {
 			field.active.value = false;
@@ -119,6 +139,7 @@ class ContextView {
 
 	function resetAddMenuItems() {
 		button.remove.enabled.value = false;
+		button.switchType.enabled.value = false;
 		button.add.enabled.value = false;
 		menu.add.clear();
 	}

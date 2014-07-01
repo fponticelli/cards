@@ -1,9 +1,19 @@
+- rewiring switched editor doesn't work
+- focus on switched editor doesn't work
+- disabling/enabling 2 buttons doesn't work
+
+- add CodeTransform
+
 + extract field value editor from ContextField
 + remove expression evaluation from contextview
 + use standard editors to feed ValueProperty
 - add switch to code editor
 - feed ValueProperty.runtime from code editor
 - add switch back to standard editor
+
+- restore error notification for expressions
+- mark field with error
+- mark fragment with error
 
 + add BoolEditor
 - add FloatEditor

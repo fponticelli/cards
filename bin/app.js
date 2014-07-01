@@ -1232,8 +1232,9 @@ steamer.Producer.prototype = {
 			}
 		};
 		this.handler(sendPulse);
+		return this;
 	}
-	,mapToOption: function() {
+	,toOption: function() {
 		return this.map(function(v) {
 			if(null == v) return haxe.ds.Option.None; else return haxe.ds.Option.Some(v);
 		});
@@ -1260,7 +1261,7 @@ steamer.Producer.prototype = {
 							forward(steamer.Pulse.Fail(e));
 						} else {
 						var e1 = $e0;
-						forward(steamer.Pulse.Fail(new thx.Error(Std.string(e1),null,{ fileName : "Producer.hx", lineNumber : 56, className : "steamer.Producer", methodName : "mapAsync"})));
+						forward(steamer.Pulse.Fail(new thx.Error(Std.string(e1),null,{ fileName : "Producer.hx", lineNumber : 57, className : "steamer.Producer", methodName : "mapAsync"})));
 						}
 					}
 				},forward);
@@ -1326,7 +1327,7 @@ steamer.Producer.prototype = {
 							forward(steamer.Pulse.Fail(e));
 						} else {
 						var e1 = $e0;
-						forward(steamer.Pulse.Fail(new thx.Error(Std.string(e1),null,{ fileName : "Producer.hx", lineNumber : 106, className : "steamer.Producer", methodName : "filterAsync"})));
+						forward(steamer.Pulse.Fail(new thx.Error(Std.string(e1),null,{ fileName : "Producer.hx", lineNumber : 107, className : "steamer.Producer", methodName : "filterAsync"})));
 						}
 					}
 				},forward);
@@ -1617,6 +1618,7 @@ steamer.MultiProducer.prototype = $extend(steamer.Producer.prototype,{
 			producer.feed(consumer);
 		}
 		this.consumers.push(consumer);
+		return this;
 	}
 	,__class__: steamer.MultiProducer
 });
@@ -1752,6 +1754,7 @@ steamer.Value.prototype = $extend(steamer.Producer.prototype,{
 	,feed: function(consumer) {
 		steamer.Producer.prototype.feed.call(this,consumer);
 		consumer.onPulse(steamer.Pulse.Emit(this.get_value()));
+		return this;
 	}
 	,terminate: function() {
 		this.forward(steamer.Pulse.End);
@@ -3723,7 +3726,7 @@ ui.Article = function(options) {
 	this.fragments = new haxe.ds.ObjectMap();
 	this.fragmentStream = new steamer.MultiProducer();
 	this.fragment = new steamer.Value(haxe.ds.Option.None);
-	this.fragmentStream.mapToOption().feed(this.fragment);
+	this.fragmentStream.toOption().feed(this.fragment);
 	var filtered = steamer.Producer.filterOption(this.fragment);
 	filtered.previous().feed((function($this) {
 		var $r;
@@ -3969,14 +3972,24 @@ ui.ContextField = function(options) {
 	var key = dom.Query.first(".key",this.component.el);
 	key.innerText = options.display;
 	this.name = options.name;
+	this.type = options.type;
 	this.focus = new steamer.Value(false);
 	this.active = new steamer.Value(false);
 	this.fieldValue = new ui.FieldValue(this.component,dom.Query.first(".value-container",this.component.el),function(type,editor) {
+		haxe.Log.trace("create",{ fileName : "ContextField.hx", lineNumber : 49, className : "ui.ContextField", methodName : "new"});
+		haxe.Log.trace(type,{ fileName : "ContextField.hx", lineNumber : 50, className : "ui.ContextField", methodName : "new"});
 		editor.focus.feed(_g.focus);
-		editor.value.feed(options.value.stream);
-		options.value.stream.feed(editor.value);
+		switch(type[1]) {
+		case 6:
+			editor.value.map(ui.Runtime.toRuntime).toOption().feed(options.value.runtime);
+			break;
+		default:
+			haxe.Log.trace(options.value,{ fileName : "ContextField.hx", lineNumber : 59, className : "ui.ContextField", methodName : "new"});
+			editor.value.feed(options.value.stream);
+			options.value.stream.feed(editor.value);
+		}
 	},function(type1,editor1) {
-		editor1.value.terminate();
+		haxe.Log.trace("destroy",{ fileName : "ContextField.hx", lineNumber : 66, className : "ui.ContextField", methodName : "new"});
 	});
 	this.fieldValue.setEditor(options.type,options.value.get_value());
 	this.active.feed(steamer.dom.Dom.consumeToggleClass(this.component.el,"active"));
@@ -4024,6 +4037,7 @@ ui.ContextField.prototype = {
 	,name: null
 	,withError: null
 	,fieldValue: null
+	,type: null
 	,destroy: function() {
 		this.component.destroy();
 		this.focus = null;
@@ -4039,12 +4053,12 @@ ui.ContextView = function(document,mapper,options) {
 	this.el = dom.Html.parseList("<div class=\"fields\"><div></div></div>")[0];
 	this.component.el.appendChild(this.el);
 	this.el = dom.Query.first("div",this.el);
-	this.add = { button : this.toolbar.left.addButton("add property",Config.icons.dropdown), menu : new ui.widgets.Menu({ parent : this.component})};
-	this.add.menu.anchorTo(this.add.button.component.el);
-	this.add.button.clicks.toTrue().feed(this.add.menu.visible.stream);
-	this.add.button.enabled.set_value(false);
-	this.remove = { button : this.toolbar.right.addButton("",Config.icons.remove)};
-	this.remove.button.clicks.feed((function($this) {
+	this.button = { add : this.toolbar.left.addButton("add property",Config.icons.dropdown), switchType : this.toolbar.right.addButton("",Config.icons.switchtype), remove : this.toolbar.right.addButton("",Config.icons.remove)};
+	this.menu = { add : new ui.widgets.Menu({ parent : this.component})};
+	this.menu.add.anchorTo(this.button.add.component.el);
+	this.button.add.clicks.toTrue().feed(this.menu.add.visible.stream);
+	this.button.add.enabled.set_value(false);
+	this.button.remove.clicks.feed((function($this) {
 		var $r;
 		var f = function(_) {
 			var field = thx.core.Options.toValue(_g.field.get_value());
@@ -4064,13 +4078,18 @@ ui.ContextView = function(document,mapper,options) {
 		}};
 		return $r;
 	}(this)));
-	this.field = new steamer.Value(haxe.ds.Option.None);
-	steamer.Producer.toBool(this.field).debounce(10).feed(this.remove.button.enabled);
-	var filtered = steamer.Producer.filterOption(this.field);
-	filtered.previous().feed((function($this) {
+	this.button.switchType.clicks.feed((function($this) {
 		var $r;
-		var f1 = function(field1) {
-			field1.active.set_value(false);
+		var f1 = function(_1) {
+			var field1 = thx.core.Options.toValue(_g.field.get_value());
+			var type = field1.fieldValue.type;
+			switch(type[1]) {
+			case 6:
+				field1.fieldValue.setEditor(field1.type);
+				break;
+			default:
+				field1.fieldValue.setEditor(ui.SchemaType.CodeType);
+			}
 		};
 		$r = { onPulse : function(pulse1) {
 			switch(pulse1[1]) {
@@ -4083,16 +4102,37 @@ ui.ContextView = function(document,mapper,options) {
 		}};
 		return $r;
 	}(this)));
-	filtered.feed((function($this) {
+	this.field = new steamer.Value(haxe.ds.Option.None);
+	var delayed = steamer.Producer.toBool(this.field).debounce(10);
+	delayed.feed(this.button.remove.enabled);
+	delayed.feed(this.button.switchType.enabled);
+	var filtered = steamer.Producer.filterOption(this.field);
+	filtered.previous().feed((function($this) {
 		var $r;
 		var f2 = function(field2) {
-			field2.active.set_value(true);
+			field2.active.set_value(false);
 		};
 		$r = { onPulse : function(pulse2) {
 			switch(pulse2[1]) {
 			case 0:
 				var v2 = pulse2[2];
 				f2(v2);
+				break;
+			default:
+			}
+		}};
+		return $r;
+	}(this)));
+	filtered.feed((function($this) {
+		var $r;
+		var f3 = function(field3) {
+			field3.active.set_value(true);
+		};
+		$r = { onPulse : function(pulse3) {
+			switch(pulse3[1]) {
+			case 0:
+				var v3 = pulse3[2];
+				f3(v3);
 				break;
 			default:
 			}
@@ -4108,8 +4148,8 @@ ui.ContextView.prototype = {
 	,document: null
 	,field: null
 	,el: null
-	,add: null
-	,remove: null
+	,button: null
+	,menu: null
 	,mapper: null
 	,resetFragmentStatus: function() {
 		this.resetFields();
@@ -4138,18 +4178,19 @@ ui.ContextView.prototype = {
 		}).feed(this.field);
 	}
 	,resetAddMenuItems: function() {
-		this.remove.button.enabled.set_value(false);
-		this.add.button.enabled.set_value(false);
-		this.add.menu.clear();
+		this.button.remove.enabled.set_value(false);
+		this.button.switchType.enabled.set_value(false);
+		this.button.add.enabled.set_value(false);
+		this.menu.add.clear();
 	}
 	,setAddMenuItems: function(fragment) {
 		var _g = this;
 		this.resetAddMenuItems();
 		var attachables = this.mapper.getAttachablePropertiesForFragment(fragment);
-		this.add.button.enabled.set_value(attachables.length > 0);
+		this.button.add.enabled.set_value(attachables.length > 0);
 		attachables.map(function(info) {
 			var button = new ui.widgets.Button("add " + info.display);
-			_g.add.menu.addItem(button.component);
+			_g.menu.add.addItem(button.component);
 			button.clicks.feed((function($this) {
 				var $r;
 				var f = function(_) {
@@ -4703,6 +4744,7 @@ ui.SchemaProducer.prototype = $extend(steamer.Producer.prototype,{
 	,feed: function(consumer) {
 		steamer.Producer.prototype.feed.call(this,consumer);
 		consumer.onPulse(steamer.Pulse.Emit(ui.SchemaEvent.ListFields(this.getPairs())));
+		return this;
 	}
 	,__class__: ui.SchemaProducer
 });
@@ -5475,7 +5517,7 @@ thx.Assert.results = { add : function(assertion) {
 		break;
 	}
 }};
-Config.icons = { add : "plus", remove : "minus", dropdown : "arrow-down", checked : "check-square-o", unchecked : "square-o"};
+Config.icons = { add : "plus", remove : "minus", dropdown : "arrow-down", checked : "check-square-o", unchecked : "square-o", switchtype : "arrows"};
 Config.selectors = { app : ".card"};
 PropertyFeeder.classes = [{ display : "bold", name : "strong"},{ display : "italic", name : "emphasis"}];
 dom.Query.doc = document;

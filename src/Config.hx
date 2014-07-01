@@ -4,7 +4,8 @@ class Config {
 		remove : 'minus',
 		dropdown : 'arrow-down',
 		checked : 'check-square-o',
-		unchecked : 'square-o'
+		unchecked : 'square-o',
+		switchtype : 'arrows',
 	};
 
 	public static var selectors(default, null) = {

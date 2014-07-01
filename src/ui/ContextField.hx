@@ -25,6 +25,7 @@ class ContextField {
 	public var name(default, null) : String;
 	public var withError(default, null) : Value<Option<String>>;
 	public var fieldValue(default, null) : FieldValue;
+	public var type(default, null) : SchemaType;
 
 	public function new(options : ContextFieldOptions) {
 		if(null == options.template && null == options.el)
@@ -36,6 +37,7 @@ class ContextField {
 		key.innerText = options.display;
 
 		this.name = options.name;
+		this.type = options.type;
 
 		focus  = new Value(false);
 		active = new Value(false);
@@ -44,6 +46,8 @@ class ContextField {
 			component,
 			Query.first('.value-container', component.el),
 			function(type : SchemaType, editor : Editor<Dynamic>) {
+				trace('create');
+				trace(type);
 				editor.focus.feed(focus);
 				switch type {
 					case CodeType:
@@ -52,14 +56,16 @@ class ContextField {
 							.toOption()
 							.feed(options.value.runtime);
 					case _:
+						trace(options.value);
 						editor.value.feed(options.value.stream);
 						// TODO does this leak?
 						options.value.stream.feed(editor.value);
 				}
 			},
 			function(type : SchemaType, editor : Editor<Dynamic>) {
-				editor.value.terminate();
-				editor.focus.terminate();
+				trace('destroy');
+				//editor.value.terminate();
+				//editor.focus.terminate();
 			}
 		);
 
@@ -67,6 +73,7 @@ class ContextField {
 
 		active.feed(component.el.consumeToggleClass('active'));
 
+		// TODO this is broken at the moment, maybe move to FieldValue?
 		var hasError = component.el.consumeToggleClass('error');
 		withError = new Value(None);
 		withError.map(function(o) {
