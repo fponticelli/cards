@@ -48,7 +48,7 @@ class ContextField {
 		// and not have lost focus in the meanwhile
 		focus  = new Value(false);
 		active = new Value(false);
-		editor.focus.debounce(250).distinct().feed(focus);
+		editor.focus.debounce(50).distinct().feed(focus);
 		active.feed(component.el.consumeToggleClass('active'));
 
 		var hasError = component.el.consumeToggleClass('error');

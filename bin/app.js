@@ -1843,10 +1843,11 @@ steamer.dom.Dom.consumeAttribute = function(el,name) {
 		};
 	})(consume,originalValue)});
 };
-steamer.dom.Dom.consumeToggleAttribute = function(el,name) {
+steamer.dom.Dom.consumeToggleAttribute = function(el,name,value) {
 	var originalValue = el.hasAttribute(name);
+	if(null == value) value = name;
 	var consume = function(v) {
-		if(v) el.setAttribute(name,name); else el.removeAttribute(name);
+		if(v) el.setAttribute(name,value); else el.removeAttribute(name);
 	};
 	return steamer._Consumer.Consumer_Impl_.fromObject({ emit : consume, end : (function(f,v1) {
 		return function() {
@@ -1867,7 +1868,7 @@ steamer.dom.Dom.consumeToggleClass = function(el,name) {
 };
 steamer.dom.Dom.consumeToggleVisibility = function(el) {
 	var originalDisplay = el.style.display;
-	thx.Assert.notNull(originalDisplay,"original element.style.display for visibility is NULL",{ fileName : "Dom.hx", lineNumber : 86, className : "steamer.dom.Dom", methodName : "consumeToggleVisibility"});
+	thx.Assert.notNull(originalDisplay,"original element.style.display for visibility is NULL",{ fileName : "Dom.hx", lineNumber : 88, className : "steamer.dom.Dom", methodName : "consumeToggleVisibility"});
 	if(originalDisplay == "none") originalDisplay = "";
 	var consume = function(value) {
 		if(value) el.style.display = originalDisplay; else el.style.display = "none";
@@ -3576,7 +3577,7 @@ ui.ContextField = function(options) {
 	this.editor = ui.editors.EditorPicker.pick(options.type,dom.Query.first(".value",this.component.el),this.component,options.value.get_value());
 	this.focus = new steamer.Value(false);
 	this.active = new steamer.Value(false);
-	this.editor.focus.debounce(250).distinct().feed(this.focus);
+	this.editor.focus.debounce(50).distinct().feed(this.focus);
 	this.active.feed(steamer.dom.Dom.consumeToggleClass(this.component.el,"active"));
 	var hasError = steamer.dom.Dom.consumeToggleClass(this.component.el,"error");
 	this.withError = new steamer.Value(haxe.ds.Option.None);
@@ -3666,7 +3667,7 @@ ui.ContextView = function(document,mapper,options) {
 		return $r;
 	}(this)));
 	this.field = new steamer.Value(haxe.ds.Option.None);
-	steamer.Producer.toBool(this.field).debounce(50).feed(this.remove.button.enabled);
+	steamer.Producer.toBool(this.field).debounce(10).feed(this.remove.button.enabled);
 	var filtered = steamer.Producer.filterOption(this.field);
 	filtered.previous().feed((function($this) {
 		var $r;
@@ -4361,13 +4362,14 @@ ui.editors.BoolEditor.prototype = {
 	,__class__: ui.editors.BoolEditor
 };
 ui.editors.TextEditor = function(options) {
+	var _g = this;
 	this.type = ui.SchemaType.StringType;
 	if(null == options.defaultText) options.defaultText = "";
 	if(null == options.placeHolder) options.placeHolder = "placeholder";
 	if(null == options.el && null == options.template) options.template = "<span></span>";
 	this.component = new sui.components.Component(options);
 	this.component.el.classList.add("editor");
-	this.component.el.setAttribute("contenteditable",true);
+	this.component.el.setAttribute("tabindex","0");
 	this.component.el.style.content = options.placeHolder;
 	var text = new sui.properties.Text(this.component,options.defaultText);
 	var inputPair = steamer.dom.Dom.produceEvent(this.component.el,"input");
@@ -4378,9 +4380,26 @@ ui.editors.TextEditor = function(options) {
 		return text.component.el.textContent;
 	}).feed(this.value);
 	this.focus = new steamer.Value(false);
-	focusPair.producer.map(function(_1) {
+	this.focus.feed(steamer.dom.Dom.consumeToggleAttribute(this.component.el,"contenteditable","true"));
+	this.focus.filterValue(true).feed((function($this) {
+		var $r;
+		var f = function(_1) {
+			window.document.getSelection().selectAllChildren(_g.component.el);
+		};
+		$r = { onPulse : function(pulse) {
+			switch(pulse[1]) {
+			case 0:
+				var v = pulse[2];
+				f(v);
+				break;
+			default:
+			}
+		}};
+		return $r;
+	}(this)));
+	focusPair.producer.map(function(_2) {
 		return true;
-	}).merge(blurPair.producer.map(function(_2) {
+	}).merge(blurPair.producer.map(function(_3) {
 		return false;
 	})).feed(this.focus);
 	this.cancel = function() {

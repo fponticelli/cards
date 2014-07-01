@@ -125,12 +125,25 @@ a img {
 }
 .card .editor.bool {
   cursor: pointer;
-  font-size: 11px;
   color: #333;
-  display: inline-block;
+  display: -webkit-box;
+  display: -moz-box;
+  display: -ms-box;
+  display: -webkit-inline-flex;
+  display: box;
+  display: inline-flex;
   -webkit-border-radius: 0.5em;
   border-radius: 0.5em;
   text-align: center;
+  height: 1.3em;
+  position: relative;
+}
+.card .editor.bool:before {
+  font-size: 1.1em;
+  top: 0.05em;
+  left: calc(50% - 0.5em);
+  position: absolute;
+  display: block;
 }
 .card .editor.code {
   font-family: monospace;
@@ -411,7 +424,7 @@ a img {
 }
 .card .fields > div .field .value-container {
   width: 70%;
-  padding: 0.2em 0.2em 0.2em 0.30000000000000004em;
+  padding: 0.2em 0.4em 0.2em 0.30000000000000004em;
 }
 .card .fields > div .field .value-container .value {
   border-bottom: 1px solid #f6f6f6;

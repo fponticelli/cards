@@ -1,3 +1,4 @@
+- extract field value editor from ContextField
 + remove expression evaluation from contextview
 + use standard editors to feed ValueProperty
 - add switch to code editor
@@ -8,7 +9,9 @@
 - add FloatEditor
 - add DateEditor
 
+TODO (requires the INTERNET)
 - add placeholder to editors
+- make certain elements unselectable (field keys, bool editor, toolbars, footer)
 
 - context: switch editor button
 - context: switch between native editor and code editor
@@ -23,8 +26,10 @@
 
 - helper context (for excel like functions)
 
-- active state for fields
-- focus state for fields
++ active state for context fields
++ focus state for context fields
+- active state for model fields
+- focus state for model fields
 
 - inline fragment
 

@@ -7,6 +7,7 @@ import steamer.Value;
 import sui.properties.Text;
 import ui.SchemaType;
 using steamer.dom.Dom;
+import js.Browser;
 
 class TextEditor implements Editor<String> {
 	public var component(default, null) : Component;
@@ -24,7 +25,8 @@ class TextEditor implements Editor<String> {
 			options.template = '<span></span>';
 		component = new Component(options);
 		component.el.classList.add('editor');
-		component.el.setAttribute('contenteditable', cast true);
+		component.el.setAttribute('tabindex', '0');
+		//component.el.setAttribute('contenteditable', 'true');
 
 		// TODO find out how to set the content of :before programmatically
 		component.el.style.content = options.placeHolder;
@@ -40,6 +42,13 @@ class TextEditor implements Editor<String> {
 			.feed(value);
 
 		focus = new Value(false);
+		focus.feed(component.el.consumeToggleAttribute('contenteditable', 'true'));
+		focus
+			.filterValue(true)
+			.feed(function(_) {
+				Browser.document.getSelection().selectAllChildren(component.el);
+			});
+
 		focusPair.producer
 			.map(function(_) return true)
 			.merge(

@@ -55,7 +55,7 @@ class ContextView {
 		});
 
 		field = new Value(None);
-		field.toBool().debounce(50).feed(remove.button.enabled);
+		field.toBool().debounce(10).feed(remove.button.enabled);
 		var filtered = field.filterOption();
 		filtered.previous().feed(function(field : ContextField) {
 			field.active.value = false;
