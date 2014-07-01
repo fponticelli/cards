@@ -22,7 +22,7 @@ class Runtime {
 
 	public static function toErrorOption(runtime : Runtime) : Option<String>
 		return switch runtime.expression {
-			case SyntaxError(e), RuntimeError(e): Some(e);
+			case SyntaxError(e): Some(e);
 			case _: None;
 		};
 

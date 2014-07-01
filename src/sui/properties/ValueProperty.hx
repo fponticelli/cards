@@ -11,25 +11,33 @@ class ValueProperty<T> extends Property {
 	public var defaultValue(get, null) : T;
 	public var stream(default, null) : Value<T>;
 	public var runtime(default, null) : Value<Option<Runtime>>;
+	public var runtimeError(default, null) : Value<Option<String>>;
 
 	public function new(defaultValue : T, component : Component, name : String) {
 		stream = new Value(defaultValue);
 		runtime = new Value(None);
+		runtimeError = new Value(None);
 		super(component, name);
 
 		runtime.feed(function(opt : Option<Runtime>) {
 			switch opt {
 				case None:
 					component.el.classList.remove('error');
+					runtimeError.value = None;
 				case Some(runtime):
 					switch runtime.expression {
 						case SyntaxError(e):
 							component.el.classList.add('error');
-						case RuntimeError(e):
-							component.el.classList.add('error');
+							runtimeError.value = None;
 						case Fun(f):
 							component.el.classList.remove('error');
-							stream.value = transform(f());
+							runtimeError.value = None;
+							try {
+								stream.value = transform(f());
+								runtimeError.value = None;
+							} catch(e : Dynamic) {
+								runtimeError.value = Some(Std.string(e));
+							}
 					}
 			}
 		});
