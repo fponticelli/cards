@@ -1,4 +1,4 @@
-- extract field value editor from ContextField
++ extract field value editor from ContextField
 + remove expression evaluation from contextview
 + use standard editors to feed ValueProperty
 - add switch to code editor

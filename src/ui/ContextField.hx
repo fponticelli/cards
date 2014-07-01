@@ -45,12 +45,21 @@ class ContextField {
 			Query.first('.value-container', component.el),
 			function(type : SchemaType, editor : Editor<Dynamic>) {
 				editor.focus.feed(focus);
-				editor.value.feed(options.value.stream);
-				// TODO does this leak?
-				options.value.stream.feed(editor.value);
+				switch type {
+					case CodeType:
+						editor.value
+							.map(Runtime.toRuntime)
+							.toOption()
+							.feed(options.value.runtime);
+					case _:
+						editor.value.feed(options.value.stream);
+						// TODO does this leak?
+						options.value.stream.feed(editor.value);
+				}
 			},
 			function(type : SchemaType, editor : Editor<Dynamic>) {
 				editor.value.terminate();
+				editor.focus.terminate();
 			}
 		);
 
