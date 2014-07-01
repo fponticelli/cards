@@ -95,6 +95,7 @@ class SchemaProducer extends Producer<SchemaEvent> {
 	override function feed(consumer : Consumer<SchemaEvent>) {
 		super.feed(consumer);
 		consumer.toImplementation().onPulse(Emit(ListFields(getPairs())));
+		return this;
 	}
 }
 
