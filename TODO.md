@@ -11,7 +11,8 @@
 
 TODO (requires the INTERNET)
 - add placeholder to editors
-- make certain elements unselectable (field keys, bool editor, toolbars, footer)
+
++ make certain elements unselectable (field keys, bool editor, toolbars, footer)
 
 - context: switch editor button
 - context: switch between native editor and code editor
