@@ -113,16 +113,7 @@ class ContextView {
 
 		expression
 			.merge(runtime)
-			.map(function(e) {
-				return switch e.runtime {
-					case Fun(f):
-						None;
-					case SyntaxError(e):
-						Some(e);
-					case RuntimeError(e):
-						Some(e);
-				};
-			})
+			.map(Runtimes.toErrorOption)
 			.feed(f.withError);
 		expression.feed(runtime);
 	}

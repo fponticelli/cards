@@ -3924,22 +3924,7 @@ ui.ContextView.prototype = {
 		f.focus.map(function(b) {
 			if(b) return haxe.ds.Option.Some(f); else return haxe.ds.Option.None;
 		}).feed(this.field);
-		expression.merge(runtime).map(function(e) {
-			{
-				var _g = e.runtime;
-				switch(_g[1]) {
-				case 0:
-					var f1 = _g[2];
-					return haxe.ds.Option.None;
-				case 1:
-					var e1 = _g[2];
-					return haxe.ds.Option.Some(e1);
-				case 2:
-					var e2 = _g[2];
-					return haxe.ds.Option.Some(e2);
-				}
-			}
-		}).feed(f.withError);
+		expression.merge(runtime).map(ui.Runtimes.toErrorOption).feed(f.withError);
 		expression.feed(runtime);
 	}
 	,resetAddMenuItems: function() {
@@ -4431,6 +4416,21 @@ ui.Runtimes.toRuntime = function(code) {
 		}
 		return $r;
 	}(this)), code : code};
+};
+ui.Runtimes.toErrorOption = function(runtime) {
+	{
+		var _g = runtime.runtime;
+		switch(_g[1]) {
+		case 1:
+			var e = _g[2];
+			return haxe.ds.Option.Some(e);
+		case 2:
+			var e = _g[2];
+			return haxe.ds.Option.Some(e);
+		default:
+			return haxe.ds.Option.None;
+		}
+	}
 };
 ui.Schema = function() {
 	var _g = this;

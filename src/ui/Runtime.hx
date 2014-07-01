@@ -1,5 +1,7 @@
 package ui;
 
+import haxe.ds.Option;
+
 typedef Runtime = {
 	runtime : Expression,
 	code : String
@@ -23,4 +25,10 @@ class Runtimes {
 			code : code
 		};
 	}
+
+	public static function toErrorOption(runtime : Runtime) : Option<String>
+		return switch runtime.runtime {
+			case SyntaxError(e), RuntimeError(e): Some(e);
+			case _: None;
+		};
 }
