@@ -34,6 +34,14 @@ EReg.prototype = {
 };
 var HxOverrides = function() { };
 HxOverrides.__name__ = ["HxOverrides"];
+HxOverrides.dateStr = function(date) {
+	var m = date.getMonth() + 1;
+	var d = date.getDate();
+	var h = date.getHours();
+	var mi = date.getMinutes();
+	var s = date.getSeconds();
+	return date.getFullYear() + "-" + (m < 10?"0" + m:"" + m) + "-" + (d < 10?"0" + d:"" + d) + " " + (h < 10?"0" + h:"" + h) + ":" + (mi < 10?"0" + mi:"" + mi) + ":" + (s < 10?"0" + s:"" + s);
+};
 HxOverrides.cca = function(s,index) {
 	var x = s.charCodeAt(index);
 	if(x != x) return undefined;
@@ -204,8 +212,33 @@ Std.parseInt = function(x) {
 	if(isNaN(v)) return null;
 	return v;
 };
+Std.parseFloat = function(x) {
+	return parseFloat(x);
+};
 var StringTools = function() { };
 StringTools.__name__ = ["StringTools"];
+StringTools.startsWith = function(s,start) {
+	return s.length >= start.length && HxOverrides.substr(s,0,start.length) == start;
+};
+StringTools.isSpace = function(s,pos) {
+	var c = HxOverrides.cca(s,pos);
+	return c > 8 && c < 14 || c == 32;
+};
+StringTools.ltrim = function(s) {
+	var l = s.length;
+	var r = 0;
+	while(r < l && StringTools.isSpace(s,r)) r++;
+	if(r > 0) return HxOverrides.substr(s,r,l - r); else return s;
+};
+StringTools.rtrim = function(s) {
+	var l = s.length;
+	var r = 0;
+	while(r < l && StringTools.isSpace(s,l - r - 1)) r++;
+	if(r > 0) return HxOverrides.substr(s,0,l - r); else return s;
+};
+StringTools.trim = function(s) {
+	return StringTools.ltrim(StringTools.rtrim(s));
+};
 StringTools.replace = function(s,sub,by) {
 	return s.split(sub).join(by);
 };
@@ -1163,7 +1196,7 @@ steamer.Producer.prototype = {
 		var _g = this;
 		var ended = false;
 		var sendPulse = function(v) {
-			if(ended) throw new thx.Error("Feed already reached end but still receiving pulses: ${v}",null,{ fileName : "Producer.hx", lineNumber : 23, className : "steamer.Producer", methodName : "feed"}); else switch(v[1]) {
+			if(ended) throw new thx.Error("Feed already reached end but still receiving pulses: ${v}",null,{ fileName : "Producer.hx", lineNumber : 24, className : "steamer.Producer", methodName : "feed"}); else switch(v[1]) {
 			case 2:
 				if(_g.endOnError) {
 					thx.Timer.setImmediate((function(f,a1) {
@@ -1227,7 +1260,7 @@ steamer.Producer.prototype = {
 							forward(steamer.Pulse.Fail(e));
 						} else {
 						var e1 = $e0;
-						forward(steamer.Pulse.Fail(new thx.Error(Std.string(e1),null,{ fileName : "Producer.hx", lineNumber : 55, className : "steamer.Producer", methodName : "mapAsync"})));
+						forward(steamer.Pulse.Fail(new thx.Error(Std.string(e1),null,{ fileName : "Producer.hx", lineNumber : 56, className : "steamer.Producer", methodName : "mapAsync"})));
 						}
 					}
 				},forward);
@@ -1235,6 +1268,11 @@ steamer.Producer.prototype = {
 				return $r;
 			}(this)));
 		},this.endOnError);
+	}
+	,toNil: function() {
+		return this.map(function(_) {
+			return thx.Nil.nil;
+		});
 	}
 	,toTrue: function() {
 		return this.map(function(_) {
@@ -1288,7 +1326,7 @@ steamer.Producer.prototype = {
 							forward(steamer.Pulse.Fail(e));
 						} else {
 						var e1 = $e0;
-						forward(steamer.Pulse.Fail(new thx.Error(Std.string(e1),null,{ fileName : "Producer.hx", lineNumber : 101, className : "steamer.Producer", methodName : "filterAsync"})));
+						forward(steamer.Pulse.Fail(new thx.Error(Std.string(e1),null,{ fileName : "Producer.hx", lineNumber : 106, className : "steamer.Producer", methodName : "filterAsync"})));
 						}
 					}
 				},forward);
@@ -1808,6 +1846,21 @@ steamer.dom.Dom.produceEvent = function(el,name) {
 	});
 	return { producer : producer, cancel : cancel};
 };
+steamer.dom.Dom.produceKeyboardEvent = function(el,name) {
+	if(!StringTools.startsWith(name,"key")) name = "key" + name;
+	var cancel = null;
+	var producer = new steamer.Producer(function(forward) {
+		var f = function(e) {
+			forward(steamer.Pulse.Emit(e));
+		};
+		el.addEventListener(name,f,false);
+		cancel = function() {
+			el.removeEventListener(name,f,false);
+			forward(steamer.Pulse.End);
+		};
+	});
+	return { producer : producer, cancel : cancel};
+};
 steamer.dom.Dom.consumeText = function(el) {
 	var originalText = el.innerText;
 	var consume = function(text) {
@@ -1868,7 +1921,7 @@ steamer.dom.Dom.consumeToggleClass = function(el,name) {
 };
 steamer.dom.Dom.consumeToggleVisibility = function(el) {
 	var originalDisplay = el.style.display;
-	thx.Assert.notNull(originalDisplay,"original element.style.display for visibility is NULL",{ fileName : "Dom.hx", lineNumber : 88, className : "steamer.dom.Dom", methodName : "consumeToggleVisibility"});
+	thx.Assert.notNull(originalDisplay,"original element.style.display for visibility is NULL",{ fileName : "Dom.hx", lineNumber : 107, className : "steamer.dom.Dom", methodName : "consumeToggleVisibility"});
 	if(originalDisplay == "none") originalDisplay = "";
 	var consume = function(value) {
 		if(value) el.style.display = originalDisplay; else el.style.display = "none";
@@ -3321,6 +3374,348 @@ thx.ref.ValueRef.prototype = $extend(thx.ref.BaseRef.prototype,{
 	}
 	,__class__: thx.ref.ValueRef
 });
+var types = {};
+types.ArrayTransform = function() { };
+types.ArrayTransform.__name__ = ["types","ArrayTransform"];
+types.ArrayTransform.toArray = function(value) {
+	if(null != value) return value; else return [];
+};
+types.ArrayTransform.toBool = function(value) {
+	return types.ArrayTransform.toArray(value).length > 0;
+};
+types.ArrayTransform.toDate = function(value) {
+	var defaults = [2000,0,1,0,0,0];
+	var values = types.ArrayTransform.toArray(value).map(types.DynamicTransform.toFloat).map(function(v) {
+		return Math.round(v);
+	}).slice(0,defaults.length);
+	values = values.concat(defaults.slice(values.length));
+	return new Date(values[0],values[1],values[2],values[3],values[4],values[5]);
+};
+types.ArrayTransform.toFloat = function(value) {
+	return types.ArrayTransform.toArray(value).length;
+};
+types.ArrayTransform.toObject = function(value) {
+	var obj = { };
+	thx.core.Arrays.mapi(types.ArrayTransform.toArray(value),function(v,i) {
+		obj["field_" + (i + 1)] = v;
+	});
+	return obj;
+};
+types.ArrayTransform.toString = function(value) {
+	return types.ArrayTransform.toArray(value).map(types.DynamicTransform.toString).join(", ");
+};
+types.ArrayTransform.toCode = function(value) {
+	return "[" + types.ArrayTransform.toArray(value).map(types.DynamicTransform.toCode).join(",") + "]";
+};
+types.BoolTransform = function() { };
+types.BoolTransform.__name__ = ["types","BoolTransform"];
+types.BoolTransform.toArray = function(value) {
+	return [types.BoolTransform.toBool(value)?false:value];
+};
+types.BoolTransform.toBool = function(value) {
+	return null != value && value;
+};
+types.BoolTransform.toDate = function(value) {
+	return new Date();
+};
+types.BoolTransform.toFloat = function(value) {
+	if(types.BoolTransform.toBool(value)) return 1; else return 0;
+};
+types.BoolTransform.toObject = function(value) {
+	return types.ArrayTransform.toObject([types.BoolTransform.toBool(value)]);
+};
+types.BoolTransform.toString = function(value) {
+	if(types.BoolTransform.toBool(value)) return "Yes"; else return "No";
+};
+types.BoolTransform.toCode = function(value) {
+	if(types.BoolTransform.toBool(value)) return "true"; else return "false";
+};
+types.DateTransform = function() { };
+types.DateTransform.__name__ = ["types","DateTransform"];
+types.DateTransform.toArray = function(value) {
+	return [types.DateTransform.toDate(value)];
+};
+types.DateTransform.toBool = function(value) {
+	return false;
+};
+types.DateTransform.toDate = function(value) {
+	if(null != value) return value; else return new Date();
+};
+types.DateTransform.toFloat = function(value) {
+	return types.DateTransform.toDate(value).getTime();
+};
+types.DateTransform.toObject = function(value) {
+	return types.ArrayTransform.toObject([types.DateTransform.toDate(value)]);
+};
+types.DateTransform.toString = function(value) {
+	var _this = types.DateTransform.toDate(value);
+	return HxOverrides.dateStr(_this);
+};
+types.DateTransform.toCode = function(value) {
+	return "new Date(" + types.DateTransform.toDate(value).getTime() + ")";
+};
+types.DynamicTransform = function() { };
+types.DynamicTransform.__name__ = ["types","DynamicTransform"];
+types.DynamicTransform.toArray = function(value) {
+	if(null == value) return [];
+	if((value instanceof Array) && value.__enum__ == null) return types.ArrayTransform.toArray(value);
+	if(typeof(value) == "boolean") return types.BoolTransform.toArray(value);
+	if(js.Boot.__instanceof(value,Date)) return types.DateTransform.toArray(value);
+	if(typeof(value) == "number") return types.FloatTransform.toArray(value);
+	if(typeof(value) == "string") return types.StringTransform.toArray(value);
+	if(Reflect.isObject(value)) return types.ObjectTransform.toArray(value);
+	throw "Type of " + Std.string(value) + " cannot be matched by DynamicTransform.toArray";
+};
+types.DynamicTransform.toBool = function(value) {
+	if(null == value) return false;
+	if((value instanceof Array) && value.__enum__ == null) return types.ArrayTransform.toBool(value);
+	if(typeof(value) == "boolean") return types.BoolTransform.toBool(value);
+	if(js.Boot.__instanceof(value,Date)) return types.DateTransform.toBool(value);
+	if(typeof(value) == "number") return types.FloatTransform.toBool(value);
+	if(typeof(value) == "string") return types.StringTransform.toBool(value);
+	if(Reflect.isObject(value)) return types.ObjectTransform.toBool(value);
+	throw "Type of " + Std.string(value) + " cannot be matched by DynamicTransform.toBool";
+};
+types.DynamicTransform.toDate = function(value) {
+	if(null == value) return new Date();
+	if((value instanceof Array) && value.__enum__ == null) return types.ArrayTransform.toDate(value);
+	if(typeof(value) == "boolean") return types.BoolTransform.toDate(value);
+	if(js.Boot.__instanceof(value,Date)) return types.DateTransform.toDate(value);
+	if(typeof(value) == "number") return types.FloatTransform.toDate(value);
+	if(typeof(value) == "string") return types.StringTransform.toDate(value);
+	if(Reflect.isObject(value)) return types.ObjectTransform.toDate(value);
+	throw "Type of " + Std.string(value) + " cannot be matched by DynamicTransform.toDate";
+};
+types.DynamicTransform.toFloat = function(value) {
+	if(null == value) return 0;
+	if((value instanceof Array) && value.__enum__ == null) return types.ArrayTransform.toFloat(value);
+	if(typeof(value) == "boolean") return types.BoolTransform.toFloat(value);
+	if(js.Boot.__instanceof(value,Date)) return types.DateTransform.toFloat(value);
+	if(typeof(value) == "number") return types.FloatTransform.toFloat(value);
+	if(typeof(value) == "string") return types.StringTransform.toFloat(value);
+	if(Reflect.isObject(value)) return types.ObjectTransform.toFloat(value);
+	throw "Type of " + Std.string(value) + " cannot be matched by DynamicTransform.toFloat";
+};
+types.DynamicTransform.toObject = function(value) {
+	if(null == value) return { };
+	if((value instanceof Array) && value.__enum__ == null) return types.ArrayTransform.toObject(value);
+	if(typeof(value) == "boolean") return types.BoolTransform.toObject(value);
+	if(js.Boot.__instanceof(value,Date)) return types.DateTransform.toObject(value);
+	if(typeof(value) == "number") return types.FloatTransform.toObject(value);
+	if(typeof(value) == "string") return types.StringTransform.toObject(value);
+	if(Reflect.isObject(value)) return types.ObjectTransform.toObject(value);
+	throw "Type of " + Std.string(value) + " cannot be matched by DynamicTransform.toObject";
+};
+types.DynamicTransform.toString = function(value) {
+	if(null == value) return "";
+	if((value instanceof Array) && value.__enum__ == null) return types.ArrayTransform.toString(value);
+	if(typeof(value) == "boolean") return types.BoolTransform.toString(value);
+	if(js.Boot.__instanceof(value,Date)) return types.DateTransform.toString(value);
+	if(typeof(value) == "number") return types.FloatTransform.toString(value);
+	if(typeof(value) == "string") return types.StringTransform.toString(value);
+	if(Reflect.isObject(value)) return types.ObjectTransform.toString(value);
+	throw "Type of " + Std.string(value) + " cannot be matched by DynamicTransform.toString";
+};
+types.DynamicTransform.toCode = function(value) {
+	if(null == value) return "null";
+	if((value instanceof Array) && value.__enum__ == null) return types.ArrayTransform.toCode(value);
+	if(typeof(value) == "boolean") return types.BoolTransform.toCode(value);
+	if(js.Boot.__instanceof(value,Date)) return types.DateTransform.toCode(value);
+	if(typeof(value) == "number") return types.FloatTransform.toCode(value);
+	if(typeof(value) == "string") return types.StringTransform.toCode(value);
+	if(Reflect.isObject(value)) return types.ObjectTransform.toCode(value);
+	throw "Type of " + Std.string(value) + " cannot be matched by DynamicTransform.toCode";
+};
+types.FloatTransform = function() { };
+types.FloatTransform.__name__ = ["types","FloatTransform"];
+types.FloatTransform.toArray = function(value) {
+	return [types.FloatTransform.toFloat(value)];
+};
+types.FloatTransform.toBool = function(value) {
+	return types.FloatTransform.toFloat(value) != 0;
+};
+types.FloatTransform.toDate = function(value) {
+	var t = types.FloatTransform.toFloat(value);
+	var d = new Date();
+	d.setTime(t);
+	return d;
+};
+types.FloatTransform.toFloat = function(value) {
+	if(null != value) return value; else return 0.0;
+};
+types.FloatTransform.toObject = function(value) {
+	return types.ArrayTransform.toObject([types.FloatTransform.toFloat(value)]);
+};
+types.FloatTransform.toString = function(value) {
+	return "" + types.FloatTransform.toFloat(value);
+};
+types.FloatTransform.toCode = function(value) {
+	return "" + types.FloatTransform.toFloat(value);
+};
+types.ObjectTransform = function() { };
+types.ObjectTransform.__name__ = ["types","ObjectTransform"];
+types.ObjectTransform.toArray = function(value) {
+	return [types.ObjectTransform.toObject(value)];
+};
+types.ObjectTransform.toBool = function(value) {
+	return !thx.core.Objects.isEmpty(types.ObjectTransform.toObject(value));
+};
+types.ObjectTransform.toDate = function(value) {
+	return new Date();
+};
+types.ObjectTransform.toFloat = function(value) {
+	return Reflect.fields(types.ObjectTransform.toObject(value)).length;
+};
+types.ObjectTransform.toObject = function(value) {
+	if(null != value) return value; else return { };
+};
+types.ObjectTransform.toString = function(value) {
+	return Reflect.fields(types.ObjectTransform.toObject(value)).map(function(field) {
+		return "" + field + ": " + types.DynamicTransform.toString(Reflect.field(value,field));
+	}).join(", ");
+};
+types.ObjectTransform.toCode = function(value) {
+	return "{" + Reflect.fields(types.ObjectTransform.toObject(value)).map(function(field) {
+		return "\"" + field + "\" : " + types.DynamicTransform.toCode(Reflect.field(value,field));
+	}).join(", ") + "}";
+};
+types.StringTransform = function() { };
+types.StringTransform.__name__ = ["types","StringTransform"];
+types.StringTransform.toArray = function(value) {
+	return [types.StringTransform.toString(value)];
+};
+types.StringTransform.toBool = function(value) {
+	return StringTools.trim(types.StringTransform.toString(value)) != "";
+};
+types.StringTransform.toDate = function(value) {
+	return new Date();
+};
+types.StringTransform.toFloat = function(value) {
+	return Std.parseFloat(types.StringTransform.toString(value));
+};
+types.StringTransform.toObject = function(value) {
+	return types.ArrayTransform.toObject([types.StringTransform.toString(value)]);
+};
+types.StringTransform.toString = function(value) {
+	if(null != value) return value; else return "";
+};
+types.StringTransform.toCode = function(value) {
+	return "\"" + StringTools.replace(types.StringTransform.toString(value),"\"","\\\"") + "\"";
+};
+types.TypeTransform = function() { };
+types.TypeTransform.__name__ = ["types","TypeTransform"];
+types.TypeTransform.transform = function(srcType,dstType) {
+	switch(srcType[1]) {
+	case 0:
+		switch(dstType[1]) {
+		case 0:
+			return types.ArrayTransform.toArray;
+		case 1:
+			return types.ArrayTransform.toBool;
+		case 2:
+			return types.ArrayTransform.toDate;
+		case 3:
+			return types.ArrayTransform.toFloat;
+		case 4:
+			return types.ArrayTransform.toObject;
+		case 5:
+			return types.ArrayTransform.toString;
+		case 6:
+			return types.ArrayTransform.toCode;
+		}
+		break;
+	case 1:
+		switch(dstType[1]) {
+		case 0:
+			return types.BoolTransform.toArray;
+		case 1:
+			return types.BoolTransform.toBool;
+		case 2:
+			return types.BoolTransform.toDate;
+		case 3:
+			return types.BoolTransform.toFloat;
+		case 4:
+			return types.BoolTransform.toObject;
+		case 5:
+			return types.BoolTransform.toString;
+		case 6:
+			return types.BoolTransform.toCode;
+		}
+		break;
+	case 2:
+		switch(dstType[1]) {
+		case 0:
+			return types.DateTransform.toArray;
+		case 1:
+			return types.DateTransform.toBool;
+		case 2:
+			return types.DateTransform.toDate;
+		case 3:
+			return types.DateTransform.toFloat;
+		case 4:
+			return types.DateTransform.toObject;
+		case 5:
+			return types.DateTransform.toString;
+		case 6:
+			return types.DateTransform.toCode;
+		}
+		break;
+	case 3:
+		switch(dstType[1]) {
+		case 0:
+			return types.FloatTransform.toArray;
+		case 1:
+			return types.FloatTransform.toBool;
+		case 2:
+			return types.FloatTransform.toDate;
+		case 3:
+			return types.FloatTransform.toFloat;
+		case 4:
+			return types.FloatTransform.toObject;
+		case 5:
+			return types.FloatTransform.toString;
+		case 6:
+			return types.FloatTransform.toCode;
+		}
+		break;
+	case 4:
+		switch(dstType[1]) {
+		case 0:
+			return types.ObjectTransform.toArray;
+		case 1:
+			return types.ObjectTransform.toBool;
+		case 2:
+			return types.ObjectTransform.toDate;
+		case 3:
+			return types.ObjectTransform.toFloat;
+		case 4:
+			return types.ObjectTransform.toObject;
+		case 5:
+			return types.ObjectTransform.toString;
+		case 6:
+			return types.ObjectTransform.toCode;
+		}
+		break;
+	case 5:case 6:
+		switch(dstType[1]) {
+		case 0:
+			return types.StringTransform.toArray;
+		case 1:
+			return types.StringTransform.toBool;
+		case 2:
+			return types.StringTransform.toDate;
+		case 3:
+			return types.StringTransform.toFloat;
+		case 4:
+			return types.StringTransform.toObject;
+		case 5:
+			return types.StringTransform.toString;
+		case 6:
+			return types.StringTransform.toCode;
+		}
+		break;
+	}
+};
 var ui = {};
 ui.Article = function(options) {
 	if(null == options.el && null == options.template) options.template = "<article></article>";
@@ -3574,10 +3969,16 @@ ui.ContextField = function(options) {
 	var key = dom.Query.first(".key",this.component.el);
 	key.innerText = options.display;
 	this.name = options.name;
-	this.editor = ui.editors.EditorPicker.pick(options.type,dom.Query.first(".value",this.component.el),this.component,options.value.get_value());
 	this.focus = new steamer.Value(false);
 	this.active = new steamer.Value(false);
-	this.editor.focus.debounce(50).distinct().feed(this.focus);
+	this.fieldValue = new ui.FieldValue(this.component,dom.Query.first(".value-container",this.component.el),function(type,editor) {
+		editor.focus.feed(_g.focus);
+		editor.value.feed(options.value.stream);
+		options.value.stream.feed(editor.value);
+	},function(type1,editor1) {
+		editor1.value.terminate();
+	});
+	this.fieldValue.setEditor(options.type,options.value.get_value());
 	this.active.feed(steamer.dom.Dom.consumeToggleClass(this.component.el,"active"));
 	var hasError = steamer.dom.Dom.consumeToggleClass(this.component.el,"error");
 	this.withError = new steamer.Value(haxe.ds.Option.None);
@@ -3614,20 +4015,17 @@ ui.ContextField = function(options) {
 		}};
 		return $r;
 	}(this)));
-	this.editor.value.feed(options.value.stream);
-	options.value.stream.feed(this.editor.value);
 };
 ui.ContextField.__name__ = ["ui","ContextField"];
 ui.ContextField.prototype = {
 	component: null
-	,editor: null
 	,focus: null
 	,active: null
 	,name: null
 	,withError: null
+	,fieldValue: null
 	,destroy: function() {
 		this.component.destroy();
-		this.editor = null;
 		this.focus = null;
 	}
 	,__class__: ui.ContextField
@@ -3900,6 +4298,35 @@ ui.Document.prototype = {
 ui.Expression = { __ename__ : ["ui","Expression"], __constructs__ : ["Fun","SyntaxError"] };
 ui.Expression.Fun = function(f) { var $x = ["Fun",0,f]; $x.__enum__ = ui.Expression; $x.toString = $estr; return $x; };
 ui.Expression.SyntaxError = function(msg) { var $x = ["SyntaxError",1,msg]; $x.__enum__ = ui.Expression; $x.toString = $estr; return $x; };
+ui.FieldValue = function(parent,container,afterCreate,afterRemove) {
+	this.parent = parent;
+	this.container = container;
+	this.afterCreate = afterCreate;
+	this.afterRemove = afterRemove;
+};
+ui.FieldValue.__name__ = ["ui","FieldValue"];
+ui.FieldValue.prototype = {
+	type: null
+	,editor: null
+	,parent: null
+	,container: null
+	,afterCreate: null
+	,afterRemove: null
+	,setEditor: function(type,value) {
+		if(null != this.editor) {
+			if(null == value) value = (types.TypeTransform.transform(this.type,type))(this.editor.value.get_value());
+			this.afterRemove(this.type,this.editor);
+			this.editor.value.terminate();
+			this.editor.focus.terminate();
+		}
+		this.container.innerHTML = "<div class=\"value\"></div>";
+		var el = dom.Query.first(".value",this.container);
+		this.type = type;
+		this.editor = ui.editors.EditorPicker.pick(type,el,this.parent,value);
+		this.afterCreate(this.type,this.editor);
+	}
+	,__class__: ui.FieldValue
+};
 ui.Model = function(data) {
 	var _g = this;
 	this.data = data;
@@ -4328,9 +4755,18 @@ ui.editors.BoolEditor = function(options) {
 	var clickPair = steamer.dom.Dom.produceEvent(this.component.el,"click");
 	var focusPair = steamer.dom.Dom.produceEvent(this.component.el,"focus");
 	var blurPair = steamer.dom.Dom.produceEvent(this.component.el,"blur");
+	var keyboardPair = steamer.dom.Dom.produceKeyboardEvent(this.component.el,"up");
 	this.value.feed(steamer.dom.Dom.consumeToggleClass(this.component.el,"fa-" + Config.icons.checked));
 	steamer.Producer.negate(this.value).feed(steamer.dom.Dom.consumeToggleClass(this.component.el,"fa-" + Config.icons.unchecked));
-	clickPair.producer.map(function(_) {
+	clickPair.producer.toNil().merge(keyboardPair.producer.filter(function(e) {
+		var _g1 = e.keyCode;
+		switch(_g1) {
+		case 32:case 13:
+			return true;
+		default:
+			return false;
+		}
+	}).toNil()).map(function(_) {
 		return !_g.value.get_value();
 	}).feed(this.value);
 	this.focus = new steamer.Value(false);
@@ -4344,6 +4780,7 @@ ui.editors.BoolEditor = function(options) {
 		clickPair.cancel();
 		focusPair.cancel();
 		blurPair.cancel();
+		keyboardPair.cancel();
 	};
 };
 ui.editors.BoolEditor.__name__ = ["ui","editors","BoolEditor"];

@@ -1,6 +1,7 @@
 package ui.editors;
 
 using steamer.Producer;
+import js.html.KeyboardEvent;
 import sui.components.Component;
 import sui.components.ComponentOptions;
 import steamer.Value;
@@ -29,9 +30,10 @@ class BoolEditor implements Editor<Bool> {
 		component.el.setAttribute('tabindex', '0');
 
 		value = new Value(options.defaultValue);
-		var clickPair = component.el.produceEvent('click'),
-			focusPair = component.el.produceEvent('focus'),
-			blurPair  = component.el.produceEvent('blur');
+		var clickPair    = component.el.produceEvent('click'),
+			focusPair    = component.el.produceEvent('focus'),
+			blurPair     = component.el.produceEvent('blur'),
+			keyboardPair = component.el.produceKeyboardEvent('up');
 
 		value
 			.feed(component.el.consumeToggleClass('fa-' + Config.icons.checked));
@@ -40,6 +42,19 @@ class BoolEditor implements Editor<Bool> {
 			.feed(component.el.consumeToggleClass('fa-' + Config.icons.unchecked));
 
 		clickPair.producer
+			.toNil()
+			.merge(
+				keyboardPair.producer
+					.filter(function(e : KeyboardEvent) {
+						return switch e.keyCode {
+							case 32, 13: // spacebar, return
+								true;
+							case _:
+								false;
+						};
+					})
+					.toNil()
+			)
 			.map(function(_) return !value.value)
 			.feed(value);
 
@@ -55,6 +70,7 @@ class BoolEditor implements Editor<Bool> {
 			clickPair.cancel();
 			focusPair.cancel();
 			blurPair.cancel();
+			keyboardPair.cancel();
 		};
 	}
 

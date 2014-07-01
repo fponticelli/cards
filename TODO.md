@@ -12,6 +12,7 @@
 TODO (requires the INTERNET)
 - add placeholder to editors
 
++ add support for keyboard in BoolEditor (spacebar, return should trigger check/uncheck)
 + make certain elements unselectable (field keys, bool editor, toolbars, footer)
 
 - context: switch editor button
