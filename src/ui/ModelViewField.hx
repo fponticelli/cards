@@ -17,7 +17,7 @@ class ModelViewField {
 
 	public function new(options : FieldEditableKeyOptions) {
 		if(null == options.template && null == options.el)
-			options.template = '<div class="field"><div class="key"></div><div class="value"></div></div>';
+			options.template = '<div class="field"><div class="key"></div><div class="value-container"><div class="value"></div></div></div>';
 
 		component = new Component(options);
 		// setup field key

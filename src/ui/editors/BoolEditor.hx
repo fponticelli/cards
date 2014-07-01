@@ -38,26 +38,7 @@ class BoolEditor implements Editor<Bool> {
 		value
 			.negate()
 			.feed(component.el.consumeToggleClass('fa-' + Config.icons.unchecked));
-/*
-		trace(component.el);
-		value
-			.log('check')
-			.feed(function(isChecked : Bool) {
-				trace('isChecked? $isChecked');
-				trace(Type.typeof(isChecked));
-				if(isChecked) {
-					trace("SET CHECKED");
-					cls.add('fa-' + Config.icons.checked);
-					cls.remove('fa-' + Config.icons.unchecked);
-					trace(cls.contains('fa-' + Config.icons.checked));
-				} else {
-					trace("SET UNCHECKED");
-					cls.remove('fa-' + Config.icons.checked);
-					cls.add('fa-' + Config.icons.unchecked);
-					trace(cls.contains('fa-' + Config.icons.unchecked));
-				}
-			});
-*/
+
 		clickPair.producer
 			.map(function(_) return !value.value)
 			.feed(value);
