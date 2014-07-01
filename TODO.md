@@ -1,3 +1,4 @@
+- move expression evaluation away from contextview
 - evaluate expressions in context
 - create dependency between model values and context properties
 - refresh evaluation on change
@@ -6,7 +7,6 @@
 
 - active state for fields
 - focus state for fields
-
 
 - inline fragment
 

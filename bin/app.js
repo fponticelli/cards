@@ -3922,29 +3922,31 @@ ui.ContextView.prototype = {
 		var temp = value.get_value();
 		var pair = this.ensureFeedExpression(fragment,info,value);
 		var f = new ui.ContextField({ container : this.fieldsEl, parent : this.component, display : info.display, name : info.name, value : (ui.ContextView.valueToCode(info.type))(temp)});
+		var expression = f.value.text.debounce(250).distinct().map(function(code) {
+			return ui.Runtimes.toRuntime(code);
+		});
 		f.focus.map(function(b) {
 			if(b) return haxe.ds.Option.Some(f); else return haxe.ds.Option.None;
 		}).feed(this.field);
-		var expression = pair.expression;
-		var exp = f.value.text.debounce(250).distinct().map(function(code) {
-			return ui.Expressions.toExpression(code);
-		});
 		f.value.text.feed(pair.code);
-		var mixed = exp.merge(expression);
+		var mixed = expression.merge(pair.runtime);
 		mixed.map(function(e) {
-			switch(e[1]) {
-			case 0:
-				var f1 = e[2];
-				return haxe.ds.Option.None;
-			case 1:
-				var e1 = e[2];
-				return haxe.ds.Option.Some(e1);
-			case 2:
-				var e2 = e[2];
-				return haxe.ds.Option.Some(e2);
+			{
+				var _g = e.runtime;
+				switch(_g[1]) {
+				case 0:
+					var f1 = _g[2];
+					return haxe.ds.Option.None;
+				case 1:
+					var e1 = _g[2];
+					return haxe.ds.Option.Some(e1);
+				case 2:
+					var e2 = _g[2];
+					return haxe.ds.Option.Some(e2);
+				}
 			}
 		}).feed(f.withError);
-		exp.feed(expression);
+		expression.feed(pair.runtime);
 	}
 	,resetAddMenuItems: function() {
 		this.buttonAdd.enabled.set_value(false);
@@ -3983,22 +3985,25 @@ ui.ContextView.prototype = {
 		if(null == pair) {
 			var e = this.createFeedExpression(ui.ContextView.typeTransform(info.type),types.DynamicTransform.toCode(value.get_value()));
 			e.value.feed(value.stream);
-			var value1 = pair = { expression : e.expression, code : new steamer.Value(types.DynamicTransform.toCode(value.get_value()))};
+			var value1 = pair = { runtime : e.runtime, code : new steamer.Value(types.DynamicTransform.toCode(value.get_value()))};
 			this.expressions.set(key,value1);
 		}
 		return pair;
 	}
 	,createFeedExpression: function(transform,code) {
-		var expression = new steamer.Value(ui.Expressions.toExpression(code));
+		var runtime = new steamer.Value(ui.Runtimes.toRuntime(code));
 		var value = new steamer.Value(null);
 		var state = null;
-		expression.map(function(exp) {
-			switch(exp[1]) {
-			case 0:
-				var f = exp[2];
-				return f;
-			default:
-				return null;
+		runtime.map(function(r) {
+			{
+				var _g = r.runtime;
+				switch(_g[1]) {
+				case 0:
+					var f = _g[2];
+					return f;
+				default:
+					return null;
+				}
 			}
 		}).filter(function(f1) {
 			return f1 != null;
@@ -4007,13 +4012,13 @@ ui.ContextView.prototype = {
 				state = f2();
 				return true;
 			} catch( e ) {
-				expression.set_value(ui.Expression.RuntimeError(Std.string(e),""));
+				runtime.set_value({ runtime : ui.Expression.RuntimeError(Std.string(e)), code : runtime.get_value().code});
 				return false;
 			}
 		}).map(function(_) {
 			return state;
 		}).map(transform).feed(value);
-		return { expression : expression, value : value};
+		return { runtime : runtime, value : value};
 	}
 	,__class__: ui.ContextView
 };
@@ -4147,21 +4152,9 @@ ui.Document.prototype = {
 	,__class__: ui.Document
 };
 ui.Expression = { __ename__ : ["ui","Expression"], __constructs__ : ["Fun","SyntaxError","RuntimeError"] };
-ui.Expression.Fun = function(f,code) { var $x = ["Fun",0,f,code]; $x.__enum__ = ui.Expression; $x.toString = $estr; return $x; };
-ui.Expression.SyntaxError = function(msg,code) { var $x = ["SyntaxError",1,msg,code]; $x.__enum__ = ui.Expression; $x.toString = $estr; return $x; };
-ui.Expression.RuntimeError = function(msg,code) { var $x = ["RuntimeError",2,msg,code]; $x.__enum__ = ui.Expression; $x.toString = $estr; return $x; };
-ui.Expressions = function() { };
-ui.Expressions.__name__ = ["ui","Expressions"];
-ui.Expressions.createFunction = function(args,code) {
-	return new Function(args.join(","),code);
-};
-ui.Expressions.toExpression = function(code) {
-	try {
-		return ui.Expression.Fun(ui.Expressions.createFunction([],"return " + code),code);
-	} catch( e ) {
-		return ui.Expression.SyntaxError(Std.string(e),code);
-	}
-};
+ui.Expression.Fun = function(f) { var $x = ["Fun",0,f]; $x.__enum__ = ui.Expression; $x.toString = $estr; return $x; };
+ui.Expression.SyntaxError = function(msg) { var $x = ["SyntaxError",1,msg]; $x.__enum__ = ui.Expression; $x.toString = $estr; return $x; };
+ui.Expression.RuntimeError = function(msg) { var $x = ["RuntimeError",2,msg]; $x.__enum__ = ui.Expression; $x.toString = $estr; return $x; };
 ui.Model = function(data) {
 	var _g = this;
 	this.data = data;
@@ -4420,6 +4413,30 @@ ui.ModelViewField.prototype = {
 		this.focus = null;
 	}
 	,__class__: ui.ModelViewField
+};
+ui.Runtimes = function() { };
+ui.Runtimes.__name__ = ["ui","Runtimes"];
+ui.Runtimes.createFunction = function(args,code) {
+	return new Function(args.join(","),code);
+};
+ui.Runtimes.formatCode = function(code) {
+	return "return " + code;
+};
+ui.Runtimes.toRuntime = function(code) {
+	return { runtime : (function($this) {
+		var $r;
+		try {
+			$r = (function($this) {
+				var $r;
+				var formatted = ui.Runtimes.formatCode(code);
+				$r = ui.Expression.Fun(ui.Runtimes.createFunction([],formatted));
+				return $r;
+			}($this));
+		} catch( e ) {
+			$r = ui.Expression.SyntaxError(Std.string(e));
+		}
+		return $r;
+	}(this)), code : code};
 };
 ui.Schema = function() {
 	var _g = this;

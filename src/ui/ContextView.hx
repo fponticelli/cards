@@ -14,7 +14,7 @@ import ui.widgets.Button;
 import ui.fragments.Fragment;
 import ui.widgets.Menu;
 import ui.widgets.Toolbar;
-using ui.Expression;
+using ui.Runtime;
 using thx.core.Options;
 using steamer.Producer;
 
@@ -26,7 +26,7 @@ class ContextView {
 	var menuAdd : Menu;
 	var buttonAdd : Button;
 	var buttonRemove : Button;
-	var expressions : Map<String, { expression : Value<Expression>, code : Value<String> }>;
+	var expressions : Map<String, { runtime : Value<Runtime>, code : Value<String> }>;
 	var mapper : FragmentMapper;
 
 	public var field(default, null) : Value<Option<ContextField>>;
@@ -93,38 +93,36 @@ class ContextView {
 	}
 
 	function addField(fragment : Fragment, info : ValuePropertyInfo<Dynamic>, value : ValueProperty<Dynamic>) {
-		var temp = value.value;
-		var pair = ensureFeedExpression(fragment, info, value),
+		var temp = value.value,
+			pair = ensureFeedExpression(fragment, info, value),
 			f = new ContextField({
 				container : fieldsEl,
 				parent : component,
 				display : info.display,
 				name : info.name,
 				value : valueToCode(info.type)(temp)
-			});
+			}),
+			expression = f.value.text
+				.debounce(250)
+				.distinct()
+				.map(function(code) return code.toRuntime());
 		f.focus
 			.map(function(b) return b ? Some(f) : None)
 			.feed(field);
 
-		var expression = pair.expression,
-			exp = f.value.text
-					.debounce(250)
-					.distinct()
-					.map(function(code) return code.toExpression());
-
 		f.value.text.feed(pair.code);
-		var mixed = exp.merge(expression);
+		var mixed = expression.merge(pair.runtime);
 		mixed.map(function(e) {
-			return switch e {
-				case Fun(f, _):
+			return switch e.runtime {
+				case Fun(f):
 					None;
-				case SyntaxError(e, _):
+				case SyntaxError(e):
 					Some(e);
-				case RuntimeError(e, _):
+				case RuntimeError(e):
 					Some(e);
 			};
 		}).feed(f.withError);
-		exp.feed(expression);
+		expression.feed(pair.runtime);
 	}
 
 	function resetAddMenuItems() {
@@ -155,7 +153,7 @@ class ContextView {
 				DynamicTransform.toCode(value.value)
 			);
 			e.value.feed(value.stream);
-			expressions.set(key, pair = { expression : e.expression, code : new Value<String>(DynamicTransform.toCode(value.value)) });
+			expressions.set(key, pair = { runtime : e.runtime, code : new Value<String>(DynamicTransform.toCode(value.value)) });
 		}
 		return pair;
 	}
@@ -183,14 +181,14 @@ class ContextView {
 	}
 
 	function createFeedExpression<T>(transform : Dynamic -> T, code : String) {
-		var expression = new Value(Expressions.toExpression(code)),
+		var runtime = new Value(code.toRuntime()),
 			value = new Value(null),
 			state : Dynamic = null;
 
-		expression
-			.map(function(exp) {
-				return switch exp {
-					case Fun(f, _):
+		runtime
+			.map(function(r) {
+				return switch r.runtime {
+					case Fun(f):
 						f;
 					case _:
 						null;
@@ -202,7 +200,10 @@ class ContextView {
 					state = f();
 					true;
 				} catch(e : Dynamic) {
-					expression.value = RuntimeError(Std.string(e), '');
+					runtime.value = {
+						runtime : RuntimeError(Std.string(e)),
+						code : runtime.value.code
+					};
 					false;
 				};
 			})
@@ -210,7 +211,7 @@ class ContextView {
 			.map(transform)
 			.feed(value);
 		return {
-			expression : expression,
+			runtime : runtime,
 			value : value
 		};
 	}
