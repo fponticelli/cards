@@ -1,6 +1,6 @@
 package ui.editors;
 
-import steamer.Producer;
+using steamer.Producer;
 import sui.components.Component;
 import sui.components.ComponentOptions;
 import steamer.Value;
@@ -18,21 +18,26 @@ class TextEditor implements Editor<String> {
 		type = StringType;
 		if(null == options.defaultText)
 			options.defaultText = '';
+		if(null == options.placeHolder)
+			options.placeHolder = 'placeholder';
 		if(null == options.el && null == options.template)
 			options.template = '<span></span>';
 		component = new Component(options);
 		component.el.classList.add('editor');
 		component.el.setAttribute('contenteditable', cast true);
 
+		// TODO find out how to set the content of :before programmatically
+		component.el.style.content = options.placeHolder;
+
 		var text      = new Text(component, options.defaultText),
 			inputPair = component.el.produceEvent('input'),
 			focusPair = component.el.produceEvent('focus'),
 			blurPair  = component.el.produceEvent('blur');
 
-		this.value = text.stream;
+		value = text.stream;
 		inputPair.producer
 			.map(function(_) return text.component.el.textContent)
-			.feed(this.value);
+			.feed(value);
 
 		focus = new Value(false);
 		focusPair.producer
@@ -47,6 +52,11 @@ class TextEditor implements Editor<String> {
 			focusPair.cancel();
 			blurPair.cancel();
 		};
+
+		value
+			.toBool()
+			.negate()
+			.feed(component.el.consumeToggleClass('empty'));
 	}
 
 	public function destroy() {
@@ -57,5 +67,6 @@ class TextEditor implements Editor<String> {
 }
 
 typedef TextEditorOptions = {> ComponentOptions,
-	defaultText : String
+	defaultText : String,
+	?placeHolder : String
 }

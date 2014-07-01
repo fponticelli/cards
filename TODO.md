@@ -1,5 +1,5 @@
-- remove expression evaluation from contextview
-- use standard editors to feed ValueProperty
++ remove expression evaluation from contextview
++ use standard editors to feed ValueProperty
 - add switch to code editor
 - feed ValueProperty.runtime from code editor
 - add switch back to standard editor
@@ -7,6 +7,8 @@
 + add BoolEditor
 - add FloatEditor
 - add DateEditor
+
+- add placeholder to editors
 
 - context: switch editor button
 - context: switch between native editor and code editor

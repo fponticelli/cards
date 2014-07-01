@@ -26,7 +26,7 @@ class ContextField {
 
 	public function new(options : ContextFieldOptions) {
 		if(null == options.template && null == options.el)
-			options.template = '<div class="field"><div class="key"></div><div class="value-container"><div class="value"></div></div></div>';
+			options.template = '<div class="field"><div class="key-container"><div class="key"></div></div><div class="value-container"><div class="value"></div></div></div>';
 
 		component = new Component(options);
 		// setup field key

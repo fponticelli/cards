@@ -1,3 +1,5 @@
+pad = 0.2em
+
 .fields
 	position absolute
 	top toolbar-height
@@ -5,18 +7,21 @@
 	width 100%
 	fill-height-except-toolbar()
 	> div
+		margin-top pad
 		display table
 		width 100%
 		.field
 			display table-row
 			> div
 				display table-cell
-			.key
-				background-color light-bg-color
-				border-bottom 1px solid #f0f0f0
-				padding 0.2em 0 0.2em 0.2em
+			.key-container
+				padding pad 0 pad pad
+				.key
+					background-color light-bg-color
+					border-bottom 1px solid #f0f0f0
+					padding pad
 			.value-container
 				width 70%
-				padding 0.2em 0.3em
+				padding pad pad pad pad*1.5
 				.value
 					border-bottom 1px solid #f6f6f6

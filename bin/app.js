@@ -1577,6 +1577,13 @@ steamer.MultiProducer.prototype = $extend(steamer.Producer.prototype,{
 	}
 	,__class__: steamer.MultiProducer
 });
+steamer.StringProducer = function() { };
+steamer.StringProducer.__name__ = ["steamer","StringProducer"];
+steamer.StringProducer.toBool = function(producer) {
+	return producer.map(function(s) {
+		return s != null && s != "";
+	});
+};
 steamer.Bus = function(emit,end,fail) {
 	this.emit = emit;
 	this.end = end;
@@ -3406,6 +3413,15 @@ ui.Card.create = function(model,container,mapper) {
 		$r = consumer;
 		return $r;
 	}(this)));
+	document.article.addReadonly();
+	var block = document.article.addBlock();
+	mapper.values.ensure("strong",block.component);
+	block = document.article.addBlock();
+	mapper.values.ensure("emphasis",block.component);
+	block = document.article.addBlock();
+	mapper.values.ensure("strong",block.component);
+	mapper.values.ensure("emphasis",block.component);
+	document.article.addBlock();
 };
 ui.widgets = {};
 ui.widgets.FrameOverlay = function(options) {
@@ -3547,7 +3563,7 @@ ui.widgets.Tooltip.prototype = $extend(ui.widgets.FrameOverlay.prototype,{
 });
 ui.ContextField = function(options) {
 	var _g = this;
-	if(null == options.template && null == options.el) options.template = "<div class=\"field\"><div class=\"key\"></div><div class=\"value\"></div></div>";
+	if(null == options.template && null == options.el) options.template = "<div class=\"field\"><div class=\"key-container\"><div class=\"key\"></div></div><div class=\"value-container\"><div class=\"value\"></div></div></div>";
 	this.component = new sui.components.Component(options);
 	var key = dom.Query.first(".key",this.component.el);
 	key.innerText = options.display;
@@ -3833,11 +3849,6 @@ ui.Document = function(options) {
 		}};
 		return $r;
 	}(this)));
-	this.article.addReadonly();
-	this.article.addBlock();
-	this.article.addBlock();
-	this.article.addBlock();
-	this.article.addBlock();
 };
 ui.Document.__name__ = ["ui","Document"];
 ui.Document.prototype = {
@@ -4084,7 +4095,7 @@ ui.ModelView.prototype = {
 	,__class__: ui.ModelView
 };
 ui.ModelViewField = function(options) {
-	if(null == options.template && null == options.el) options.template = "<div class=\"field\"><div class=\"key\"></div><div class=\"value\"></div></div>";
+	if(null == options.template && null == options.el) options.template = "<div class=\"field\"><div class=\"key-container\"><div class=\"key\"></div></div><div class=\"value-container\"><div class=\"value\"></div></div></div>";
 	this.component = new sui.components.Component(options);
 	this.key = new ui.editors.TextEditor({ el : dom.Query.first(".key",this.component.el), parent : this.component, defaultText : options.key});
 	this.value = new ui.editors.TextEditor({ el : dom.Query.first(".value",this.component.el), parent : this.component, defaultText : ""});
@@ -4314,10 +4325,12 @@ ui.editors.BoolEditor.prototype = {
 ui.editors.TextEditor = function(options) {
 	this.type = ui.SchemaType.StringType;
 	if(null == options.defaultText) options.defaultText = "";
+	if(null == options.placeHolder) options.placeHolder = "placeholder";
 	if(null == options.el && null == options.template) options.template = "<span></span>";
 	this.component = new sui.components.Component(options);
 	this.component.el.classList.add("editor");
 	this.component.el.setAttribute("contenteditable",true);
+	this.component.el.style.content = options.placeHolder;
 	var text = new sui.properties.Text(this.component,options.defaultText);
 	var inputPair = steamer.dom.Dom.produceEvent(this.component.el,"input");
 	var focusPair = steamer.dom.Dom.produceEvent(this.component.el,"focus");
@@ -4338,6 +4351,7 @@ ui.editors.TextEditor = function(options) {
 		focusPair.cancel();
 		blurPair.cancel();
 	};
+	steamer.Producer.negate(steamer.StringProducer.toBool(this.value)).feed(steamer.dom.Dom.consumeToggleClass(this.component.el,"empty"));
 };
 ui.editors.TextEditor.__name__ = ["ui","editors","TextEditor"];
 ui.editors.TextEditor.__interfaces__ = [ui.editors.Editor];

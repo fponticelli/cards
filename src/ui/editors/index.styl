@@ -1,8 +1,8 @@
 .editor
 	text-shadow -0.5px -0.5px 1px rgba(255,255,255,0.7), 0.5px 0.5px 1px rgba(0,0,0,0.2)
-	box-shadow inset 1px 1px 1px rgba(255,255,255,0.7), 0px 0px 1px rgba(0,0,0,0.3)
+	//box-shadow inset 1px 1px 1px rgba(255,255,255,0.7), 0px 0px 1px rgba(0,0,0,0.3)
 	background-color #f0f0f0
-	padding 0.3em
+	padding 0.2em
 	&.active
 		background-color #f9f9f9
 	&:focus
@@ -17,12 +17,24 @@
 		font-size 11px
 		color #333
 		display inline-block
-		border-radius 1px
+		border-radius 0.5em
 		text-align center
 
 	&.code
 		font-family monospace
 
+	&.empty:before
+		content 'placeholder'
+		color #aaa
+		text-shadow none
+		font-style italic
+
 .article
 	.editor.active
 		background-color transparent
+
+.fields
+	.value-container
+		.editor
+			&.bool
+				min-width 4em
