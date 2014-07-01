@@ -6,6 +6,7 @@ import sui.components.Component;
 import sui.components.ComponentOptions;
 import dom.Dom;
 import sui.properties.ToggleClass;
+import sui.properties.ValueProperty;
 import ui.editors.Editor;
 import ui.editors.EditorPicker;
 using steamer.dom.Dom;
@@ -40,7 +41,7 @@ class ContextField {
 			options.type,
 			Query.first('.value', component.el),
 			component,
-			options.value
+			options.value.value
 		);
 		// 250 is kind of a magic value and it is enough
 		// to be able to click on a button
@@ -68,6 +69,10 @@ class ContextField {
 						tooltip.visible.value = false;
 			}
 		});
+
+		this.value.value.feed(options.value.stream);
+		// TODO does this leak?
+		options.value.stream.feed(this.value.value);
 	}
 
 	public function destroy() {
@@ -82,5 +87,5 @@ typedef ContextFieldOptions = {>ComponentOptions,
 	type : SchemaType,
 	display : String,
 	name : String,
-	value : String
+	value : ValueProperty<Dynamic>
 }
