@@ -1,15 +1,42 @@
 package sui.properties;
 
+import haxe.ds.Option;
 import sui.components.Component;
 import steamer.Value;
+import ui.Runtime;
+using steamer.Producer;
 
 class ValueProperty<T> extends Property {
 	public var value(get, set) : T;
 	public var defaultValue(get, null) : T;
 	public var stream(default, null) : Value<T>;
+	public var runtime(default, null) : Value<Option<Runtime>>;
+
 	public function new(defaultValue : T, component : Component, name : String) {
 		stream = new Value(defaultValue);
+		runtime = new Value(None);
 		super(component, name);
+
+		runtime.feed(function(opt : Option<Runtime>) {
+			switch opt {
+				case None:
+					component.el.classList.remove('error');
+				case Some(runtime):
+					switch runtime.expression {
+						case SyntaxError(e):
+							component.el.classList.add('error');
+						case RuntimeError(e):
+							component.el.classList.add('error');
+						case Fun(f):
+							component.el.classList.remove('error');
+							stream.value = transform(f());
+					}
+			}
+		});
+	}
+
+	public function transform(value : Dynamic) : T {
+		return throw Type.getClassName(Type.getClass(this)).split('.').pop() + '.transform() is abstract and must be overridden';
 	}
 
 	override public function dispose() {

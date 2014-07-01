@@ -1,6 +1,10 @@
-- add multi state icon (on/off, checked/unchecked/uncheckable)
+- remove expression evaluation from contextview
+- use standard editors to feed ValueProperty
+- add switch to code editor
+- feed ValueProperty.runtime from code editor
+- add switch back to standard editor
 
-- add BoolEditor
++ add BoolEditor
 - add FloatEditor
 - add DateEditor
 
