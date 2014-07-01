@@ -6,9 +6,11 @@ import sui.components.Component;
 import sui.components.ComponentOptions;
 import dom.Dom;
 import sui.properties.ToggleClass;
-import ui.editors.*;
+import ui.editors.Editor;
+import ui.editors.EditorPicker;
 using steamer.dom.Dom;
 import haxe.ds.Option;
+import ui.SchemaType;
 import ui.widgets.Tooltip;
 
 class ContextField {
@@ -34,11 +36,12 @@ class ContextField {
 
 		// setup field value
 		// TODO support multiple editors data types
-		value = new CodeEditor({
-			el : Query.first('.value', component.el),
-			parent : component,
-			defaultText : options.value
-		});
+		value = EditorPicker.pick(
+			options.type,
+			Query.first('.value', component.el),
+			component,
+			options.value
+		);
 		// 250 is kind of a magic value and it is enough
 		// to be able to click on a button
 		// and not have lost focus in the meanwhile
@@ -76,6 +79,7 @@ class ContextField {
 }
 
 typedef ContextFieldOptions = {>ComponentOptions,
+	type : SchemaType,
 	display : String,
 	name : String,
 	value : String

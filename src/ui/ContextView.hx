@@ -40,7 +40,7 @@ class ContextView {
 		el = Query.first('div', el);
 
 		add = {
-			button : toolbar.left.addButton('add property', Config.icons.dropDown),
+			button : toolbar.left.addButton('add property', Config.icons.dropdown),
 			menu : new Menu({ parent : component })
 		};
 
@@ -98,13 +98,14 @@ class ContextView {
 			runtime = ensureRuntime(fragment, info, value),
 			f = new ContextField({
 				container : el,
-				parent : component,
-				display : info.display,
-				name : info.name,
-				value : valueToCode(info.type)(temp)
+				parent    : component,
+				display   : info.display,
+				name      : info.name,
+				type      : info.type,
+				value     : valueToCode(info.type)(temp)
 			}),
 			expression = f.value.value
-				.debounce(250)
+				.debounce(100)
 				.distinct()
 				.map(Runtimes.toRuntime);
 		f.focus
@@ -160,6 +161,7 @@ class ContextView {
 			case FloatType: FloatTransform.toCode;
 			case ObjectType(_): ObjectTransform.toCode;
 			case StringType: StringTransform.toCode;
+			case CodeType: StringTransform.toCode;
 		};
 	}
 
@@ -171,6 +173,7 @@ class ContextView {
 			case FloatType: DynamicTransform.toFloat;
 			case ObjectType(_): DynamicTransform.toObject;
 			case StringType: DynamicTransform.toString;
+			case CodeType: DynamicTransform.toCode;
 		};
 	}
 

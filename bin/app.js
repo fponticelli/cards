@@ -1873,7 +1873,7 @@ steamer.dom.Dom.consumeToggleAttribute = function(el,name) {
 	})(consume,originalValue)});
 };
 steamer.dom.Dom.consumeToggleClass = function(el,name) {
-	var originalValue = el.hasAttribute(name);
+	var originalValue = el.classList.contains(name);
 	var consume = function(v) {
 		if(v) el.classList.add(name); else el.classList.remove(name);
 	};
@@ -3757,7 +3757,7 @@ ui.ContextField = function(options) {
 	var key = dom.Query.first(".key",this.component.el);
 	key.innerText = options.display;
 	this.name = options.name;
-	this.value = new ui.editors.CodeEditor({ el : dom.Query.first(".value",this.component.el), parent : this.component, defaultText : options.value});
+	this.value = ui.editors.EditorPicker.pick(options.type,dom.Query.first(".value",this.component.el),this.component,options.value);
 	this.focus = this.value.focus.debounce(250).distinct();
 	this.classActive = new sui.properties.ToggleClass(this.component,"active");
 	this.focus.feed(this.classActive.stream);
@@ -3822,7 +3822,7 @@ ui.ContextView = function(document,mapper,options) {
 	this.el = dom.Html.parseList("<div class=\"fields\"><div></div></div>")[0];
 	this.component.el.appendChild(this.el);
 	this.el = dom.Query.first("div",this.el);
-	this.add = { button : this.toolbar.left.addButton("add property",Config.icons.dropDown), menu : new ui.widgets.Menu({ parent : this.component})};
+	this.add = { button : this.toolbar.left.addButton("add property",Config.icons.dropdown), menu : new ui.widgets.Menu({ parent : this.component})};
 	this.add.menu.anchorTo(this.add.button.component.el);
 	this.add.button.clicks.toTrue().feed(this.add.menu.visible.stream);
 	this.add.button.enabled.set_value(false);
@@ -3868,6 +3868,8 @@ ui.ContextView.valueToCode = function(type) {
 		return types.ObjectTransform.toCode;
 	case 5:
 		return types.StringTransform.toCode;
+	case 6:
+		return types.StringTransform.toCode;
 	}
 };
 ui.ContextView.typeTransform = function(type) {
@@ -3884,6 +3886,8 @@ ui.ContextView.typeTransform = function(type) {
 		return types.DynamicTransform.toObject;
 	case 5:
 		return types.DynamicTransform.toString;
+	case 6:
+		return types.DynamicTransform.toCode;
 	}
 };
 ui.ContextView.prototype = {
@@ -3919,8 +3923,8 @@ ui.ContextView.prototype = {
 	,addField: function(fragment,info,value) {
 		var temp = value.get_value();
 		var runtime = this.ensureRuntime(fragment,info,value);
-		var f = new ui.ContextField({ container : this.el, parent : this.component, display : info.display, name : info.name, value : (ui.ContextView.valueToCode(info.type))(temp)});
-		var expression = f.value.value.debounce(250).distinct().map(ui.Runtimes.toRuntime);
+		var f = new ui.ContextField({ container : this.el, parent : this.component, display : info.display, name : info.name, type : info.type, value : (ui.ContextView.valueToCode(info.type))(temp)});
+		var expression = f.value.value.debounce(100).distinct().map(ui.Runtimes.toRuntime);
 		f.focus.map(function(b) {
 			if(b) return haxe.ds.Option.Some(f); else return haxe.ds.Option.None;
 		}).feed(this.field);
@@ -4520,7 +4524,7 @@ ui.SchemaEvent.AddField = function(name,type) { var $x = ["AddField",1,name,type
 ui.SchemaEvent.DeleteField = function(name) { var $x = ["DeleteField",2,name]; $x.__enum__ = ui.SchemaEvent; $x.toString = $estr; return $x; };
 ui.SchemaEvent.RenameField = function(oldname,newname) { var $x = ["RenameField",3,oldname,newname]; $x.__enum__ = ui.SchemaEvent; $x.toString = $estr; return $x; };
 ui.SchemaEvent.RetypeField = function(name,type) { var $x = ["RetypeField",4,name,type]; $x.__enum__ = ui.SchemaEvent; $x.toString = $estr; return $x; };
-ui.SchemaType = { __ename__ : ["ui","SchemaType"], __constructs__ : ["ArrayType","BoolType","DateType","FloatType","ObjectType","StringType"] };
+ui.SchemaType = { __ename__ : ["ui","SchemaType"], __constructs__ : ["ArrayType","BoolType","DateType","FloatType","ObjectType","StringType","CodeType"] };
 ui.SchemaType.ArrayType = function(item) { var $x = ["ArrayType",0,item]; $x.__enum__ = ui.SchemaType; $x.toString = $estr; return $x; };
 ui.SchemaType.BoolType = ["BoolType",1];
 ui.SchemaType.BoolType.toString = $estr;
@@ -4535,6 +4539,9 @@ ui.SchemaType.ObjectType = function(fields) { var $x = ["ObjectType",4,fields]; 
 ui.SchemaType.StringType = ["StringType",5];
 ui.SchemaType.StringType.toString = $estr;
 ui.SchemaType.StringType.__enum__ = ui.SchemaType;
+ui.SchemaType.CodeType = ["CodeType",6];
+ui.SchemaType.CodeType.toString = $estr;
+ui.SchemaType.CodeType.__enum__ = ui.SchemaType;
 ui.editors = {};
 ui.editors.Editor = function() { };
 ui.editors.Editor.__name__ = ["ui","editors","Editor"];
@@ -4543,6 +4550,55 @@ ui.editors.Editor.prototype = {
 	,type: null
 	,focus: null
 	,__class__: ui.editors.Editor
+};
+ui.editors.BoolEditor = function(options) {
+	var _g = this;
+	this.type = ui.SchemaType.BoolType;
+	if(null == options.defaultValue) options.defaultValue = false;
+	if(null == options.el && null == options.template) options.template = "<span></span>";
+	this.component = new sui.components.Component(options);
+	var cls = this.component.el.classList;
+	cls.add("fa");
+	cls.add("editor");
+	cls.add("bool");
+	cls.add("fa-" + Config.icons.unchecked);
+	this.component.el.setAttribute("tabindex","0");
+	this.value = new steamer.Value(options.defaultValue);
+	var clickPair = steamer.dom.Dom.produceEvent(this.component.el,"click");
+	var focusPair = steamer.dom.Dom.produceEvent(this.component.el,"focus");
+	var blurPair = steamer.dom.Dom.produceEvent(this.component.el,"blur");
+	this.value.feed(steamer.dom.Dom.consumeToggleClass(this.component.el,"fa-" + Config.icons.checked));
+	steamer.Producer.negate(this.value).feed(steamer.dom.Dom.consumeToggleClass(this.component.el,"fa-" + Config.icons.unchecked));
+	clickPair.producer.map(function(_) {
+		return !_g.value.get_value();
+	}).feed(this.value);
+	this.focus = new steamer.Value(false);
+	focusPair.producer.map(function(_1) {
+		return true;
+	}).merge(blurPair.producer.map(function(_2) {
+		return false;
+	})).feed(this.focus);
+	this.cancel = function() {
+		_g.value.terminate();
+		clickPair.cancel();
+		focusPair.cancel();
+		blurPair.cancel();
+	};
+};
+ui.editors.BoolEditor.__name__ = ["ui","editors","BoolEditor"];
+ui.editors.BoolEditor.__interfaces__ = [ui.editors.Editor];
+ui.editors.BoolEditor.prototype = {
+	component: null
+	,focus: null
+	,value: null
+	,type: null
+	,cancel: null
+	,destroy: function() {
+		this.value.terminate();
+		this.component.destroy();
+		this.cancel();
+	}
+	,__class__: ui.editors.BoolEditor
 };
 ui.editors.TextEditor = function(options) {
 	this.type = ui.SchemaType.StringType;
@@ -4596,6 +4652,20 @@ ui.editors.CodeEditor.__super__ = ui.editors.TextEditor;
 ui.editors.CodeEditor.prototype = $extend(ui.editors.TextEditor.prototype,{
 	__class__: ui.editors.CodeEditor
 });
+ui.editors.EditorPicker = function() { };
+ui.editors.EditorPicker.__name__ = ["ui","editors","EditorPicker"];
+ui.editors.EditorPicker.pick = function(type,el,parent,value) {
+	switch(type[1]) {
+	case 1:
+		return new ui.editors.BoolEditor({ el : el, parent : parent, defaultValue : value});
+	case 6:
+		return new ui.editors.CodeEditor({ el : el, parent : parent, defaultText : value});
+	case 5:
+		return new ui.editors.TextEditor({ el : el, parent : parent, defaultText : value});
+	default:
+		throw "Editor for " + Std.string(type) + " has not been implemented yet";
+	}
+};
 ui.fragments = {};
 ui.fragments.Fragment = function() { };
 ui.fragments.Fragment.__name__ = ["ui","fragments","Fragment"];
@@ -5186,7 +5256,7 @@ thx.Assert.results = { add : function(assertion) {
 		break;
 	}
 }};
-Config.icons = { add : "plus", remove : "minus", dropDown : "arrow-down"};
+Config.icons = { add : "plus", remove : "minus", dropdown : "arrow-down", checked : "check-square-o", unchecked : "square-o"};
 Config.selectors = { app : ".card"};
 PropertyFeeder.classes = [{ display : "bold", name : "strong"},{ display : "italic", name : "emphasis"}];
 dom.Query.doc = document;

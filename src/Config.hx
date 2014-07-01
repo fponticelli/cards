@@ -2,7 +2,9 @@ class Config {
 	public static var icons(default, null) = {
 		add : 'plus',
 		remove : 'minus',
-		dropDown : 'arrow-down'
+		dropdown : 'arrow-down',
+		checked : 'check-square-o',
+		unchecked : 'square-o'
 	};
 
 	public static var selectors(default, null) = {

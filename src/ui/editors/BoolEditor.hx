@@ -1,64 +1,89 @@
-package ui;
+package ui.editors;
 
+using steamer.Producer;
+import sui.components.Component;
+import sui.components.ComponentOptions;
+import steamer.Value;
+import sui.properties.Text;
+import ui.SchemaType;
+using steamer.dom.Dom;
+
+class BoolEditor implements Editor<Bool> {
+	public var component(default, null) : Component;
+	public var focus(default, null) : Value<Bool>;
+	public var value(default, null) : Value<Bool>;
+	public var type(default, null) : SchemaType;
+	var cancel : Void -> Void;
+	public function new(options : BoolEditorOptions) {
+		type = BoolType;
+		if(null == options.defaultValue)
+			options.defaultValue = false;
+		if(null == options.el && null == options.template)
+			options.template = '<span></span>';
+		component = new Component(options);
+		var cls = component.el.classList;
+		cls.add('fa');
+		cls.add('editor');
+		cls.add('bool');
+		cls.add('fa-' + Config.icons.unchecked);
+		component.el.setAttribute('tabindex', '0');
+
+		value = new Value(options.defaultValue);
+		var clickPair = component.el.produceEvent('click'),
+			focusPair = component.el.produceEvent('focus'),
+			blurPair  = component.el.produceEvent('blur');
+
+		value
+			.feed(component.el.consumeToggleClass('fa-' + Config.icons.checked));
+		value
+			.negate()
+			.feed(component.el.consumeToggleClass('fa-' + Config.icons.unchecked));
 /*
-import { ContainerProperty } from '../container';
-import { BehaviorProperty } from '../behavior';
-import { ValueProperty } from './value';
-import { Dom, Query, Html } from 'ui/dom';
+		trace(component.el);
+		value
+			.log('check')
+			.feed(function(isChecked : Bool) {
+				trace('isChecked? $isChecked');
+				trace(Type.typeof(isChecked));
+				if(isChecked) {
+					trace("SET CHECKED");
+					cls.add('fa-' + Config.icons.checked);
+					cls.remove('fa-' + Config.icons.unchecked);
+					trace(cls.contains('fa-' + Config.icons.checked));
+				} else {
+					trace("SET UNCHECKED");
+					cls.remove('fa-' + Config.icons.checked);
+					cls.add('fa-' + Config.icons.unchecked);
+					trace(cls.contains('fa-' + Config.icons.unchecked));
+				}
+			});
+*/
+		clickPair.producer
+			.map(function(_) return !value.value)
+			.feed(value);
 
-let template = require('./booleditor.jade');
-
-let _bound = Symbol(),
-	_bindƒ = Symbol(),
-	_unbindƒ = Symbol(),
-	valueProperty = new ValueProperty('Bool', (editor, value) => {
-		let el       = editor.parent.el,
-			content  = Query.first('.content', el),
-			listenƒ  = () => {
-				value.push(input.checked);
-			},
-			input    = Html.parse(template({ checked : value.value })),
-			focusƒ   = () => editor.parent.focusStream.push(editor.parent),
-			unfocusƒ = () => editor.parent.focusStream.push(null);
-
-		content.appendChild(input);
-
-		input.addEventListener("change", listenƒ, false);
-		input.addEventListener("focus", focusƒ, false);
-		input.addEventListener("blur", unfocusƒ, false);
-
-		// cancel
-		return function() {
-			input.removeEventListener("focus", focusƒ, false);
-			input.removeEventListener("blur", unfocusƒ, false);
-			input.removeEventListener("change", listenƒ, false);
+		focus = new Value(false);
+		focusPair.producer
+			.map(function(_) return true)
+			.merge(
+				blurPair.producer
+					.map(function(_) return false)
+			).feed(focus);
+		cancel = function() {
+			value.terminate();
+			clickPair.cancel();
+			focusPair.cancel();
+			blurPair.cancel();
 		};
-	}),
-	focusProperty = new BehaviorProperty('focus', (target) => {
-		let content = Query.first('.content', target.parent.el);
-		return function() {
-			content.focus();
-		};
-	});
-
-class BoolEditorProperty extends ContainerProperty {
-	constructor() {
-		super('editor', 'value');
 	}
 
-	inject(target) {
-		let ƒ = super.inject(target),
-			editor = target.editor;
-
-		editor.properties.add(valueProperty);
-		editor.properties.add(focusProperty);
-
-		return () => {
-			editor.properties.remove(focusProperty);
-			ƒ();
-		};
+	public function destroy() {
+		value.terminate();
+		component.destroy();
+		cancel();
 	}
 }
 
-export { BoolEditorProperty };
-*/
+typedef BoolEditorOptions = {> ComponentOptions,
+	defaultValue : Bool
+}

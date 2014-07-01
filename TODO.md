@@ -1,3 +1,5 @@
+- add multi state icon (on/off, checked/unchecked/uncheckable)
+
 - add BoolEditor
 - add FloatEditor
 - add DateEditor

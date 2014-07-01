@@ -106,8 +106,39 @@ a img {
   width: 100%;
   height: 100%;
 }
+.card .editor {
+  text-shadow: -0.5px -0.5px 1px rgba(255,255,255,0.7), 0.5px 0.5px 1px rgba(0,0,0,0.2);
+  -webkit-box-shadow: inset 1px 1px 1px rgba(255,255,255,0.7), 0px 0px 1px rgba(0,0,0,0.3);
+  box-shadow: inset 1px 1px 1px rgba(255,255,255,0.7), 0px 0px 1px rgba(0,0,0,0.3);
+  background-color: #f0f0f0;
+}
+.card .editor.active {
+  background-color: #f9f9f9;
+}
+.card .editor:focus {
+  outline: none;
+  -webkit-box-shadow: inset 1px 1px 1px rgba(255,255,255,0.9), 0px 0px 1px rgba(0,0,0,0.4);
+  box-shadow: inset 1px 1px 1px rgba(255,255,255,0.9), 0px 0px 1px rgba(0,0,0,0.4);
+  background-color: #fbfbfb;
+}
+.card .editor:hover {
+  background-color: #f9f9f9;
+}
+.card .editor.bool {
+  cursor: pointer;
+  font-size: 11px;
+  color: #333;
+  margin: 4px;
+  display: inline-block;
+  -webkit-border-radius: 0 0 0 9px;
+  border-radius: 0 0 0 9px;
+  text-align: center;
+}
 .card .editor.code {
   font-family: monospace;
+}
+.card .article .editor.active {
+  background-color: transparent;
 }
 .card .block {
   padding: 0.25em 0.5em;

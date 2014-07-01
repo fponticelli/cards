@@ -7,4 +7,5 @@ enum SchemaType {
 	FloatType;
 	ObjectType(fields : Iterable<{ name : String, type : SchemaType }>);
 	StringType;
+	CodeType;
 }
