@@ -5,15 +5,22 @@ using StringTools;
 
 class StringTransform {
 	public static function toArray(value : String) : Array<Dynamic> {
-		return [toString(value)];
+		return toString(value).split(',').map(StringTools.trim);
 	}
 
 	public static function toBool(value : String) : Bool {
-		return toString(value).trim() != '';
+		return switch toString(value).trim().toLowerCase() {
+			case '', 'off', 'no', 'false', '0': false;
+			case _: true;
+		};
 	}
 
 	public static function toDate(value : String) : Date {
-		return Date.now();
+		return try {
+			Date.fromString(value);
+		} catch(e : Dynamic) {
+			Date.now();
+		};
 	}
 
 	public static function toFloat(value : String) : Float {

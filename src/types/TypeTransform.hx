@@ -96,7 +96,7 @@ class TypeTransform {
 					case CodeType:
 						ObjectTransform.toCode;
 				}
-			case StringType, CodeType:
+			case StringType:
 				switch dstType {
 					case ArrayType(_):
 						StringTransform.toArray;
@@ -112,6 +112,23 @@ class TypeTransform {
 						StringTransform.toString;
 					case CodeType:
 						StringTransform.toCode;
+				}
+			case CodeType:
+				switch dstType {
+					case ArrayType(_):
+						CodeTransform.toArray;
+					case BoolType:
+						CodeTransform.toBool;
+					case DateType:
+						CodeTransform.toDate;
+					case FloatType:
+						CodeTransform.toFloat;
+					case ObjectType(_):
+						CodeTransform.toObject;
+					case StringType:
+						CodeTransform.toString;
+					case CodeType:
+						CodeTransform.toCode;
 				}
 		}
 	}
