@@ -40,8 +40,9 @@ class ContextField {
 		name = options.name;
 		type = options.type;
 
-		focus  = new Value(false);
+		focus = new Value(false);
 		active = new Value(false);
+		withError = new Value(None);
 
 		fieldValue = new FieldValue(
 			component,
@@ -90,9 +91,7 @@ class ContextField {
 					fieldValue.editor.focus.value = true;
 			});
 
-		// TODO this is broken at the moment, maybe move to FieldValue?
 		var hasError = component.el.consumeToggleClass('error');
-		withError = new Value(None);
 		withError.map(function(o) {
 			return switch o {
 				case None: false;

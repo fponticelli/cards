@@ -1,10 +1,6 @@
-- restore error notification for expressions
-- mark field with error
-- mark fragment with error
-
 - evaluate expressions in context
 - create dependency between model values and context properties
-- refresh evaluation on change
+- refresh evaluation on model change
 
 - helper context (for excel like functions)
 
@@ -43,6 +39,9 @@ DOC: set focus to currently created block/fragment
 
 DONE:
 
++ restore error notification for expressions
++ mark field with error
++ mark fragment with error
 + context: set focus clicking on field name
 + active state for context fields
 + focus state for context fields

@@ -4112,6 +4112,7 @@ ui.ContextField = function(options) {
 	this.type = options.type;
 	this.focus = new steamer.Value(false);
 	this.active = new steamer.Value(false);
+	this.withError = new steamer.Value(haxe.ds.Option.None);
 	this.fieldValue = new ui.FieldValue(this.component,dom.Query.first(".value-container",this.component.el),function(type,editor) {
 		editor.focus.feed(_g.focus);
 		switch(type[1]) {
@@ -4163,7 +4164,6 @@ ui.ContextField = function(options) {
 		return $r;
 	}(this)));
 	var hasError = steamer.dom.Dom.consumeToggleClass(this.component.el,"error");
-	this.withError = new steamer.Value(haxe.ds.Option.None);
 	this.withError.map(function(o) {
 		switch(o[1]) {
 		case 1:
