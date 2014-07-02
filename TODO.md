@@ -8,26 +8,20 @@
 
 - helper context (for excel like functions)
 
-- add FloatEditor
-- add DateEditor
-
-TODO (requires the INTERNET)
-- add placeholder to editors
-- chose better icons
-
-- context: set focus clicking on field name
 - model: switch editor button
 - model: switch editor menu
 - model: switch between any 2 editors
 
+- add FloatEditor
+- add DateEditor
+
 - active state for model fields
 - focus state for model fields
 
-- inline fragment
-
-- more properties:
-	- text
-	- visible
+TODO (requires the INTERNET)
+- add placeholder to editors
+- chose better icons
+- check why nib is not included by default
 
 - bidirectional updates from property to model when possible
 
@@ -42,23 +36,14 @@ MV: text placeholder for editors
 MV: field do not propagate until they have a unique field name
 MV: highlight invalid text editors
 
-DOC: define Fragment
-DOC: Fragment properties (to display in context)
-DOC: create Fragment
-DOC: delete Fragment
 DOC: define Fragment hierarchy
 DOC: display hierarchy breadcrumbs
 DOC: create new blocks after the current one
 DOC: set focus to currently created block/fragment
 
-CV: current fragment/block
-CV: display associated properties
-CV: add related properties
-
-OPT: execute expression in special scope with utility functions
-
 DONE:
 
++ context: set focus clicking on field name
 + active state for context fields
 + focus state for context fields
 + add support for keyboard in BoolEditor (spacebar, return should trigger check/uncheck)

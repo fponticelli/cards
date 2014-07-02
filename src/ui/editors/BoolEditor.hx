@@ -59,6 +59,7 @@ class BoolEditor implements Editor<Bool> {
 			.feed(value);
 
 		focus = new Value(false);
+		focus.filterValue(true).feed(component.el.consumeFocus());
 		focusPair.producer
 			.map(function(_) return true)
 			.merge(

@@ -1887,6 +1887,11 @@ steamer.dom.Dom.produceKeyboardEvent = function(el,name) {
 	});
 	return { producer : producer, cancel : cancel};
 };
+steamer.dom.Dom.consumeFocus = function(el) {
+	return steamer._Consumer.Consumer_Impl_.fromObject({ emit : function(v) {
+		if(v) el.focus(); else el.blur();
+	}});
+};
 steamer.dom.Dom.consumeText = function(el) {
 	var originalText = el.innerText;
 	var consume = function(text) {
@@ -1947,7 +1952,7 @@ steamer.dom.Dom.consumeToggleClass = function(el,name) {
 };
 steamer.dom.Dom.consumeToggleVisibility = function(el) {
 	var originalDisplay = el.style.display;
-	thx.Assert.notNull(originalDisplay,"original element.style.display for visibility is NULL",{ fileName : "Dom.hx", lineNumber : 107, className : "steamer.dom.Dom", methodName : "consumeToggleVisibility"});
+	thx.Assert.notNull(originalDisplay,"original element.style.display for visibility is NULL",{ fileName : "Dom.hx", lineNumber : 113, className : "steamer.dom.Dom", methodName : "consumeToggleVisibility"});
 	if(originalDisplay == "none") originalDisplay = "";
 	var consume = function(value) {
 		if(value) el.style.display = originalDisplay; else el.style.display = "none";
@@ -4122,6 +4127,23 @@ ui.ContextField = function(options) {
 	var runtime = thx.core.Options.toValue(options.value.runtime.get_value());
 	if(null != runtime) this.fieldValue.setEditor(ui.SchemaType.CodeType,runtime.code); else this.fieldValue.setEditor(options.type,options.value.get_value());
 	this.active.feed(steamer.dom.Dom.consumeToggleClass(this.component.el,"active"));
+	var clickKey = steamer.dom.Dom.produceEvent(key,"click");
+	clickKey.producer.feed((function($this) {
+		var $r;
+		var f = function(_) {
+			if(null != _g.fieldValue.editor) _g.fieldValue.editor.focus.set_value(true);
+		};
+		$r = { onPulse : function(pulse) {
+			switch(pulse[1]) {
+			case 0:
+				var v = pulse[2];
+				f(v);
+				break;
+			default:
+			}
+		}};
+		return $r;
+	}(this)));
 	var hasError = steamer.dom.Dom.consumeToggleClass(this.component.el,"error");
 	this.withError = new steamer.Value(haxe.ds.Option.None);
 	this.withError.map(function(o) {
@@ -4134,7 +4156,7 @@ ui.ContextField = function(options) {
 	}).feed(hasError);
 	this.withError.feed((function($this) {
 		var $r;
-		var f = function(o1) {
+		var f1 = function(o1) {
 			switch(o1[1]) {
 			case 0:
 				var err = o1[2];
@@ -4146,11 +4168,11 @@ ui.ContextField = function(options) {
 				if(ui.ContextField.tooltip.anchorElement == _g.component.el) ui.ContextField.tooltip.visible.set_value(false);
 			}
 		};
-		$r = { onPulse : function(pulse) {
-			switch(pulse[1]) {
+		$r = { onPulse : function(pulse1) {
+			switch(pulse1[1]) {
 			case 0:
-				var v = pulse[2];
-				f(v);
+				var v1 = pulse1[2];
+				f1(v1);
 				break;
 			default:
 			}
@@ -4938,6 +4960,7 @@ ui.editors.BoolEditor = function(options) {
 		return !_g.value.get_value();
 	}).feed(this.value);
 	this.focus = new steamer.Value(false);
+	this.focus.filterValue(true).feed(steamer.dom.Dom.consumeFocus(this.component.el));
 	focusPair.producer.map(function(_1) {
 		return true;
 	}).merge(blurPair.producer.map(function(_2) {
@@ -4985,6 +5008,7 @@ ui.editors.TextEditor = function(options) {
 	}).feed(this.value);
 	this.focus = new steamer.Value(false);
 	this.focus.feed(steamer.dom.Dom.consumeToggleAttribute(this.component.el,"contenteditable","true"));
+	this.focus.filterValue(true).feed(steamer.dom.Dom.consumeFocus(this.component.el));
 	this.focus.filterValue(true).feed((function($this) {
 		var $r;
 		var f = function(_1) {

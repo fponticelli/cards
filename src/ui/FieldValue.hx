@@ -11,7 +11,7 @@ import types.TypeTransform;
 
 class FieldValue {
 	public var type(default, null) : SchemaType;
-	var editor : Editor<Dynamic>;
+	public var editor(default, null) : Null<Editor<Dynamic>>;
 	var parent : Component;
 	var container : Element;
 	var afterCreate : InitFunction;

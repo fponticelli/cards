@@ -70,6 +70,13 @@ class ContextField {
 
 		active.feed(component.el.consumeToggleClass('active'));
 
+		var clickKey = key.produceEvent('click');
+		clickKey.producer
+			.feed(function(_) {
+				if(null != fieldValue.editor)
+					fieldValue.editor.focus.value = true;
+			});
+
 		// TODO this is broken at the moment, maybe move to FieldValue?
 		var hasError = component.el.consumeToggleClass('error');
 		withError = new Value(None);

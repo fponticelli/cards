@@ -43,6 +43,7 @@ class TextEditor implements Editor<String> {
 
 		focus = new Value(false);
 		focus.feed(component.el.consumeToggleAttribute('contenteditable', 'true'));
+		focus.filterValue(true).feed(component.el.consumeFocus());
 		focus
 			.filterValue(true)
 			.feed(function(_) {
