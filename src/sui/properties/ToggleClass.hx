@@ -3,7 +3,7 @@ package sui.properties;
 using steamer.dom.Dom;
 import sui.components.Component;
 
-class ToggleClass extends ValueProperty<Bool> {
+class ToggleClass extends BoolProperty {
 	public function new(component : Component, name : String, ?className : String) {
 		var defaultValue = component.el.classList.contains(className);
 		super(defaultValue, component, name);

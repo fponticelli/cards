@@ -3,7 +3,7 @@ package sui.properties;
 import sui.components.Component;
 using steamer.dom.Dom;
 
-class Attribute extends ValueProperty<String> {
+class Attribute extends StringProperty {
 	public var attributeName(default, null) : String;
 	public function new(component : Component, name : String, ?attributeName : String, defaultValue : String) {
 		this.attributeName = null == attributeName ? name : attributeName;

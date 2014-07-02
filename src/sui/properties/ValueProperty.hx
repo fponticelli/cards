@@ -33,9 +33,13 @@ class ValueProperty<T> extends Property {
 							component.el.classList.remove('error');
 							runtimeError.value = None;
 							try {
-								stream.value = transform(f());
+								var v = f();
+								stream.value = transform(v);
 								runtimeError.value = None;
 							} catch(e : Dynamic) {
+								// TODO remove me once error notification is working
+								trace('RUNTIME ERROR');
+								trace(e);
 								runtimeError.value = Some(Std.string(e));
 							}
 					}
@@ -48,7 +52,7 @@ class ValueProperty<T> extends Property {
 	}
 
 	override public function dispose() {
-		stream.terminate();
+		stream.end();
 		super.dispose();
 	}
 

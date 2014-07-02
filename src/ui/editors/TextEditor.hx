@@ -69,7 +69,7 @@ class TextEditor implements Editor<String> {
 	}
 
 	public function destroy() {
-		value.terminate();
+		value.end();
 		component.destroy();
 		cancel();
 	}

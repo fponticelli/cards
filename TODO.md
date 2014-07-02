@@ -1,45 +1,25 @@
-- rewiring switched editor doesn't work
-- focus on switched editor doesn't work
-- disabling/enabling 2 buttons doesn't work
-
-- add CodeTransform
-
-+ extract field value editor from ContextField
-+ remove expression evaluation from contextview
-+ use standard editors to feed ValueProperty
-- add switch to code editor
-- feed ValueProperty.runtime from code editor
-- add switch back to standard editor
-
 - restore error notification for expressions
 - mark field with error
 - mark fragment with error
 
-+ add BoolEditor
-- add FloatEditor
-- add DateEditor
-
-TODO (requires the INTERNET)
-- add placeholder to editors
-
-+ add support for keyboard in BoolEditor (spacebar, return should trigger check/uncheck)
-+ make certain elements unselectable (field keys, bool editor, toolbars, footer)
-
-- context: switch editor button
-- context: switch between native editor and code editor
-- model: switch editor button
-- model: switch editor menu
-- model: switch between any 2 editors
-
-- move expression evaluation away from contextview
 - evaluate expressions in context
 - create dependency between model values and context properties
 - refresh evaluation on change
 
 - helper context (for excel like functions)
 
-+ active state for context fields
-+ focus state for context fields
+- add FloatEditor
+- add DateEditor
+
+TODO (requires the INTERNET)
+- add placeholder to editors
+- chose better icons
+
+- context: set focus clicking on field name
+- model: switch editor button
+- model: switch editor menu
+- model: switch between any 2 editors
+
 - active state for model fields
 - focus state for model fields
 
@@ -79,6 +59,18 @@ OPT: execute expression in special scope with utility functions
 
 DONE:
 
++ active state for context fields
++ focus state for context fields
++ add support for keyboard in BoolEditor (spacebar, return should trigger check/uncheck)
++ make certain elements unselectable (field keys, bool editor, toolbars, footer)
++ extract field value editor from ContextField
++ remove expression evaluation from contextview
++ use standard editors to feed ValueProperty
++ add switch to code editor
++ feed ValueProperty.runtime from code editor
++ add switch back to standard editor
++ add BoolEditor
++ add CodeTransform
 + active state for fragments
 + focus state for fragments
 + make all fragments focusable

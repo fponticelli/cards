@@ -1,5 +1,6 @@
 .block
 	padding 0.25em 0.5em
+	margin-bottom 2px
 	&:first-child
 		padding-top 0.5em
 	&:last-child
@@ -9,3 +10,7 @@
 	&:focus
 		outline none
 		background-color white
+
+	&.error
+		outline 2px dotted rgba(200,25,0,0.5)
+		outline-offset -2px

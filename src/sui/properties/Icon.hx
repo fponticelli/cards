@@ -3,7 +3,7 @@ package sui.properties;
 import js.html.Element;
 import sui.components.Component;
 
-class Icon extends ValueProperty {
+class Icon extends StringProperty {
 	static function getCurrentIcon(el : Element) {
 		for(i in 0...el.classList.length) {
 			var className = el.classList.item(i);

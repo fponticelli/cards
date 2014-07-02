@@ -16,11 +16,11 @@ class FieldValue {
 	var container : Element;
 	var afterCreate : InitFunction;
 	var afterRemove : InitFunction;
-	public function new(parent : Component, container : Element, afterCreate : InitFunction, afterRemove : InitFunction) {
+	public function new(parent : Component, container : Element, afterCreate : InitFunction, ?afterRemove : InitFunction) {
 		this.parent = parent;
 		this.container = container;
 		this.afterCreate = afterCreate;
-		this.afterRemove = afterRemove;
+		this.afterRemove = null != afterRemove ? afterRemove : function(_, _) {};
 	}
 
 	public function setEditor(type, ?value : Dynamic) {
@@ -29,8 +29,6 @@ class FieldValue {
 				value = TypeTransform.transform(this.type, type)(editor.value.value);
 			}
 			afterRemove(this.type, editor);
-			editor.value.terminate();
-			editor.focus.terminate();
 		}
 		container.innerHTML = '<div class="value"></div>';
 		var el = Query.first('.value', container);

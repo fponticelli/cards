@@ -110,11 +110,11 @@ a img {
 }
 .card .editor.active {
   background-color: #f9f9f9;
+  -webkit-box-shadow: inset 1px 1px 1px rgba(255,255,255,0.9), 0px 0px 1px rgba(0,0,0,0.4);
+  box-shadow: inset 1px 1px 1px rgba(255,255,255,0.9), 0px 0px 1px rgba(0,0,0,0.4);
 }
 .card .editor:focus {
   outline: none;
-  -webkit-box-shadow: inset 1px 1px 1px rgba(255,255,255,0.9), 0px 0px 1px rgba(0,0,0,0.4);
-  box-shadow: inset 1px 1px 1px rgba(255,255,255,0.9), 0px 0px 1px rgba(0,0,0,0.4);
   background-color: #fbfbfb;
 }
 .card .editor:hover {
@@ -159,6 +159,7 @@ a img {
 }
 .card .block {
   padding: 0.25em 0.5em;
+  margin-bottom: 2px;
 }
 .card .block:first-child {
   padding-top: 0.5em;
@@ -172,6 +173,10 @@ a img {
 .card .block:focus {
   outline: none;
   background-color: #fff;
+}
+.card .block.error {
+  outline: 2px dotted rgba(200,25,0,0.5);
+  outline-offset: -2px;
 }
 .card button.fa {
   padding-left: 4.5px;

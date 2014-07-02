@@ -15,6 +15,7 @@ import haxe.ds.Option;
 import ui.SchemaType;
 import ui.widgets.Tooltip;
 import ui.FieldValue;
+using thx.core.Options;
 
 class ContextField {
 	public static var tooltip(default, null) : Tooltip = new Tooltip({ classes : 'tooltip error' });
@@ -36,8 +37,8 @@ class ContextField {
 		var key = Query.first('.key', component.el);
 		key.innerText = options.display;
 
-		this.name = options.name;
-		this.type = options.type;
+		name = options.name;
+		type = options.type;
 
 		focus  = new Value(false);
 		active = new Value(false);
@@ -46,8 +47,6 @@ class ContextField {
 			component,
 			Query.first('.value-container', component.el),
 			function(type : SchemaType, editor : Editor<Dynamic>) {
-				trace('create');
-				trace(type);
 				editor.focus.feed(focus);
 				switch type {
 					case CodeType:
@@ -56,20 +55,18 @@ class ContextField {
 							.toOption()
 							.feed(options.value.runtime);
 					case _:
-						trace(options.value);
 						editor.value.feed(options.value.stream);
 						// TODO does this leak?
 						options.value.stream.feed(editor.value);
 				}
-			},
-			function(type : SchemaType, editor : Editor<Dynamic>) {
-				trace('destroy');
-				//editor.value.terminate();
-				//editor.focus.terminate();
 			}
 		);
 
-		fieldValue.setEditor(options.type, options.value.value);
+		var runtime = options.value.runtime.value.toValue();
+		if(null != runtime)
+			fieldValue.setEditor(CodeType, runtime.code);
+		else
+			fieldValue.setEditor(options.type, options.value.value);
 
 		active.feed(component.el.consumeToggleClass('active'));
 

@@ -66,7 +66,6 @@ class BoolEditor implements Editor<Bool> {
 					.map(function(_) return false)
 			).feed(focus);
 		cancel = function() {
-			value.terminate();
 			clickPair.cancel();
 			focusPair.cancel();
 			blurPair.cancel();
@@ -75,9 +74,9 @@ class BoolEditor implements Editor<Bool> {
 	}
 
 	public function destroy() {
-		value.terminate();
-		component.destroy();
 		cancel();
+		component.destroy();
+		value.end();
 	}
 }
 
