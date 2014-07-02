@@ -2102,6 +2102,7 @@ sui.properties.ValueProperty = function(defaultValue,component,name) {
 	this.runtime = new steamer.Value(haxe.ds.Option.None);
 	this.runtimeError = new steamer.Value(haxe.ds.Option.None);
 	sui.properties.Property.call(this,component,name);
+	steamer.Producer.toBool(this.runtimeError).feed(steamer.dom.Dom.consumeToggleClass(component.el,"error"));
 	this.runtime.feed((function($this) {
 		var $r;
 		var f = function(opt) {
@@ -2129,8 +2130,6 @@ sui.properties.ValueProperty = function(defaultValue,component,name) {
 							_g.stream.set_value(_g.transform(v));
 							_g.runtimeError.set_value(haxe.ds.Option.None);
 						} catch( e1 ) {
-							haxe.Log.trace("RUNTIME ERROR",{ fileName : "ValueProperty.hx", lineNumber : 41, className : "sui.properties.ValueProperty", methodName : "new"});
-							haxe.Log.trace(e1,{ fileName : "ValueProperty.hx", lineNumber : 42, className : "sui.properties.ValueProperty", methodName : "new"});
 							_g.runtimeError.set_value(haxe.ds.Option.Some(Std.string(e1)));
 						}
 						break;
@@ -4105,7 +4104,7 @@ ui.widgets.Tooltip.prototype = $extend(ui.widgets.FrameOverlay.prototype,{
 });
 ui.ContextField = function(options) {
 	var _g = this;
-	if(null == options.template && null == options.el) options.template = "<div class=\"field\"><div class=\"key-container\"><div class=\"key\"></div></div><div class=\"value-container\"><div class=\"value\"></div></div></div>";
+	if(null == options.template && null == options.el) options.template = "<div class=\"field\"><div class=\"key-container\"><div class=\"key\"></div></div><div class=\"value-container\"></div></div>";
 	this.component = new sui.components.Component(options);
 	var key = dom.Query.first(".key",this.component.el);
 	key.innerText = options.display;
@@ -4117,15 +4116,34 @@ ui.ContextField = function(options) {
 		editor.focus.feed(_g.focus);
 		switch(type[1]) {
 		case 6:
-			editor.value.map(ui.Runtime.toRuntime).toOption().feed(options.value.runtime);
+			editor.value.map(ui.Runtime.toRuntime).toOption().feed(options.value.runtime).map(function(opt) {
+				switch(opt[1]) {
+				case 0:
+					var runtime = opt[2];
+					{
+						var _g1 = runtime.expression;
+						switch(_g1[1]) {
+						case 1:
+							var e = _g1[2];
+							return haxe.ds.Option.Some(e);
+						default:
+							return haxe.ds.Option.None;
+						}
+					}
+					break;
+				default:
+					return haxe.ds.Option.None;
+				}
+			}).feed(_g.withError);
+			options.value.runtimeError.feed(_g.withError);
 			break;
 		default:
 			editor.value.feed(options.value.stream);
 			options.value.stream.feed(editor.value);
 		}
 	});
-	var runtime = thx.core.Options.toValue(options.value.runtime.get_value());
-	if(null != runtime) this.fieldValue.setEditor(ui.SchemaType.CodeType,runtime.code); else this.fieldValue.setEditor(options.type,options.value.get_value());
+	var runtime1 = thx.core.Options.toValue(options.value.runtime.get_value());
+	if(null != runtime1) this.fieldValue.setEditor(ui.SchemaType.CodeType,runtime1.code); else this.fieldValue.setEditor(options.type,options.value.get_value());
 	this.active.feed(steamer.dom.Dom.consumeToggleClass(this.component.el,"active"));
 	var clickKey = steamer.dom.Dom.produceEvent(key,"click");
 	clickKey.producer.feed((function($this) {
@@ -4507,11 +4525,11 @@ ui.FieldValue.prototype = {
 		if(null != this.editor) {
 			if(null == value) value = (types.TypeTransform.transform(this.type,type))(this.editor.value.get_value());
 			this.afterRemove(this.type,this.editor);
+			this.container.innerHTML = "";
 		}
-		this.container.innerHTML = "<div class=\"value\"></div>";
-		var el = dom.Query.first(".value",this.container);
 		this.type = type;
-		this.editor = ui.editors.EditorPicker.pick(type,el,this.parent,value);
+		this.editor = ui.editors.EditorPicker.pick(type,this.container,this.parent,value);
+		this.editor.component.el.classList.add("value");
 		this.afterCreate(this.type,this.editor);
 	}
 	,__class__: ui.FieldValue
@@ -4927,13 +4945,14 @@ ui.editors.Editor.prototype = {
 	value: null
 	,type: null
 	,focus: null
+	,component: null
 	,__class__: ui.editors.Editor
 };
 ui.editors.BoolEditor = function(options) {
 	var _g = this;
 	this.type = ui.SchemaType.BoolType;
 	if(null == options.defaultValue) options.defaultValue = false;
-	if(null == options.el && null == options.template) options.template = "<span></span>";
+	if(null == options.el && null == options.template) options.template = "<div></div>";
 	this.component = new sui.components.Component(options);
 	var cls = this.component.el.classList;
 	cls.add("fa");
@@ -4993,7 +5012,7 @@ ui.editors.TextEditor = function(options) {
 	this.type = ui.SchemaType.StringType;
 	if(null == options.defaultText) options.defaultText = "";
 	if(null == options.placeHolder) options.placeHolder = "placeholder";
-	if(null == options.el && null == options.template) options.template = "<span></span>";
+	if(null == options.el && null == options.template) options.template = "<div></div>";
 	this.component = new sui.components.Component(options);
 	this.component.el.classList.add("editor");
 	this.component.el.setAttribute("tabindex","0");
@@ -5062,19 +5081,113 @@ ui.editors.CodeEditor.__super__ = ui.editors.TextEditor;
 ui.editors.CodeEditor.prototype = $extend(ui.editors.TextEditor.prototype,{
 	__class__: ui.editors.CodeEditor
 });
+ui.editors.DateEditor = function(options) {
+	var _g = this;
+	this.type = ui.SchemaType.BoolType;
+	if(null == options.defaultValue) options.defaultValue = new Date();
+	if(null == options.template) options.template = "<input type=\"date\"/>";
+	this.component = new sui.components.Component(options);
+	var cls = this.component.el.classList;
+	cls.add("editor");
+	cls.add("date");
+	this.component.el.setAttribute("tabindex","0");
+	this.value = new steamer.Value(options.defaultValue);
+	var inputPair = steamer.dom.Dom.produceEvent(this.component.el,"input");
+	var focusPair = steamer.dom.Dom.produceEvent(this.component.el,"focus");
+	var blurPair = steamer.dom.Dom.produceEvent(this.component.el,"blur");
+	this.focus = new steamer.Value(false);
+	this.focus.filterValue(true).feed(steamer.dom.Dom.consumeFocus(this.component.el));
+	focusPair.producer.map(function(_) {
+		return true;
+	}).merge(blurPair.producer.map(function(_1) {
+		return false;
+	})).feed(this.focus);
+	inputPair.producer.map(function(_2) {
+		return _g.component.el.valueAsDate;
+	}).feed(this.value);
+	this.cancel = function() {
+		inputPair.cancel();
+		focusPair.cancel();
+		blurPair.cancel();
+	};
+};
+ui.editors.DateEditor.__name__ = ["ui","editors","DateEditor"];
+ui.editors.DateEditor.__interfaces__ = [ui.editors.Editor];
+ui.editors.DateEditor.prototype = {
+	component: null
+	,focus: null
+	,value: null
+	,type: null
+	,cancel: null
+	,destroy: function() {
+		this.cancel();
+		this.component.destroy();
+		this.value.end();
+	}
+	,__class__: ui.editors.DateEditor
+};
 ui.editors.EditorPicker = function() { };
 ui.editors.EditorPicker.__name__ = ["ui","editors","EditorPicker"];
 ui.editors.EditorPicker.pick = function(type,el,parent,value) {
 	switch(type[1]) {
 	case 1:
-		return new ui.editors.BoolEditor({ el : el, parent : parent, defaultValue : value});
+		return new ui.editors.BoolEditor({ container : el, parent : parent, defaultValue : value});
 	case 6:
-		return new ui.editors.CodeEditor({ el : el, parent : parent, defaultText : value});
+		return new ui.editors.CodeEditor({ container : el, parent : parent, defaultText : value});
 	case 5:
-		return new ui.editors.TextEditor({ el : el, parent : parent, defaultText : value});
+		return new ui.editors.TextEditor({ container : el, parent : parent, defaultText : value});
+	case 2:
+		return new ui.editors.DateEditor({ container : el, parent : parent, defaultValue : value});
+	case 3:
+		return new ui.editors.FloatEditor({ container : el, parent : parent, defaultValue : value});
 	default:
 		throw "Editor for " + Std.string(type) + " has not been implemented yet";
 	}
+};
+ui.editors.FloatEditor = function(options) {
+	var _g = this;
+	this.type = ui.SchemaType.BoolType;
+	if(null == options.defaultValue) options.defaultValue = 0.0;
+	if(null == options.template) options.template = "<input type=\"number\"/>";
+	this.component = new sui.components.Component(options);
+	var cls = this.component.el.classList;
+	cls.add("editor");
+	cls.add("float");
+	this.component.el.setAttribute("tabindex","0");
+	this.value = new steamer.Value(options.defaultValue);
+	var inputPair = steamer.dom.Dom.produceEvent(this.component.el,"input");
+	var focusPair = steamer.dom.Dom.produceEvent(this.component.el,"focus");
+	var blurPair = steamer.dom.Dom.produceEvent(this.component.el,"blur");
+	this.focus = new steamer.Value(false);
+	this.focus.filterValue(true).feed(steamer.dom.Dom.consumeFocus(this.component.el));
+	focusPair.producer.map(function(_) {
+		return true;
+	}).merge(blurPair.producer.map(function(_1) {
+		return false;
+	})).feed(this.focus);
+	inputPair.producer.map(function(_2) {
+		return _g.component.el.valueAsNumber;
+	}).feed(this.value);
+	this.cancel = function() {
+		inputPair.cancel();
+		focusPair.cancel();
+		blurPair.cancel();
+	};
+};
+ui.editors.FloatEditor.__name__ = ["ui","editors","FloatEditor"];
+ui.editors.FloatEditor.__interfaces__ = [ui.editors.Editor];
+ui.editors.FloatEditor.prototype = {
+	component: null
+	,focus: null
+	,value: null
+	,type: null
+	,cancel: null
+	,destroy: function() {
+		this.cancel();
+		this.component.destroy();
+		this.value.end();
+	}
+	,__class__: ui.editors.FloatEditor
 };
 ui.fragments = {};
 ui.fragments.Fragment = function() { };

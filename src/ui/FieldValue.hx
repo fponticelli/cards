@@ -29,11 +29,11 @@ class FieldValue {
 				value = TypeTransform.transform(this.type, type)(editor.value.value);
 			}
 			afterRemove(this.type, editor);
+			container.innerHTML = '';
 		}
-		container.innerHTML = '<div class="value"></div>';
-		var el = Query.first('.value', container);
 		this.type = type;
-		editor = EditorPicker.pick(type, el, parent, value);
+		editor = EditorPicker.pick(type, container, parent, value);
+		editor.component.el.classList.add('value');
 		afterCreate(this.type, editor);
 	}
 }

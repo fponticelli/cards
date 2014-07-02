@@ -5,6 +5,7 @@ import sui.components.Component;
 import steamer.Value;
 import ui.Runtime;
 using steamer.Producer;
+using steamer.dom.Dom;
 
 class ValueProperty<T> extends Property {
 	public var value(get, set) : T;
@@ -19,6 +20,9 @@ class ValueProperty<T> extends Property {
 		runtimeError = new Value(None);
 		super(component, name);
 
+		runtimeError
+			.toBool()
+			.feed(component.el.consumeToggleClass('error'));
 		runtime.feed(function(opt : Option<Runtime>) {
 			switch opt {
 				case None:
@@ -37,9 +41,6 @@ class ValueProperty<T> extends Property {
 								stream.value = transform(v);
 								runtimeError.value = None;
 							} catch(e : Dynamic) {
-								// TODO remove me once error notification is working
-								trace('RUNTIME ERROR');
-								trace(e);
 								runtimeError.value = Some(Std.string(e));
 							}
 					}

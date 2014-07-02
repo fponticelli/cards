@@ -30,7 +30,7 @@ class ContextField {
 
 	public function new(options : ContextFieldOptions) {
 		if(null == options.template && null == options.el)
-			options.template = '<div class="field"><div class="key-container"><div class="key"></div></div><div class="value-container"><div class="value"></div></div></div>';
+			options.template = '<div class="field"><div class="key-container"><div class="key"></div></div><div class="value-container"></div></div>';
 
 		component = new Component(options);
 		// setup field key
@@ -53,7 +53,20 @@ class ContextField {
 						editor.value
 							.map(Runtime.toRuntime)
 							.toOption()
-							.feed(options.value.runtime);
+							.feed(options.value.runtime)
+							.map(function(opt) {
+								return switch opt {
+									case Some(runtime):
+										switch runtime.expression {
+											case SyntaxError(e): Some(e);
+											case _: None;
+										};
+									case _: None;
+								};
+							})
+							.feed(withError);
+						options.value.runtimeError
+							.feed(withError);
 					case _:
 						editor.value.feed(options.value.stream);
 						// TODO does this leak?

@@ -20,7 +20,7 @@ class BoolEditor implements Editor<Bool> {
 		if(null == options.defaultValue)
 			options.defaultValue = false;
 		if(null == options.el && null == options.template)
-			options.template = '<span></span>';
+			options.template = '<div></div>';
 		component = new Component(options);
 		var cls = component.el.classList;
 		cls.add('fa');
