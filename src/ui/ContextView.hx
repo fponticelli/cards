@@ -78,10 +78,9 @@ class ContextView {
 		field = new Value(None);
 		var delayed = field
 			.toBool()
-			.debounce(10);
-
-		delayed.feed(button.remove.enabled);
-		delayed.feed(button.switchType.enabled);
+			.debounce(10)
+			.feed(button.remove.enabled)
+			.feed(button.switchType.enabled);
 
 		var filtered = field.filterOption();
 		filtered.previous().feed(function(field : ContextField) {
