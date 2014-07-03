@@ -20,12 +20,13 @@ class TextEditor implements Editor<String> {
 		if(null == options.defaultText)
 			options.defaultText = '';
 		if(null == options.placeHolder)
-			options.placeHolder = 'placeholder';
+			options.placeHolder = '';
 		if(null == options.el && null == options.template)
 			options.template = '<div></div>';
 		component = new Component(options);
 		component.el.classList.add('editor');
 		component.el.setAttribute('tabindex', '0');
+		component.el.setAttribute('placeholder', options.placeHolder);
 
 		// TODO find out how to set the content of :before programmatically
 		component.el.style.content = options.placeHolder;

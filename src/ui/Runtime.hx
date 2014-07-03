@@ -4,7 +4,7 @@ import haxe.ds.Option;
 import ui.Expression;
 
 class Runtime {
-	static function createFunction(args : Array<String>, code : String) : Void -> Dynamic
+	static function createFunction(args : Array<String>, code : String) : Dynamic -> Dynamic
 		return (untyped __js__('new Function'))(args.join(','), code);
 
 	static function formatCode(code : String)
@@ -13,7 +13,7 @@ class Runtime {
 	public static function toRuntime(code : String) : Runtime {
 		var expression = try {
 				var formatted = formatCode(code);
-				Fun(createFunction([], formatted));
+				Fun(createFunction(['$'], formatted));
 			} catch(e : Dynamic) {
 				SyntaxError(Std.string(e));
 			};

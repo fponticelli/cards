@@ -1,6 +1,7 @@
 var gulp    = require('gulp'),
 	changed = require('gulp-changed'),
-	stylus  = require('gulp-stylus');
+	stylus  = require('gulp-stylus'),
+	nib     = require('nib');
 
 var paths = {
 	src : {
@@ -17,7 +18,7 @@ var paths = {
 gulp.task('stylus', function() {
     gulp.src(paths.src.stylus)
         .pipe(changed(paths.dst.stylus))
-        .pipe(stylus({/*use:['nib']*/}))
+        .pipe(stylus({use: [nib()], errors: true}))
         .pipe(gulp.dest(paths.dst.stylus));
 });
 

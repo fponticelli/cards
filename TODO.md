@@ -15,8 +15,6 @@
 - focus state for model fields
 
 TODO (requires the INTERNET)
-- add placeholder to editors
-- chose better icons
 - check why nib is not included by default
 
 - bidirectional updates from property to model when possible

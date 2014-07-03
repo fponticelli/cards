@@ -123,11 +123,11 @@ a img {
 .card .editor.bool {
   cursor: pointer;
   color: #333;
-  display: -webkit-box;
-  display: -moz-box;
-  display: -ms-box;
+  display: -webkit-inline-box;
+  display: -moz-inline-box;
   display: -webkit-inline-flex;
-  display: box;
+  display: -ms-inline-flexbox;
+  display: inline-box;
   display: inline-flex;
   -webkit-border-radius: 0.5em;
   border-radius: 0.5em;
@@ -146,7 +146,7 @@ a img {
   font-family: monospace;
 }
 .card .editor.empty:before {
-  content: 'placeholder';
+  content: attr(placeholder);
   color: #aaa;
   text-shadow: none;
   font-style: italic;
@@ -316,12 +316,11 @@ a img {
   border: 2px solid #b30;
 }
 .card article {
-  background: -webkit-gradient(linear, left bottom, left top, color-stop(0, #eee), color-stop(1, #f0f0f6));
-  background: -webkit-linear-gradient(bottom, #eee 0%, #f0f0f6 100%);
-  background: -moz-linear-gradient(bottom, #eee 0%, #f0f0f6 100%);
-  background: -o-linear-gradient(bottom, #eee 0%, #f0f0f6 100%);
-  background: -ms-linear-gradient(bottom, #eee 0%, #f0f0f6 100%);
-  background: linear-gradient(bottom, #eee 0%, #f0f0f6 100%);
+  background: -webkit-linear-gradient(bottom, #eee, #f0f0f6);
+  background: -moz-linear-gradient(bottom, #eee, #f0f0f6);
+  background: -o-linear-gradient(bottom, #eee, #f0f0f6);
+  background: -ms-linear-gradient(bottom, #eee, #f0f0f6);
+  background: linear-gradient(to top, #eee, #f0f0f6);
   font-size: 1.8em;
 }
 .card article a {
@@ -386,12 +385,11 @@ a img {
   height: 50%;
 }
 .card .context .error > div {
-  background: -webkit-gradient(linear, left bottom, left top, color-stop(0, #b30), color-stop(0.1, #b30), color-stop(0.10099999999999999, #fff));
-  background: -webkit-linear-gradient(bottom, #b30 0%, #b30 10%, #fff 10.1%);
-  background: -moz-linear-gradient(bottom, #b30 0%, #b30 10%, #fff 10.1%);
-  background: -o-linear-gradient(bottom, #b30 0%, #b30 10%, #fff 10.1%);
-  background: -ms-linear-gradient(bottom, #b30 0%, #b30 10%, #fff 10.1%);
-  background: background: linear-gradient(bottom, #b30 0%, #b30 10%, #fff 10.1%);;
+  background: background: -webkit-linear-gradient(bottom, #b30, #b30 10%, #fff 10.1%);;
+  background: background: -moz-linear-gradient(bottom, #b30, #b30 10%, #fff 10.1%);;
+  background: background: -o-linear-gradient(bottom, #b30, #b30 10%, #fff 10.1%);;
+  background: background: -ms-linear-gradient(bottom, #b30, #b30 10%, #fff 10.1%);;
+  background: background: linear-gradient(to top, #b30, #b30 10%, #fff 10.1%);;
 }
 .card .doc {
   border-right: 1px solid #eee;
@@ -435,7 +433,7 @@ a img {
 }
 .card .fields > div .field .value-container {
   width: 70%;
-  padding: 0.2em 0.4em 0.2em 0.30000000000000004em;
+  padding: 0.2em 0.4em 0.2em 0.3em;
 }
 .card .fields > div .field .value-container .value {
   border-bottom: 1px solid #f6f6f6;

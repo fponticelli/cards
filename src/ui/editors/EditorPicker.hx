@@ -10,9 +10,9 @@ class EditorPicker {
 			case BoolType:
 				new BoolEditor({ container : el, parent : parent, defaultValue : value });
 			case CodeType:
-				new CodeEditor({ container : el, parent : parent, defaultText : value });
+				new CodeEditor({ container : el, parent : parent, defaultText : value, placeHolder : 'code' });
 			case StringType:
-				new TextEditor({ container : el, parent : parent, defaultText : value });
+				new TextEditor({ container : el, parent : parent, defaultText : value, placeHolder : 'content' });
 			case DateType:
 				new DateEditor({ container : el, parent : parent, defaultValue : value });
 			case FloatType:

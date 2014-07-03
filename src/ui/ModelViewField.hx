@@ -24,7 +24,8 @@ class ModelViewField {
 		key = new TextEditor({
 			el : Query.first('.key', component.el),
 			parent : component,
-			defaultText : options.key
+			defaultText : options.key,
+			placeHolder : 'key'
 		});
 
 		// setup field value
@@ -32,7 +33,8 @@ class ModelViewField {
 		value = new TextEditor({
 			el : Query.first('.value', component.el),
 			parent : component,
-			defaultText : ''
+			defaultText : '',
+			placeHolder : 'value'
 		});
 		// 250 is kind of a magic value and it is enough
 		// to be able to click on a button

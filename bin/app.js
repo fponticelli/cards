@@ -2125,12 +2125,19 @@ sui.properties.ValueProperty = function(defaultValue,component,name) {
 						var f1 = _g1[2];
 						component.el.classList.remove("error");
 						_g.runtimeError.set_value(haxe.ds.Option.None);
-						try {
-							var v = f1();
-							_g.stream.set_value(_g.transform(v));
-							_g.runtimeError.set_value(haxe.ds.Option.None);
-						} catch( e1 ) {
-							_g.runtimeError.set_value(haxe.ds.Option.Some(Std.string(e1)));
+						var runtimeScope = new ui.RuntimeScope({ });
+						{
+							var _g2 = runtimeScope.execute(f1);
+							switch(_g2[1]) {
+							case 0:
+								var v = _g2[2];
+								_g.stream.set_value(_g.transform(v));
+								break;
+							case 1:
+								var e1 = _g2[2];
+								_g.runtimeError.set_value(haxe.ds.Option.Some(e1));
+								break;
+							}
 						}
 						break;
 					}
@@ -4102,6 +4109,21 @@ ui.widgets.Tooltip.prototype = $extend(ui.widgets.FrameOverlay.prototype,{
 	}
 	,__class__: ui.widgets.Tooltip
 });
+ui.RuntimeScope = function(model) {
+	this.model = model;
+};
+ui.RuntimeScope.__name__ = ["ui","RuntimeScope"];
+ui.RuntimeScope.prototype = {
+	model: null
+	,execute: function(f) {
+		try {
+			return ui.RuntimeResult.Result(f(this.model));
+		} catch( e ) {
+			return ui.RuntimeResult.Error(Std.string(e));
+		}
+	}
+	,__class__: ui.RuntimeScope
+};
 ui.ContextField = function(options) {
 	var _g = this;
 	if(null == options.template && null == options.el) options.template = "<div class=\"field\"><div class=\"key-container\"><div class=\"key\"></div></div><div class=\"value-container\"></div></div>";
@@ -4770,8 +4792,8 @@ ui.ModelView.prototype = {
 ui.ModelViewField = function(options) {
 	if(null == options.template && null == options.el) options.template = "<div class=\"field\"><div class=\"key-container\"><div class=\"key\"></div></div><div class=\"value-container\"><div class=\"value\"></div></div></div>";
 	this.component = new sui.components.Component(options);
-	this.key = new ui.editors.TextEditor({ el : dom.Query.first(".key",this.component.el), parent : this.component, defaultText : options.key});
-	this.value = new ui.editors.TextEditor({ el : dom.Query.first(".value",this.component.el), parent : this.component, defaultText : ""});
+	this.key = new ui.editors.TextEditor({ el : dom.Query.first(".key",this.component.el), parent : this.component, defaultText : options.key, placeHolder : "key"});
+	this.value = new ui.editors.TextEditor({ el : dom.Query.first(".value",this.component.el), parent : this.component, defaultText : "", placeHolder : "value"});
 	var f = this.key.focus.merge(this.value.focus);
 	this.focus = f.debounce(250).distinct();
 	this.classActive = new sui.properties.ToggleClass(this.component,"active");
@@ -4808,7 +4830,7 @@ ui.Runtime.toRuntime = function(code) {
 	var expression;
 	try {
 		var formatted = ui.Runtime.formatCode(code);
-		expression = ui.Expression.Fun(ui.Runtime.createFunction([],formatted));
+		expression = ui.Expression.Fun(ui.Runtime.createFunction(["$"],formatted));
 	} catch( e ) {
 		expression = ui.Expression.SyntaxError(Std.string(e));
 	}
@@ -4831,6 +4853,9 @@ ui.Runtime.prototype = {
 	,code: null
 	,__class__: ui.Runtime
 };
+ui.RuntimeResult = { __ename__ : ["ui","RuntimeResult"], __constructs__ : ["Result","Error"] };
+ui.RuntimeResult.Result = function(value) { var $x = ["Result",0,value]; $x.__enum__ = ui.RuntimeResult; $x.toString = $estr; return $x; };
+ui.RuntimeResult.Error = function(msg) { var $x = ["Error",1,msg]; $x.__enum__ = ui.RuntimeResult; $x.toString = $estr; return $x; };
 ui.Schema = function() {
 	var _g = this;
 	this.fields = new haxe.ds.StringMap();
@@ -5011,11 +5036,12 @@ ui.editors.TextEditor = function(options) {
 	var _g = this;
 	this.type = ui.SchemaType.StringType;
 	if(null == options.defaultText) options.defaultText = "";
-	if(null == options.placeHolder) options.placeHolder = "placeholder";
+	if(null == options.placeHolder) options.placeHolder = "";
 	if(null == options.el && null == options.template) options.template = "<div></div>";
 	this.component = new sui.components.Component(options);
 	this.component.el.classList.add("editor");
 	this.component.el.setAttribute("tabindex","0");
+	this.component.el.setAttribute("placeholder",options.placeHolder);
 	this.component.el.style.content = options.placeHolder;
 	var text = new sui.properties.Text(this.component,options.defaultText);
 	var inputPair = steamer.dom.Dom.produceEvent(this.component.el,"input");
@@ -5133,9 +5159,9 @@ ui.editors.EditorPicker.pick = function(type,el,parent,value) {
 	case 1:
 		return new ui.editors.BoolEditor({ container : el, parent : parent, defaultValue : value});
 	case 6:
-		return new ui.editors.CodeEditor({ container : el, parent : parent, defaultText : value});
+		return new ui.editors.CodeEditor({ container : el, parent : parent, defaultText : value, placeHolder : "code"});
 	case 5:
-		return new ui.editors.TextEditor({ container : el, parent : parent, defaultText : value});
+		return new ui.editors.TextEditor({ container : el, parent : parent, defaultText : value, placeHolder : "content"});
 	case 2:
 		return new ui.editors.DateEditor({ container : el, parent : parent, defaultValue : value});
 	case 3:
@@ -5205,6 +5231,7 @@ ui.fragments.Block = function(options) {
 	this.name = "block";
 	if(null == options.el && null == options.template) options.template = "<section class=\"block\"></div>";
 	if(null != options.uid) this.uid = options.uid; else this.uid = thx.core.UUID.create();
+	if(null == options.placeHolder) options.placeHolder = "block content";
 	this.editor = new ui.editors.TextEditor(options);
 	this.active = new steamer.Value(false);
 	this.active.feed(new sui.properties.ToggleClass(this.editor.component,"active").stream);
@@ -5783,7 +5810,7 @@ var scope = window || this;
 if(!scope.setImmediate) scope.setImmediate = function(callback) {
 	scope.setTimeout(callback,0);
 };
-Config.icons = { add : "plus", remove : "minus", dropdown : "arrow-down", checked : "check-square-o", unchecked : "square-o", switchtype : "arrows"};
+Config.icons = { add : "plus-circle", remove : "ban", dropdown : "reorder", checked : "dot-circle-o", unchecked : "circle-o", switchtype : "bolt"};
 Config.selectors = { app : ".card"};
 PropertyFeeder.classes = [{ display : "bold", name : "strong"},{ display : "italic", name : "emphasis"}];
 dom.Query.doc = document;

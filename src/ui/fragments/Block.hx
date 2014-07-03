@@ -16,6 +16,8 @@ class Block implements Fragment {
 		if(null == options.el && null == options.template)
 			options.template = '<section class="block"></div>';
 		uid = null != options.uid ? options.uid : thx.core.UUID.create();
+		if(null == options.placeHolder)
+			options.placeHolder = 'block content';
 		editor = new TextEditor(options);
 		active = new Value(false);
 		active.feed(new ToggleClass(editor.component, 'active').stream);

@@ -1,6 +1,6 @@
 package ui;
 
 enum Expression {
-	Fun(f : Void -> Dynamic);
+	Fun(f : Dynamic -> Dynamic);
 	SyntaxError(msg : String);
 }
