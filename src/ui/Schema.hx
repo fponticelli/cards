@@ -1,6 +1,7 @@
 package ui;
 
 import steamer.Consumer;
+import steamer.Feeder;
 import steamer.Producer;
 import steamer.Pulse;
 import thx.Error;
@@ -8,23 +9,19 @@ import ui.SchemaEvent;
 
 class Schema {
 	var fields : Map<String, SchemaType>;
-	public var stream(default, null) : SchemaProducer;
-	var feed : Pulse<SchemaEvent> -> Void;
+	public var stream(default, null) : Producer<SchemaEvent>;
+	var feeder : Feeder<SchemaEvent>;
 
 	public function new() {
 		fields = new Map();
-		// TODO sadness
-		feed = function(_){};
-		stream = new SchemaProducer(getPairs, function(feed : Pulse<SchemaEvent> -> Void) {
-			this.feed = feed;
-		});
+		stream = feeder = new Feeder();
 	}
 
 	public function add(name : String, type : SchemaType) {
 		if(fields.exists(name))
 			throw new Error('Schema already contains a field "$name"');
 		fields.set(name, type);
-		feed(Emit(AddField(name, type)));
+		feeder.forward(Emit(AddField(name, type)));
 	}
 
 	public function reset(?list : Array<FieldPair>) {
@@ -34,14 +31,14 @@ class Schema {
 		list.map(function(pair) {
 			fields.set(pair.name, pair.type);
 		});
-		feed(Emit(ListFields(list.copy())));
+		feeder.forward(Emit(ListFields(list.copy())));
 	}
 
 	public function delete(name : String) {
 		if(!fields.exists(name))
 			throw new Error('Schema does not contain a field "${name}"');
 		fields.remove(name);
-		feed(Emit(DeleteField(name)));
+		feeder.forward(Emit(DeleteField(name)));
 	}
 
 	public function rename(oldname : String, newname : String) {
@@ -50,14 +47,14 @@ class Schema {
 		var type = fields.get(oldname);
 		fields.remove(oldname);
 		fields.set(newname, type);
-		feed(Emit(RenameField(oldname, newname)));
+		feeder.forward(Emit(RenameField(oldname, newname)));
 	}
 
 	public function retype(name : String, type : SchemaType) {
 		if(!fields.exists(name))
 			throw new Error('Schema does not contain a field "${name}"');
 		fields.set(name, type);
-		feed(Emit(RetypeField(name, type)));
+		feeder.forward(Emit(RetypeField(name, type)));
 	}
 
 	public function get(name : String) {
@@ -84,28 +81,3 @@ class Schema {
 		});
 	}
 }
-
-class SchemaProducer extends Producer<SchemaEvent> {
-	var getPairs : Void -> Array<FieldPair>;
-	public function new(getPairs : Void -> Array<FieldPair>, handler : (Pulse<SchemaEvent> -> Void) -> Void) {
-		this.getPairs = getPairs;
-		super(handler, false);
-	}
-
-	override function feed(consumer : Consumer<SchemaEvent>) {
-		super.feed(consumer);
-		consumer.toImplementation().onPulse(Emit(ListFields(getPairs())));
-		return this;
-	}
-}
-
-/*
-locations[0].city = "Milano"
-locations : ArrayType<ObjectType>
-locations.city : StringType
-
-address = { city : "Milano" }
-
-address : ObjectType
-address.city : StringType
-*/

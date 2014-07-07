@@ -7,13 +7,27 @@ class Runtime {
 	static function createFunction(args : Array<String>, code : String) : Dynamic -> Dynamic
 		return (untyped __js__('new Function'))(args.join(','), code);
 
-	static function formatCode(code : String)
-		return 'return $code';
+	static function formatCode(code : String, scope : Dynamic) {
+		var prelim = Reflect.fields(scope)
+			.map(function(field) {
+				var variable = switch field {
+					case 'model': '$';
+					case field: field;
+				};
+				return 'var $variable = scope.$field;';
+			})
+			.join('\n');
+		return '$prelim
+delete scope;
+return $code;';
+	}
 
-	public static function toRuntime(code : String) : Runtime {
+	public static function toRuntime(code : String, scope : Dynamic) : Runtime {
 		var expression = try {
-				var formatted = formatCode(code);
-				Fun(createFunction(['$'], formatted));
+				var formatted = formatCode(code, scope);
+				var f = createFunction(['scope'], formatted);
+
+				Fun(function() try return Result(f(scope)) catch(e : Dynamic) return Error(Std.string(e)));
 			} catch(e : Dynamic) {
 				SyntaxError(Std.string(e));
 			};
@@ -32,4 +46,9 @@ class Runtime {
 		this.expression = expression;
 		this.code = code;
 	}
+}
+
+enum RuntimeResult {
+	Result(value : Dynamic);
+	Error(msg : String);
 }

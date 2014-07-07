@@ -4,7 +4,6 @@ import haxe.ds.Option;
 import sui.components.Component;
 import steamer.Value;
 import ui.Runtime;
-import ui.RuntimeScope;
 using steamer.Producer;
 using steamer.dom.Dom;
 
@@ -37,8 +36,7 @@ class ValueProperty<T> extends Property {
 						case Fun(f):
 							component.el.classList.remove('error');
 							runtimeError.value = None;
-							var runtimeScope = new RuntimeScope({});
-							switch runtimeScope.execute(f) {
+							switch f() {
 								case Result(v):
 									stream.value = transform(v);
 								case Error(e):

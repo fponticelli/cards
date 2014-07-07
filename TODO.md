@@ -1,4 +1,4 @@
-- evaluate expressions in context
++ evaluate expressions in context
 - create dependency between model values and context properties
 - refresh evaluation on model change
 

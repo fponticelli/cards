@@ -922,6 +922,9 @@ thx.core.Iterables.reducei = function(it,callback,initial) {
 thx.core.Iterables.isEmpty = function(it) {
 	return thx.core.Iterators.isEmpty($iterator(it)());
 };
+thx.core.Iterables.filter = function(it,predicate) {
+	return thx.core.Iterators.filter($iterator(it)(),predicate);
+};
 thx.core.Iterators = function() { };
 thx.core.Iterators.__name__ = ["thx","core","Iterators"];
 thx.core.Iterators.map = function(it,f) {
@@ -968,6 +971,12 @@ thx.core.Iterators.reducei = function(it,callback,initial) {
 };
 thx.core.Iterators.isEmpty = function(it) {
 	return !it.hasNext();
+};
+thx.core.Iterators.filter = function(it,predicate) {
+	return thx.core.Iterators.reduce(it,function(acc,item) {
+		if(predicate(item)) acc.push(item);
+		return acc;
+	},[]);
 };
 thx.core.Objects = function() { };
 thx.core.Objects.__name__ = ["thx","core","Objects"];

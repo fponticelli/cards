@@ -52,7 +52,7 @@ class ContextField {
 				switch type {
 					case CodeType:
 						editor.value
-							.map(Runtime.toRuntime)
+							.map(Runtime.toRuntime.bind(_, options.scope))
 							.toOption()
 							.feed(options.value.runtime)
 							.map(function(opt) {
@@ -122,5 +122,6 @@ typedef ContextFieldOptions = {>ComponentOptions,
 	type : SchemaType,
 	display : String,
 	name : String,
-	value : ValueProperty<Dynamic>
+	value : ValueProperty<Dynamic>,
+	scope : Scope
 }

@@ -1607,6 +1607,49 @@ steamer.Producer.prototype = {
 	}
 	,__class__: steamer.Producer
 };
+steamer.Feeder = function() {
+	var _g = this;
+	this.forwards = [];
+	steamer.Producer.call(this,function(forward) {
+		_g.forwards.push(forward);
+	},false);
+};
+steamer.Feeder.__name__ = ["steamer","Feeder"];
+steamer.Feeder.__super__ = steamer.Producer;
+steamer.Feeder.prototype = $extend(steamer.Producer.prototype,{
+	forwards: null
+	,forward: function(pulse) {
+		var _g = 0;
+		var _g1 = this.forwards;
+		while(_g < _g1.length) {
+			var f = _g1[_g];
+			++_g;
+			f(pulse);
+		}
+		switch(pulse[1]) {
+		case 1:
+			this.forwards = [];
+			break;
+		default:
+		}
+	}
+	,onPulse: function(pulse) {
+		switch(pulse[1]) {
+		case 0:
+			var v = pulse[2];
+			this.forward(steamer.Pulse.Emit(v));
+			break;
+		case 2:
+			var e = pulse[2];
+			this.forward(steamer.Pulse.Fail(e));
+			break;
+		case 1:
+			this.forward(steamer.Pulse.End);
+			break;
+		}
+	}
+	,__class__: steamer.Feeder
+});
 steamer.MultiProducer = function(endOnError) {
 	if(endOnError == null) endOnError = true;
 	this.producers = [];
@@ -1724,11 +1767,7 @@ steamer.Pulses.times = function(n,pulse) {
 	}(this))).concat([steamer.Pulse.End]);
 };
 steamer.Value = function(initialValue,defaultValue) {
-	var _g = this;
-	this.forwards = [];
-	steamer.Producer.call(this,function(forward) {
-		_g.forwards.push(forward);
-	},false);
+	steamer.Feeder.call(this);
 	if(null == defaultValue) this.defaultValue = initialValue; else this.defaultValue = defaultValue;
 	this.set_value(initialValue);
 };
@@ -1745,26 +1784,10 @@ steamer.Value.bool = function(value,defaultValue) {
 	if(value == null) value = false;
 	return new steamer.Value(value,defaultValue);
 };
-steamer.Value.__super__ = steamer.Producer;
-steamer.Value.prototype = $extend(steamer.Producer.prototype,{
+steamer.Value.__super__ = steamer.Feeder;
+steamer.Value.prototype = $extend(steamer.Feeder.prototype,{
 	value: null
 	,defaultValue: null
-	,forwards: null
-	,forward: function(pulse) {
-		var _g = 0;
-		var _g1 = this.forwards;
-		while(_g < _g1.length) {
-			var f = _g1[_g];
-			++_g;
-			f(pulse);
-		}
-		switch(pulse[1]) {
-		case 1:
-			this.forwards = [];
-			break;
-		default:
-		}
-	}
 	,get_value: function() {
 		return this.value;
 	}
@@ -1773,11 +1796,6 @@ steamer.Value.prototype = $extend(steamer.Producer.prototype,{
 		this.value = v;
 		this.forward(steamer.Pulse.Emit(v));
 		return v;
-	}
-	,feed: function(consumer) {
-		steamer.Producer.prototype.feed.call(this,consumer);
-		consumer.onPulse(steamer.Pulse.Emit(this.get_value()));
-		return this;
 	}
 	,end: function() {
 		this.forward(steamer.Pulse.End);
@@ -1797,6 +1815,11 @@ steamer.Value.prototype = $extend(steamer.Producer.prototype,{
 			break;
 		}
 	}
+	,feed: function(consumer) {
+		steamer.Feeder.prototype.feed.call(this,consumer);
+		consumer.onPulse(steamer.Pulse.Emit(this.get_value()));
+		return this;
+	}
 	,reset: function() {
 		this.set_value(this.defaultValue);
 	}
@@ -1805,56 +1828,6 @@ steamer.Value.prototype = $extend(steamer.Producer.prototype,{
 	}
 	,__class__: steamer.Value
 });
-steamer.consumers = {};
-steamer.consumers.LoggerConsumer = function(prefix,pos) {
-	this.prefix = prefix;
-	this.pos = pos;
-	var p = function() {
-		return " ---> " + pos.className + "." + pos.methodName + "() at " + pos.lineNumber;
-	};
-	this.log = function(v) {
-		console.log(v,p());
-	};
-	this.warn = function(v1) {
-		console.warn(v1,p());
-	};
-	this.error = function(v2) {
-		console.error(v2,p());
-	};
-};
-steamer.consumers.LoggerConsumer.__name__ = ["steamer","consumers","LoggerConsumer"];
-steamer.consumers.LoggerConsumer.prototype = {
-	prefix: null
-	,pos: null
-	,onPulse: function(pulse) {
-		switch(pulse[1]) {
-		case 0:
-			var v = pulse[2];
-			this.log(this.p(v));
-			break;
-		case 1:
-			this.warn(this.p("End"));
-			break;
-		case 2:
-			var err = pulse[2];
-			this.error(this.p(Std.string(err)));
-			break;
-		}
-	}
-	,p: function(v) {
-		return (null == this.prefix?"":this.prefix + ": ") + v;
-	}
-	,log: function(v) {
-		haxe.Log.trace(v,this.pos);
-	}
-	,warn: function(v) {
-		haxe.Log.trace("[W] " + v,this.pos);
-	}
-	,error: function(v) {
-		haxe.Log.trace("[E] " + v,this.pos);
-	}
-	,__class__: steamer.consumers.LoggerConsumer
-};
 steamer.dom = {};
 steamer.dom.Dom = function() { };
 steamer.dom.Dom.__name__ = ["steamer","dom","Dom"];
@@ -2125,9 +2098,8 @@ sui.properties.ValueProperty = function(defaultValue,component,name) {
 						var f1 = _g1[2];
 						component.el.classList.remove("error");
 						_g.runtimeError.set_value(haxe.ds.Option.None);
-						var runtimeScope = new ui.RuntimeScope({ });
 						{
-							var _g2 = runtimeScope.execute(f1);
+							var _g2 = f1();
 							switch(_g2[1]) {
 							case 0:
 								var v = _g2[2];
@@ -3948,19 +3920,28 @@ ui.Card.create = function(model,container,mapper) {
 	var context = dom.Query.first(".context",card.el);
 	var modelView = new ui.ModelView();
 	var document = new ui.Document({ el : dom.Query.first(".doc",card.el)});
-	var context1 = new ui.ContextView(document,mapper,{ el : dom.Query.first(".context",card.el)});
+	var scope = { model : { }};
+	var context1 = new ui.ContextView(document,scope,mapper,{ el : dom.Query.first(".context",card.el)});
 	modelView.component.appendTo(dom.Query.first(".model",card.el));
+	model.data.value.feed((function($this) {
+		var $r;
+		var f = function(o) {
+			scope.model = o;
+		};
+		$r = { onPulse : function(pulse) {
+			switch(pulse[1]) {
+			case 0:
+				var v = pulse[2];
+				f(v);
+				break;
+			default:
+			}
+		}};
+		return $r;
+	}(this)));
 	modelView.schema.feed(model.schemaEventConsumer);
 	modelView.data.feed(model.dataEventConsumer);
 	card.appendTo(container);
-	model.data.stream.map(function(o) {
-		return JSON.stringify(o);
-	}).feed((function($this) {
-		var $r;
-		var consumer = new steamer.consumers.LoggerConsumer(null,{ fileName : "Card.hx", lineNumber : 26, className : "ui.Card", methodName : "create"});
-		$r = consumer;
-		return $r;
-	}(this)));
 	document.article.addReadonly();
 	var block = document.article.addBlock();
 	mapper.values.ensure("strong",block.component);
@@ -4109,21 +4090,6 @@ ui.widgets.Tooltip.prototype = $extend(ui.widgets.FrameOverlay.prototype,{
 	}
 	,__class__: ui.widgets.Tooltip
 });
-ui.RuntimeScope = function(model) {
-	this.model = model;
-};
-ui.RuntimeScope.__name__ = ["ui","RuntimeScope"];
-ui.RuntimeScope.prototype = {
-	model: null
-	,execute: function(f) {
-		try {
-			return ui.RuntimeResult.Result(f(this.model));
-		} catch( e ) {
-			return ui.RuntimeResult.Error(Std.string(e));
-		}
-	}
-	,__class__: ui.RuntimeScope
-};
 ui.ContextField = function(options) {
 	var _g = this;
 	if(null == options.template && null == options.el) options.template = "<div class=\"field\"><div class=\"key-container\"><div class=\"key\"></div></div><div class=\"value-container\"></div></div>";
@@ -4139,7 +4105,11 @@ ui.ContextField = function(options) {
 		editor.focus.feed(_g.focus);
 		switch(type[1]) {
 		case 6:
-			editor.value.map(ui.Runtime.toRuntime).toOption().feed(options.value.runtime).map(function(opt) {
+			editor.value.map((function(f,a2) {
+				return function(a1) {
+					return f(a1,a2);
+				};
+			})(ui.Runtime.toRuntime,options.scope)).toOption().feed(options.value.runtime).map(function(opt) {
 				switch(opt[1]) {
 				case 0:
 					var runtime = opt[2];
@@ -4171,14 +4141,14 @@ ui.ContextField = function(options) {
 	var clickKey = steamer.dom.Dom.produceEvent(key,"click");
 	clickKey.producer.feed((function($this) {
 		var $r;
-		var f = function(_) {
+		var f1 = function(_) {
 			if(null != _g.fieldValue.editor) _g.fieldValue.editor.focus.set_value(true);
 		};
 		$r = { onPulse : function(pulse) {
 			switch(pulse[1]) {
 			case 0:
 				var v = pulse[2];
-				f(v);
+				f1(v);
 				break;
 			default:
 			}
@@ -4196,7 +4166,7 @@ ui.ContextField = function(options) {
 	}).feed(hasError);
 	this.withError.feed((function($this) {
 		var $r;
-		var f1 = function(o1) {
+		var f2 = function(o1) {
 			switch(o1[1]) {
 			case 0:
 				var err = o1[2];
@@ -4212,7 +4182,7 @@ ui.ContextField = function(options) {
 			switch(pulse1[1]) {
 			case 0:
 				var v1 = pulse1[2];
-				f1(v1);
+				f2(v1);
 				break;
 			default:
 			}
@@ -4235,9 +4205,10 @@ ui.ContextField.prototype = {
 	}
 	,__class__: ui.ContextField
 };
-ui.ContextView = function(document,mapper,options) {
+ui.ContextView = function(document,scope,mapper,options) {
 	var _g = this;
 	this.document = document;
+	this.scope = scope;
 	this.mapper = mapper;
 	this.component = new sui.components.Component(options);
 	this.toolbar = new ui.widgets.Toolbar({ parent : this.component, container : this.component.el});
@@ -4336,6 +4307,7 @@ ui.ContextView.prototype = {
 	,toolbar: null
 	,document: null
 	,field: null
+	,scope: null
 	,el: null
 	,button: null
 	,menu: null
@@ -4361,7 +4333,7 @@ ui.ContextView.prototype = {
 		});
 	}
 	,addField: function(info,value) {
-		var f = new ui.ContextField({ container : this.el, parent : this.component, display : info.display, name : info.name, type : info.type, value : value});
+		var f = new ui.ContextField({ container : this.el, parent : this.component, display : info.display, name : info.name, type : info.type, value : value, scope : this.scope});
 		f.focus.filterValue(true).map(function(b) {
 			if(b) return haxe.ds.Option.Some(f); else return haxe.ds.Option.None;
 		}).feed(this.field);
@@ -4402,20 +4374,14 @@ ui.ContextView.prototype = {
 	,__class__: ui.ContextView
 };
 ui.Data = function(data) {
-	var _g = this;
-	this.feed = function(p) {
-	};
-	this.stream = new steamer.Producer(function(feed) {
-		_g.feed = feed;
-	}).debounce(100);
+	this.value = new steamer.Value(data);
 	this.reset(data);
 };
 ui.Data.__name__ = ["ui","Data"];
 ui.Data.prototype = {
 	root: null
 	,cache: null
-	,feed: null
-	,stream: null
+	,value: null
 	,resolve: function(path) {
 		var ref = this.cache.get(path);
 		if(null == ref) {
@@ -4435,7 +4401,7 @@ ui.Data.prototype = {
 		this.cache.set(path,ref);
 		if(ref.get() != value) {
 			ref.set(value);
-			this.feed(steamer.Pulse.Emit(this.toObject()));
+			this.value.set_value(this.toObject());
 		}
 		return this;
 	}
@@ -4443,7 +4409,7 @@ ui.Data.prototype = {
 		this.root = new thx.ref.ObjectRef(null);
 		this.cache = new haxe.ds.StringMap();
 		if(null != value) this.set("",value);
-		this.feed(steamer.Pulse.Emit(this.toObject()));
+		this.value.set_value(this.toObject());
 		return this;
 	}
 	,remove: function(path) {
@@ -4451,7 +4417,7 @@ ui.Data.prototype = {
 		if(null == ref) ref = this.root.resolve(path);
 		if(ref.hasValue()) {
 			ref.remove();
-			this.feed(steamer.Pulse.Emit(this.toObject()));
+			this.value.set_value(this.toObject());
 		}
 		this.cache.remove(path);
 	}
@@ -4460,7 +4426,7 @@ ui.Data.prototype = {
 		var v = this.get(oldpath);
 		this.remove(oldpath);
 		this.set(newpath,v);
-		this.feed(steamer.Pulse.Emit(this.toObject()));
+		this.value.set_value(this.toObject());
 		return true;
 	}
 	,toObject: function() {
@@ -4676,16 +4642,8 @@ ui.ModelView = function() {
 	this.pairs = dom.Html.parseList("<div class=\"fields\"><div></div></div>")[0];
 	this.component.el.appendChild(this.pairs);
 	this.pairs = dom.Query.first("div",this.pairs);
-	this.feedSchema = function(_2) {
-	};
-	this.schema = new steamer.Producer(function(feed) {
-		_g.feedSchema = feed;
-	});
-	this.feedData = function(_3) {
-	};
-	this.data = new steamer.Producer(function(feed1) {
-		_g.feedData = feed1;
-	});
+	this.schema = this.schemaFeeder = new steamer.Feeder();
+	this.data = this.dataFeeder = new steamer.Feeder();
 	this.fields = new haxe.ds.StringMap();
 	this.fieldFocus = new steamer.MultiProducer();
 	this.fieldFocus.feed((function($this) {
@@ -4714,8 +4672,8 @@ ui.ModelView.prototype = {
 	,toolbar: null
 	,currentField: null
 	,pairs: null
-	,feedSchema: null
-	,feedData: null
+	,schemaFeeder: null
+	,dataFeeder: null
 	,fields: null
 	,fieldFocus: null
 	,fieldBlur: null
@@ -4739,10 +4697,10 @@ ui.ModelView.prototype = {
 		this.removeField(field);
 	}
 	,removeField: function(field) {
-		thx.Assert.notNull(field,"when removing a field it should not be null",{ fileName : "ModelView.hx", lineNumber : 86, className : "ui.ModelView", methodName : "removeField"});
+		thx.Assert.notNull(field,"when removing a field it should not be null",{ fileName : "ModelView.hx", lineNumber : 80, className : "ui.ModelView", methodName : "removeField"});
 		var name = field.key.value.get_value();
 		field.destroy();
-		if(this.fields.remove(name)) this.feedSchema(steamer.Pulse.Emit(ui.SchemaEvent.DeleteField(name)));
+		if(this.fields.remove(name)) this.schemaFeeder.forward(steamer.Pulse.Emit(ui.SchemaEvent.DeleteField(name)));
 	}
 	,addField: function(name,type) {
 		var _g = this;
@@ -4768,20 +4726,10 @@ ui.ModelView.prototype = {
 				oldname = newname1;
 				return r;
 			}
-		}).feed((function($this) {
-			var $r;
-			var consumer = steamer.Bus.feed($this.feedSchema);
-			$r = consumer;
-			return $r;
-		}(this)));
+		}).feed(this.schemaFeeder);
 		field.value.value.map(function(_) {
 			return createSetValue();
-		}).debounce(250).feed((function($this) {
-			var $r;
-			var consumer1 = steamer.Bus.feed($this.feedData);
-			$r = consumer1;
-			return $r;
-		}(this)));
+		}).debounce(250).feed(this.dataFeeder);
 		this.fieldFocus.add(field.focus.map(function(v1) {
 			if(v1) return field; else return null;
 		}));
@@ -4823,16 +4771,37 @@ ui.Runtime.__name__ = ["ui","Runtime"];
 ui.Runtime.createFunction = function(args,code) {
 	return new Function(args.join(","),code);
 };
-ui.Runtime.formatCode = function(code) {
-	return "return " + code;
+ui.Runtime.formatCode = function(code,scope) {
+	var prelim = Reflect.fields(scope).map(function(field) {
+		var variable;
+		var field1 = field;
+		switch(field) {
+		case "model":
+			variable = "$";
+			break;
+		default:
+			variable = field1;
+		}
+		return "var " + variable + " = scope." + field + ";";
+	}).join("\n");
+	return "" + prelim + "\ndelete scope;\nreturn " + code + ";";
 };
-ui.Runtime.toRuntime = function(code) {
+ui.Runtime.toRuntime = function(code,scope) {
+	haxe.Log.trace(scope,{ fileName : "Runtime.hx", lineNumber : 26, className : "ui.Runtime", methodName : "toRuntime"});
 	var expression;
 	try {
-		var formatted = ui.Runtime.formatCode(code);
-		expression = ui.Expression.Fun(ui.Runtime.createFunction(["$"],formatted));
-	} catch( e ) {
-		expression = ui.Expression.SyntaxError(Std.string(e));
+		var formatted = ui.Runtime.formatCode(code,scope);
+		haxe.Log.trace(formatted,{ fileName : "Runtime.hx", lineNumber : 29, className : "ui.Runtime", methodName : "toRuntime"});
+		var f = ui.Runtime.createFunction(["scope"],formatted);
+		expression = ui.Expression.Fun(function() {
+			try {
+				return ui.RuntimeResult.Result(f(scope));
+			} catch( e ) {
+				return ui.RuntimeResult.Error(Std.string(e));
+			}
+		});
+	} catch( e1 ) {
+		expression = ui.Expression.SyntaxError(Std.string(e1));
 	}
 	return new ui.Runtime(expression,code);
 };
@@ -4857,23 +4826,18 @@ ui.RuntimeResult = { __ename__ : ["ui","RuntimeResult"], __constructs__ : ["Resu
 ui.RuntimeResult.Result = function(value) { var $x = ["Result",0,value]; $x.__enum__ = ui.RuntimeResult; $x.toString = $estr; return $x; };
 ui.RuntimeResult.Error = function(msg) { var $x = ["Error",1,msg]; $x.__enum__ = ui.RuntimeResult; $x.toString = $estr; return $x; };
 ui.Schema = function() {
-	var _g = this;
 	this.fields = new haxe.ds.StringMap();
-	this.feed = function(_) {
-	};
-	this.stream = new ui.SchemaProducer($bind(this,this.getPairs),function(feed) {
-		_g.feed = feed;
-	});
+	this.stream = this.feeder = new steamer.Feeder();
 };
 ui.Schema.__name__ = ["ui","Schema"];
 ui.Schema.prototype = {
 	fields: null
 	,stream: null
-	,feed: null
+	,feeder: null
 	,add: function(name,type) {
-		if(this.fields.exists(name)) throw new thx.Error("Schema already contains a field \"" + name + "\"",null,{ fileName : "Schema.hx", lineNumber : 25, className : "ui.Schema", methodName : "add"});
+		if(this.fields.exists(name)) throw new thx.Error("Schema already contains a field \"" + name + "\"",null,{ fileName : "Schema.hx", lineNumber : 22, className : "ui.Schema", methodName : "add"});
 		this.fields.set(name,type);
-		this.feed(steamer.Pulse.Emit(ui.SchemaEvent.AddField(name,type)));
+		this.feeder.forward(steamer.Pulse.Emit(ui.SchemaEvent.AddField(name,type)));
 	}
 	,reset: function(list) {
 		var _g = this;
@@ -4882,24 +4846,24 @@ ui.Schema.prototype = {
 		list.map(function(pair) {
 			_g.fields.set(pair.name,pair.type);
 		});
-		this.feed(steamer.Pulse.Emit(ui.SchemaEvent.ListFields(list.slice())));
+		this.feeder.forward(steamer.Pulse.Emit(ui.SchemaEvent.ListFields(list.slice())));
 	}
 	,'delete': function(name) {
-		if(!this.fields.exists(name)) throw new thx.Error("Schema does not contain a field \"" + name + "\"",null,{ fileName : "Schema.hx", lineNumber : 42, className : "ui.Schema", methodName : "delete"});
+		if(!this.fields.exists(name)) throw new thx.Error("Schema does not contain a field \"" + name + "\"",null,{ fileName : "Schema.hx", lineNumber : 39, className : "ui.Schema", methodName : "delete"});
 		this.fields.remove(name);
-		this.feed(steamer.Pulse.Emit(ui.SchemaEvent.DeleteField(name)));
+		this.feeder.forward(steamer.Pulse.Emit(ui.SchemaEvent.DeleteField(name)));
 	}
 	,rename: function(oldname,newname) {
-		if(!this.fields.exists(oldname)) throw new thx.Error("Schema does not contain a field \"" + oldname + "\"",null,{ fileName : "Schema.hx", lineNumber : 49, className : "ui.Schema", methodName : "rename"});
+		if(!this.fields.exists(oldname)) throw new thx.Error("Schema does not contain a field \"" + oldname + "\"",null,{ fileName : "Schema.hx", lineNumber : 46, className : "ui.Schema", methodName : "rename"});
 		var type = this.fields.get(oldname);
 		this.fields.remove(oldname);
 		this.fields.set(newname,type);
-		this.feed(steamer.Pulse.Emit(ui.SchemaEvent.RenameField(oldname,newname)));
+		this.feeder.forward(steamer.Pulse.Emit(ui.SchemaEvent.RenameField(oldname,newname)));
 	}
 	,retype: function(name,type) {
-		if(!this.fields.exists(name)) throw new thx.Error("Schema does not contain a field \"" + name + "\"",null,{ fileName : "Schema.hx", lineNumber : 58, className : "ui.Schema", methodName : "retype"});
+		if(!this.fields.exists(name)) throw new thx.Error("Schema does not contain a field \"" + name + "\"",null,{ fileName : "Schema.hx", lineNumber : 55, className : "ui.Schema", methodName : "retype"});
 		this.fields.set(name,type);
-		this.feed(steamer.Pulse.Emit(ui.SchemaEvent.RetypeField(name,type)));
+		this.feeder.forward(steamer.Pulse.Emit(ui.SchemaEvent.RetypeField(name,type)));
 	}
 	,get: function(name) {
 		return this.fields.get(name);
@@ -4924,21 +4888,6 @@ ui.Schema.prototype = {
 	}
 	,__class__: ui.Schema
 };
-ui.SchemaProducer = function(getPairs,handler) {
-	this.getPairs = getPairs;
-	steamer.Producer.call(this,handler,false);
-};
-ui.SchemaProducer.__name__ = ["ui","SchemaProducer"];
-ui.SchemaProducer.__super__ = steamer.Producer;
-ui.SchemaProducer.prototype = $extend(steamer.Producer.prototype,{
-	getPairs: null
-	,feed: function(consumer) {
-		steamer.Producer.prototype.feed.call(this,consumer);
-		consumer.onPulse(steamer.Pulse.Emit(ui.SchemaEvent.ListFields(this.getPairs())));
-		return this;
-	}
-	,__class__: ui.SchemaProducer
-});
 ui.SchemaEvent = { __ename__ : ["ui","SchemaEvent"], __constructs__ : ["ListFields","AddField","DeleteField","RenameField","RetypeField"] };
 ui.SchemaEvent.ListFields = function(list) { var $x = ["ListFields",0,list]; $x.__enum__ = ui.SchemaEvent; $x.toString = $estr; return $x; };
 ui.SchemaEvent.AddField = function(name,type) { var $x = ["AddField",1,name,type]; $x.__enum__ = ui.SchemaEvent; $x.toString = $estr; return $x; };

@@ -14,17 +14,18 @@ class Card {
 			context = Query.first('.context', card.el),
 			modelView = new ModelView(),
 			document = new Document({ el : Query.first('.doc', card.el) }),
-			context = new ContextView(document, mapper, { el : Query.first('.context', card.el) });
+			scope = { model : {} },
+			context = new ContextView(document, scope, mapper, { el : Query.first('.context', card.el) });
 
 		modelView.component.appendTo(Query.first('.model', card.el));
 
+		model.data.value.feed(function(o) {
+			scope.model = o;
+		});
 		modelView.schema.feed(model.schemaEventConsumer);
 		modelView.data.feed(model.dataEventConsumer);
 
 		card.appendTo(container);
-
-		model.data.stream.map(function(o) return haxe.Json.stringify(o)).feed(new steamer.consumers.LoggerConsumer());
-
 
 		// TODO remove me
 		document.article.addReadonly();

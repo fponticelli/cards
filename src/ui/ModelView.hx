@@ -10,6 +10,7 @@ import ui.DataEvent;
 import ui.SchemaEvent;
 import ui.widgets.Toolbar;
 import dom.Dom;
+import steamer.Feeder;
 
 class ModelView {
 	public var component(default, null) : Component;
@@ -20,8 +21,8 @@ class ModelView {
 
 	var pairs : Element;
 
-	var feedSchema : Pulse<SchemaEvent> -> Void;
-	var feedData : Pulse<DataEvent> -> Void;
+	var schemaFeeder : Feeder<SchemaEvent>;
+	var dataFeeder : Feeder<DataEvent>;
 	var fields : Map<String, ModelViewField>;
 	var fieldFocus : MultiProducer<ModelViewField>;
 	var fieldBlur : MultiProducer<ModelViewField>;
@@ -48,15 +49,8 @@ class ModelView {
 		component.el.appendChild(pairs);
 		pairs = Query.first('div', pairs);
 
-		this.feedSchema = function(_) {};
-		schema = new Producer(function(feed) {
-			this.feedSchema = feed;
-		});
-
-		this.feedData = function(_) {};
-		data = new Producer(function(feed) {
-			this.feedData = feed;
-		});
+		schema = this.schemaFeeder = new Feeder();
+		data = this.dataFeeder = new Feeder();
 
 		fields = new Map();
 
@@ -87,7 +81,7 @@ class ModelView {
 		var name = field.key.value.value;
 		field.destroy();
 		if(fields.remove(name)) {
-			feedSchema(Emit(DeleteField(name)));
+			schemaFeeder.forward(Emit(DeleteField(name)));
 		}
 	}
 
@@ -131,7 +125,7 @@ class ModelView {
 					return r;
 				}
 			})
-			.feed(Bus.feed(feedSchema));
+			.feed(schemaFeeder);
 
 		// setup field value
 		// TODO support multiple editors data types
@@ -140,7 +134,7 @@ class ModelView {
 		// events (not the best synch mechanism ever)
 		field.value.value.map(function(_ : String) {
 			return createSetValue();
-		}).debounce(250).feed(Bus.feed(feedData));
+		}).debounce(250).feed(dataFeeder);
 		fieldFocus.add(field.focus.map(function(v) return v ? field : null));
 
 		fields.set(name, field);

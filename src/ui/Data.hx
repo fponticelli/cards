@@ -5,20 +5,15 @@ import steamer.Producer;
 import steamer.Pulse;
 import thx.ref.ObjectRef;
 import thx.ref.IRef;
+import steamer.Value;
 
 class Data {
 	var root : ObjectRef;
 	var cache : Map<String, IRef>;
-	var feed : Pulse<{}> -> Void;
-
-	public var stream(default, null) : Producer<{}>;
+	public var value(default, null) : Value<{}>;
 
 	public function new(data : {}) {
-		this.feed = function(p){};
-		// debounce removes noise
-		stream = new Producer(function(feed) {
-			this.feed = feed;
-		}).debounce(100);
+		value = new Value(data);
 		reset(data);
 	}
 
@@ -45,7 +40,7 @@ class Data {
 		cache.set(path, ref);
 		if(ref.get() != value) {
 			ref.set(value);
-			feed(Emit(toObject()));
+			this.value.value = toObject();
 		}
 		return this;
 	}
@@ -56,7 +51,7 @@ class Data {
 		if(null != value) {
 			set("", value);
 		}
-		feed(Emit(toObject()));
+		this.value.value = toObject();
 		return this;
 	}
 
@@ -68,7 +63,7 @@ class Data {
 
 		if(ref.hasValue()) {
 			ref.remove();
-			feed(Emit(toObject()));
+			this.value.value = toObject();
 		}
 		cache.remove(path);
 	}
@@ -79,7 +74,7 @@ class Data {
 		var v = get(oldpath);
 		remove(oldpath);
 		set(newpath, v);
-		feed(Emit(toObject()));
+		this.value.value = toObject();
 		return true;
 	}
 

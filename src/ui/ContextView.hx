@@ -22,6 +22,7 @@ class ContextView {
 	public var toolbar(default, null) : Toolbar;
 	public var document(default, null) : Document;
 	public var field(default, null) : Value<Option<ContextField>>;
+	public var scope(default, null) : Scope;
 	var el : Element;
 	var button : {
 		add : Button,
@@ -33,8 +34,9 @@ class ContextView {
 	};
 	var mapper : FragmentMapper;
 
-	public function new(document : Document, mapper : FragmentMapper, options : ComponentOptions) {
+	public function new(document : Document, scope : Scope, mapper : FragmentMapper, options : ComponentOptions) {
 		this.document = document;
+		this.scope = scope;
 		this.mapper = mapper;
 		component = new Component(options);
 		toolbar   = new Toolbar({ parent : component, container : component.el });
@@ -127,7 +129,8 @@ class ContextView {
 				display   : info.display,
 				name      : info.name,
 				type      : info.type,
-				value     : value
+				value     : value,
+				scope     : scope
 			});
 
 		f.focus

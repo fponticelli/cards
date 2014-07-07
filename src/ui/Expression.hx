@@ -1,6 +1,8 @@
 package ui;
 
+import ui.Runtime;
+
 enum Expression {
-	Fun(f : Dynamic -> Dynamic);
+	Fun(f : Void -> RuntimeResult);
 	SyntaxError(msg : String);
 }
