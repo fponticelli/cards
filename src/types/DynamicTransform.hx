@@ -18,6 +18,8 @@ class DynamicTransform {
 			return StringTransform.toArray(value);
 		if(Reflect.isObject(value))
 			return ObjectTransform.toArray(value);
+		if(Reflect.isFunction(value))
+			return toArray(null);
 		return throw 'Type of $value cannot be matched by DynamicTransform.toArray';
 	}
 
@@ -36,6 +38,8 @@ class DynamicTransform {
 			return StringTransform.toBool(value);
 		if(Reflect.isObject(value))
 			return ObjectTransform.toBool(value);
+		if(Reflect.isFunction(value))
+			return toBool(null);
 		return throw 'Type of $value cannot be matched by DynamicTransform.toBool';
 	}
 
@@ -54,6 +58,8 @@ class DynamicTransform {
 			return StringTransform.toDate(value);
 		if(Reflect.isObject(value))
 			return ObjectTransform.toDate(value);
+		if(Reflect.isFunction(value))
+			return toDate(null);
 		return throw 'Type of $value cannot be matched by DynamicTransform.toDate';
 	}
 
@@ -72,6 +78,8 @@ class DynamicTransform {
 			return StringTransform.toFloat(value);
 		if(Reflect.isObject(value))
 			return ObjectTransform.toFloat(value);
+		if(Reflect.isFunction(value))
+			return toFloat(null);
 		return throw 'Type of $value cannot be matched by DynamicTransform.toFloat';
 	}
 
@@ -90,6 +98,8 @@ class DynamicTransform {
 			return StringTransform.toObject(value);
 		if(Reflect.isObject(value))
 			return ObjectTransform.toObject(value);
+		if(Reflect.isFunction(value))
+			return toObject(null);
 		return throw 'Type of $value cannot be matched by DynamicTransform.toObject';
 	}
 
@@ -108,6 +118,8 @@ class DynamicTransform {
 			return StringTransform.toString(value);
 		if(Reflect.isObject(value))
 			return ObjectTransform.toString(value);
+		if(Reflect.isFunction(value))
+			return toString(null);
 		return throw 'Type of $value cannot be matched by DynamicTransform.toString';
 	}
 
@@ -126,6 +138,8 @@ class DynamicTransform {
 			return StringTransform.toCode(value);
 		if(Reflect.isObject(value))
 			return ObjectTransform.toCode(value);
+		if(Reflect.isFunction(value))
+			return toCode(null);
 		return throw 'Type of $value cannot be matched by DynamicTransform.toCode';
 	}
 }

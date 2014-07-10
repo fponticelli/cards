@@ -7,6 +7,7 @@ import sui.components.ComponentOptions;
 import dom.Dom;
 import sui.properties.ToggleClass;
 import sui.properties.ValueProperty;
+using thx.core.Arrays;
 import ui.editors.CodeEditor;
 import ui.editors.Editor;
 import ui.editors.EditorPicker;
@@ -16,6 +17,8 @@ import ui.SchemaType;
 import ui.widgets.Tooltip;
 import ui.FieldValue;
 using thx.core.Options;
+using ui.Expression;
+using StringTools;
 
 class ContextField {
 	public static var tooltip(default, null) : Tooltip = new Tooltip({ classes : 'tooltip error' });
@@ -51,24 +54,27 @@ class ContextField {
 				editor.focus.feed(focus);
 				switch type {
 					case CodeType:
-						editor.value
-							.map(Runtime.toRuntime.bind(_, options.scope))
-							.toOption()
-							.feed(options.value.runtime)
-							.map(function(opt) {
-								return switch opt {
-									case Some(runtime):
-										switch runtime.expression {
-											case SyntaxError(e): Some(e);
-											case _: None;
-										};
-									case _: None;
-								};
+						var runtime = editor.value.map(Runtime.toRuntime.bind(_, options.model));
+						runtime
+							.distinct(function(a, b) {
+								return b != null && a.dependencies.same(b.dependencies);
 							})
-							.feed(withError);
-						options.value.runtimeError
+							.feed(function(res : Runtime) {
+								options.model.changes.feed(function(path) {
+									if(res.dependencies.contains(path, function(a, b) return b.startsWith(a))) {
+										options.value.runtime.value = Some(Runtime.toRuntime(editor.value.value, options.model));
+									}
+								});
+							});
+						runtime
+							.toOption()
+							.feed(options.value.runtime);
+						runtime
+							.map(function(res) return res.expression.toErrorOption())
+							.merge(options.value.runtimeError)
 							.feed(withError);
 					case _:
+						options.value.runtime.value = None;
 						editor.value.feed(options.value.stream);
 						// TODO does this leak?
 						options.value.stream.feed(editor.value);
@@ -123,5 +129,5 @@ typedef ContextFieldOptions = {>ComponentOptions,
 	display : String,
 	name : String,
 	value : ValueProperty<Dynamic>,
-	scope : Scope
+	model : Model
 }

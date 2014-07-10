@@ -1,6 +1,8 @@
-+ evaluate expressions in context
-- create dependency between model values and context properties
-- refresh evaluation on model change
+- add ReferenceType
+- add ReferenceEditor
+- wire reference bidirectionally
+- change fragments to support Reference
+- only allow reference values for editable contents
 
 - helper context (for excel like functions)
 
@@ -37,6 +39,9 @@ DOC: set focus to currently created block/fragment
 
 DONE:
 
++ evaluate expressions in context
++ create dependency between model values and context properties
++ refresh evaluation on model change
 + restore error notification for expressions
 + mark field with error
 + mark fragment with error

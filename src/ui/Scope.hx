@@ -1,5 +1,6 @@
 package ui;
 
-typedef Scope = {
-	model : Dynamic
+class Scope {
+	public var name : String = "Franco";
+	public function new() {}
 }
