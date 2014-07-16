@@ -1,5 +1,6 @@
-- add ReferenceType
-- add ReferenceEditor
++ add ReferenceType
++ add ReferenceEditor
+- feed Reference to Value
 - wire reference bidirectionally
 - change fragments to support Reference
 - only allow reference values for editable contents
@@ -15,11 +16,6 @@
 
 - active state for model fields
 - focus state for model fields
-
-TODO (requires the INTERNET)
-- check why nib is not included by default
-
-- bidirectional updates from property to model when possible
 
 DOC: drag and drop fragments
 

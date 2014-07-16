@@ -30,7 +30,8 @@ class ReferenceTransform {
 	}
 
 	public static function toCode(value : String) : String {
-		return '$.$value';
+		value = toReference(value);
+		return '' == value ? '' : '$.$value';
 	}
 
 	public static function toReference(value : String) : String {

@@ -142,8 +142,12 @@ a img {
   position: absolute;
   display: block;
 }
-.card .editor.code {
+.card .editor.code,
+.card .editor.reference {
   font-family: monospace;
+}
+.card .editor.reference {
+  background-color: #efe;
 }
 .card .editor.empty:before {
   content: attr(placeholder);

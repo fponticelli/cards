@@ -6,6 +6,9 @@ class Config {
 		checked : 'dot-circle-o',
 		unchecked : 'circle-o',
 		switchtype : 'bolt',
+		code : 'bolt',
+		value : 'pencil',
+		reference : 'link',
 	};
 
 	public static var selectors(default, null) = {

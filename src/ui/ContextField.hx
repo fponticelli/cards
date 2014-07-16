@@ -30,6 +30,7 @@ class ContextField {
 	public var withError(default, null) : Value<Option<String>>;
 	public var fieldValue(default, null) : FieldValue;
 	public var type(default, null) : SchemaType;
+	public var currentType(default, null) : Value<SchemaType>;
 
 	public function new(options : ContextFieldOptions) {
 		if(null == options.template && null == options.el)
@@ -42,6 +43,7 @@ class ContextField {
 
 		name = options.name;
 		type = options.type;
+		currentType = new Value(options.type);
 
 		focus = new Value(false);
 		active = new Value(false);
@@ -52,6 +54,7 @@ class ContextField {
 			Query.first('.value-container', component.el),
 			function(type : SchemaType, editor : Editor<Dynamic>) {
 				editor.focus.feed(focus);
+				currentType.value = type;
 				switch type {
 					case CodeType:
 						var runtime = editor.value.map(Runtime.toRuntime.bind(_, options.model));

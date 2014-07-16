@@ -1,5 +1,6 @@
 (function ($hx_exports) { "use strict";
 $hx_exports.promhx = $hx_exports.promhx || {};
+var $estr = function() { return js.Boot.__string_rec(this,''); };
 function $extend(from, fields) {
 	function Inherit() {} Inherit.prototype = from; var proto = new Inherit();
 	for (var name in fields) proto[name] = fields[name];
@@ -324,20 +325,27 @@ StringTools.replace = function(s,sub,by) {
 };
 var ValueType = { __ename__ : ["ValueType"], __constructs__ : ["TNull","TInt","TFloat","TBool","TObject","TFunction","TClass","TEnum","TUnknown"] };
 ValueType.TNull = ["TNull",0];
+ValueType.TNull.toString = $estr;
 ValueType.TNull.__enum__ = ValueType;
 ValueType.TInt = ["TInt",1];
+ValueType.TInt.toString = $estr;
 ValueType.TInt.__enum__ = ValueType;
 ValueType.TFloat = ["TFloat",2];
+ValueType.TFloat.toString = $estr;
 ValueType.TFloat.__enum__ = ValueType;
 ValueType.TBool = ["TBool",3];
+ValueType.TBool.toString = $estr;
 ValueType.TBool.__enum__ = ValueType;
 ValueType.TObject = ["TObject",4];
+ValueType.TObject.toString = $estr;
 ValueType.TObject.__enum__ = ValueType;
 ValueType.TFunction = ["TFunction",5];
+ValueType.TFunction.toString = $estr;
 ValueType.TFunction.__enum__ = ValueType;
-ValueType.TClass = function(c) { var $x = ["TClass",6,c]; $x.__enum__ = ValueType; return $x; };
-ValueType.TEnum = function(e) { var $x = ["TEnum",7,e]; $x.__enum__ = ValueType; return $x; };
+ValueType.TClass = function(c) { var $x = ["TClass",6,c]; $x.__enum__ = ValueType; $x.toString = $estr; return $x; };
+ValueType.TEnum = function(e) { var $x = ["TEnum",7,e]; $x.__enum__ = ValueType; $x.toString = $estr; return $x; };
 ValueType.TUnknown = ["TUnknown",8];
+ValueType.TUnknown.toString = $estr;
 ValueType.TUnknown.__enum__ = ValueType;
 var Type = function() { };
 Type.__name__ = ["Type"];
@@ -446,11 +454,12 @@ dom._Dom.H.toArray = function(list) {
 var haxe = {};
 haxe.StackItem = { __ename__ : ["haxe","StackItem"], __constructs__ : ["CFunction","Module","FilePos","Method","LocalFunction"] };
 haxe.StackItem.CFunction = ["CFunction",0];
+haxe.StackItem.CFunction.toString = $estr;
 haxe.StackItem.CFunction.__enum__ = haxe.StackItem;
-haxe.StackItem.Module = function(m) { var $x = ["Module",1,m]; $x.__enum__ = haxe.StackItem; return $x; };
-haxe.StackItem.FilePos = function(s,file,line) { var $x = ["FilePos",2,s,file,line]; $x.__enum__ = haxe.StackItem; return $x; };
-haxe.StackItem.Method = function(classname,method) { var $x = ["Method",3,classname,method]; $x.__enum__ = haxe.StackItem; return $x; };
-haxe.StackItem.LocalFunction = function(v) { var $x = ["LocalFunction",4,v]; $x.__enum__ = haxe.StackItem; return $x; };
+haxe.StackItem.Module = function(m) { var $x = ["Module",1,m]; $x.__enum__ = haxe.StackItem; $x.toString = $estr; return $x; };
+haxe.StackItem.FilePos = function(s,file,line) { var $x = ["FilePos",2,s,file,line]; $x.__enum__ = haxe.StackItem; $x.toString = $estr; return $x; };
+haxe.StackItem.Method = function(classname,method) { var $x = ["Method",3,classname,method]; $x.__enum__ = haxe.StackItem; $x.toString = $estr; return $x; };
+haxe.StackItem.LocalFunction = function(v) { var $x = ["LocalFunction",4,v]; $x.__enum__ = haxe.StackItem; $x.toString = $estr; return $x; };
 haxe.CallStack = function() { };
 haxe.CallStack.__name__ = ["haxe","CallStack"];
 haxe.CallStack.callStack = function() {
@@ -560,8 +569,9 @@ haxe.ds.ObjectMap.prototype = {
 	,__class__: haxe.ds.ObjectMap
 };
 haxe.ds.Option = { __ename__ : ["haxe","ds","Option"], __constructs__ : ["Some","None"] };
-haxe.ds.Option.Some = function(v) { var $x = ["Some",0,v]; $x.__enum__ = haxe.ds.Option; return $x; };
+haxe.ds.Option.Some = function(v) { var $x = ["Some",0,v]; $x.__enum__ = haxe.ds.Option; $x.toString = $estr; return $x; };
 haxe.ds.Option.None = ["None",1];
+haxe.ds.Option.None.toString = $estr;
 haxe.ds.Option.None.__enum__ = haxe.ds.Option;
 haxe.ds.StringMap = function() {
 	this.h = { };
@@ -1063,8 +1073,8 @@ promhx.base.EventLoop.continueOnNextLoop = function() {
 };
 promhx.error = {};
 promhx.error.PromiseError = { __ename__ : ["promhx","error","PromiseError"], __constructs__ : ["AlreadyResolved","DownstreamNotFullfilled"] };
-promhx.error.PromiseError.AlreadyResolved = function(message) { var $x = ["AlreadyResolved",0,message]; $x.__enum__ = promhx.error.PromiseError; return $x; };
-promhx.error.PromiseError.DownstreamNotFullfilled = function(message) { var $x = ["DownstreamNotFullfilled",1,message]; $x.__enum__ = promhx.error.PromiseError; return $x; };
+promhx.error.PromiseError.AlreadyResolved = function(message) { var $x = ["AlreadyResolved",0,message]; $x.__enum__ = promhx.error.PromiseError; $x.toString = $estr; return $x; };
+promhx.error.PromiseError.DownstreamNotFullfilled = function(message) { var $x = ["DownstreamNotFullfilled",1,message]; $x.__enum__ = promhx.error.PromiseError; $x.toString = $estr; return $x; };
 var steamer = {};
 steamer._Consumer = {};
 steamer._Consumer.Consumer_Impl_ = function() { };
@@ -1741,6 +1751,27 @@ steamer.MultiProducer.prototype = $extend(steamer.Producer.prototype,{
 	}
 	,__class__: steamer.MultiProducer
 });
+steamer.ProducerProducer = function() { };
+steamer.ProducerProducer.__name__ = ["steamer","ProducerProducer"];
+steamer.ProducerProducer.flatMap = function(producer) {
+	return new steamer.Producer(function(forward) {
+		producer.feed((function($this) {
+			var $r;
+			var consumer = steamer.Bus.passOn(function(prod) {
+				prod.feed((function($this) {
+					var $r;
+					var consumer1 = steamer.Bus.passOn(function(value) {
+						forward(steamer.Pulse.Emit(value));
+					},forward);
+					$r = consumer1;
+					return $r;
+				}(this)));
+			},forward);
+			$r = consumer;
+			return $r;
+		}(this)));
+	},producer.endOnError);
+};
 steamer.StringProducer = function() { };
 steamer.StringProducer.__name__ = ["steamer","StringProducer"];
 steamer.StringProducer.toBool = function(producer) {
@@ -1792,13 +1823,15 @@ steamer.Bus.prototype = {
 	,__class__: steamer.Bus
 };
 steamer.Pulse = { __ename__ : ["steamer","Pulse"], __constructs__ : ["Emit","End","Fail"] };
-steamer.Pulse.Emit = function(value) { var $x = ["Emit",0,value]; $x.__enum__ = steamer.Pulse; return $x; };
+steamer.Pulse.Emit = function(value) { var $x = ["Emit",0,value]; $x.__enum__ = steamer.Pulse; $x.toString = $estr; return $x; };
 steamer.Pulse.End = ["End",1];
+steamer.Pulse.End.toString = $estr;
 steamer.Pulse.End.__enum__ = steamer.Pulse;
-steamer.Pulse.Fail = function(error) { var $x = ["Fail",2,error]; $x.__enum__ = steamer.Pulse; return $x; };
+steamer.Pulse.Fail = function(error) { var $x = ["Fail",2,error]; $x.__enum__ = steamer.Pulse; $x.toString = $estr; return $x; };
 var thx = {};
 thx.Nil = { __ename__ : ["thx","Nil"], __constructs__ : ["nil"] };
 thx.Nil.nil = ["nil",0];
+thx.Nil.nil.toString = $estr;
 thx.Nil.nil.__enum__ = thx.Nil;
 steamer.Pulses = function() { };
 steamer.Pulses.__name__ = ["steamer","Pulses"];
@@ -2900,12 +2933,12 @@ thx.core.Arrays.contains = function(arr,element,eq) {
 	}
 };
 thx.core.Assertion = { __ename__ : ["thx","core","Assertion"], __constructs__ : ["Success","Failure","Error","PreConditionError","PostConditionError","Warning"] };
-thx.core.Assertion.Success = function(pos) { var $x = ["Success",0,pos]; $x.__enum__ = thx.core.Assertion; return $x; };
-thx.core.Assertion.Failure = function(msg,pos) { var $x = ["Failure",1,msg,pos]; $x.__enum__ = thx.core.Assertion; return $x; };
-thx.core.Assertion.Error = function(e,stack) { var $x = ["Error",2,e,stack]; $x.__enum__ = thx.core.Assertion; return $x; };
-thx.core.Assertion.PreConditionError = function(e,stack) { var $x = ["PreConditionError",3,e,stack]; $x.__enum__ = thx.core.Assertion; return $x; };
-thx.core.Assertion.PostConditionError = function(e,stack) { var $x = ["PostConditionError",4,e,stack]; $x.__enum__ = thx.core.Assertion; return $x; };
-thx.core.Assertion.Warning = function(msg) { var $x = ["Warning",5,msg]; $x.__enum__ = thx.core.Assertion; return $x; };
+thx.core.Assertion.Success = function(pos) { var $x = ["Success",0,pos]; $x.__enum__ = thx.core.Assertion; $x.toString = $estr; return $x; };
+thx.core.Assertion.Failure = function(msg,pos) { var $x = ["Failure",1,msg,pos]; $x.__enum__ = thx.core.Assertion; $x.toString = $estr; return $x; };
+thx.core.Assertion.Error = function(e,stack) { var $x = ["Error",2,e,stack]; $x.__enum__ = thx.core.Assertion; $x.toString = $estr; return $x; };
+thx.core.Assertion.PreConditionError = function(e,stack) { var $x = ["PreConditionError",3,e,stack]; $x.__enum__ = thx.core.Assertion; $x.toString = $estr; return $x; };
+thx.core.Assertion.PostConditionError = function(e,stack) { var $x = ["PostConditionError",4,e,stack]; $x.__enum__ = thx.core.Assertion; $x.toString = $estr; return $x; };
+thx.core.Assertion.Warning = function(msg) { var $x = ["Warning",5,msg]; $x.__enum__ = thx.core.Assertion; $x.toString = $estr; return $x; };
 thx.core.F0 = function() { };
 thx.core.F0.__name__ = ["thx","core","F0"];
 thx.core.F0.join = function(fa,fb) {
@@ -3696,6 +3729,9 @@ types.ArrayTransform.toString = function(value) {
 types.ArrayTransform.toCode = function(value) {
 	return "[" + types.ArrayTransform.toArray(value).map(types.DynamicTransform.toCode).join(",") + "]";
 };
+types.ArrayTransform.toReference = function(value) {
+	return "";
+};
 types.BoolTransform = function() { };
 types.BoolTransform.__name__ = ["types","BoolTransform"];
 types.BoolTransform.toArray = function(value) {
@@ -3718,6 +3754,9 @@ types.BoolTransform.toString = function(value) {
 };
 types.BoolTransform.toCode = function(value) {
 	if(types.BoolTransform.toBool(value)) return "true"; else return "false";
+};
+types.BoolTransform.toReference = function(value) {
+	return "";
 };
 types.CodeTransform = function() { };
 types.CodeTransform.__name__ = ["types","CodeTransform"];
@@ -3768,6 +3807,10 @@ types.CodeTransform.toString = function(value) {
 types.CodeTransform.toCode = function(value) {
 	if(null != value) return StringTools.trim(value); else return "null";
 };
+types.CodeTransform.toReference = function(value) {
+	var code = types.CodeTransform.toCode(value);
+	if(types.CodeTransform.PATTERN.match(code)) return types.CodeTransform.PATTERN.matched(1); else return "";
+};
 types.DateTransform = function() { };
 types.DateTransform.__name__ = ["types","DateTransform"];
 types.DateTransform.toArray = function(value) {
@@ -3791,6 +3834,9 @@ types.DateTransform.toString = function(value) {
 };
 types.DateTransform.toCode = function(value) {
 	return "new Date(" + types.DateTransform.toDate(value).getTime() + ")";
+};
+types.DateTransform.toReference = function(value) {
+	return "";
 };
 types.DynamicTransform = function() { };
 types.DynamicTransform.__name__ = ["types","DynamicTransform"];
@@ -3871,6 +3917,17 @@ types.DynamicTransform.toCode = function(value) {
 	if(Reflect.isFunction(value)) return types.DynamicTransform.toCode(null);
 	throw "Type of " + Std.string(value) + " cannot be matched by DynamicTransform.toCode";
 };
+types.DynamicTransform.toReference = function(value) {
+	if(null == value) return "";
+	if((value instanceof Array) && value.__enum__ == null) return types.ArrayTransform.toReference(value);
+	if(typeof(value) == "boolean") return types.BoolTransform.toReference(value);
+	if(js.Boot.__instanceof(value,Date)) return types.DateTransform.toReference(value);
+	if(typeof(value) == "number") return types.FloatTransform.toReference(value);
+	if(typeof(value) == "string") return types.StringTransform.toReference(value);
+	if(Reflect.isObject(value)) return types.ObjectTransform.toReference(value);
+	if(Reflect.isFunction(value)) return types.DynamicTransform.toReference(null);
+	throw "Type of " + Std.string(value) + " cannot be matched by DynamicTransform.toReference";
+};
 types.FloatTransform = function() { };
 types.FloatTransform.__name__ = ["types","FloatTransform"];
 types.FloatTransform.toArray = function(value) {
@@ -3896,6 +3953,9 @@ types.FloatTransform.toString = function(value) {
 };
 types.FloatTransform.toCode = function(value) {
 	return "" + types.FloatTransform.toFloat(value);
+};
+types.FloatTransform.toReference = function(value) {
+	return "";
 };
 types.ObjectTransform = function() { };
 types.ObjectTransform.__name__ = ["types","ObjectTransform"];
@@ -3923,6 +3983,36 @@ types.ObjectTransform.toCode = function(value) {
 	return "{" + Reflect.fields(types.ObjectTransform.toObject(value)).map(function(field) {
 		return "\"" + field + "\" : " + types.DynamicTransform.toCode(Reflect.field(value,field));
 	}).join(", ") + "}";
+};
+types.ObjectTransform.toReference = function(value) {
+	return "";
+};
+types.ReferenceTransform = function() { };
+types.ReferenceTransform.__name__ = ["types","ReferenceTransform"];
+types.ReferenceTransform.toArray = function(value) {
+	return types.ArrayTransform.toArray(null);
+};
+types.ReferenceTransform.toBool = function(value) {
+	return types.BoolTransform.toBool(null);
+};
+types.ReferenceTransform.toDate = function(value) {
+	return types.DateTransform.toDate(null);
+};
+types.ReferenceTransform.toFloat = function(value) {
+	return types.FloatTransform.toFloat(null);
+};
+types.ReferenceTransform.toObject = function(value) {
+	return types.ObjectTransform.toObject(null);
+};
+types.ReferenceTransform.toString = function(value) {
+	return types.StringTransform.toString(null);
+};
+types.ReferenceTransform.toCode = function(value) {
+	value = types.ReferenceTransform.toReference(value);
+	if("" == value) return ""; else return "$." + value;
+};
+types.ReferenceTransform.toReference = function(value) {
+	if(null == value) return ""; else return value;
 };
 types.StringTransform = function() { };
 types.StringTransform.__name__ = ["types","StringTransform"];
@@ -3957,6 +4047,9 @@ types.StringTransform.toString = function(value) {
 types.StringTransform.toCode = function(value) {
 	return "\"" + StringTools.replace(types.StringTransform.toString(value),"\"","\\\"") + "\"";
 };
+types.StringTransform.toReference = function(value) {
+	return "";
+};
 types.TypeTransform = function() { };
 types.TypeTransform.__name__ = ["types","TypeTransform"];
 types.TypeTransform.transform = function(srcType,dstType) {
@@ -3977,6 +4070,8 @@ types.TypeTransform.transform = function(srcType,dstType) {
 			return types.ArrayTransform.toString;
 		case 6:
 			return types.ArrayTransform.toCode;
+		case 7:
+			return types.ArrayTransform.toReference;
 		}
 		break;
 	case 1:
@@ -3995,6 +4090,8 @@ types.TypeTransform.transform = function(srcType,dstType) {
 			return types.BoolTransform.toString;
 		case 6:
 			return types.BoolTransform.toCode;
+		case 7:
+			return types.BoolTransform.toReference;
 		}
 		break;
 	case 2:
@@ -4013,6 +4110,8 @@ types.TypeTransform.transform = function(srcType,dstType) {
 			return types.DateTransform.toString;
 		case 6:
 			return types.DateTransform.toCode;
+		case 7:
+			return types.DateTransform.toReference;
 		}
 		break;
 	case 3:
@@ -4031,6 +4130,8 @@ types.TypeTransform.transform = function(srcType,dstType) {
 			return types.FloatTransform.toString;
 		case 6:
 			return types.FloatTransform.toCode;
+		case 7:
+			return types.FloatTransform.toReference;
 		}
 		break;
 	case 4:
@@ -4049,6 +4150,8 @@ types.TypeTransform.transform = function(srcType,dstType) {
 			return types.ObjectTransform.toString;
 		case 6:
 			return types.ObjectTransform.toCode;
+		case 7:
+			return types.ObjectTransform.toReference;
 		}
 		break;
 	case 5:
@@ -4067,6 +4170,8 @@ types.TypeTransform.transform = function(srcType,dstType) {
 			return types.StringTransform.toString;
 		case 6:
 			return types.StringTransform.toCode;
+		case 7:
+			return types.StringTransform.toReference;
 		}
 		break;
 	case 6:
@@ -4085,6 +4190,28 @@ types.TypeTransform.transform = function(srcType,dstType) {
 			return types.CodeTransform.toString;
 		case 6:
 			return types.CodeTransform.toCode;
+		case 7:
+			return types.CodeTransform.toReference;
+		}
+		break;
+	case 7:
+		switch(dstType[1]) {
+		case 0:
+			return types.ReferenceTransform.toArray;
+		case 1:
+			return types.ReferenceTransform.toBool;
+		case 2:
+			return types.ReferenceTransform.toDate;
+		case 3:
+			return types.ReferenceTransform.toFloat;
+		case 4:
+			return types.ReferenceTransform.toObject;
+		case 5:
+			return types.ReferenceTransform.toString;
+		case 6:
+			return types.ReferenceTransform.toCode;
+		case 7:
+			return types.ReferenceTransform.toReference;
 		}
 		break;
 	}
@@ -4335,11 +4462,13 @@ ui.ContextField = function(options) {
 	key.innerText = options.display;
 	this.name = options.name;
 	this.type = options.type;
+	this.currentType = new steamer.Value(options.type);
 	this.focus = new steamer.Value(false);
 	this.active = new steamer.Value(false);
 	this.withError = new steamer.Value(haxe.ds.Option.None);
 	this.fieldValue = new ui.FieldValue(this.component,dom.Query.first(".value-container",this.component.el),function(type,editor) {
 		editor.focus.feed(_g.focus);
+		_g.currentType.set_value(type);
 		switch(type[1]) {
 		case 6:
 			var runtime = editor.value.map((function(f,a2) {
@@ -4457,6 +4586,7 @@ ui.ContextField.prototype = {
 	,withError: null
 	,fieldValue: null
 	,type: null
+	,currentType: null
 	,destroy: function() {
 		this.component.destroy();
 		this.focus = null;
@@ -4473,7 +4603,7 @@ ui.ContextView = function(document,model,mapper,options) {
 	this.el = dom.Html.parseList("<div class=\"fields\"><div></div></div>")[0];
 	this.component.el.appendChild(this.el);
 	this.el = dom.Query.first("div",this.el);
-	this.button = { add : this.toolbar.left.addButton("add property",Config.icons.dropdown), switchType : this.toolbar.right.addButton("",Config.icons.switchtype), remove : this.toolbar.right.addButton("",Config.icons.remove)};
+	this.button = { add : this.toolbar.left.addButton("add property",Config.icons.dropdown), toValue : this.toolbar.right.addButton("",Config.icons.value), toCode : this.toolbar.right.addButton("",Config.icons.code), toReference : this.toolbar.right.addButton("",Config.icons.reference), remove : this.toolbar.right.addButton("",Config.icons.remove)};
 	this.menu = { add : new ui.widgets.Menu({ parent : this.component})};
 	this.menu.add.anchorTo(this.button.add.component.el);
 	this.button.add.clicks.toTrue().feed(this.menu.add.visible.stream);
@@ -4498,18 +4628,12 @@ ui.ContextView = function(document,model,mapper,options) {
 		}};
 		return $r;
 	}(this)));
-	this.button.switchType.clicks.feed((function($this) {
+	this.button.toValue.clicks.feed((function($this) {
 		var $r;
 		var f1 = function(_1) {
 			var field1 = thx.core.Options.toValue(_g.field.get_value());
 			var type = field1.fieldValue.type;
-			switch(type[1]) {
-			case 6:
-				field1.fieldValue.setEditor(field1.type);
-				break;
-			default:
-				field1.fieldValue.setEditor(ui.SchemaType.CodeType);
-			}
+			field1.fieldValue.setEditor(field1.type);
 		};
 		$r = { onPulse : function(pulse1) {
 			switch(pulse1[1]) {
@@ -4522,13 +4646,12 @@ ui.ContextView = function(document,model,mapper,options) {
 		}};
 		return $r;
 	}(this)));
-	this.field = new steamer.Value(haxe.ds.Option.None);
-	var delayed = steamer.Producer.toBool(this.field).debounce(10).feed(this.button.remove.enabled).feed(this.button.switchType.enabled);
-	var filtered = steamer.Producer.filterOption(this.field);
-	filtered.previous().feed((function($this) {
+	this.button.toCode.clicks.feed((function($this) {
 		var $r;
-		var f2 = function(field2) {
-			field2.active.set_value(false);
+		var f2 = function(_2) {
+			var field2 = thx.core.Options.toValue(_g.field.get_value());
+			var type1 = field2.fieldValue.type;
+			field2.fieldValue.setEditor(ui.SchemaType.CodeType);
 		};
 		$r = { onPulse : function(pulse2) {
 			switch(pulse2[1]) {
@@ -4541,16 +4664,88 @@ ui.ContextView = function(document,model,mapper,options) {
 		}};
 		return $r;
 	}(this)));
-	filtered.feed((function($this) {
+	this.button.toReference.clicks.feed((function($this) {
 		var $r;
-		var f3 = function(field3) {
-			field3.active.set_value(true);
+		var f3 = function(_3) {
+			var field3 = thx.core.Options.toValue(_g.field.get_value());
+			var type2 = field3.fieldValue.type;
+			field3.fieldValue.setEditor(ui.SchemaType.ReferenceType);
 		};
 		$r = { onPulse : function(pulse3) {
 			switch(pulse3[1]) {
 			case 0:
 				var v3 = pulse3[2];
 				f3(v3);
+				break;
+			default:
+			}
+		}};
+		return $r;
+	}(this)));
+	this.field = new steamer.Value(haxe.ds.Option.None);
+	var delayed = this.field.debounce(10);
+	steamer.Producer.toBool(delayed).feed(this.button.remove.enabled);
+	steamer.ProducerProducer.flatMap(steamer.Producer.filterOption(this.field).map(function(v4) {
+		return v4.currentType;
+	})).feed((function($this) {
+		var $r;
+		var f4 = function(type3) {
+			haxe.Log.trace(type3,{ fileName : "ContextView.hx", lineNumber : 101, className : "ui.ContextView", methodName : "new"});
+			switch(type3[1]) {
+			case 6:
+				_g.button.toCode.enabled.set_value(false);
+				_g.button.toReference.enabled.set_value(true);
+				_g.button.toValue.enabled.set_value(true);
+				break;
+			case 7:
+				_g.button.toCode.enabled.set_value(true);
+				_g.button.toReference.enabled.set_value(false);
+				_g.button.toValue.enabled.set_value(true);
+				break;
+			default:
+				_g.button.toCode.enabled.set_value(true);
+				_g.button.toReference.enabled.set_value(true);
+				_g.button.toValue.enabled.set_value(false);
+			}
+		};
+		$r = { onPulse : function(pulse4) {
+			switch(pulse4[1]) {
+			case 0:
+				var v5 = pulse4[2];
+				f4(v5);
+				break;
+			default:
+			}
+		}};
+		return $r;
+	}(this)));
+	var filtered = steamer.Producer.filterOption(this.field);
+	filtered.previous().feed((function($this) {
+		var $r;
+		var f5 = function(field4) {
+			field4.active.set_value(false);
+		};
+		$r = { onPulse : function(pulse5) {
+			switch(pulse5[1]) {
+			case 0:
+				var v6 = pulse5[2];
+				f5(v6);
+				break;
+			default:
+			}
+		}};
+		return $r;
+	}(this)));
+	filtered.feed((function($this) {
+		var $r;
+		var f6 = function(field5) {
+			field5.active.set_value(true);
+		};
+		$r = { onPulse : function(pulse6) {
+			switch(pulse6[1]) {
+			case 0:
+				var v7 = pulse6[2];
+				f6(v7);
 				break;
 			default:
 			}
@@ -4598,7 +4793,9 @@ ui.ContextView.prototype = {
 	}
 	,resetAddMenuItems: function() {
 		this.button.remove.enabled.set_value(false);
-		this.button.switchType.enabled.set_value(false);
+		this.button.toValue.enabled.set_value(false);
+		this.button.toCode.enabled.set_value(false);
+		this.button.toReference.enabled.set_value(false);
 		this.button.add.enabled.set_value(false);
 		this.menu.add.clear();
 	}
@@ -4696,7 +4893,7 @@ ui.Data.prototype = {
 	,__class__: ui.Data
 };
 ui.DataEvent = { __ename__ : ["ui","DataEvent"], __constructs__ : ["SetValue"] };
-ui.DataEvent.SetValue = function(path,value,type) { var $x = ["SetValue",0,path,value,type]; $x.__enum__ = ui.DataEvent; return $x; };
+ui.DataEvent.SetValue = function(path,value,type) { var $x = ["SetValue",0,path,value,type]; $x.__enum__ = ui.DataEvent; $x.toString = $estr; return $x; };
 ui.Document = function(options) {
 	var _g = this;
 	this.component = new sui.components.Component(options);
@@ -4750,8 +4947,8 @@ ui.Document.prototype = {
 	,__class__: ui.Document
 };
 ui.Expression = { __ename__ : ["ui","Expression"], __constructs__ : ["Fun","SyntaxError"] };
-ui.Expression.Fun = function(f) { var $x = ["Fun",0,f]; $x.__enum__ = ui.Expression; return $x; };
-ui.Expression.SyntaxError = function(msg) { var $x = ["SyntaxError",1,msg]; $x.__enum__ = ui.Expression; return $x; };
+ui.Expression.Fun = function(f) { var $x = ["Fun",0,f]; $x.__enum__ = ui.Expression; $x.toString = $estr; return $x; };
+ui.Expression.SyntaxError = function(msg) { var $x = ["SyntaxError",1,msg]; $x.__enum__ = ui.Expression; $x.toString = $estr; return $x; };
 ui.Expressions = function() { };
 ui.Expressions.__name__ = ["ui","Expressions"];
 ui.Expressions.toErrorOption = function(exp) {
@@ -5096,8 +5293,8 @@ ui.Runtime.prototype = {
 	,__class__: ui.Runtime
 };
 ui.RuntimeResult = { __ename__ : ["ui","RuntimeResult"], __constructs__ : ["Result","Error"] };
-ui.RuntimeResult.Result = function(value) { var $x = ["Result",0,value]; $x.__enum__ = ui.RuntimeResult; return $x; };
-ui.RuntimeResult.Error = function(msg) { var $x = ["Error",1,msg]; $x.__enum__ = ui.RuntimeResult; return $x; };
+ui.RuntimeResult.Result = function(value) { var $x = ["Result",0,value]; $x.__enum__ = ui.RuntimeResult; $x.toString = $estr; return $x; };
+ui.RuntimeResult.Error = function(msg) { var $x = ["Error",1,msg]; $x.__enum__ = ui.RuntimeResult; $x.toString = $estr; return $x; };
 ui.Schema = function() {
 	this.fields = new haxe.ds.StringMap();
 	this.stream = this.feeder = new steamer.Feeder();
@@ -5162,24 +5359,32 @@ ui.Schema.prototype = {
 	,__class__: ui.Schema
 };
 ui.SchemaEvent = { __ename__ : ["ui","SchemaEvent"], __constructs__ : ["ListFields","AddField","DeleteField","RenameField","RetypeField"] };
-ui.SchemaEvent.ListFields = function(list) { var $x = ["ListFields",0,list]; $x.__enum__ = ui.SchemaEvent; return $x; };
-ui.SchemaEvent.AddField = function(name,type) { var $x = ["AddField",1,name,type]; $x.__enum__ = ui.SchemaEvent; return $x; };
-ui.SchemaEvent.DeleteField = function(name) { var $x = ["DeleteField",2,name]; $x.__enum__ = ui.SchemaEvent; return $x; };
-ui.SchemaEvent.RenameField = function(oldname,newname) { var $x = ["RenameField",3,oldname,newname]; $x.__enum__ = ui.SchemaEvent; return $x; };
-ui.SchemaEvent.RetypeField = function(name,type) { var $x = ["RetypeField",4,name,type]; $x.__enum__ = ui.SchemaEvent; return $x; };
-ui.SchemaType = { __ename__ : ["ui","SchemaType"], __constructs__ : ["ArrayType","BoolType","DateType","FloatType","ObjectType","StringType","CodeType"] };
-ui.SchemaType.ArrayType = function(item) { var $x = ["ArrayType",0,item]; $x.__enum__ = ui.SchemaType; return $x; };
+ui.SchemaEvent.ListFields = function(list) { var $x = ["ListFields",0,list]; $x.__enum__ = ui.SchemaEvent; $x.toString = $estr; return $x; };
+ui.SchemaEvent.AddField = function(name,type) { var $x = ["AddField",1,name,type]; $x.__enum__ = ui.SchemaEvent; $x.toString = $estr; return $x; };
+ui.SchemaEvent.DeleteField = function(name) { var $x = ["DeleteField",2,name]; $x.__enum__ = ui.SchemaEvent; $x.toString = $estr; return $x; };
+ui.SchemaEvent.RenameField = function(oldname,newname) { var $x = ["RenameField",3,oldname,newname]; $x.__enum__ = ui.SchemaEvent; $x.toString = $estr; return $x; };
+ui.SchemaEvent.RetypeField = function(name,type) { var $x = ["RetypeField",4,name,type]; $x.__enum__ = ui.SchemaEvent; $x.toString = $estr; return $x; };
+ui.SchemaType = { __ename__ : ["ui","SchemaType"], __constructs__ : ["ArrayType","BoolType","DateType","FloatType","ObjectType","StringType","CodeType","ReferenceType"] };
+ui.SchemaType.ArrayType = function(item) { var $x = ["ArrayType",0,item]; $x.__enum__ = ui.SchemaType; $x.toString = $estr; return $x; };
 ui.SchemaType.BoolType = ["BoolType",1];
+ui.SchemaType.BoolType.toString = $estr;
 ui.SchemaType.BoolType.__enum__ = ui.SchemaType;
 ui.SchemaType.DateType = ["DateType",2];
+ui.SchemaType.DateType.toString = $estr;
 ui.SchemaType.DateType.__enum__ = ui.SchemaType;
 ui.SchemaType.FloatType = ["FloatType",3];
+ui.SchemaType.FloatType.toString = $estr;
 ui.SchemaType.FloatType.__enum__ = ui.SchemaType;
-ui.SchemaType.ObjectType = function(fields) { var $x = ["ObjectType",4,fields]; $x.__enum__ = ui.SchemaType; return $x; };
+ui.SchemaType.ObjectType = function(fields) { var $x = ["ObjectType",4,fields]; $x.__enum__ = ui.SchemaType; $x.toString = $estr; return $x; };
 ui.SchemaType.StringType = ["StringType",5];
+ui.SchemaType.StringType.toString = $estr;
 ui.SchemaType.StringType.__enum__ = ui.SchemaType;
 ui.SchemaType.CodeType = ["CodeType",6];
+ui.SchemaType.CodeType.toString = $estr;
 ui.SchemaType.CodeType.__enum__ = ui.SchemaType;
+ui.SchemaType.ReferenceType = ["ReferenceType",7];
+ui.SchemaType.ReferenceType.toString = $estr;
+ui.SchemaType.ReferenceType.__enum__ = ui.SchemaType;
 ui.Scope = function() {
 	this.name = "Franco";
 };
@@ -5263,13 +5468,17 @@ ui.editors.TextEditor = function(options) {
 	if(null == options.defaultText) options.defaultText = "";
 	if(null == options.placeHolder) options.placeHolder = "";
 	if(null == options.el && null == options.template) options.template = "<div></div>";
+	if(null == options.inputEvent) options.inputEvent = function(component) {
+		return steamer.dom.Dom.produceEvent(component.el,"input");
+	};
 	this.component = new sui.components.Component(options);
 	this.component.el.classList.add("editor");
 	this.component.el.setAttribute("tabindex","0");
 	this.component.el.setAttribute("placeholder",options.placeHolder);
 	this.component.el.style.content = options.placeHolder;
 	var text = new sui.properties.Text(this.component,options.defaultText);
-	var inputPair = steamer.dom.Dom.produceEvent(this.component.el,"input");
+	var inputPair = options.inputEvent(this.component);
+	var changePair = steamer.dom.Dom.produceEvent(this.component.el,"input");
 	var focusPair = steamer.dom.Dom.produceEvent(this.component.el,"focus");
 	var blurPair = steamer.dom.Dom.produceEvent(this.component.el,"blur");
 	this.value = text.stream;
@@ -5302,11 +5511,16 @@ ui.editors.TextEditor = function(options) {
 	})).feed(this.focus);
 	this.cancel = function() {
 		text.dispose();
+		changePair.cancel();
 		inputPair.cancel();
 		focusPair.cancel();
 		blurPair.cancel();
 	};
-	steamer.Producer.negate(steamer.StringProducer.toBool(this.value)).feed(steamer.dom.Dom.consumeToggleClass(this.component.el,"empty"));
+	var empty = new steamer.Value(options.defaultText == "");
+	changePair.producer.map(function(_4) {
+		return text.component.el.textContent == "";
+	}).feed(empty);
+	empty.feed(steamer.dom.Dom.consumeToggleClass(this.component.el,"empty"));
 };
 ui.editors.TextEditor.__name__ = ["ui","editors","TextEditor"];
 ui.editors.TextEditor.__interfaces__ = [ui.editors.Editor];
@@ -5324,6 +5538,9 @@ ui.editors.TextEditor.prototype = {
 	,__class__: ui.editors.TextEditor
 };
 ui.editors.CodeEditor = function(options) {
+	if(null == options.inputEvent) options.inputEvent = function(component) {
+		return steamer.dom.Dom.produceEvent(component.el,"blur");
+	};
 	ui.editors.TextEditor.call(this,options);
 	this.component.el.classList.add("code");
 };
@@ -5385,6 +5602,8 @@ ui.editors.EditorPicker.pick = function(type,el,parent,value) {
 		return new ui.editors.BoolEditor({ container : el, parent : parent, defaultValue : value});
 	case 6:
 		return new ui.editors.CodeEditor({ container : el, parent : parent, defaultText : value, placeHolder : "code"});
+	case 7:
+		return new ui.editors.ReferenceEditor({ container : el, parent : parent, defaultText : value, placeHolder : "reference"});
 	case 5:
 		return new ui.editors.TextEditor({ container : el, parent : parent, defaultText : value, placeHolder : "content"});
 	case 2:
@@ -5440,6 +5659,18 @@ ui.editors.FloatEditor.prototype = {
 	}
 	,__class__: ui.editors.FloatEditor
 };
+ui.editors.ReferenceEditor = function(options) {
+	if(null == options.inputEvent) options.inputEvent = function(component) {
+		return steamer.dom.Dom.produceEvent(component.el,"blur");
+	};
+	ui.editors.TextEditor.call(this,options);
+	this.component.el.classList.add("reference");
+};
+ui.editors.ReferenceEditor.__name__ = ["ui","editors","ReferenceEditor"];
+ui.editors.ReferenceEditor.__super__ = ui.editors.TextEditor;
+ui.editors.ReferenceEditor.prototype = $extend(ui.editors.TextEditor.prototype,{
+	__class__: ui.editors.ReferenceEditor
+});
 ui.fragments = {};
 ui.fragments.Fragment = function() { };
 ui.fragments.Fragment.__name__ = ["ui","fragments","Fragment"];
@@ -5600,22 +5831,31 @@ ui.fragments.ReadonlyBlock.prototype = {
 };
 ui.widgets.AnchorPoint = { __ename__ : ["ui","widgets","AnchorPoint"], __constructs__ : ["TopLeft","Top","TopRight","Left","Center","Right","BottomLeft","Bottom","BottomRight"] };
 ui.widgets.AnchorPoint.TopLeft = ["TopLeft",0];
+ui.widgets.AnchorPoint.TopLeft.toString = $estr;
 ui.widgets.AnchorPoint.TopLeft.__enum__ = ui.widgets.AnchorPoint;
 ui.widgets.AnchorPoint.Top = ["Top",1];
+ui.widgets.AnchorPoint.Top.toString = $estr;
 ui.widgets.AnchorPoint.Top.__enum__ = ui.widgets.AnchorPoint;
 ui.widgets.AnchorPoint.TopRight = ["TopRight",2];
+ui.widgets.AnchorPoint.TopRight.toString = $estr;
 ui.widgets.AnchorPoint.TopRight.__enum__ = ui.widgets.AnchorPoint;
 ui.widgets.AnchorPoint.Left = ["Left",3];
+ui.widgets.AnchorPoint.Left.toString = $estr;
 ui.widgets.AnchorPoint.Left.__enum__ = ui.widgets.AnchorPoint;
 ui.widgets.AnchorPoint.Center = ["Center",4];
+ui.widgets.AnchorPoint.Center.toString = $estr;
 ui.widgets.AnchorPoint.Center.__enum__ = ui.widgets.AnchorPoint;
 ui.widgets.AnchorPoint.Right = ["Right",5];
+ui.widgets.AnchorPoint.Right.toString = $estr;
 ui.widgets.AnchorPoint.Right.__enum__ = ui.widgets.AnchorPoint;
 ui.widgets.AnchorPoint.BottomLeft = ["BottomLeft",6];
+ui.widgets.AnchorPoint.BottomLeft.toString = $estr;
 ui.widgets.AnchorPoint.BottomLeft.__enum__ = ui.widgets.AnchorPoint;
 ui.widgets.AnchorPoint.Bottom = ["Bottom",7];
+ui.widgets.AnchorPoint.Bottom.toString = $estr;
 ui.widgets.AnchorPoint.Bottom.__enum__ = ui.widgets.AnchorPoint;
 ui.widgets.AnchorPoint.BottomRight = ["BottomRight",8];
+ui.widgets.AnchorPoint.BottomRight.toString = $estr;
 ui.widgets.AnchorPoint.BottomRight.__enum__ = ui.widgets.AnchorPoint;
 ui.widgets.Button = function(text,icon) {
 	if(text == null) text = "";
@@ -6026,7 +6266,7 @@ var scope = window || this;
 if(!scope.setImmediate) scope.setImmediate = function(callback) {
 	scope.setTimeout(callback,0);
 };
-Config.icons = { add : "plus-circle", remove : "ban", dropdown : "reorder", checked : "dot-circle-o", unchecked : "circle-o", switchtype : "bolt"};
+Config.icons = { add : "plus-circle", remove : "ban", dropdown : "reorder", checked : "dot-circle-o", unchecked : "circle-o", switchtype : "bolt", code : "bolt", value : "pencil", reference : "link"};
 Config.selectors = { app : ".card"};
 PropertyFeeder.classes = [{ display : "bold", name : "strong"},{ display : "italic", name : "emphasis"}];
 dom.Query.doc = document;
@@ -6048,6 +6288,7 @@ thx.ref.EmptyParent.instance = new thx.ref.EmptyParent();
 thx.ref.Ref.reField = new EReg("^\\.?([^.\\[]+)","");
 thx.ref.Ref.reIndex = new EReg("^\\[(\\d+)\\]","");
 types.CodeTransform.datePattern = new EReg("Date\\(-?\\d+(:?\\.\\d+)?(:?e-?\\d+)?\\)","");
+types.CodeTransform.PATTERN = new EReg("^\\s*\\$\\.(.+?)\\s*$","");
 ui.ContextField.tooltip = new ui.widgets.Tooltip({ classes : "tooltip error"});
 ui.Runtime.pattern = new EReg("\\$\\.(.+?)\\b","");
 Main.main();

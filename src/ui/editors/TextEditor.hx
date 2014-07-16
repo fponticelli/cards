@@ -36,10 +36,11 @@ class TextEditor implements Editor<String> {
 		// TODO find out how to set the content of :before programmatically
 		component.el.style.content = options.placeHolder;
 
-		var text      = new Text(component, options.defaultText),
-			inputPair = options.inputEvent(component),
-			focusPair = component.el.produceEvent('focus'),
-			blurPair  = component.el.produceEvent('blur');
+		var text       = new Text(component, options.defaultText),
+			inputPair  = options.inputEvent(component),
+			changePair = component.el.produceEvent('input'),
+			focusPair  = component.el.produceEvent('focus'),
+			blurPair   = component.el.produceEvent('blur');
 
 		value = text.stream;
 		inputPair.producer
@@ -63,15 +64,17 @@ class TextEditor implements Editor<String> {
 			).feed(focus);
 		cancel = function() {
 			text.dispose();
+			changePair.cancel();
 			inputPair.cancel();
 			focusPair.cancel();
 			blurPair.cancel();
 		};
 
-		value
-			.toBool()
-			.negate()
-			.feed(component.el.consumeToggleClass('empty'));
+		var empty = new Value(options.defaultText == '');
+		changePair.producer
+			.map(function(_) return text.component.el.textContent == '')
+			.feed(empty);
+		empty.feed(component.el.consumeToggleClass('empty'));
 	}
 
 	public function destroy() {

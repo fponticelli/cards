@@ -27,7 +27,9 @@ class ContextView {
 	var button : {
 		add : Button,
 		remove : Button,
-		switchType : Button
+		toValue : Button,
+		toCode : Button,
+		toReference : Button
 	};
 	var menu : {
 		add : Menu
@@ -46,7 +48,9 @@ class ContextView {
 
 		button = {
 			add : toolbar.left.addButton('add property', Config.icons.dropdown),
-			switchType : toolbar.right.addButton('', Config.icons.switchtype),
+			toValue : toolbar.right.addButton('', Config.icons.value),
+			toCode : toolbar.right.addButton('', Config.icons.code),
+			toReference : toolbar.right.addButton('', Config.icons.reference),
 			remove : toolbar.right.addButton('', Config.icons.remove)
 		};
 		menu = {
@@ -66,23 +70,50 @@ class ContextView {
 			setAddMenuItems(fragment);
 		});
 
-		button.switchType.clicks.feed(function(_) {
+		button.toValue.clicks.feed(function(_) {
 			var field = field.value.toValue(),
 				type  = field.fieldValue.type;
-			switch type {
-				case CodeType:
-					field.fieldValue.setEditor(field.type);
-				case _:
-					field.fieldValue.setEditor(CodeType);
-			}
+			field.fieldValue.setEditor(field.type);
+		});
+		button.toCode.clicks.feed(function(_) {
+			var field = field.value.toValue(),
+				type  = field.fieldValue.type;
+			field.fieldValue.setEditor(CodeType);
+		});
+		button.toReference.clicks.feed(function(_) {
+			var field = field.value.toValue(),
+				type  = field.fieldValue.type;
+			field.fieldValue.setEditor(ReferenceType);
 		});
 
 		field = new Value(None);
 		var delayed = field
+			.debounce(10);
+
+		delayed
 			.toBool()
-			.debounce(10)
-			.feed(button.remove.enabled)
-			.feed(button.switchType.enabled);
+			.feed(button.remove.enabled);
+		field
+			.filterOption()
+			.map(function(v) : Producer<SchemaType> return v.currentType)
+			.flatMap()
+			.feed(function(type) {
+				trace(type);
+				switch type {
+					case CodeType:
+						button.toCode.enabled.value = false;
+						button.toReference.enabled.value = true;
+						button.toValue.enabled.value = true;
+					case ReferenceType:
+						button.toCode.enabled.value = true;
+						button.toReference.enabled.value = false;
+						button.toValue.enabled.value = true;
+					case _:
+						button.toCode.enabled.value = true;
+						button.toReference.enabled.value = true;
+						button.toValue.enabled.value = false;
+				}
+			});
 
 		var filtered = field.filterOption();
 		filtered.previous().feed(function(field : ContextField) {
@@ -141,7 +172,9 @@ class ContextView {
 
 	function resetAddMenuItems() {
 		button.remove.enabled.value = false;
-		button.switchType.enabled.value = false;
+		button.toValue.enabled.value = false;
+		button.toCode.enabled.value = false;
+		button.toReference.enabled.value = false;
 		button.add.enabled.value = false;
 		menu.add.clear();
 	}

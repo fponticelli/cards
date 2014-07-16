@@ -11,6 +11,8 @@ class EditorPicker {
 				new BoolEditor({ container : el, parent : parent, defaultValue : value });
 			case CodeType:
 				new CodeEditor({ container : el, parent : parent, defaultText : value, placeHolder : 'code' });
+			case ReferenceType:
+				new ReferenceEditor({ container : el, parent : parent, defaultText : value, placeHolder : 'reference' });
 			case StringType:
 				new TextEditor({ container : el, parent : parent, defaultText : value, placeHolder : 'content' });
 			case DateType:
