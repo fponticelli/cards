@@ -98,7 +98,6 @@ class ContextView {
 			.map(function(v) : Producer<SchemaType> return v.currentType)
 			.flatMap()
 			.feed(function(type) {
-				trace(type);
 				switch type {
 					case CodeType:
 						button.toCode.enabled.value = false;

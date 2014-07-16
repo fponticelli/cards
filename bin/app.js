@@ -1,6 +1,5 @@
 (function ($hx_exports) { "use strict";
 $hx_exports.promhx = $hx_exports.promhx || {};
-var $estr = function() { return js.Boot.__string_rec(this,''); };
 function $extend(from, fields) {
 	function Inherit() {} Inherit.prototype = from; var proto = new Inherit();
 	for (var name in fields) proto[name] = fields[name];
@@ -325,27 +324,20 @@ StringTools.replace = function(s,sub,by) {
 };
 var ValueType = { __ename__ : ["ValueType"], __constructs__ : ["TNull","TInt","TFloat","TBool","TObject","TFunction","TClass","TEnum","TUnknown"] };
 ValueType.TNull = ["TNull",0];
-ValueType.TNull.toString = $estr;
 ValueType.TNull.__enum__ = ValueType;
 ValueType.TInt = ["TInt",1];
-ValueType.TInt.toString = $estr;
 ValueType.TInt.__enum__ = ValueType;
 ValueType.TFloat = ["TFloat",2];
-ValueType.TFloat.toString = $estr;
 ValueType.TFloat.__enum__ = ValueType;
 ValueType.TBool = ["TBool",3];
-ValueType.TBool.toString = $estr;
 ValueType.TBool.__enum__ = ValueType;
 ValueType.TObject = ["TObject",4];
-ValueType.TObject.toString = $estr;
 ValueType.TObject.__enum__ = ValueType;
 ValueType.TFunction = ["TFunction",5];
-ValueType.TFunction.toString = $estr;
 ValueType.TFunction.__enum__ = ValueType;
-ValueType.TClass = function(c) { var $x = ["TClass",6,c]; $x.__enum__ = ValueType; $x.toString = $estr; return $x; };
-ValueType.TEnum = function(e) { var $x = ["TEnum",7,e]; $x.__enum__ = ValueType; $x.toString = $estr; return $x; };
+ValueType.TClass = function(c) { var $x = ["TClass",6,c]; $x.__enum__ = ValueType; return $x; };
+ValueType.TEnum = function(e) { var $x = ["TEnum",7,e]; $x.__enum__ = ValueType; return $x; };
 ValueType.TUnknown = ["TUnknown",8];
-ValueType.TUnknown.toString = $estr;
 ValueType.TUnknown.__enum__ = ValueType;
 var Type = function() { };
 Type.__name__ = ["Type"];
@@ -454,12 +446,11 @@ dom._Dom.H.toArray = function(list) {
 var haxe = {};
 haxe.StackItem = { __ename__ : ["haxe","StackItem"], __constructs__ : ["CFunction","Module","FilePos","Method","LocalFunction"] };
 haxe.StackItem.CFunction = ["CFunction",0];
-haxe.StackItem.CFunction.toString = $estr;
 haxe.StackItem.CFunction.__enum__ = haxe.StackItem;
-haxe.StackItem.Module = function(m) { var $x = ["Module",1,m]; $x.__enum__ = haxe.StackItem; $x.toString = $estr; return $x; };
-haxe.StackItem.FilePos = function(s,file,line) { var $x = ["FilePos",2,s,file,line]; $x.__enum__ = haxe.StackItem; $x.toString = $estr; return $x; };
-haxe.StackItem.Method = function(classname,method) { var $x = ["Method",3,classname,method]; $x.__enum__ = haxe.StackItem; $x.toString = $estr; return $x; };
-haxe.StackItem.LocalFunction = function(v) { var $x = ["LocalFunction",4,v]; $x.__enum__ = haxe.StackItem; $x.toString = $estr; return $x; };
+haxe.StackItem.Module = function(m) { var $x = ["Module",1,m]; $x.__enum__ = haxe.StackItem; return $x; };
+haxe.StackItem.FilePos = function(s,file,line) { var $x = ["FilePos",2,s,file,line]; $x.__enum__ = haxe.StackItem; return $x; };
+haxe.StackItem.Method = function(classname,method) { var $x = ["Method",3,classname,method]; $x.__enum__ = haxe.StackItem; return $x; };
+haxe.StackItem.LocalFunction = function(v) { var $x = ["LocalFunction",4,v]; $x.__enum__ = haxe.StackItem; return $x; };
 haxe.CallStack = function() { };
 haxe.CallStack.__name__ = ["haxe","CallStack"];
 haxe.CallStack.callStack = function() {
@@ -569,9 +560,8 @@ haxe.ds.ObjectMap.prototype = {
 	,__class__: haxe.ds.ObjectMap
 };
 haxe.ds.Option = { __ename__ : ["haxe","ds","Option"], __constructs__ : ["Some","None"] };
-haxe.ds.Option.Some = function(v) { var $x = ["Some",0,v]; $x.__enum__ = haxe.ds.Option; $x.toString = $estr; return $x; };
+haxe.ds.Option.Some = function(v) { var $x = ["Some",0,v]; $x.__enum__ = haxe.ds.Option; return $x; };
 haxe.ds.Option.None = ["None",1];
-haxe.ds.Option.None.toString = $estr;
 haxe.ds.Option.None.__enum__ = haxe.ds.Option;
 haxe.ds.StringMap = function() {
 	this.h = { };
@@ -1073,8 +1063,8 @@ promhx.base.EventLoop.continueOnNextLoop = function() {
 };
 promhx.error = {};
 promhx.error.PromiseError = { __ename__ : ["promhx","error","PromiseError"], __constructs__ : ["AlreadyResolved","DownstreamNotFullfilled"] };
-promhx.error.PromiseError.AlreadyResolved = function(message) { var $x = ["AlreadyResolved",0,message]; $x.__enum__ = promhx.error.PromiseError; $x.toString = $estr; return $x; };
-promhx.error.PromiseError.DownstreamNotFullfilled = function(message) { var $x = ["DownstreamNotFullfilled",1,message]; $x.__enum__ = promhx.error.PromiseError; $x.toString = $estr; return $x; };
+promhx.error.PromiseError.AlreadyResolved = function(message) { var $x = ["AlreadyResolved",0,message]; $x.__enum__ = promhx.error.PromiseError; return $x; };
+promhx.error.PromiseError.DownstreamNotFullfilled = function(message) { var $x = ["DownstreamNotFullfilled",1,message]; $x.__enum__ = promhx.error.PromiseError; return $x; };
 var steamer = {};
 steamer._Consumer = {};
 steamer._Consumer.Consumer_Impl_ = function() { };
@@ -1823,15 +1813,13 @@ steamer.Bus.prototype = {
 	,__class__: steamer.Bus
 };
 steamer.Pulse = { __ename__ : ["steamer","Pulse"], __constructs__ : ["Emit","End","Fail"] };
-steamer.Pulse.Emit = function(value) { var $x = ["Emit",0,value]; $x.__enum__ = steamer.Pulse; $x.toString = $estr; return $x; };
+steamer.Pulse.Emit = function(value) { var $x = ["Emit",0,value]; $x.__enum__ = steamer.Pulse; return $x; };
 steamer.Pulse.End = ["End",1];
-steamer.Pulse.End.toString = $estr;
 steamer.Pulse.End.__enum__ = steamer.Pulse;
-steamer.Pulse.Fail = function(error) { var $x = ["Fail",2,error]; $x.__enum__ = steamer.Pulse; $x.toString = $estr; return $x; };
+steamer.Pulse.Fail = function(error) { var $x = ["Fail",2,error]; $x.__enum__ = steamer.Pulse; return $x; };
 var thx = {};
 thx.Nil = { __ename__ : ["thx","Nil"], __constructs__ : ["nil"] };
 thx.Nil.nil = ["nil",0];
-thx.Nil.nil.toString = $estr;
 thx.Nil.nil.__enum__ = thx.Nil;
 steamer.Pulses = function() { };
 steamer.Pulses.__name__ = ["steamer","Pulses"];
@@ -2933,12 +2921,12 @@ thx.core.Arrays.contains = function(arr,element,eq) {
 	}
 };
 thx.core.Assertion = { __ename__ : ["thx","core","Assertion"], __constructs__ : ["Success","Failure","Error","PreConditionError","PostConditionError","Warning"] };
-thx.core.Assertion.Success = function(pos) { var $x = ["Success",0,pos]; $x.__enum__ = thx.core.Assertion; $x.toString = $estr; return $x; };
-thx.core.Assertion.Failure = function(msg,pos) { var $x = ["Failure",1,msg,pos]; $x.__enum__ = thx.core.Assertion; $x.toString = $estr; return $x; };
-thx.core.Assertion.Error = function(e,stack) { var $x = ["Error",2,e,stack]; $x.__enum__ = thx.core.Assertion; $x.toString = $estr; return $x; };
-thx.core.Assertion.PreConditionError = function(e,stack) { var $x = ["PreConditionError",3,e,stack]; $x.__enum__ = thx.core.Assertion; $x.toString = $estr; return $x; };
-thx.core.Assertion.PostConditionError = function(e,stack) { var $x = ["PostConditionError",4,e,stack]; $x.__enum__ = thx.core.Assertion; $x.toString = $estr; return $x; };
-thx.core.Assertion.Warning = function(msg) { var $x = ["Warning",5,msg]; $x.__enum__ = thx.core.Assertion; $x.toString = $estr; return $x; };
+thx.core.Assertion.Success = function(pos) { var $x = ["Success",0,pos]; $x.__enum__ = thx.core.Assertion; return $x; };
+thx.core.Assertion.Failure = function(msg,pos) { var $x = ["Failure",1,msg,pos]; $x.__enum__ = thx.core.Assertion; return $x; };
+thx.core.Assertion.Error = function(e,stack) { var $x = ["Error",2,e,stack]; $x.__enum__ = thx.core.Assertion; return $x; };
+thx.core.Assertion.PreConditionError = function(e,stack) { var $x = ["PreConditionError",3,e,stack]; $x.__enum__ = thx.core.Assertion; return $x; };
+thx.core.Assertion.PostConditionError = function(e,stack) { var $x = ["PostConditionError",4,e,stack]; $x.__enum__ = thx.core.Assertion; return $x; };
+thx.core.Assertion.Warning = function(msg) { var $x = ["Warning",5,msg]; $x.__enum__ = thx.core.Assertion; return $x; };
 thx.core.F0 = function() { };
 thx.core.F0.__name__ = ["thx","core","F0"];
 thx.core.F0.join = function(fa,fb) {
@@ -4690,7 +4678,6 @@ ui.ContextView = function(document,model,mapper,options) {
 	})).feed((function($this) {
 		var $r;
 		var f4 = function(type3) {
-			haxe.Log.trace(type3,{ fileName : "ContextView.hx", lineNumber : 101, className : "ui.ContextView", methodName : "new"});
 			switch(type3[1]) {
 			case 6:
 				_g.button.toCode.enabled.set_value(false);
@@ -4893,7 +4880,7 @@ ui.Data.prototype = {
 	,__class__: ui.Data
 };
 ui.DataEvent = { __ename__ : ["ui","DataEvent"], __constructs__ : ["SetValue"] };
-ui.DataEvent.SetValue = function(path,value,type) { var $x = ["SetValue",0,path,value,type]; $x.__enum__ = ui.DataEvent; $x.toString = $estr; return $x; };
+ui.DataEvent.SetValue = function(path,value,type) { var $x = ["SetValue",0,path,value,type]; $x.__enum__ = ui.DataEvent; return $x; };
 ui.Document = function(options) {
 	var _g = this;
 	this.component = new sui.components.Component(options);
@@ -4947,8 +4934,8 @@ ui.Document.prototype = {
 	,__class__: ui.Document
 };
 ui.Expression = { __ename__ : ["ui","Expression"], __constructs__ : ["Fun","SyntaxError"] };
-ui.Expression.Fun = function(f) { var $x = ["Fun",0,f]; $x.__enum__ = ui.Expression; $x.toString = $estr; return $x; };
-ui.Expression.SyntaxError = function(msg) { var $x = ["SyntaxError",1,msg]; $x.__enum__ = ui.Expression; $x.toString = $estr; return $x; };
+ui.Expression.Fun = function(f) { var $x = ["Fun",0,f]; $x.__enum__ = ui.Expression; return $x; };
+ui.Expression.SyntaxError = function(msg) { var $x = ["SyntaxError",1,msg]; $x.__enum__ = ui.Expression; return $x; };
 ui.Expressions = function() { };
 ui.Expressions.__name__ = ["ui","Expressions"];
 ui.Expressions.toErrorOption = function(exp) {
@@ -5293,8 +5280,8 @@ ui.Runtime.prototype = {
 	,__class__: ui.Runtime
 };
 ui.RuntimeResult = { __ename__ : ["ui","RuntimeResult"], __constructs__ : ["Result","Error"] };
-ui.RuntimeResult.Result = function(value) { var $x = ["Result",0,value]; $x.__enum__ = ui.RuntimeResult; $x.toString = $estr; return $x; };
-ui.RuntimeResult.Error = function(msg) { var $x = ["Error",1,msg]; $x.__enum__ = ui.RuntimeResult; $x.toString = $estr; return $x; };
+ui.RuntimeResult.Result = function(value) { var $x = ["Result",0,value]; $x.__enum__ = ui.RuntimeResult; return $x; };
+ui.RuntimeResult.Error = function(msg) { var $x = ["Error",1,msg]; $x.__enum__ = ui.RuntimeResult; return $x; };
 ui.Schema = function() {
 	this.fields = new haxe.ds.StringMap();
 	this.stream = this.feeder = new steamer.Feeder();
@@ -5359,31 +5346,25 @@ ui.Schema.prototype = {
 	,__class__: ui.Schema
 };
 ui.SchemaEvent = { __ename__ : ["ui","SchemaEvent"], __constructs__ : ["ListFields","AddField","DeleteField","RenameField","RetypeField"] };
-ui.SchemaEvent.ListFields = function(list) { var $x = ["ListFields",0,list]; $x.__enum__ = ui.SchemaEvent; $x.toString = $estr; return $x; };
-ui.SchemaEvent.AddField = function(name,type) { var $x = ["AddField",1,name,type]; $x.__enum__ = ui.SchemaEvent; $x.toString = $estr; return $x; };
-ui.SchemaEvent.DeleteField = function(name) { var $x = ["DeleteField",2,name]; $x.__enum__ = ui.SchemaEvent; $x.toString = $estr; return $x; };
-ui.SchemaEvent.RenameField = function(oldname,newname) { var $x = ["RenameField",3,oldname,newname]; $x.__enum__ = ui.SchemaEvent; $x.toString = $estr; return $x; };
-ui.SchemaEvent.RetypeField = function(name,type) { var $x = ["RetypeField",4,name,type]; $x.__enum__ = ui.SchemaEvent; $x.toString = $estr; return $x; };
+ui.SchemaEvent.ListFields = function(list) { var $x = ["ListFields",0,list]; $x.__enum__ = ui.SchemaEvent; return $x; };
+ui.SchemaEvent.AddField = function(name,type) { var $x = ["AddField",1,name,type]; $x.__enum__ = ui.SchemaEvent; return $x; };
+ui.SchemaEvent.DeleteField = function(name) { var $x = ["DeleteField",2,name]; $x.__enum__ = ui.SchemaEvent; return $x; };
+ui.SchemaEvent.RenameField = function(oldname,newname) { var $x = ["RenameField",3,oldname,newname]; $x.__enum__ = ui.SchemaEvent; return $x; };
+ui.SchemaEvent.RetypeField = function(name,type) { var $x = ["RetypeField",4,name,type]; $x.__enum__ = ui.SchemaEvent; return $x; };
 ui.SchemaType = { __ename__ : ["ui","SchemaType"], __constructs__ : ["ArrayType","BoolType","DateType","FloatType","ObjectType","StringType","CodeType","ReferenceType"] };
-ui.SchemaType.ArrayType = function(item) { var $x = ["ArrayType",0,item]; $x.__enum__ = ui.SchemaType; $x.toString = $estr; return $x; };
+ui.SchemaType.ArrayType = function(item) { var $x = ["ArrayType",0,item]; $x.__enum__ = ui.SchemaType; return $x; };
 ui.SchemaType.BoolType = ["BoolType",1];
-ui.SchemaType.BoolType.toString = $estr;
 ui.SchemaType.BoolType.__enum__ = ui.SchemaType;
 ui.SchemaType.DateType = ["DateType",2];
-ui.SchemaType.DateType.toString = $estr;
 ui.SchemaType.DateType.__enum__ = ui.SchemaType;
 ui.SchemaType.FloatType = ["FloatType",3];
-ui.SchemaType.FloatType.toString = $estr;
 ui.SchemaType.FloatType.__enum__ = ui.SchemaType;
-ui.SchemaType.ObjectType = function(fields) { var $x = ["ObjectType",4,fields]; $x.__enum__ = ui.SchemaType; $x.toString = $estr; return $x; };
+ui.SchemaType.ObjectType = function(fields) { var $x = ["ObjectType",4,fields]; $x.__enum__ = ui.SchemaType; return $x; };
 ui.SchemaType.StringType = ["StringType",5];
-ui.SchemaType.StringType.toString = $estr;
 ui.SchemaType.StringType.__enum__ = ui.SchemaType;
 ui.SchemaType.CodeType = ["CodeType",6];
-ui.SchemaType.CodeType.toString = $estr;
 ui.SchemaType.CodeType.__enum__ = ui.SchemaType;
 ui.SchemaType.ReferenceType = ["ReferenceType",7];
-ui.SchemaType.ReferenceType.toString = $estr;
 ui.SchemaType.ReferenceType.__enum__ = ui.SchemaType;
 ui.Scope = function() {
 	this.name = "Franco";
@@ -5831,31 +5812,22 @@ ui.fragments.ReadonlyBlock.prototype = {
 };
 ui.widgets.AnchorPoint = { __ename__ : ["ui","widgets","AnchorPoint"], __constructs__ : ["TopLeft","Top","TopRight","Left","Center","Right","BottomLeft","Bottom","BottomRight"] };
 ui.widgets.AnchorPoint.TopLeft = ["TopLeft",0];
-ui.widgets.AnchorPoint.TopLeft.toString = $estr;
 ui.widgets.AnchorPoint.TopLeft.__enum__ = ui.widgets.AnchorPoint;
 ui.widgets.AnchorPoint.Top = ["Top",1];
-ui.widgets.AnchorPoint.Top.toString = $estr;
 ui.widgets.AnchorPoint.Top.__enum__ = ui.widgets.AnchorPoint;
 ui.widgets.AnchorPoint.TopRight = ["TopRight",2];
-ui.widgets.AnchorPoint.TopRight.toString = $estr;
 ui.widgets.AnchorPoint.TopRight.__enum__ = ui.widgets.AnchorPoint;
 ui.widgets.AnchorPoint.Left = ["Left",3];
-ui.widgets.AnchorPoint.Left.toString = $estr;
 ui.widgets.AnchorPoint.Left.__enum__ = ui.widgets.AnchorPoint;
 ui.widgets.AnchorPoint.Center = ["Center",4];
-ui.widgets.AnchorPoint.Center.toString = $estr;
 ui.widgets.AnchorPoint.Center.__enum__ = ui.widgets.AnchorPoint;
 ui.widgets.AnchorPoint.Right = ["Right",5];
-ui.widgets.AnchorPoint.Right.toString = $estr;
 ui.widgets.AnchorPoint.Right.__enum__ = ui.widgets.AnchorPoint;
 ui.widgets.AnchorPoint.BottomLeft = ["BottomLeft",6];
-ui.widgets.AnchorPoint.BottomLeft.toString = $estr;
 ui.widgets.AnchorPoint.BottomLeft.__enum__ = ui.widgets.AnchorPoint;
 ui.widgets.AnchorPoint.Bottom = ["Bottom",7];
-ui.widgets.AnchorPoint.Bottom.toString = $estr;
 ui.widgets.AnchorPoint.Bottom.__enum__ = ui.widgets.AnchorPoint;
 ui.widgets.AnchorPoint.BottomRight = ["BottomRight",8];
-ui.widgets.AnchorPoint.BottomRight.toString = $estr;
 ui.widgets.AnchorPoint.BottomRight.__enum__ = ui.widgets.AnchorPoint;
 ui.widgets.Button = function(text,icon) {
 	if(text == null) text = "";
