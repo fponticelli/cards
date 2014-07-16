@@ -41,4 +41,8 @@ class ArrayTransform {
 	public static function toCode(value : Array<Dynamic>) : String {
 		return '[${toArray(value).map(DynamicTransform.toCode).join(",")}]';
 	}
+
+	public static function toReference(value : Array<Dynamic>) : String {
+		return '';
+	}
 }

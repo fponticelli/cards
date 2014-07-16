@@ -30,4 +30,8 @@ class DateTransform {
 	public static function toCode(value : Date) : String {
 		return 'new Date(${toDate(value).getTime()})';
 	}
+
+	public static function toReference(value : Date) : String {
+		return '';
+	}
 }

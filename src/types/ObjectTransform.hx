@@ -35,4 +35,8 @@ class ObjectTransform {
 			return '"$field" : ' + DynamicTransform.toCode(Reflect.field(value, field));
 		}).join(', ') + "}";
 	}
+
+	public static function toReference(value : Array<Dynamic>) : String {
+		return '';
+	}
 }

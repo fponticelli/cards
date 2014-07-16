@@ -8,4 +8,5 @@ enum SchemaType {
 	ObjectType(fields : Iterable<{ name : String, type : SchemaType }>);
 	StringType;
 	CodeType;
+	ReferenceType;
 }

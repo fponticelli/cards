@@ -11,6 +11,8 @@ using steamer.dom.Dom;
 
 class CodeEditor extends TextEditor {
 	public function new(options : TextEditorOptions) {
+		if(null == options.inputEvent)
+			options.inputEvent = function(component : Component) return component.el.produceEvent('blur');
 		super(options);
 		component.el.classList.add('code');
 	}

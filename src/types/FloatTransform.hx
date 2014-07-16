@@ -30,4 +30,8 @@ class FloatTransform {
 	public static function toCode(value : Float) : String {
 		return '' + toFloat(value);
 	}
+
+	public static function toReference(value : Array<Dynamic>) : String {
+		return '';
+	}
 }

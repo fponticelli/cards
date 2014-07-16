@@ -142,4 +142,24 @@ class DynamicTransform {
 			return toCode(null);
 		return throw 'Type of $value cannot be matched by DynamicTransform.toCode';
 	}
+
+	public static function toReference(value : Dynamic) : String {
+		if(null == value)
+			return '';
+		if(Std.is(value, Array))
+			return ArrayTransform.toReference(value);
+		if(Std.is(value, Bool))
+			return BoolTransform.toReference(value);
+		if(Std.is(value, Date))
+			return DateTransform.toReference(value);
+		if(Std.is(value, Float))
+			return FloatTransform.toReference(value);
+		if(Std.is(value, String))
+			return StringTransform.toReference(value);
+		if(Reflect.isObject(value))
+			return ObjectTransform.toReference(value);
+		if(Reflect.isFunction(value))
+			return toReference(null);
+		return throw 'Type of $value cannot be matched by DynamicTransform.toReference';
+	}
 }

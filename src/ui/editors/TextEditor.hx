@@ -1,6 +1,8 @@
 package ui.editors;
 
 using steamer.Producer;
+import js.html.Element;
+import js.html.Event;
 import sui.components.Component;
 import sui.components.ComponentOptions;
 import steamer.Value;
@@ -23,6 +25,9 @@ class TextEditor implements Editor<String> {
 			options.placeHolder = '';
 		if(null == options.el && null == options.template)
 			options.template = '<div></div>';
+		if(null == options.inputEvent)
+			options.inputEvent = function(component : Component) return component.el.produceEvent('input');
+
 		component = new Component(options);
 		component.el.classList.add('editor');
 		component.el.setAttribute('tabindex', '0');
@@ -32,7 +37,7 @@ class TextEditor implements Editor<String> {
 		component.el.style.content = options.placeHolder;
 
 		var text      = new Text(component, options.defaultText),
-			inputPair = component.el.produceEvent('input'),
+			inputPair = options.inputEvent(component),
 			focusPair = component.el.produceEvent('focus'),
 			blurPair  = component.el.produceEvent('blur');
 
@@ -78,5 +83,6 @@ class TextEditor implements Editor<String> {
 
 typedef TextEditorOptions = {> ComponentOptions,
 	defaultText : String,
-	?placeHolder : String
+	?placeHolder : String,
+	?inputEvent : Component -> { producer : Producer<Event>, cancel : Void -> Void }
 }

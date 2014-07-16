@@ -30,4 +30,8 @@ class BoolTransform {
 	public static function toCode<T>(value : Bool) : String {
 		return toBool(value) ? 'true' : 'false';
 	}
+
+	public static function toReference(value : Bool) : String {
+		return '';
+	}
 }

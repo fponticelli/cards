@@ -27,6 +27,8 @@ class TypeTransform {
 						ArrayTransform.toString;
 					case CodeType:
 						ArrayTransform.toCode;
+					case ReferenceType:
+						ArrayTransform.toReference;
 				}
 			case BoolType:
 				switch dstType {
@@ -44,6 +46,8 @@ class TypeTransform {
 						BoolTransform.toString;
 					case CodeType:
 						BoolTransform.toCode;
+					case ReferenceType:
+						BoolTransform.toReference;
 				}
 			case DateType:
 				switch dstType {
@@ -61,6 +65,8 @@ class TypeTransform {
 						DateTransform.toString;
 					case CodeType:
 						DateTransform.toCode;
+					case ReferenceType:
+						DateTransform.toReference;
 				}
 			case FloatType:
 				switch dstType {
@@ -78,6 +84,8 @@ class TypeTransform {
 						FloatTransform.toString;
 					case CodeType:
 						FloatTransform.toCode;
+					case ReferenceType:
+						FloatTransform.toReference;
 				}
 			case ObjectType(_):
 				switch dstType {
@@ -95,6 +103,8 @@ class TypeTransform {
 						ObjectTransform.toString;
 					case CodeType:
 						ObjectTransform.toCode;
+					case ReferenceType:
+						ObjectTransform.toReference;
 				}
 			case StringType:
 				switch dstType {
@@ -112,6 +122,8 @@ class TypeTransform {
 						StringTransform.toString;
 					case CodeType:
 						StringTransform.toCode;
+					case ReferenceType:
+						StringTransform.toReference;
 				}
 			case CodeType:
 				switch dstType {
@@ -129,6 +141,27 @@ class TypeTransform {
 						CodeTransform.toString;
 					case CodeType:
 						CodeTransform.toCode;
+					case ReferenceType:
+						CodeTransform.toReference;
+				}
+			case ReferenceType:
+				switch dstType {
+					case ArrayType(_):
+						ReferenceTransform.toArray;
+					case BoolType:
+						ReferenceTransform.toBool;
+					case DateType:
+						ReferenceTransform.toDate;
+					case FloatType:
+						ReferenceTransform.toFloat;
+					case ObjectType(_):
+						ReferenceTransform.toObject;
+					case StringType:
+						ReferenceTransform.toString;
+					case CodeType:
+						ReferenceTransform.toCode;
+					case ReferenceType:
+						ReferenceTransform.toReference;
 				}
 		}
 	}

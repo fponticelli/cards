@@ -38,4 +38,8 @@ class StringTransform {
 	public static function toCode(value : String) : String {
 		return '"' + toString(value).replace('"', '\\"') + '"';
 	}
+
+	public static function toReference(value : Array<Dynamic>) : String {
+		return '';
+	}
 }
