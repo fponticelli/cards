@@ -115,12 +115,10 @@ class ContextView {
 			});
 
 		var filtered = field.filterOption();
-		filtered.previous().feed(function(field : ContextField) {
-			field.active.value = false;
-		});
-		filtered.feed(function(field : ContextField) {
-			field.active.value = true;
-		});
+		filtered.previous().feed(function(field : ContextField)
+			field.active.value = false);
+		filtered.feed(function(field : ContextField)
+			field.active.value = true);
 
 		document.article.fragment.feed({
 			some : setFragmentStatus,
@@ -165,7 +163,7 @@ class ContextView {
 
 		f.focus
 			.filterValue(true)
-			.map(function(b) return b ? Some(f) : None)
+			.map(function(_) return Some(f))
 			.feed(field);
 	}
 

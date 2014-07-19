@@ -4454,60 +4454,66 @@ ui.ContextField = function(options) {
 	this.focus = new steamer.Value(false);
 	this.active = new steamer.Value(false);
 	this.withError = new steamer.Value(haxe.ds.Option.None);
-	this.fieldValue = new ui.FieldValue(this.component,dom.Query.first(".value-container",this.component.el),function(type,editor) {
-		editor.focus.feed(_g.focus);
+	var wireRuntime = function(editor,convert) {
+		var runtime = editor.value.map(convert);
+		runtime.distinct(function(a,b) {
+			return b != null && thx.core.Arrays.same(a.dependencies,b.dependencies);
+		}).feed((function($this) {
+			var $r;
+			var f = function(res) {
+				options.model.changes.feed((function($this) {
+					var $r;
+					var f1 = function(path) {
+						if(thx.core.Arrays.contains(res.dependencies,path,function(a1,b1) {
+							return StringTools.startsWith(b1,a1);
+						})) options.value.runtime.set_value(haxe.ds.Option.Some(convert(editor.value.get_value())));
+					};
+					$r = { onPulse : function(pulse) {
+						switch(pulse[1]) {
+						case 0:
+							var v = pulse[2];
+							f1(v);
+							break;
+						default:
+						}
+					}};
+					return $r;
+				}(this)));
+			};
+			$r = { onPulse : function(pulse1) {
+				switch(pulse1[1]) {
+				case 0:
+					var v1 = pulse1[2];
+					f(v1);
+					break;
+				default:
+				}
+			}};
+			return $r;
+		}(this)));
+		runtime.toOption().feed(options.value.runtime);
+		runtime.map(function(res1) {
+			return ui.Expressions.toErrorOption(res1.expression);
+		}).merge(options.value.runtimeError).feed(_g.withError);
+	};
+	this.fieldValue = new ui.FieldValue(this.component,dom.Query.first(".value-container",this.component.el),function(type,editor1) {
+		editor1.focus.feed(_g.focus);
 		_g.currentType.set_value(type);
 		switch(type[1]) {
 		case 6:
-			var runtime = editor.value.map((function(f,a2) {
-				return function(a1) {
-					return f(a1,a2);
-				};
-			})(ui.Runtime.toRuntime,options.model));
-			runtime.distinct(function(a,b) {
-				return b != null && thx.core.Arrays.same(a.dependencies,b.dependencies);
-			}).feed((function($this) {
-				var $r;
-				var f1 = function(res) {
-					options.model.changes.feed((function($this) {
-						var $r;
-						var f2 = function(path) {
-							if(thx.core.Arrays.contains(res.dependencies,path,function(a3,b1) {
-								return StringTools.startsWith(b1,a3);
-							})) options.value.runtime.set_value(haxe.ds.Option.Some(ui.Runtime.toRuntime(editor.value.get_value(),options.model)));
-						};
-						$r = { onPulse : function(pulse) {
-							switch(pulse[1]) {
-							case 0:
-								var v = pulse[2];
-								f2(v);
-								break;
-							default:
-							}
-						}};
-						return $r;
-					}(this)));
-				};
-				$r = { onPulse : function(pulse1) {
-					switch(pulse1[1]) {
-					case 0:
-						var v1 = pulse1[2];
-						f1(v1);
-						break;
-					default:
-					}
-				}};
-				return $r;
-			}(this)));
-			runtime.toOption().feed(options.value.runtime);
-			runtime.map(function(res1) {
-				return ui.Expressions.toErrorOption(res1.expression);
-			}).merge(options.value.runtimeError).feed(_g.withError);
+			wireRuntime(editor1,function(value) {
+				return ui.Runtime.toRuntime(value,options.model);
+			});
+			break;
+		case 7:
+			wireRuntime(editor1,function(value1) {
+				return ui.Runtime.toRuntime(types.ReferenceTransform.toCode(value1),options.model);
+			});
 			break;
 		default:
 			options.value.runtime.set_value(haxe.ds.Option.None);
-			editor.value.feed(options.value.stream);
-			options.value.stream.feed(editor.value);
+			editor1.value.feed(options.value.stream);
+			options.value.stream.feed(editor1.value);
 		}
 	});
 	var runtime1 = thx.core.Options.toValue(options.value.runtime.get_value());
@@ -4516,14 +4522,14 @@ ui.ContextField = function(options) {
 	var clickKey = steamer.dom.Dom.produceEvent(key,"click");
 	clickKey.producer.feed((function($this) {
 		var $r;
-		var f3 = function(_) {
+		var f2 = function(_) {
 			if(null != _g.fieldValue.editor) _g.fieldValue.editor.focus.set_value(true);
 		};
 		$r = { onPulse : function(pulse2) {
 			switch(pulse2[1]) {
 			case 0:
 				var v2 = pulse2[2];
-				f3(v2);
+				f2(v2);
 				break;
 			default:
 			}
@@ -4541,7 +4547,7 @@ ui.ContextField = function(options) {
 	}).feed(hasError);
 	this.withError.feed((function($this) {
 		var $r;
-		var f4 = function(o1) {
+		var f3 = function(o1) {
 			switch(o1[1]) {
 			case 0:
 				var err = o1[2];
@@ -4557,7 +4563,7 @@ ui.ContextField = function(options) {
 			switch(pulse3[1]) {
 			case 0:
 				var v3 = pulse3[2];
-				f4(v3);
+				f3(v3);
 				break;
 			default:
 			}
@@ -4774,8 +4780,8 @@ ui.ContextView.prototype = {
 	}
 	,addField: function(info,value) {
 		var f = new ui.ContextField({ container : this.el, parent : this.component, display : info.display, name : info.name, type : info.type, value : value, model : this.model});
-		f.focus.filterValue(true).map(function(b) {
-			if(b) return haxe.ds.Option.Some(f); else return haxe.ds.Option.None;
+		f.focus.filterValue(true).map(function(_) {
+			return haxe.ds.Option.Some(f);
 		}).feed(this.field);
 	}
 	,resetAddMenuItems: function() {

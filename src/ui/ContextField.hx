@@ -8,6 +8,7 @@ import dom.Dom;
 import sui.properties.ToggleClass;
 import sui.properties.ValueProperty;
 using thx.core.Arrays;
+import types.ReferenceTransform;
 import ui.editors.CodeEditor;
 import ui.editors.Editor;
 import ui.editors.EditorPicker;
@@ -49,6 +50,28 @@ class ContextField {
 		active = new Value(false);
 		withError = new Value(None);
 
+		function wireRuntime(editor : Editor<Dynamic>, convert : String -> Runtime) {
+			var runtime = editor.value.map(convert);
+			runtime
+				.distinct(function(a, b) {
+					return b != null && a.dependencies.same(b.dependencies);
+				})
+				.feed(function(res : Runtime) {
+					options.model.changes.feed(function(path) {
+						if(res.dependencies.contains(path, function(a, b) return b.startsWith(a))) {
+							options.value.runtime.value = Some(convert(editor.value.value));
+						}
+					});
+				});
+			runtime
+				.toOption()
+				.feed(options.value.runtime);
+			runtime
+				.map(function(res) return res.expression.toErrorOption())
+				.merge(options.value.runtimeError)
+				.feed(withError);
+		}
+
 		fieldValue = new FieldValue(
 			component,
 			Query.first('.value-container', component.el),
@@ -57,25 +80,9 @@ class ContextField {
 				currentType.value = type;
 				switch type {
 					case CodeType:
-						var runtime = editor.value.map(Runtime.toRuntime.bind(_, options.model));
-						runtime
-							.distinct(function(a, b) {
-								return b != null && a.dependencies.same(b.dependencies);
-							})
-							.feed(function(res : Runtime) {
-								options.model.changes.feed(function(path) {
-									if(res.dependencies.contains(path, function(a, b) return b.startsWith(a))) {
-										options.value.runtime.value = Some(Runtime.toRuntime(editor.value.value, options.model));
-									}
-								});
-							});
-						runtime
-							.toOption()
-							.feed(options.value.runtime);
-						runtime
-							.map(function(res) return res.expression.toErrorOption())
-							.merge(options.value.runtimeError)
-							.feed(withError);
+						wireRuntime(editor, function(value : String) return Runtime.toRuntime(value, options.model));
+					case ReferenceType:
+						wireRuntime(editor, function(value : String) return Runtime.toRuntime(ReferenceTransform.toCode(value), options.model));
 					case _:
 						options.value.runtime.value = None;
 						editor.value.feed(options.value.stream);

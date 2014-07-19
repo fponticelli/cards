@@ -1,6 +1,6 @@
 + add ReferenceType
 + add ReferenceEditor
-- feed Reference to Value
++ feed Reference to Value
 - wire reference bidirectionally
 - change fragments to support Reference
 - only allow reference values for editable contents
