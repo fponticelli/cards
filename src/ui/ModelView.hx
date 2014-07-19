@@ -85,6 +85,15 @@ class ModelView {
 		}
 	}
 
+	public function setField(path : String, value : Dynamic, type : SchemaType) {
+		if(path == "" || path == null)
+			return;
+		var field = fields.get(path);
+		if(null == field)
+			field = addField(path, type);
+		field.value.value.value = types.TypeTransform.transform(type, field.value.type)(value);
+	}
+
 	public function addField(name : String, type : SchemaType) {
 		var field = new ModelViewField({
 			container : pairs,
@@ -138,5 +147,7 @@ class ModelView {
 		fieldFocus.add(field.focus.map(function(v) return v ? field : null));
 
 		fields.set(name, field);
+
+		return field;
 	}
 }

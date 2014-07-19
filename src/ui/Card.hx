@@ -17,6 +17,7 @@ class Card {
 			context = new ContextView(
 				document,
 				model,
+				modelView,
 				mapper,
 				{ el : Query.first('.context', card.el) }
 			);

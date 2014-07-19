@@ -8,7 +8,9 @@ import dom.Dom;
 import sui.properties.ToggleClass;
 import sui.properties.ValueProperty;
 using thx.core.Arrays;
+import types.CodeTransform;
 import types.ReferenceTransform;
+import types.TypeTransform;
 import ui.editors.CodeEditor;
 import ui.editors.Editor;
 import ui.editors.EditorPicker;
@@ -83,6 +85,11 @@ class ContextField {
 						wireRuntime(editor, function(value : String) return Runtime.toRuntime(value, options.model));
 					case ReferenceType:
 						wireRuntime(editor, function(value : String) return Runtime.toRuntime(ReferenceTransform.toCode(value), options.model));
+						// TODO break loop!
+						options.value.stream.feed(function(value : Dynamic) {
+							var path = editor.value.value;
+							options.modelView.setField(path, value, options.type);
+						});
 					case _:
 						options.value.runtime.value = None;
 						editor.value.feed(options.value.stream);
@@ -93,10 +100,15 @@ class ContextField {
 		);
 
 		var runtime = options.value.runtime.value.toValue();
-		if(null != runtime)
-			fieldValue.setEditor(CodeType, runtime.code);
-		else
+		if(null == runtime)
 			fieldValue.setEditor(options.type, options.value.value);
+		else {
+			var reference = CodeTransform.toReference(runtime.code);
+			if(null != reference)
+				fieldValue.setEditor(ReferenceType, CodeTransform.toReference(runtime.code));
+			else
+				fieldValue.setEditor(CodeType, runtime.code);
+		}
 
 		active.feed(component.el.consumeToggleClass('active'));
 
@@ -139,5 +151,6 @@ typedef ContextFieldOptions = {>ComponentOptions,
 	display : String,
 	name : String,
 	value : ValueProperty<Dynamic>,
-	model : Model
+	model : Model,
+	modelView : ModelView
 }

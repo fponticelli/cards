@@ -73,6 +73,7 @@ class TextEditor implements Editor<String> {
 		var empty = new Value(options.defaultText == '');
 		changePair.producer
 			.map(function(_) return text.component.el.textContent == '')
+			.merge(value.map(function(t) return t ==''))
 			.feed(empty);
 		empty.feed(component.el.consumeToggleClass('empty'));
 	}
