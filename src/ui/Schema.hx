@@ -4,7 +4,7 @@ import steamer.Consumer;
 import steamer.Feeder;
 import steamer.Producer;
 import steamer.Pulse;
-import thx.Error;
+import thx.core.Error;
 import ui.SchemaEvent;
 
 class Schema {

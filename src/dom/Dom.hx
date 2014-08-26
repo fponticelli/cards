@@ -2,7 +2,7 @@ package dom;
 
 import js.html.Element;
 import steamer.Producer;
-import thx.Nil;
+import thx.core.Nil;
 import promhx.Promise;
 
 class Html {

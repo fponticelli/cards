@@ -285,6 +285,9 @@ Std.parseInt = function(x) {
 Std.parseFloat = function(x) {
 	return parseFloat(x);
 };
+Std.random = function(x) {
+	if(x <= 0) return 0; else return Math.floor(Math.random() * x);
+};
 var StringBuf = function() {
 	this.b = "";
 };
@@ -430,7 +433,7 @@ dom.Dom.__name__ = ["dom","Dom"];
 dom.Dom.ready = function() {
 	var deferred = new promhx.Promise();
 	window.document.addEventListener("DOMContentLoaded",function(_) {
-		deferred.resolve(thx.Nil.nil);
+		deferred.resolve(thx.core.Nil.nil);
 	},false);
 	return deferred;
 };
@@ -1210,12 +1213,12 @@ steamer.Producer.skipNull = function(producer) {
 };
 steamer.Producer.left = function(producer) {
 	return producer.map(function(v) {
-		return v.left;
+		return v._0;
 	});
 };
 steamer.Producer.right = function(producer) {
 	return producer.map(function(v) {
-		return v.right;
+		return v._1;
 	});
 };
 steamer.Producer.negate = function(producer) {
@@ -1277,7 +1280,7 @@ steamer.Producer.prototype = {
 		var _g = this;
 		var ended = false;
 		var sendPulse = function(v) {
-			if(ended) throw new thx.Error("Feed already reached end but still receiving pulses: ${v}",null,{ fileName : "Producer.hx", lineNumber : 24, className : "steamer.Producer", methodName : "feed"}); else switch(v[1]) {
+			if(ended) throw new thx.core.Error("Feed already reached end but still receiving pulses: ${v}",null,{ fileName : "Producer.hx", lineNumber : 24, className : "steamer.Producer", methodName : "feed"}); else switch(v[1]) {
 			case 2:
 				if(_g.endOnError) {
 					thx.Timer.setImmediate((function(f,a1) {
@@ -1337,12 +1340,12 @@ steamer.Producer.prototype = {
 						};
 						transform(value,t);
 					} catch( $e0 ) {
-						if( js.Boot.__instanceof($e0,thx.Error) ) {
+						if( js.Boot.__instanceof($e0,thx.core.Error) ) {
 							var e = $e0;
 							forward(steamer.Pulse.Fail(e));
 						} else {
 						var e1 = $e0;
-						forward(steamer.Pulse.Fail(new thx.Error(Std.string(e1),null,{ fileName : "Producer.hx", lineNumber : 57, className : "steamer.Producer", methodName : "mapAsync"})));
+						forward(steamer.Pulse.Fail(new thx.core.Error(Std.string(e1),null,{ fileName : "Producer.hx", lineNumber : 57, className : "steamer.Producer", methodName : "mapAsync"})));
 						}
 					}
 				},forward);
@@ -1353,7 +1356,7 @@ steamer.Producer.prototype = {
 	}
 	,toNil: function() {
 		return this.map(function(_) {
-			return thx.Nil.nil;
+			return thx.core.Nil.nil;
 		});
 	}
 	,toTrue: function() {
@@ -1403,12 +1406,12 @@ steamer.Producer.prototype = {
 						};
 						f(value,t);
 					} catch( $e0 ) {
-						if( js.Boot.__instanceof($e0,thx.Error) ) {
+						if( js.Boot.__instanceof($e0,thx.core.Error) ) {
 							var e = $e0;
 							forward(steamer.Pulse.Fail(e));
 						} else {
 						var e1 = $e0;
-						forward(steamer.Pulse.Fail(new thx.Error(Std.string(e1),null,{ fileName : "Producer.hx", lineNumber : 107, className : "steamer.Producer", methodName : "filterAsync"})));
+						forward(steamer.Pulse.Fail(new thx.core.Error(Std.string(e1),null,{ fileName : "Producer.hx", lineNumber : 107, className : "steamer.Producer", methodName : "filterAsync"})));
 						}
 					}
 				},forward);
@@ -1489,7 +1492,13 @@ steamer.Producer.prototype = {
 					return forward(steamer.Pulse.End);
 				}
 				if(buffA.length == 0 || buffB.length == 0) return;
-				forward(steamer.Pulse.Emit({ left : buffA.shift(), right : buffB.shift()}));
+				forward(steamer.Pulse.Emit((function($this) {
+					var $r;
+					var _0 = buffA.shift();
+					var _1 = buffB.shift();
+					$r = { _0 : _0, _1 : _1};
+					return $r;
+				}(this))));
 			};
 			_g.feed((function($this) {
 				var $r;
@@ -1525,7 +1534,7 @@ steamer.Producer.prototype = {
 	}
 	,blend: function(other,f) {
 		return this.zip(other).map(function(tuple) {
-			return f(tuple.left,tuple.right);
+			return f(tuple._0,tuple._1);
 		});
 	}
 	,pair: function(other) {
@@ -1542,7 +1551,7 @@ steamer.Producer.prototype = {
 					return forward(steamer.Pulse.End);
 				}
 				if(buffA == null || buffB == null) return;
-				forward(steamer.Pulse.Emit({ left : buffA, right : buffB}));
+				forward(steamer.Pulse.Emit({ _0 : buffA, _1 : buffB}));
 			};
 			_g.feed((function($this) {
 				var $r;
@@ -1628,7 +1637,7 @@ steamer.Producer.prototype = {
 				var $r;
 				var consumer1 = steamer.Bus.passOn(function(v1) {
 					if(null == latest) return;
-					forward(steamer.Pulse.Emit({ left : latest, right : v1}));
+					forward(steamer.Pulse.Emit({ _0 : latest, _1 : v1}));
 					latest = null;
 				},forward);
 				$r = consumer1;
@@ -1691,7 +1700,7 @@ steamer.Feeder.prototype = $extend(steamer.Producer.prototype,{
 		}
 		switch(pulse[1]) {
 		case 1:
-			this.forwards = [];
+			this.cancel();
 			break;
 		default:
 		}
@@ -1710,6 +1719,9 @@ steamer.Feeder.prototype = $extend(steamer.Producer.prototype,{
 			this.forward(steamer.Pulse.End);
 			break;
 		}
+	}
+	,cancel: function() {
+		this.forwards = [];
 	}
 	,__class__: steamer.Feeder
 });
@@ -1829,10 +1841,11 @@ steamer.Pulse.End.toString = $estr;
 steamer.Pulse.End.__enum__ = steamer.Pulse;
 steamer.Pulse.Fail = function(error) { var $x = ["Fail",2,error]; $x.__enum__ = steamer.Pulse; $x.toString = $estr; return $x; };
 var thx = {};
-thx.Nil = { __ename__ : ["thx","Nil"], __constructs__ : ["nil"] };
-thx.Nil.nil = ["nil",0];
-thx.Nil.nil.toString = $estr;
-thx.Nil.nil.__enum__ = thx.Nil;
+thx.core = {};
+thx.core.Nil = { __ename__ : ["thx","core","Nil"], __constructs__ : ["nil"] };
+thx.core.Nil.nil = ["nil",0];
+thx.core.Nil.nil.toString = $estr;
+thx.core.Nil.nil.__enum__ = thx.core.Nil;
 steamer.Pulses = function() { };
 steamer.Pulses.__name__ = ["steamer","Pulses"];
 steamer.Pulses.times = function(n,pulse) {
@@ -2338,7 +2351,7 @@ sui.properties.Visible.__super__ = sui.properties.BoolProperty;
 sui.properties.Visible.prototype = $extend(sui.properties.BoolProperty.prototype,{
 	__class__: sui.properties.Visible
 });
-thx.Error = function(message,stack,pos) {
+thx.core.Error = function(message,stack,pos) {
 	this.message = message;
 	if(null == stack) {
 		stack = haxe.CallStack.exceptionStack();
@@ -2347,12 +2360,16 @@ thx.Error = function(message,stack,pos) {
 	this.stack = stack;
 	this.pos = pos;
 };
-thx.Error.__name__ = ["thx","Error"];
-thx.Error.__super__ = Error;
-thx.Error.prototype = $extend(Error.prototype,{
+thx.core.Error.__name__ = ["thx","core","Error"];
+thx.core.Error.fromDynamic = function(err,pos) {
+	if(js.Boot.__instanceof(err,thx.core.Error)) return err;
+	return new thx.core.Error("" + Std.string(err),null,pos);
+};
+thx.core.Error.__super__ = Error;
+thx.core.Error.prototype = $extend(Error.prototype,{
 	stack: null
 	,pos: null
-	,__class__: thx.Error
+	,__class__: thx.core.Error
 });
 thx.Assert = function() { };
 thx.Assert.__name__ = ["thx","Assert"];
@@ -2840,7 +2857,6 @@ thx.Timer.setImmediate = function(callback) {
 thx.Timer.clearTimer = function(id) {
 	return clearTimeout(id);
 };
-thx.core = {};
 thx.core.Arrays = function() { };
 thx.core.Arrays.__name__ = ["thx","core","Arrays"];
 thx.core.Arrays.same = function(a,b,eq) {
@@ -2898,6 +2914,19 @@ thx.core.Arrays.pushIf = function(arr,cond,value) {
 	if(cond) arr.push(value);
 	return arr;
 };
+thx.core.Arrays.eachPair = function(arr,handler) {
+	var _g1 = 0;
+	var _g = arr.length;
+	while(_g1 < _g) {
+		var i = _g1++;
+		var _g3 = i;
+		var _g2 = arr.length;
+		while(_g3 < _g2) {
+			var j = _g3++;
+			if(!handler(arr[i],arr[j])) return;
+		}
+	}
+};
 thx.core.Arrays.mapi = function(arr,handler) {
 	return arr.map(handler);
 };
@@ -2932,6 +2961,17 @@ thx.core.Arrays.contains = function(arr,element,eq) {
 		return false;
 	}
 };
+thx.core.Arrays.shuffle = function(a) {
+	var t = thx.core.Ints.range(a.length);
+	var arr = [];
+	while(t.length > 0) {
+		var pos = Std.random(t.length);
+		var index = t[pos];
+		t.splice(pos,1);
+		arr.push(a[index]);
+	}
+	return arr;
+};
 thx.core.Assertion = { __ename__ : ["thx","core","Assertion"], __constructs__ : ["Success","Failure","Error","PreConditionError","PostConditionError","Warning"] };
 thx.core.Assertion.Success = function(pos) { var $x = ["Success",0,pos]; $x.__enum__ = thx.core.Assertion; $x.toString = $estr; return $x; };
 thx.core.Assertion.Failure = function(msg,pos) { var $x = ["Failure",1,msg,pos]; $x.__enum__ = thx.core.Assertion; $x.toString = $estr; return $x; };
@@ -2939,29 +2979,33 @@ thx.core.Assertion.Error = function(e,stack) { var $x = ["Error",2,e,stack]; $x.
 thx.core.Assertion.PreConditionError = function(e,stack) { var $x = ["PreConditionError",3,e,stack]; $x.__enum__ = thx.core.Assertion; $x.toString = $estr; return $x; };
 thx.core.Assertion.PostConditionError = function(e,stack) { var $x = ["PostConditionError",4,e,stack]; $x.__enum__ = thx.core.Assertion; $x.toString = $estr; return $x; };
 thx.core.Assertion.Warning = function(msg) { var $x = ["Warning",5,msg]; $x.__enum__ = thx.core.Assertion; $x.toString = $estr; return $x; };
-thx.core.F0 = function() { };
-thx.core.F0.__name__ = ["thx","core","F0"];
-thx.core.F0.join = function(fa,fb) {
+thx.core.Function0 = function() { };
+thx.core.Function0.__name__ = ["thx","core","Function0"];
+thx.core.Function0.noop = function() {
+};
+thx.core.Function0.join = function(fa,fb) {
 	return function() {
 		fa();
 		fb();
 	};
 };
-thx.core.F0.once = function(f) {
+thx.core.Function0.once = function(f) {
 	return function() {
 		f();
 		f = function() {
 		};
 	};
 };
-thx.core.F1 = function() { };
-thx.core.F1.__name__ = ["thx","core","F1"];
-thx.core.F1.compose = function(fa,fb) {
+thx.core.Function1 = function() { };
+thx.core.Function1.__name__ = ["thx","core","Function1"];
+thx.core.Function1.noop = function(_) {
+};
+thx.core.Function1.compose = function(fa,fb) {
 	return function(v) {
 		return fa(fb(v));
 	};
 };
-thx.core.F1.join = function(fa,fb) {
+thx.core.Function1.join = function(fa,fb) {
 	return function(v) {
 		fa(v);
 		fb(v);
@@ -2993,10 +3037,26 @@ thx.core.Ints.parse = function(s) {
 thx.core.Ints.compare = function(a,b) {
 	return a - b;
 };
+thx.core.Ints.range = function(start,stop,step) {
+	if(step == null) step = 1;
+	if(null == stop) {
+		stop = start;
+		start = 0;
+	}
+	if((stop - start) / step == Infinity) throw "infinite range";
+	var range = [];
+	var i = -1;
+	var j;
+	if(step < 0) while((j = start + step * ++i) > stop) range.push(j); else while((j = start + step * ++i) < stop) range.push(j);
+	return range;
+};
 thx.core.Iterables = function() { };
 thx.core.Iterables.__name__ = ["thx","core","Iterables"];
 thx.core.Iterables.map = function(it,f) {
 	return thx.core.Iterators.map($iterator(it)(),f);
+};
+thx.core.Iterables.eachPair = function(it,handler) {
+	return thx.core.Iterators.eachPair($iterator(it)(),handler);
 };
 thx.core.Iterables.toArray = function(it) {
 	return thx.core.Iterators.toArray($iterator(it)());
@@ -3034,6 +3094,9 @@ thx.core.Iterators.mapi = function(it,f) {
 		acc.push(f(v,i++));
 	}
 	return acc;
+};
+thx.core.Iterators.eachPair = function(it,handler) {
+	thx.core.Arrays.eachPair(thx.core.Iterators.toArray(it),handler);
 };
 thx.core.Iterators.toArray = function(it) {
 	var items = [];
@@ -3313,6 +3376,130 @@ thx.core.Strings.ellipsis = function(s,maxlen,symbol) {
 };
 thx.core.Strings.compare = function(a,b) {
 	if(a < b) return -1; else if(a > b) return 1; else return 0;
+};
+thx.core._Tuple = {};
+thx.core._Tuple.Tuple1_Impl_ = function() { };
+thx.core._Tuple.Tuple1_Impl_.__name__ = ["thx","core","_Tuple","Tuple1_Impl_"];
+thx.core._Tuple.Tuple1_Impl_._new = function(_0) {
+	return _0;
+};
+thx.core._Tuple.Tuple1_Impl_.get__0 = function(this1) {
+	return this1;
+};
+thx.core._Tuple.Tuple1_Impl_.toString = function(this1) {
+	return "Tuple1(" + Std.string(this1) + ")";
+};
+thx.core._Tuple.Tuple2_Impl_ = function() { };
+thx.core._Tuple.Tuple2_Impl_.__name__ = ["thx","core","_Tuple","Tuple2_Impl_"];
+thx.core._Tuple.Tuple2_Impl_._new = function(_0,_1) {
+	return { _0 : _0, _1 : _1};
+};
+thx.core._Tuple.Tuple2_Impl_.get__0 = function(this1) {
+	return this1._0;
+};
+thx.core._Tuple.Tuple2_Impl_.get__1 = function(this1) {
+	return this1._1;
+};
+thx.core._Tuple.Tuple2_Impl_.toTuple3 = function(this1,v) {
+	return { _0 : this1._0, _1 : this1._1, _2 : v};
+};
+thx.core._Tuple.Tuple2_Impl_.toString = function(this1) {
+	return "Tuple2(" + Std.string(this1._0) + "," + Std.string(this1._1) + ")";
+};
+thx.core._Tuple.Tuple3_Impl_ = function() { };
+thx.core._Tuple.Tuple3_Impl_.__name__ = ["thx","core","_Tuple","Tuple3_Impl_"];
+thx.core._Tuple.Tuple3_Impl_._new = function(_0,_1,_2) {
+	return { _0 : _0, _1 : _1, _2 : _2};
+};
+thx.core._Tuple.Tuple3_Impl_.get__0 = function(this1) {
+	return this1._0;
+};
+thx.core._Tuple.Tuple3_Impl_.get__1 = function(this1) {
+	return this1._1;
+};
+thx.core._Tuple.Tuple3_Impl_.get__2 = function(this1) {
+	return this1._2;
+};
+thx.core._Tuple.Tuple3_Impl_.toTuple4 = function(this1,v) {
+	return { _0 : this1._0, _1 : this1._1, _2 : this1._2, _3 : v};
+};
+thx.core._Tuple.Tuple3_Impl_.toString = function(this1) {
+	return "Tuple3(" + Std.string(this1._0) + "," + Std.string(this1._1) + "," + Std.string(this1._2) + ")";
+};
+thx.core._Tuple.Tuple4_Impl_ = function() { };
+thx.core._Tuple.Tuple4_Impl_.__name__ = ["thx","core","_Tuple","Tuple4_Impl_"];
+thx.core._Tuple.Tuple4_Impl_._new = function(_0,_1,_2,_3) {
+	return { _0 : _0, _1 : _1, _2 : _2, _3 : _3};
+};
+thx.core._Tuple.Tuple4_Impl_.get__0 = function(this1) {
+	return this1._0;
+};
+thx.core._Tuple.Tuple4_Impl_.get__1 = function(this1) {
+	return this1._1;
+};
+thx.core._Tuple.Tuple4_Impl_.get__2 = function(this1) {
+	return this1._2;
+};
+thx.core._Tuple.Tuple4_Impl_.get__3 = function(this1) {
+	return this1._3;
+};
+thx.core._Tuple.Tuple4_Impl_.toTuple5 = function(this1,v) {
+	return { _0 : this1._0, _1 : this1._1, _2 : this1._2, _3 : this1._3, _4 : v};
+};
+thx.core._Tuple.Tuple4_Impl_.toString = function(this1) {
+	return "Tuple4(" + Std.string(this1._0) + "," + Std.string(this1._1) + "," + Std.string(this1._2) + "," + Std.string(this1._3) + ")";
+};
+thx.core._Tuple.Tuple5_Impl_ = function() { };
+thx.core._Tuple.Tuple5_Impl_.__name__ = ["thx","core","_Tuple","Tuple5_Impl_"];
+thx.core._Tuple.Tuple5_Impl_._new = function(_0,_1,_2,_3,_4) {
+	return { _0 : _0, _1 : _1, _2 : _2, _3 : _3, _4 : _4};
+};
+thx.core._Tuple.Tuple5_Impl_.get__0 = function(this1) {
+	return this1._0;
+};
+thx.core._Tuple.Tuple5_Impl_.get__1 = function(this1) {
+	return this1._1;
+};
+thx.core._Tuple.Tuple5_Impl_.get__2 = function(this1) {
+	return this1._2;
+};
+thx.core._Tuple.Tuple5_Impl_.get__3 = function(this1) {
+	return this1._3;
+};
+thx.core._Tuple.Tuple5_Impl_.get__4 = function(this1) {
+	return this1._4;
+};
+thx.core._Tuple.Tuple5_Impl_.toTuple6 = function(this1,v) {
+	return { _0 : this1._0, _1 : this1._1, _2 : this1._2, _3 : this1._3, _4 : this1._4, _5 : v};
+};
+thx.core._Tuple.Tuple5_Impl_.toString = function(this1) {
+	return "Tuple5(" + Std.string(this1._0) + "," + Std.string(this1._1) + "," + Std.string(this1._2) + "," + Std.string(this1._3) + "," + Std.string(this1._4) + ")";
+};
+thx.core._Tuple.Tuple6_Impl_ = function() { };
+thx.core._Tuple.Tuple6_Impl_.__name__ = ["thx","core","_Tuple","Tuple6_Impl_"];
+thx.core._Tuple.Tuple6_Impl_._new = function(_0,_1,_2,_3,_4,_5) {
+	return { _0 : _0, _1 : _1, _2 : _2, _3 : _3, _4 : _4, _5 : _5};
+};
+thx.core._Tuple.Tuple6_Impl_.get__0 = function(this1) {
+	return this1._0;
+};
+thx.core._Tuple.Tuple6_Impl_.get__1 = function(this1) {
+	return this1._1;
+};
+thx.core._Tuple.Tuple6_Impl_.get__2 = function(this1) {
+	return this1._2;
+};
+thx.core._Tuple.Tuple6_Impl_.get__3 = function(this1) {
+	return this1._3;
+};
+thx.core._Tuple.Tuple6_Impl_.get__4 = function(this1) {
+	return this1._4;
+};
+thx.core._Tuple.Tuple6_Impl_.get__5 = function(this1) {
+	return this1._5;
+};
+thx.core._Tuple.Tuple6_Impl_.toString = function(this1) {
+	return "Tuple6(" + Std.string(this1._0) + "," + Std.string(this1._1) + "," + Std.string(this1._2) + "," + Std.string(this1._3) + "," + Std.string(this1._4) + "," + Std.string(this1._5) + ")";
 };
 thx.core.Types = function() { };
 thx.core.Types.__name__ = ["thx","core","Types"];
@@ -4508,6 +4695,7 @@ ui.ContextField = function(options) {
 			return ui.Expressions.toErrorOption(res1.expression);
 		}).merge(options.value.runtimeError).feed(_g.withError);
 	};
+	var bus = new steamer.Feeder();
 	this.fieldValue = new ui.FieldValue(this.component,dom.Query.first(".value-container",this.component.el),function(type,editor1) {
 		editor1.focus.feed(_g.focus);
 		_g.currentType.set_value(type);
@@ -4521,7 +4709,7 @@ ui.ContextField = function(options) {
 			wireRuntime(editor1,function(value1) {
 				return ui.Runtime.toRuntime(types.ReferenceTransform.toCode(value1),options.model);
 			});
-			options.value.stream.feed((function($this) {
+			bus.feed((function($this) {
 				var $r;
 				var f2 = function(value2) {
 					var path1 = editor1.value.get_value();
@@ -4538,17 +4726,28 @@ ui.ContextField = function(options) {
 				}};
 				return $r;
 			}(this)));
+			options.value.stream.feed(bus);
 			break;
 		default:
 			options.value.runtime.set_value(haxe.ds.Option.None);
 			editor1.value.feed(options.value.stream);
 			options.value.stream.feed(editor1.value);
 		}
+	},function(type1,editor2) {
+		switch(type1[1]) {
+		case 6:
+			break;
+		case 7:
+			haxe.Log.trace("cancelling",{ fileName : "ContextField.hx", lineNumber : 107, className : "ui.ContextField", methodName : "new"});
+			bus.cancel();
+			break;
+		default:
+		}
 	});
 	var runtime1 = thx.core.Options.toValue(options.value.runtime.get_value());
 	if(null == runtime1) this.fieldValue.setEditor(options.type,options.value.get_value()); else {
 		var reference = types.CodeTransform.toReference(runtime1.code);
-		if(null != reference) this.fieldValue.setEditor(ui.SchemaType.ReferenceType,types.CodeTransform.toReference(runtime1.code)); else this.fieldValue.setEditor(ui.SchemaType.CodeType,runtime1.code);
+		if(null != reference && "" != reference) this.fieldValue.setEditor(ui.SchemaType.ReferenceType,types.CodeTransform.toReference(runtime1.code)); else this.fieldValue.setEditor(ui.SchemaType.CodeType,runtime1.code);
 	}
 	this.active.feed(steamer.dom.Dom.consumeToggleClass(this.component.el,"active"));
 	var clickKey = steamer.dom.Dom.produceEvent(key,"click");
@@ -4991,8 +5190,7 @@ ui.FieldValue = function(parent,container,afterCreate,afterRemove) {
 	this.parent = parent;
 	this.container = container;
 	this.afterCreate = afterCreate;
-	if(null != afterRemove) this.afterRemove = afterRemove; else this.afterRemove = function(_,_1) {
-	};
+	this.afterRemove = afterRemove;
 };
 ui.FieldValue.__name__ = ["ui","FieldValue"];
 ui.FieldValue.prototype = {
@@ -5339,7 +5537,7 @@ ui.Schema.prototype = {
 	,stream: null
 	,feeder: null
 	,add: function(name,type) {
-		if(this.fields.exists(name)) throw new thx.Error("Schema already contains a field \"" + name + "\"",null,{ fileName : "Schema.hx", lineNumber : 22, className : "ui.Schema", methodName : "add"});
+		if(this.fields.exists(name)) throw new thx.core.Error("Schema already contains a field \"" + name + "\"",null,{ fileName : "Schema.hx", lineNumber : 22, className : "ui.Schema", methodName : "add"});
 		this.fields.set(name,type);
 		this.feeder.forward(steamer.Pulse.Emit(ui.SchemaEvent.AddField(name,type)));
 	}
@@ -5353,19 +5551,19 @@ ui.Schema.prototype = {
 		this.feeder.forward(steamer.Pulse.Emit(ui.SchemaEvent.ListFields(list.slice())));
 	}
 	,'delete': function(name) {
-		if(!this.fields.exists(name)) throw new thx.Error("Schema does not contain a field \"" + name + "\"",null,{ fileName : "Schema.hx", lineNumber : 39, className : "ui.Schema", methodName : "delete"});
+		if(!this.fields.exists(name)) throw new thx.core.Error("Schema does not contain a field \"" + name + "\"",null,{ fileName : "Schema.hx", lineNumber : 39, className : "ui.Schema", methodName : "delete"});
 		this.fields.remove(name);
 		this.feeder.forward(steamer.Pulse.Emit(ui.SchemaEvent.DeleteField(name)));
 	}
 	,rename: function(oldname,newname) {
-		if(!this.fields.exists(oldname)) throw new thx.Error("Schema does not contain a field \"" + oldname + "\"",null,{ fileName : "Schema.hx", lineNumber : 46, className : "ui.Schema", methodName : "rename"});
+		if(!this.fields.exists(oldname)) throw new thx.core.Error("Schema does not contain a field \"" + oldname + "\"",null,{ fileName : "Schema.hx", lineNumber : 46, className : "ui.Schema", methodName : "rename"});
 		var type = this.fields.get(oldname);
 		this.fields.remove(oldname);
 		this.fields.set(newname,type);
 		this.feeder.forward(steamer.Pulse.Emit(ui.SchemaEvent.RenameField(oldname,newname)));
 	}
 	,retype: function(name,type) {
-		if(!this.fields.exists(name)) throw new thx.Error("Schema does not contain a field \"" + name + "\"",null,{ fileName : "Schema.hx", lineNumber : 55, className : "ui.Schema", methodName : "retype"});
+		if(!this.fields.exists(name)) throw new thx.core.Error("Schema does not contain a field \"" + name + "\"",null,{ fileName : "Schema.hx", lineNumber : 55, className : "ui.Schema", methodName : "retype"});
 		this.fields.set(name,type);
 		this.feeder.forward(steamer.Pulse.Emit(ui.SchemaEvent.RetypeField(name,type)));
 	}
@@ -6272,26 +6470,26 @@ thx.Assert.results = { add : function(assertion) {
 	case 1:
 		var pos1 = assertion[3];
 		var msg = assertion[2];
-		throw new thx.Error(msg,null,pos1);
+		throw new thx.core.Error(msg,null,pos1);
 		break;
 	case 2:
 		var stack = assertion[3];
 		var e = assertion[2];
-		throw new thx.Error(Std.string(e),stack,{ fileName : "Assert.hx", lineNumber : 710, className : "thx.Assert", methodName : "__init__"});
+		throw new thx.core.Error(Std.string(e),stack,{ fileName : "Assert.hx", lineNumber : 675, className : "thx.Assert", methodName : "__init__"});
 		break;
 	case 3:
 		var stack = assertion[3];
 		var e = assertion[2];
-		throw new thx.Error(Std.string(e),stack,{ fileName : "Assert.hx", lineNumber : 710, className : "thx.Assert", methodName : "__init__"});
+		throw new thx.core.Error(Std.string(e),stack,{ fileName : "Assert.hx", lineNumber : 675, className : "thx.Assert", methodName : "__init__"});
 		break;
 	case 4:
 		var stack = assertion[3];
 		var e = assertion[2];
-		throw new thx.Error(Std.string(e),stack,{ fileName : "Assert.hx", lineNumber : 710, className : "thx.Assert", methodName : "__init__"});
+		throw new thx.core.Error(Std.string(e),stack,{ fileName : "Assert.hx", lineNumber : 675, className : "thx.Assert", methodName : "__init__"});
 		break;
 	case 5:
 		var msg1 = assertion[2];
-		haxe.Log.trace(msg1,{ fileName : "Assert.hx", lineNumber : 712, className : "thx.Assert", methodName : "__init__"});
+		haxe.Log.trace(msg1,{ fileName : "Assert.hx", lineNumber : 677, className : "thx.Assert", methodName : "__init__"});
 		break;
 	case 0:
 		var pos2 = assertion[2];
@@ -6309,7 +6507,7 @@ dom.Query.doc = document;
 haxe.ds.ObjectMap.count = 0;
 promhx.base.AsyncBase.id_ctr = 0;
 promhx.base.EventLoop.queue = new List();
-steamer.Pulses.nil = steamer.Pulse.Emit(thx.Nil.nil);
+steamer.Pulses.nil = steamer.Pulse.Emit(thx.core.Nil.nil);
 thx.core.Ints.pattern_parse = new EReg("^[+-]?(\\d+|0x[0-9A-F]+)$","i");
 thx.core.Strings._reSplitWC = new EReg("(\r\n|\n\r|\n|\r)","g");
 thx.core.Strings._reReduceWS = new EReg("\\s+","");
@@ -6324,7 +6522,7 @@ thx.ref.EmptyParent.instance = new thx.ref.EmptyParent();
 thx.ref.Ref.reField = new EReg("^\\.?([^.\\[]+)","");
 thx.ref.Ref.reIndex = new EReg("^\\[(\\d+)\\]","");
 types.CodeTransform.datePattern = new EReg("Date\\(-?\\d+(:?\\.\\d+)?(:?e-?\\d+)?\\)","");
-types.CodeTransform.PATTERN = new EReg("^\\s*\\$\\.(.+?)\\s*$","");
+types.CodeTransform.PATTERN = new EReg("^\\s*\\$\\.([a-z](:?(\\.|\\[\\d+\\])?[a-z0-9]*)*)\\s*$","");
 ui.ContextField.tooltip = new ui.widgets.Tooltip({ classes : "tooltip error"});
 ui.Runtime.pattern = new EReg("\\$\\.(.+?)\\b","");
 Main.main();

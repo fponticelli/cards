@@ -16,11 +16,11 @@ class FieldValue {
 	var container : Element;
 	var afterCreate : InitFunction;
 	var afterRemove : InitFunction;
-	public function new(parent : Component, container : Element, afterCreate : InitFunction, ?afterRemove : InitFunction) {
+	public function new(parent : Component, container : Element, afterCreate : InitFunction, afterRemove : InitFunction) {
 		this.parent = parent;
 		this.container = container;
 		this.afterCreate = afterCreate;
-		this.afterRemove = null != afterRemove ? afterRemove : function(_, _) {};
+		this.afterRemove = afterRemove;
 	}
 
 	public function setEditor(type, ?value : Dynamic) {

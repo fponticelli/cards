@@ -64,7 +64,7 @@ class CodeTransform {
 		return null != value ? value.trim() : 'null';
 	}
 
-	static var PATTERN = ~/^\s*\$\.(.+?)\s*$/;
+	static var PATTERN = ~/^\s*\$\.([a-z](:?(\.|\[\d+\])?[a-z0-9]*)*)\s*$/;
 	public static function toReference(value : String) : String {
 		var code = toCode(value);
 		return PATTERN.match(code) ? PATTERN.matched(1) : '';

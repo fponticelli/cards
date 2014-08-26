@@ -1,5 +1,6 @@
 package ui;
 
+import steamer.Feeder;
 import steamer.Producer;
 import steamer.Value;
 import sui.components.Component;
@@ -74,6 +75,7 @@ class ContextField {
 				.feed(withError);
 		}
 
+		var bus = new Feeder();
 		fieldValue = new FieldValue(
 			component,
 			Query.first('.value-container', component.el),
@@ -86,15 +88,25 @@ class ContextField {
 					case ReferenceType:
 						wireRuntime(editor, function(value : String) return Runtime.toRuntime(ReferenceTransform.toCode(value), options.model));
 						// TODO break loop!
-						options.value.stream.feed(function(value : Dynamic) {
+						bus.feed(function(value : Dynamic) {
 							var path = editor.value.value;
 							options.modelView.setField(path, value, options.type);
 						});
+						options.value.stream.feed(bus);
 					case _:
 						options.value.runtime.value = None;
 						editor.value.feed(options.value.stream);
 						// TODO does this leak?
 						options.value.stream.feed(editor.value);
+				}
+			},
+			function(type : SchemaType, editor : Editor<Dynamic>) {
+				switch type {
+					case CodeType:
+					case ReferenceType:
+						trace("cancelling");
+						bus.cancel();
+					case _:
 				}
 			}
 		);
@@ -104,7 +116,7 @@ class ContextField {
 			fieldValue.setEditor(options.type, options.value.value);
 		else {
 			var reference = CodeTransform.toReference(runtime.code);
-			if(null != reference)
+			if(null != reference && "" != reference)
 				fieldValue.setEditor(ReferenceType, CodeTransform.toReference(runtime.code));
 			else
 				fieldValue.setEditor(CodeType, runtime.code);
