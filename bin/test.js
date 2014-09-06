@@ -1,15 +1,11 @@
 (function () { "use strict";
-var $estr = function() { return js.Boot.__string_rec(this,''); };
 function $extend(from, fields) {
 	function Inherit() {} Inherit.prototype = from; var proto = new Inherit();
 	for (var name in fields) proto[name] = fields[name];
 	if( fields.toString !== Object.prototype.toString ) proto.toString = fields.toString;
 	return proto;
 }
-var EReg = function(r,opt) {
-	opt = opt.split("u").join("");
-	this.r = new RegExp(r,opt);
-};
+var EReg = function() { };
 EReg.__name__ = ["EReg"];
 EReg.prototype = {
 	r: null
@@ -18,14 +14,6 @@ EReg.prototype = {
 		this.r.m = this.r.exec(s);
 		this.r.s = s;
 		return this.r.m != null;
-	}
-	,matched: function(n) {
-		if(this.r.m != null && n >= 0 && n < this.r.m.length) return this.r.m[n]; else throw "EReg::matched";
-	}
-	,matchedRight: function() {
-		if(this.r.m == null) throw "No string matched";
-		var sz = this.r.m.index + this.r.m[0].length;
-		return this.r.s.substr(sz,this.r.s.length - sz);
 	}
 	,__class__: EReg
 };
@@ -142,9 +130,6 @@ Reflect.field = function(o,field) {
 		return null;
 	}
 };
-Reflect.setField = function(o,field,value) {
-	o[field] = value;
-};
 Reflect.callMethod = function(o,func,args) {
 	return func.apply(o,args);
 };
@@ -178,15 +163,6 @@ var Std = function() { };
 Std.__name__ = ["Std"];
 Std.string = function(s) {
 	return js.Boot.__string_rec(s,"");
-};
-Std.parseInt = function(x) {
-	var v = parseInt(x,10);
-	if(v == 0 && (HxOverrides.cca(x,1) == 120 || HxOverrides.cca(x,1) == 88)) v = parseInt(x);
-	if(isNaN(v)) return null;
-	return v;
-};
-Std.random = function(x) {
-	if(x <= 0) return 0; else return Math.floor(Math.random() * x);
 };
 var StringBuf = function() {
 	this.b = "";
@@ -240,131 +216,24 @@ TestAll.main = function() {
 	runner.run();
 };
 TestAll.prototype = {
-	testValueRef: function() {
-		var ref = new thx.ref.ValueRef();
-		utest.Assert.isFalse(ref.hasValue(),null,{ fileName : "TestAll.hx", lineNumber : 25, className : "TestAll", methodName : "testValueRef"});
-		ref.set("some");
-		utest.Assert.isTrue(ref.hasValue(),null,{ fileName : "TestAll.hx", lineNumber : 27, className : "TestAll", methodName : "testValueRef"});
-		utest.Assert.equals(ref,ref.resolve(""),null,{ fileName : "TestAll.hx", lineNumber : 28, className : "TestAll", methodName : "testValueRef"});
-		utest.Assert.raises(function() {
-			ref.resolve("path");
-		},null,null,null,{ fileName : "TestAll.hx", lineNumber : 29, className : "TestAll", methodName : "testValueRef"});
-		ref.remove();
-		utest.Assert.isFalse(ref.hasValue(),null,{ fileName : "TestAll.hx", lineNumber : 33, className : "TestAll", methodName : "testValueRef"});
-	}
-	,testRefFromValue: function() {
-		var ref = thx.ref.Ref.fromValue(TestAll.obj);
-		utest.Assert.same(TestAll.obj,ref.get(),null,null,{ fileName : "TestAll.hx", lineNumber : 39, className : "TestAll", methodName : "testRefFromValue"});
-	}
-	,testResolvePathEmpty: function() {
-		var ref = thx.ref.Ref.resolvePath("");
-		utest.Assert["is"](ref,thx.ref.ValueRef,null,{ fileName : "TestAll.hx", lineNumber : 44, className : "TestAll", methodName : "testResolvePathEmpty"});
-	}
-	,testResolvePathEmptyNonTerminal: function() {
-		var ref = thx.ref.Ref.resolvePath("",null,false);
-		utest.Assert["is"](ref,thx.ref.UnknownRef,null,{ fileName : "TestAll.hx", lineNumber : 49, className : "TestAll", methodName : "testResolvePathEmptyNonTerminal"});
-	}
-	,testResolvePathField: function() {
-		var ref = thx.ref.Ref.resolvePath("name");
-		utest.Assert["is"](ref,thx.ref.ValueRef,null,{ fileName : "TestAll.hx", lineNumber : 54, className : "TestAll", methodName : "testResolvePathField"});
-		utest.Assert["is"](ref.getRoot(),thx.ref.ObjectRef,null,{ fileName : "TestAll.hx", lineNumber : 55, className : "TestAll", methodName : "testResolvePathField"});
-	}
-	,testResolvePathNestedField: function() {
-		var ref = thx.ref.Ref.resolvePath("person.name");
-		utest.Assert["is"](ref,thx.ref.ValueRef,null,{ fileName : "TestAll.hx", lineNumber : 60, className : "TestAll", methodName : "testResolvePathNestedField"});
-		utest.Assert["is"](ref.parent,thx.ref.ObjectRef,null,{ fileName : "TestAll.hx", lineNumber : 61, className : "TestAll", methodName : "testResolvePathNestedField"});
-		utest.Assert["is"](ref.getRoot(),thx.ref.ObjectRef,null,{ fileName : "TestAll.hx", lineNumber : 62, className : "TestAll", methodName : "testResolvePathNestedField"});
-		utest.Assert.notEquals(ref.parent,ref.getRoot(),null,{ fileName : "TestAll.hx", lineNumber : 63, className : "TestAll", methodName : "testResolvePathNestedField"});
-	}
-	,testResolvePathItem: function() {
-		var ref = thx.ref.Ref.resolvePath("[0]");
-		utest.Assert["is"](ref,thx.ref.ValueRef,null,{ fileName : "TestAll.hx", lineNumber : 68, className : "TestAll", methodName : "testResolvePathItem"});
-		utest.Assert["is"](ref.getRoot(),thx.ref.ArrayRef,null,{ fileName : "TestAll.hx", lineNumber : 69, className : "TestAll", methodName : "testResolvePathItem"});
-	}
-	,testResolvePathNestedItem: function() {
-		var ref = thx.ref.Ref.resolvePath("[0][0]");
-		utest.Assert["is"](ref,thx.ref.ValueRef,null,{ fileName : "TestAll.hx", lineNumber : 74, className : "TestAll", methodName : "testResolvePathNestedItem"});
-		utest.Assert["is"](ref.parent,thx.ref.ArrayRef,null,{ fileName : "TestAll.hx", lineNumber : 75, className : "TestAll", methodName : "testResolvePathNestedItem"});
-		utest.Assert["is"](ref.getRoot(),thx.ref.ArrayRef,null,{ fileName : "TestAll.hx", lineNumber : 76, className : "TestAll", methodName : "testResolvePathNestedItem"});
-		utest.Assert.notEquals(ref.parent,ref.getRoot(),null,{ fileName : "TestAll.hx", lineNumber : 77, className : "TestAll", methodName : "testResolvePathNestedItem"});
-	}
-	,testResolvePathItemNestedField: function() {
-		var ref = thx.ref.Ref.resolvePath("[0].name");
-		utest.Assert["is"](ref,thx.ref.ValueRef,null,{ fileName : "TestAll.hx", lineNumber : 82, className : "TestAll", methodName : "testResolvePathItemNestedField"});
-		utest.Assert["is"](ref.parent,thx.ref.ObjectRef,null,{ fileName : "TestAll.hx", lineNumber : 83, className : "TestAll", methodName : "testResolvePathItemNestedField"});
-		utest.Assert["is"](ref.getRoot(),thx.ref.ArrayRef,null,{ fileName : "TestAll.hx", lineNumber : 84, className : "TestAll", methodName : "testResolvePathItemNestedField"});
-	}
-	,testResolvePath: function() {
-		var ref0 = thx.ref.Ref.resolvePath(TestAll.path0);
-		var root = ref0.getRoot();
-		var ref1 = root.resolve(TestAll.path1);
-		ref0.set(1);
-		ref1.set(2);
-		utest.Assert.same(TestAll.obj,root.get(),null,null,{ fileName : "TestAll.hx", lineNumber : 95, className : "TestAll", methodName : "testResolvePath"});
-	}
-	,testArrayRef: function() {
-		var ref = new thx.ref.ArrayRef();
-		utest.Assert.same([],ref.get(),null,null,{ fileName : "TestAll.hx", lineNumber : 100, className : "TestAll", methodName : "testArrayRef"});
-		utest.Assert.isFalse(ref.hasValue(),null,{ fileName : "TestAll.hx", lineNumber : 101, className : "TestAll", methodName : "testArrayRef"});
-		var value = ref.resolve("[0]");
-		utest.Assert.same([],ref.get(),null,null,{ fileName : "TestAll.hx", lineNumber : 103, className : "TestAll", methodName : "testArrayRef"});
-		value.set("A");
-		utest.Assert.isTrue(ref.hasValue(),null,{ fileName : "TestAll.hx", lineNumber : 105, className : "TestAll", methodName : "testArrayRef"});
-		utest.Assert.same(["A"],ref.get(),null,null,{ fileName : "TestAll.hx", lineNumber : 106, className : "TestAll", methodName : "testArrayRef"});
-		utest.Assert.raises(function() {
-			ref.resolve("path");
-		},null,null,null,{ fileName : "TestAll.hx", lineNumber : 107, className : "TestAll", methodName : "testArrayRef"});
-	}
-	,testObjectRef: function() {
-		var ref = new thx.ref.ObjectRef();
-		utest.Assert.same({ },ref.get(),null,null,{ fileName : "TestAll.hx", lineNumber : 114, className : "TestAll", methodName : "testObjectRef"});
-		utest.Assert.isFalse(ref.hasValue(),null,{ fileName : "TestAll.hx", lineNumber : 115, className : "TestAll", methodName : "testObjectRef"});
-		var value = ref.resolve("name");
-		utest.Assert.same({ },ref.get(),null,null,{ fileName : "TestAll.hx", lineNumber : 117, className : "TestAll", methodName : "testObjectRef"});
-		value.set("Franco");
-		utest.Assert.isTrue(ref.hasValue(),null,{ fileName : "TestAll.hx", lineNumber : 119, className : "TestAll", methodName : "testObjectRef"});
-		utest.Assert.same({ name : "Franco"},ref.get(),null,null,{ fileName : "TestAll.hx", lineNumber : 120, className : "TestAll", methodName : "testObjectRef"});
-		utest.Assert.raises(function() {
-			ref.resolve("[0]");
-		},null,null,null,{ fileName : "TestAll.hx", lineNumber : 121, className : "TestAll", methodName : "testObjectRef"});
-	}
-	,testObjectRefWithArray: function() {
-		var ref = thx.ref.Ref.fromValue({ arr : [0,1,2]});
-		utest.Assert.same([0,1,2],ref.resolve("arr").get(),null,null,{ fileName : "TestAll.hx", lineNumber : 128, className : "TestAll", methodName : "testObjectRefWithArray"});
-		ref.resolve("arr").remove();
-		utest.Assert.isFalse(ref.hasValue(),null,{ fileName : "TestAll.hx", lineNumber : 130, className : "TestAll", methodName : "testObjectRefWithArray"});
-	}
-	,testNestedRemove: function() {
-		var ref = thx.ref.Ref.fromValue({ arr : [0]});
-		utest.Assert.isTrue(ref.hasValue(),null,{ fileName : "TestAll.hx", lineNumber : 135, className : "TestAll", methodName : "testNestedRemove"});
-		ref.resolve("arr[0]").remove();
-		utest.Assert.isFalse(ref.hasValue(),null,{ fileName : "TestAll.hx", lineNumber : 137, className : "TestAll", methodName : "testNestedRemove"});
-	}
-	,__class__: TestAll
+	__class__: TestAll
 };
 var ValueType = { __ename__ : ["ValueType"], __constructs__ : ["TNull","TInt","TFloat","TBool","TObject","TFunction","TClass","TEnum","TUnknown"] };
 ValueType.TNull = ["TNull",0];
-ValueType.TNull.toString = $estr;
 ValueType.TNull.__enum__ = ValueType;
 ValueType.TInt = ["TInt",1];
-ValueType.TInt.toString = $estr;
 ValueType.TInt.__enum__ = ValueType;
 ValueType.TFloat = ["TFloat",2];
-ValueType.TFloat.toString = $estr;
 ValueType.TFloat.__enum__ = ValueType;
 ValueType.TBool = ["TBool",3];
-ValueType.TBool.toString = $estr;
 ValueType.TBool.__enum__ = ValueType;
 ValueType.TObject = ["TObject",4];
-ValueType.TObject.toString = $estr;
 ValueType.TObject.__enum__ = ValueType;
 ValueType.TFunction = ["TFunction",5];
-ValueType.TFunction.toString = $estr;
 ValueType.TFunction.__enum__ = ValueType;
-ValueType.TClass = function(c) { var $x = ["TClass",6,c]; $x.__enum__ = ValueType; $x.toString = $estr; return $x; };
-ValueType.TEnum = function(e) { var $x = ["TEnum",7,e]; $x.__enum__ = ValueType; $x.toString = $estr; return $x; };
+ValueType.TClass = function(c) { var $x = ["TClass",6,c]; $x.__enum__ = ValueType; return $x; };
+ValueType.TEnum = function(e) { var $x = ["TEnum",7,e]; $x.__enum__ = ValueType; return $x; };
 ValueType.TUnknown = ["TUnknown",8];
-ValueType.TUnknown.toString = $estr;
 ValueType.TUnknown.__enum__ = ValueType;
 var Type = function() { };
 Type.__name__ = ["Type"];
@@ -375,9 +244,6 @@ Type.getClass = function(o) {
 Type.getEnum = function(o) {
 	if(o == null) return null;
 	return o.__enum__;
-};
-Type.getSuperClass = function(c) {
-	return c.__super__;
 };
 Type.getClassName = function(c) {
 	var a = c.__name__;
@@ -433,12 +299,11 @@ Type.enumIndex = function(e) {
 var haxe = {};
 haxe.StackItem = { __ename__ : ["haxe","StackItem"], __constructs__ : ["CFunction","Module","FilePos","Method","LocalFunction"] };
 haxe.StackItem.CFunction = ["CFunction",0];
-haxe.StackItem.CFunction.toString = $estr;
 haxe.StackItem.CFunction.__enum__ = haxe.StackItem;
-haxe.StackItem.Module = function(m) { var $x = ["Module",1,m]; $x.__enum__ = haxe.StackItem; $x.toString = $estr; return $x; };
-haxe.StackItem.FilePos = function(s,file,line) { var $x = ["FilePos",2,s,file,line]; $x.__enum__ = haxe.StackItem; $x.toString = $estr; return $x; };
-haxe.StackItem.Method = function(classname,method) { var $x = ["Method",3,classname,method]; $x.__enum__ = haxe.StackItem; $x.toString = $estr; return $x; };
-haxe.StackItem.LocalFunction = function(v) { var $x = ["LocalFunction",4,v]; $x.__enum__ = haxe.StackItem; $x.toString = $estr; return $x; };
+haxe.StackItem.Module = function(m) { var $x = ["Module",1,m]; $x.__enum__ = haxe.StackItem; return $x; };
+haxe.StackItem.FilePos = function(s,file,line) { var $x = ["FilePos",2,s,file,line]; $x.__enum__ = haxe.StackItem; return $x; };
+haxe.StackItem.Method = function(classname,method) { var $x = ["Method",3,classname,method]; $x.__enum__ = haxe.StackItem; return $x; };
+haxe.StackItem.LocalFunction = function(v) { var $x = ["LocalFunction",4,v]; $x.__enum__ = haxe.StackItem; return $x; };
 haxe.CallStack = function() { };
 haxe.CallStack.__name__ = ["haxe","CallStack"];
 haxe.CallStack.callStack = function() {
@@ -567,63 +432,9 @@ haxe.Timer.prototype = {
 	,__class__: haxe.Timer
 };
 haxe.ds = {};
-haxe.ds.IntMap = function() {
-	this.h = { };
-};
+haxe.ds.IntMap = function() { };
 haxe.ds.IntMap.__name__ = ["haxe","ds","IntMap"];
 haxe.ds.IntMap.__interfaces__ = [IMap];
-haxe.ds.IntMap.prototype = {
-	h: null
-	,set: function(key,value) {
-		this.h[key] = value;
-	}
-	,get: function(key) {
-		return this.h[key];
-	}
-	,remove: function(key) {
-		if(!this.h.hasOwnProperty(key)) return false;
-		delete(this.h[key]);
-		return true;
-	}
-	,keys: function() {
-		var a = [];
-		for( var key in this.h ) {
-		if(this.h.hasOwnProperty(key)) a.push(key | 0);
-		}
-		return HxOverrides.iter(a);
-	}
-	,iterator: function() {
-		return { ref : this.h, it : this.keys(), hasNext : function() {
-			return this.it.hasNext();
-		}, next : function() {
-			var i = this.it.next();
-			return this.ref[i];
-		}};
-	}
-	,__class__: haxe.ds.IntMap
-};
-haxe.ds.ObjectMap = function() {
-	this.h = { };
-	this.h.__keys__ = { };
-};
-haxe.ds.ObjectMap.__name__ = ["haxe","ds","ObjectMap"];
-haxe.ds.ObjectMap.__interfaces__ = [IMap];
-haxe.ds.ObjectMap.prototype = {
-	h: null
-	,set: function(key,value) {
-		var id = key.__id__ || (key.__id__ = ++haxe.ds.ObjectMap.count);
-		this.h[id] = value;
-		this.h.__keys__[id] = key;
-	}
-	,remove: function(key) {
-		var id = key.__id__;
-		if(this.h.__keys__[id] == null) return false;
-		delete(this.h[id]);
-		delete(this.h.__keys__[id]);
-		return true;
-	}
-	,__class__: haxe.ds.ObjectMap
-};
 haxe.ds.StringMap = function() {
 	this.h = { };
 };
@@ -639,12 +450,6 @@ haxe.ds.StringMap.prototype = {
 	}
 	,exists: function(key) {
 		return this.h.hasOwnProperty("$" + key);
-	}
-	,remove: function(key) {
-		key = "$" + key;
-		if(!this.h.hasOwnProperty(key)) return false;
-		delete(this.h[key]);
-		return true;
 	}
 	,keys: function() {
 		var a = [];
@@ -813,635 +618,6 @@ js.Boot.__instanceof = function(o,cl) {
 		return o.__enum__ == cl;
 	}
 };
-var thx = {};
-thx.core = {};
-thx.core.Arrays = function() { };
-thx.core.Arrays.__name__ = ["thx","core","Arrays"];
-thx.core.Arrays.same = function(a,b,eq) {
-	if(a == null || b == null || a.length != b.length) return false;
-	if(null == eq) eq = thx.core.Function.equality;
-	var _g1 = 0;
-	var _g = a.length;
-	while(_g1 < _g) {
-		var i = _g1++;
-		if(!eq(a[i],b[i])) return false;
-	}
-	return true;
-};
-thx.core.Arrays.cross = function(a,b) {
-	var r = [];
-	var _g = 0;
-	while(_g < a.length) {
-		var va = a[_g];
-		++_g;
-		var _g1 = 0;
-		while(_g1 < b.length) {
-			var vb = b[_g1];
-			++_g1;
-			r.push([va,vb]);
-		}
-	}
-	return r;
-};
-thx.core.Arrays.crossMulti = function(a) {
-	var acopy = a.slice();
-	var result = acopy.shift().map(function(v) {
-		return [v];
-	});
-	while(acopy.length > 0) {
-		var arr = acopy.shift();
-		var tresult = result;
-		result = [];
-		var _g = 0;
-		while(_g < arr.length) {
-			var v1 = arr[_g];
-			++_g;
-			var _g1 = 0;
-			while(_g1 < tresult.length) {
-				var ar = tresult[_g1];
-				++_g1;
-				var t = ar.slice();
-				t.push(v1);
-				result.push(t);
-			}
-		}
-	}
-	return result;
-};
-thx.core.Arrays.pushIf = function(arr,cond,value) {
-	if(cond) arr.push(value);
-	return arr;
-};
-thx.core.Arrays.eachPair = function(arr,handler) {
-	var _g1 = 0;
-	var _g = arr.length;
-	while(_g1 < _g) {
-		var i = _g1++;
-		var _g3 = i;
-		var _g2 = arr.length;
-		while(_g3 < _g2) {
-			var j = _g3++;
-			if(!handler(arr[i],arr[j])) return;
-		}
-	}
-};
-thx.core.Arrays.mapi = function(arr,handler) {
-	return arr.map(handler);
-};
-thx.core.Arrays.flatMap = function(arr,callback) {
-	return thx.core.Arrays.flatten(arr.map(callback));
-};
-thx.core.Arrays.flatten = function(arr) {
-	return Array.prototype.concat.apply([],arr);
-};
-thx.core.Arrays.reduce = function(arr,callback,initial) {
-	return arr.reduce(callback,initial);
-};
-thx.core.Arrays.reducei = function(arr,callback,initial) {
-	return arr.reduce(callback,initial);
-};
-thx.core.Arrays.order = function(arr,sort) {
-	var n = arr.slice();
-	n.sort(sort);
-	return n;
-};
-thx.core.Arrays.isEmpty = function(arr) {
-	return arr.length == 0;
-};
-thx.core.Arrays.contains = function(arr,element,eq) {
-	if(null == eq) return HxOverrides.indexOf(arr,element,0) >= 0; else {
-		var _g1 = 0;
-		var _g = arr.length;
-		while(_g1 < _g) {
-			var i = _g1++;
-			if(eq(arr[i],element)) return true;
-		}
-		return false;
-	}
-};
-thx.core.Arrays.shuffle = function(a) {
-	var t = thx.core.Ints.range(a.length);
-	var arr = [];
-	while(t.length > 0) {
-		var pos = Std.random(t.length);
-		var index = t[pos];
-		t.splice(pos,1);
-		arr.push(a[index]);
-	}
-	return arr;
-};
-thx.core.Arrays.extract = function(a,f) {
-	var _g1 = 0;
-	var _g = a.length;
-	while(_g1 < _g) {
-		var i = _g1++;
-		if(f(a[i])) return a.splice(i,1)[0];
-	}
-	return null;
-};
-thx.core.Function0 = function() { };
-thx.core.Function0.__name__ = ["thx","core","Function0"];
-thx.core.Function0.noop = function() {
-};
-thx.core.Function0.join = function(fa,fb) {
-	return function() {
-		fa();
-		fb();
-	};
-};
-thx.core.Function0.once = function(f) {
-	return function() {
-		f();
-		f = function() {
-		};
-	};
-};
-thx.core.Function1 = function() { };
-thx.core.Function1.__name__ = ["thx","core","Function1"];
-thx.core.Function1.noop = function(_) {
-};
-thx.core.Function1.compose = function(fa,fb) {
-	return function(v) {
-		return fa(fb(v));
-	};
-};
-thx.core.Function1.join = function(fa,fb) {
-	return function(v) {
-		fa(v);
-		fb(v);
-	};
-};
-thx.core.Function = function() { };
-thx.core.Function.__name__ = ["thx","core","Function"];
-thx.core.Function.equality = function(a,b) {
-	return a == b;
-};
-thx.core.Ints = function() { };
-thx.core.Ints.__name__ = ["thx","core","Ints"];
-thx.core.Ints.clamp = function(v,min,max) {
-	if(v < min) return min; else if(v > max) return max; else return v;
-};
-thx.core.Ints.canParse = function(s) {
-	return thx.core.Ints.pattern_parse.match(s);
-};
-thx.core.Ints.min = function(a,b) {
-	if(a < b) return a; else return b;
-};
-thx.core.Ints.max = function(a,b) {
-	if(a > b) return a; else return b;
-};
-thx.core.Ints.parse = function(s) {
-	if(HxOverrides.substr(s,0,1) == "+") s = HxOverrides.substr(s,1,null);
-	return Std.parseInt(s);
-};
-thx.core.Ints.compare = function(a,b) {
-	return a - b;
-};
-thx.core.Ints.range = function(start,stop,step) {
-	if(step == null) step = 1;
-	if(null == stop) {
-		stop = start;
-		start = 0;
-	}
-	if((stop - start) / step == Math.POSITIVE_INFINITY) throw "infinite range";
-	var range = [];
-	var i = -1;
-	var j;
-	if(step < 0) while((j = start + step * ++i) > stop) range.push(j); else while((j = start + step * ++i) < stop) range.push(j);
-	return range;
-};
-thx.core.Iterables = function() { };
-thx.core.Iterables.__name__ = ["thx","core","Iterables"];
-thx.core.Iterables.map = function(it,f) {
-	return thx.core.Iterators.map($iterator(it)(),f);
-};
-thx.core.Iterables.eachPair = function(it,handler) {
-	return thx.core.Iterators.eachPair($iterator(it)(),handler);
-};
-thx.core.Iterables.toArray = function(it) {
-	return thx.core.Iterators.toArray($iterator(it)());
-};
-thx.core.Iterables.order = function(it,sort) {
-	return thx.core.Iterators.order($iterator(it)(),sort);
-};
-thx.core.Iterables.reduce = function(it,callback,initial) {
-	return thx.core.Iterators.reduce($iterator(it)(),callback,initial);
-};
-thx.core.Iterables.reducei = function(it,callback,initial) {
-	return thx.core.Iterators.reducei($iterator(it)(),callback,initial);
-};
-thx.core.Iterables.isEmpty = function(it) {
-	return thx.core.Iterators.isEmpty($iterator(it)());
-};
-thx.core.Iterables.filter = function(it,predicate) {
-	return thx.core.Iterators.filter($iterator(it)(),predicate);
-};
-thx.core.Iterators = function() { };
-thx.core.Iterators.__name__ = ["thx","core","Iterators"];
-thx.core.Iterators.map = function(it,f) {
-	var acc = [];
-	while( it.hasNext() ) {
-		var v = it.next();
-		acc.push(f(v));
-	}
-	return acc;
-};
-thx.core.Iterators.mapi = function(it,f) {
-	var acc = [];
-	var i = 0;
-	while( it.hasNext() ) {
-		var v = it.next();
-		acc.push(f(v,i++));
-	}
-	return acc;
-};
-thx.core.Iterators.eachPair = function(it,handler) {
-	thx.core.Arrays.eachPair(thx.core.Iterators.toArray(it),handler);
-};
-thx.core.Iterators.toArray = function(it) {
-	var items = [];
-	while( it.hasNext() ) {
-		var item = it.next();
-		items.push(item);
-	}
-	return items;
-};
-thx.core.Iterators.order = function(it,sort) {
-	var n = thx.core.Iterators.toArray(it);
-	n.sort(sort);
-	return n;
-};
-thx.core.Iterators.reduce = function(it,callback,initial) {
-	thx.core.Iterators.map(it,function(v) {
-		initial = callback(initial,v);
-	});
-	return initial;
-};
-thx.core.Iterators.reducei = function(it,callback,initial) {
-	thx.core.Iterators.mapi(it,function(v,i) {
-		initial = callback(initial,v,i);
-	});
-	return initial;
-};
-thx.core.Iterators.isEmpty = function(it) {
-	return !it.hasNext();
-};
-thx.core.Iterators.filter = function(it,predicate) {
-	return thx.core.Iterators.reduce(it,function(acc,item) {
-		if(predicate(item)) acc.push(item);
-		return acc;
-	},[]);
-};
-thx.core.Objects = function() { };
-thx.core.Objects.__name__ = ["thx","core","Objects"];
-thx.core.Objects.isEmpty = function(o) {
-	return Reflect.fields(o).length == 0;
-};
-thx.core.Types = function() { };
-thx.core.Types.__name__ = ["thx","core","Types"];
-thx.core.Types.isAnonymousObject = function(v) {
-	return Reflect.isObject(v) && null == Type.getClass(v);
-};
-thx.core.Types.sameType = function(a,b) {
-	return thx.core.ValueTypes.toString(Type["typeof"](a)) == thx.core.ValueTypes.toString(Type["typeof"](b));
-};
-thx.core.ClassTypes = function() { };
-thx.core.ClassTypes.__name__ = ["thx","core","ClassTypes"];
-thx.core.ClassTypes.toString = function(cls) {
-	return Type.getClassName(cls);
-};
-thx.core.ClassTypes["as"] = function(value,type) {
-	if(js.Boot.__instanceof(value,type)) return value; else return null;
-};
-thx.core.ValueTypes = function() { };
-thx.core.ValueTypes.__name__ = ["thx","core","ValueTypes"];
-thx.core.ValueTypes.typeAsString = function(value) {
-	return thx.core.ValueTypes.toString(Type["typeof"](value));
-};
-thx.core.ValueTypes.toString = function(type) {
-	switch(type[1]) {
-	case 1:
-		return "Int";
-	case 2:
-		return "Float";
-	case 3:
-		return "Bool";
-	case 4:
-		return "Dynamic";
-	case 5:
-		return "Function";
-	case 6:
-		var c = type[2];
-		return Type.getClassName(c);
-	case 7:
-		var e = type[2];
-		return Type.getEnumName(e);
-	default:
-		return null;
-	}
-};
-thx.core.ValueTypes.typeInheritance = function(type) {
-	switch(type[1]) {
-	case 1:
-		return ["Int"];
-	case 2:
-		return ["Float"];
-	case 3:
-		return ["Bool"];
-	case 4:
-		return ["Dynamic"];
-	case 5:
-		return ["Function"];
-	case 6:
-		var c = type[2];
-		var classes = [];
-		while(null != c) {
-			classes.push(c);
-			c = Type.getSuperClass(c);
-		}
-		return classes.map(Type.getClassName);
-	case 7:
-		var e = type[2];
-		return [Type.getEnumName(e)];
-	default:
-		return null;
-	}
-};
-thx.ref = {};
-thx.ref.BaseRef = function(parent) {
-	if(null != parent) this.parent = parent; else this.parent = thx.ref.EmptyParent.instance;
-};
-thx.ref.BaseRef.__name__ = ["thx","ref","BaseRef"];
-thx.ref.BaseRef.prototype = {
-	parent: null
-	,getRoot: function() {
-		var ref = this;
-		while(!js.Boot.__instanceof(ref.parent,thx.ref.EmptyParent)) ref = ref.parent;
-		return ref;
-	}
-	,__class__: thx.ref.BaseRef
-};
-thx.ref.IParentRef = function() { };
-thx.ref.IParentRef.__name__ = ["thx","ref","IParentRef"];
-thx.ref.IParentRef.prototype = {
-	removeChild: null
-	,__class__: thx.ref.IParentRef
-};
-thx.ref.IRef = function() { };
-thx.ref.IRef.__name__ = ["thx","ref","IRef"];
-thx.ref.IRef.prototype = {
-	parent: null
-	,get: null
-	,set: null
-	,remove: null
-	,hasValue: null
-	,resolve: null
-	,getRoot: null
-	,__class__: thx.ref.IRef
-};
-thx.ref.ArrayRef = function(parent) {
-	thx.ref.BaseRef.call(this,parent);
-	this.items = new haxe.ds.IntMap();
-	this.inverse = new haxe.ds.ObjectMap();
-};
-thx.ref.ArrayRef.__name__ = ["thx","ref","ArrayRef"];
-thx.ref.ArrayRef.__interfaces__ = [thx.ref.IParentRef,thx.ref.IRef];
-thx.ref.ArrayRef.__super__ = thx.ref.BaseRef;
-thx.ref.ArrayRef.prototype = $extend(thx.ref.BaseRef.prototype,{
-	items: null
-	,inverse: null
-	,get: function() {
-		var _g = this;
-		var res = [];
-		thx.core.Arrays.order(thx.core.Iterators.toArray(this.items.keys()),thx.core.Ints.compare).map(function(i) {
-			return _g.items.get(i);
-		}).map(function(ref) {
-			if(ref.hasValue()) res.push(ref.get());
-		});
-		return res;
-	}
-	,set: function(value) {
-		var _g = this;
-		if(!((value instanceof Array) && value.__enum__ == null)) throw "value \"" + Std.string(value) + "\" is not an array";
-		value.map(function(v,i) {
-			var ref = _g.items.get(i);
-			if(null == ref) {
-				var value1 = ref = thx.ref.Ref.fromValue(v,_g);
-				_g.items.set(i,value1);
-				_g.inverse.set(ref,i);
-			} else ref.set(v);
-		});
-	}
-	,remove: function() {
-		var $it0 = this.items.iterator();
-		while( $it0.hasNext() ) {
-			var ref = $it0.next();
-			ref.remove();
-		}
-		this.parent.removeChild(this);
-	}
-	,removeChild: function(child) {
-		var i = this.inverse.h[child.__id__];
-		if(null == i) throw "\"" + Std.string(child) + "\" is not child of \"" + Std.string(this) + "\"";
-		this.items.remove(i);
-		this.inverse.remove(child);
-	}
-	,hasValue: function() {
-		var $it0 = this.items.iterator();
-		while( $it0.hasNext() ) {
-			var ref = $it0.next();
-			if(ref.hasValue()) return true;
-		}
-		return false;
-	}
-	,resolve: function(path,terminal) {
-		if(terminal == null) terminal = true;
-		if(path == "") return this;
-		if(!thx.ref.Ref.reIndex.match(path)) throw "unable to resolve \"" + path + "\" for ArrayRef";
-		var index = Std.parseInt(thx.ref.Ref.reIndex.matched(1));
-		var rest = thx.ref.Ref.reIndex.matchedRight();
-		var ref = this.items.get(index);
-		if(null == ref) {
-			var value = ref = thx.ref.Ref.fromPath(rest,this,terminal);
-			this.items.set(index,value);
-			this.inverse.set(ref,index);
-		}
-		return ref.resolve(rest,terminal);
-	}
-	,__class__: thx.ref.ArrayRef
-});
-thx.ref.EmptyParent = function() {
-};
-thx.ref.EmptyParent.__name__ = ["thx","ref","EmptyParent"];
-thx.ref.EmptyParent.__interfaces__ = [thx.ref.IParentRef];
-thx.ref.EmptyParent.prototype = {
-	removeChild: function(child) {
-	}
-	,__class__: thx.ref.EmptyParent
-};
-thx.ref.ObjectRef = function(parent) {
-	thx.ref.BaseRef.call(this,parent);
-	this.fields = new haxe.ds.StringMap();
-	this.inverse = new haxe.ds.ObjectMap();
-};
-thx.ref.ObjectRef.__name__ = ["thx","ref","ObjectRef"];
-thx.ref.ObjectRef.__interfaces__ = [thx.ref.IParentRef,thx.ref.IRef];
-thx.ref.ObjectRef.__super__ = thx.ref.BaseRef;
-thx.ref.ObjectRef.prototype = $extend(thx.ref.BaseRef.prototype,{
-	fields: null
-	,inverse: null
-	,get: function() {
-		var _g = this;
-		var o = { };
-		thx.core.Iterators.map(this.fields.keys(),function(key) {
-			var ref = _g.fields.get(key);
-			if(!ref.hasValue()) return;
-			Reflect.setField(o,key,ref.get());
-		});
-		return o;
-	}
-	,set: function(obj) {
-		var _g = this;
-		if(!(Reflect.isObject(obj) && null == Type.getClass(obj))) throw "object \"" + Std.string(obj) + "\" is not an anonymous object";
-		Reflect.fields(obj).map(function(field) {
-			var ref = _g.fields.get(field);
-			var value = Reflect.field(obj,field);
-			if(null == ref) {
-				ref = thx.ref.Ref.fromValue(value,_g);
-				_g.fields.set(field,ref);
-				_g.inverse.set(ref,field);
-			} else ref.set(value);
-		});
-	}
-	,hasValue: function() {
-		var $it0 = this.fields.iterator();
-		while( $it0.hasNext() ) {
-			var ref = $it0.next();
-			if(ref.hasValue()) return true;
-		}
-		return false;
-	}
-	,remove: function() {
-		thx.core.Iterators.map(this.fields.iterator(),function(ref) {
-			ref.remove();
-		});
-		this.parent.removeChild(this);
-	}
-	,removeChild: function(child) {
-		var key = this.inverse.h[child.__id__];
-		if(null == key) throw "\"" + Std.string(child) + "\" is not child of \"" + Std.string(this) + "\"";
-		this.inverse.remove(child);
-		this.fields.remove(key);
-	}
-	,resolve: function(path,terminal) {
-		if(terminal == null) terminal = true;
-		if(path == "") return this;
-		if(!thx.ref.Ref.reField.match(path)) throw "unable to resolve \"" + path + "\" for ObjectRef";
-		var field = thx.ref.Ref.reField.matched(1);
-		var rest = thx.ref.Ref.reField.matchedRight();
-		var ref = this.fields.get(field);
-		if(null == ref) {
-			var value = ref = thx.ref.Ref.fromPath(rest,this,terminal);
-			this.fields.set(field,value);
-			this.inverse.set(ref,field);
-		}
-		return ref.resolve(rest,terminal);
-	}
-	,__class__: thx.ref.ObjectRef
-});
-thx.ref.Ref = function() { };
-thx.ref.Ref.__name__ = ["thx","ref","Ref"];
-thx.ref.Ref.fromValue = function(value,parent) {
-	if(null == parent) parent = thx.ref.EmptyParent.instance;
-	var ref;
-	if((value instanceof Array) && value.__enum__ == null) ref = new thx.ref.ArrayRef(parent); else if(Reflect.isObject(value) && null == Type.getClass(value)) ref = new thx.ref.ObjectRef(parent); else ref = new thx.ref.ValueRef(parent);
-	ref.set(value);
-	return ref;
-};
-thx.ref.Ref.fromPath = function(path,parent,terminal) {
-	if(terminal == null) terminal = true;
-	if(null == parent) parent = thx.ref.EmptyParent.instance;
-	if(path == "") if(terminal) return new thx.ref.ValueRef(parent); else return new thx.ref.UnknownRef(parent); else if(thx.ref.Ref.reField.match(path)) return new thx.ref.ObjectRef(parent); else if(thx.ref.Ref.reIndex.match(path)) return new thx.ref.ArrayRef(parent); else throw "invalid path \"" + path + "\"";
-};
-thx.ref.Ref.resolvePath = function(path,parent,terminal) {
-	if(terminal == null) terminal = true;
-	var ref = thx.ref.Ref.fromPath(path,parent,terminal);
-	return ref.resolve(path);
-};
-thx.ref.UnknownRef = function(parent) {
-	this.hasRef = false;
-	thx.ref.BaseRef.call(this,parent);
-};
-thx.ref.UnknownRef.__name__ = ["thx","ref","UnknownRef"];
-thx.ref.UnknownRef.__interfaces__ = [thx.ref.IParentRef,thx.ref.IRef];
-thx.ref.UnknownRef.__super__ = thx.ref.BaseRef;
-thx.ref.UnknownRef.prototype = $extend(thx.ref.BaseRef.prototype,{
-	ref: null
-	,hasRef: null
-	,get: function() {
-		if(this.hasRef) return this.ref.get(); else return null;
-	}
-	,set: function(value) {
-		if(this.hasRef) this.ref.set(value); else {
-			this.hasRef = true;
-			this.ref = thx.ref.Ref.fromValue(value,this);
-		}
-	}
-	,remove: function() {
-		if(this.hasRef) this.ref.remove();
-		this.parent.removeChild(this);
-	}
-	,removeChild: function(child) {
-		if(this.hasRef) {
-			this.ref = null;
-			this.hasRef = false;
-		}
-	}
-	,hasValue: function() {
-		return this.hasRef && this.ref.hasValue();
-	}
-	,resolve: function(path,terminal) {
-		if(terminal == null) terminal = true;
-		if(this.hasRef) return this.ref.resolve(path,terminal);
-		if(path == "") return this;
-		this.hasRef = true;
-		this.ref = thx.ref.Ref.fromPath(path,this,terminal);
-		return this.ref.resolve(path,terminal);
-	}
-	,__class__: thx.ref.UnknownRef
-});
-thx.ref.ValueRef = function(parent) {
-	this._hasValue = false;
-	thx.ref.BaseRef.call(this,parent);
-};
-thx.ref.ValueRef.__name__ = ["thx","ref","ValueRef"];
-thx.ref.ValueRef.__interfaces__ = [thx.ref.IRef];
-thx.ref.ValueRef.__super__ = thx.ref.BaseRef;
-thx.ref.ValueRef.prototype = $extend(thx.ref.BaseRef.prototype,{
-	_hasValue: null
-	,value: null
-	,get: function() {
-		return this.value;
-	}
-	,set: function(value) {
-		this.value = value;
-		this._hasValue = true;
-	}
-	,remove: function() {
-		this.value = null;
-		this._hasValue = false;
-		this.parent.removeChild(this);
-	}
-	,hasValue: function() {
-		return this._hasValue;
-	}
-	,resolve: function(path,terminal) {
-		if(terminal == null) terminal = true;
-		if(path != "") throw "unable to resolve path \"" + path + "\" on ValueRef";
-		return this;
-	}
-	,__class__: thx.ref.ValueRef
-});
 var utest = {};
 utest.Assert = function() { };
 utest.Assert.__name__ = ["utest","Assert"];
@@ -1483,7 +659,7 @@ utest.Assert.floatEquals = function(expected,value,approx,msg,pos) {
 	return utest.Assert.isTrue(utest.Assert._floatEquals(expected,value,approx),msg,pos);
 };
 utest.Assert._floatEquals = function(expected,value,approx) {
-	if(Math.isNaN(expected)) return Math.isNaN(value); else if(Math.isNaN(value)) return false; else if(!Math.isFinite(expected) && !Math.isFinite(value)) return expected > 0 == value > 0;
+	if(isNaN(expected)) return isNaN(value); else if(isNaN(value)) return false; else if(!isFinite(expected) && !isFinite(value)) return expected > 0 == value > 0;
 	if(null == approx) approx = 1e-5;
 	return Math.abs(value - expected) < approx;
 };
@@ -1916,18 +1092,17 @@ utest.Assert.typeToString = function(t) {
 	return "<unable to retrieve type name>";
 };
 utest.Assertation = { __ename__ : ["utest","Assertation"], __constructs__ : ["Success","Failure","Error","SetupError","TeardownError","TimeoutError","AsyncError","Warning"] };
-utest.Assertation.Success = function(pos) { var $x = ["Success",0,pos]; $x.__enum__ = utest.Assertation; $x.toString = $estr; return $x; };
-utest.Assertation.Failure = function(msg,pos) { var $x = ["Failure",1,msg,pos]; $x.__enum__ = utest.Assertation; $x.toString = $estr; return $x; };
-utest.Assertation.Error = function(e,stack) { var $x = ["Error",2,e,stack]; $x.__enum__ = utest.Assertation; $x.toString = $estr; return $x; };
-utest.Assertation.SetupError = function(e,stack) { var $x = ["SetupError",3,e,stack]; $x.__enum__ = utest.Assertation; $x.toString = $estr; return $x; };
-utest.Assertation.TeardownError = function(e,stack) { var $x = ["TeardownError",4,e,stack]; $x.__enum__ = utest.Assertation; $x.toString = $estr; return $x; };
-utest.Assertation.TimeoutError = function(missedAsyncs,stack) { var $x = ["TimeoutError",5,missedAsyncs,stack]; $x.__enum__ = utest.Assertation; $x.toString = $estr; return $x; };
-utest.Assertation.AsyncError = function(e,stack) { var $x = ["AsyncError",6,e,stack]; $x.__enum__ = utest.Assertation; $x.toString = $estr; return $x; };
-utest.Assertation.Warning = function(msg) { var $x = ["Warning",7,msg]; $x.__enum__ = utest.Assertation; $x.toString = $estr; return $x; };
+utest.Assertation.Success = function(pos) { var $x = ["Success",0,pos]; $x.__enum__ = utest.Assertation; return $x; };
+utest.Assertation.Failure = function(msg,pos) { var $x = ["Failure",1,msg,pos]; $x.__enum__ = utest.Assertation; return $x; };
+utest.Assertation.Error = function(e,stack) { var $x = ["Error",2,e,stack]; $x.__enum__ = utest.Assertation; return $x; };
+utest.Assertation.SetupError = function(e,stack) { var $x = ["SetupError",3,e,stack]; $x.__enum__ = utest.Assertation; return $x; };
+utest.Assertation.TeardownError = function(e,stack) { var $x = ["TeardownError",4,e,stack]; $x.__enum__ = utest.Assertation; return $x; };
+utest.Assertation.TimeoutError = function(missedAsyncs,stack) { var $x = ["TimeoutError",5,missedAsyncs,stack]; $x.__enum__ = utest.Assertation; return $x; };
+utest.Assertation.AsyncError = function(e,stack) { var $x = ["AsyncError",6,e,stack]; $x.__enum__ = utest.Assertation; return $x; };
+utest.Assertation.Warning = function(msg) { var $x = ["Warning",7,msg]; $x.__enum__ = utest.Assertation; return $x; };
 utest._Dispatcher = {};
 utest._Dispatcher.EventException = { __ename__ : ["utest","_Dispatcher","EventException"], __constructs__ : ["StopPropagation"] };
 utest._Dispatcher.EventException.StopPropagation = ["StopPropagation",0];
-utest._Dispatcher.EventException.StopPropagation.toString = $estr;
 utest._Dispatcher.EventException.StopPropagation.__enum__ = utest._Dispatcher.EventException;
 utest.Dispatcher = function() {
 	this.handlers = new Array();
@@ -2404,23 +1579,17 @@ utest.ui.common.FixtureResult.prototype = {
 };
 utest.ui.common.HeaderDisplayMode = { __ename__ : ["utest","ui","common","HeaderDisplayMode"], __constructs__ : ["AlwaysShowHeader","NeverShowHeader","ShowHeaderWithResults"] };
 utest.ui.common.HeaderDisplayMode.AlwaysShowHeader = ["AlwaysShowHeader",0];
-utest.ui.common.HeaderDisplayMode.AlwaysShowHeader.toString = $estr;
 utest.ui.common.HeaderDisplayMode.AlwaysShowHeader.__enum__ = utest.ui.common.HeaderDisplayMode;
 utest.ui.common.HeaderDisplayMode.NeverShowHeader = ["NeverShowHeader",1];
-utest.ui.common.HeaderDisplayMode.NeverShowHeader.toString = $estr;
 utest.ui.common.HeaderDisplayMode.NeverShowHeader.__enum__ = utest.ui.common.HeaderDisplayMode;
 utest.ui.common.HeaderDisplayMode.ShowHeaderWithResults = ["ShowHeaderWithResults",2];
-utest.ui.common.HeaderDisplayMode.ShowHeaderWithResults.toString = $estr;
 utest.ui.common.HeaderDisplayMode.ShowHeaderWithResults.__enum__ = utest.ui.common.HeaderDisplayMode;
 utest.ui.common.SuccessResultsDisplayMode = { __ename__ : ["utest","ui","common","SuccessResultsDisplayMode"], __constructs__ : ["AlwaysShowSuccessResults","NeverShowSuccessResults","ShowSuccessResultsWithNoErrors"] };
 utest.ui.common.SuccessResultsDisplayMode.AlwaysShowSuccessResults = ["AlwaysShowSuccessResults",0];
-utest.ui.common.SuccessResultsDisplayMode.AlwaysShowSuccessResults.toString = $estr;
 utest.ui.common.SuccessResultsDisplayMode.AlwaysShowSuccessResults.__enum__ = utest.ui.common.SuccessResultsDisplayMode;
 utest.ui.common.SuccessResultsDisplayMode.NeverShowSuccessResults = ["NeverShowSuccessResults",1];
-utest.ui.common.SuccessResultsDisplayMode.NeverShowSuccessResults.toString = $estr;
 utest.ui.common.SuccessResultsDisplayMode.NeverShowSuccessResults.__enum__ = utest.ui.common.SuccessResultsDisplayMode;
 utest.ui.common.SuccessResultsDisplayMode.ShowSuccessResultsWithNoErrors = ["ShowSuccessResultsWithNoErrors",2];
-utest.ui.common.SuccessResultsDisplayMode.ShowSuccessResultsWithNoErrors.toString = $estr;
 utest.ui.common.SuccessResultsDisplayMode.ShowSuccessResultsWithNoErrors.__enum__ = utest.ui.common.SuccessResultsDisplayMode;
 utest.ui.common.IReport = function() { };
 utest.ui.common.IReport.__name__ = ["utest","ui","common","IReport"];
@@ -3184,15 +2353,6 @@ function $bind(o,m) { if( m == null ) return null; if( m.__id__ == null ) m.__id
 if(Array.prototype.indexOf) HxOverrides.indexOf = function(a,o,i) {
 	return Array.prototype.indexOf.call(a,o,i);
 };
-Math.NaN = Number.NaN;
-Math.NEGATIVE_INFINITY = Number.NEGATIVE_INFINITY;
-Math.POSITIVE_INFINITY = Number.POSITIVE_INFINITY;
-Math.isFinite = function(i) {
-	return isFinite(i);
-};
-Math.isNaN = function(i1) {
-	return isNaN(i1);
-};
 String.prototype.__class__ = String;
 String.__name__ = ["String"];
 Array.__name__ = ["Array"];
@@ -3206,24 +2366,6 @@ var Bool = Boolean;
 Bool.__ename__ = ["Bool"];
 var Class = { __name__ : ["Class"]};
 var Enum = { };
-if(Array.prototype.map == null) Array.prototype.map = function(f) {
-	var a = [];
-	var _g1 = 0;
-	var _g = this.length;
-	while(_g1 < _g) {
-		var i = _g1++;
-		a[i] = f(this[i]);
-	}
-	return a;
-};
-TestAll.obj = { a : [{ b : [[1],[2]]}]};
-TestAll.path0 = "a[0].b[0][0]";
-TestAll.path1 = "a[0].b[1][0]";
-haxe.ds.ObjectMap.count = 0;
-thx.core.Ints.pattern_parse = new EReg("^[+-]?(\\d+|0x[0-9A-F]+)$","i");
-thx.ref.EmptyParent.instance = new thx.ref.EmptyParent();
-thx.ref.Ref.reField = new EReg("^\\.?([^.\\[]+)","");
-thx.ref.Ref.reIndex = new EReg("^\\[(\\d+)\\]","");
 utest.TestHandler.POLLING_TIME = 10;
 utest.ui.text.HtmlReport.platform = "javascript";
 TestAll.main();
