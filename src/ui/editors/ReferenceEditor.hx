@@ -10,10 +10,10 @@ import ui.editors.TextEditor;
 using steamer.dom.Dom;
 
 class ReferenceEditor extends TextEditor {
-	public function new(options : TextEditorOptions) {
-		if(null == options.inputEvent)
-			options.inputEvent = function(component : Component) return component.el.produceEvent('blur');
-		super(options);
-		component.el.classList.add('reference');
-	}
+  public function new(options : TextEditorOptions) {
+    if(null == options.inputEvent)
+      options.inputEvent = function(component : Component) return component.el.produceEvent('blur');
+    super(options);
+    component.el.classList.add('reference');
+  }
 }

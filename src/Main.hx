@@ -5,21 +5,21 @@ import ui.fragments.FragmentProperties;
 import ui.*;
 
 class Main {
-	public static function main() {
-		Dom.ready().then(function(_) {
-			var values    = new ValueProperties(),
-				fragments = new FragmentProperties(),
-				mapper    = new FragmentMapper(fragments, values);
+  public static function main() {
+    Dom.ready().then(function(_) {
+      var values    = new ValueProperties(),
+          fragments = new FragmentProperties(),
+          mapper    = new FragmentMapper(fragments, values);
 
-			PropertyFeeder.feedProperties(values);
-			PropertyFeeder.feedFragments(fragments);
+      PropertyFeeder.feedProperties(values);
+      PropertyFeeder.feedFragments(fragments);
 
-			var container = Query.first('.container'),
-				data      = new Data({}),
-				model     = new Model(data);
+      var container = Query.first('.container'),
+        data      = new Data({}),
+        model     = new Model(data);
 
-			// Card
-			Card.create(model, container, mapper);
-		});
-	}
+      // Card
+      Card.create(model, container, mapper);
+    });
+  }
 }

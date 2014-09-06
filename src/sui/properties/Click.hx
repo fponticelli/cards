@@ -6,11 +6,11 @@ import sui.components.Component;
 using steamer.dom.Dom;
 
 class Click extends Property {
-	public var clicks(default, null) : Producer<Event>;
-	public function new(component : Component) {
-		super(component, 'click');
-		var tuple = component.el.produceEvent('click');
-		clicks = tuple.producer;
-		cancels.push(tuple.cancel);
-	}
+  public var clicks(default, null) : Producer<Event>;
+  public function new(component : Component) {
+    super(component, 'click');
+    var tuple = component.el.produceEvent('click');
+    clicks = tuple.producer;
+    cancels.push(tuple.cancel);
+  }
 }

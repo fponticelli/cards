@@ -4,6 +4,9 @@
 -cp /Users/francoponticelli/projects/steamer/src
 -cp /Users/francoponticelli/projects/extern/promhx/src/main
 -lib thx.core
+-lib thx.promise
+-lib thx.stream
+-lib thx.stream.dom
 -debug
 -D source-map-content
 #--js-flatten ????

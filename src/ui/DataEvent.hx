@@ -1,5 +1,5 @@
 package ui;
 
 enum DataEvent {
-	SetValue(path : String, value : Dynamic, type : SchemaType);
+  SetValue(path : String, value : Dynamic, type : SchemaType);
 }

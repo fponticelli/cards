@@ -1,42 +1,42 @@
 article
-	background linear-gradient(bottom, #eee, #f0f0f6)
-	font-size 1.8em
-	a
-		color link-color
-		text-decoration none
-		&:hover
-			text-decoration underline
+  background linear-gradient(bottom, #eee, #f0f0f6)
+  font-size 1.8em
+  a
+    color link-color
+    text-decoration none
+    &:hover
+      text-decoration underline
 
-	.strong
-		font-weight bold
-	.emphasis
-		font-style italic
-	.strike
-		text-decoration line-through
+  .strong
+    font-weight bold
+  .emphasis
+    font-style italic
+  .strike
+    text-decoration line-through
 
-	[title]
-		&:before
-			display block
-			position absolute
-			top -0.2em
-			left -0.5em
-			z-index -1
-			color tooltip-marker-color
-			content "\f069";
-			font-family: FontAwesome;
-			font-style: normal;
-			font-weight: normal;
-			line-height: 1;
-			font-size: 0.3em
-			font-smoothing: antialiased;
+  [title]
+    &:before
+      display block
+      position absolute
+      top -0.2em
+      left -0.5em
+      z-index -1
+      color tooltip-marker-color
+      content "\f069";
+      font-family: FontAwesome;
+      font-style: normal;
+      font-weight: normal;
+      line-height: 1;
+      font-size: 0.3em
+      font-smoothing: antialiased;
 
-	.content
-		white-space pre-wrap
-		position relative
-		border-bottom 2px solid transparent
-		&.empty
-			padding 0 0.25em
-			background-color marker-background-light
-		&.empty:focus, &:focus
-			background-color marker-background-color
-			border-bottom 2px solid marker-color
+  .content
+    white-space pre-wrap
+    position relative
+    border-bottom 2px solid transparent
+    &.empty
+      padding 0 0.25em
+      background-color marker-background-light
+    &.empty:focus, &:focus
+      background-color marker-background-color
+      border-bottom 2px solid marker-color

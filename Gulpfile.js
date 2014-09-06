@@ -1,18 +1,18 @@
 var gulp    = require('gulp'),
-	changed = require('gulp-changed'),
-	stylus  = require('gulp-stylus'),
-	nib     = require('nib');
+  changed = require('gulp-changed'),
+  stylus  = require('gulp-stylus'),
+  nib     = require('nib');
 
 var paths = {
-	src : {
-		stylus : 'src/main.styl',
-		styluses : 'src/**/*.styl'
-		// assets: './assets/**/*.*'
-	},
-	dst : {
-		stylus : 'bin/css/'
-		// assets: './www/assets'
-	}
+  src : {
+    stylus : 'src/main.styl',
+    styluses : 'src/**/*.styl'
+    // assets: './assets/**/*.*'
+  },
+  dst : {
+    stylus : 'bin/css/'
+    // assets: './www/assets'
+  }
 }
 
 gulp.task('stylus', function() {
