@@ -1,5 +1,5 @@
-(function ($hx_exports) { "use strict";
-$hx_exports.promhx = $hx_exports.promhx || {};
+(function () { "use strict";
+var $estr = function() { return js.Boot.__string_rec(this,''); };
 function $extend(from, fields) {
 	function Inherit() {} Inherit.prototype = from; var proto = new Inherit();
 	for (var name in fields) proto[name] = fields[name];
@@ -169,34 +169,10 @@ Lambda.has = function(it,elt) {
 	}
 	return false;
 };
-var List = function() {
-	this.length = 0;
-};
-List.__name__ = ["List"];
-List.prototype = {
-	h: null
-	,q: null
-	,length: null
-	,add: function(item) {
-		var x = [item];
-		if(this.h == null) this.h = x; else this.q[1] = x;
-		this.q = x;
-		this.length++;
-	}
-	,pop: function() {
-		if(this.h == null) return null;
-		var x = this.h[0];
-		this.h = this.h[1];
-		if(this.h == null) this.q = null;
-		this.length--;
-		return x;
-	}
-	,__class__: List
-};
 var Main = function() { };
 Main.__name__ = ["Main"];
 Main.main = function() {
-	dom.Dom.ready().then(function(_) {
+	thx.stream.dom.Dom.ready().success(function(_) {
 		var values = new sui.properties.ValueProperties();
 		var fragments = new ui.fragments.FragmentProperties();
 		var mapper = new ui.fragments.FragmentMapper(fragments,values);
@@ -327,20 +303,27 @@ StringTools.replace = function(s,sub,by) {
 };
 var ValueType = { __ename__ : ["ValueType"], __constructs__ : ["TNull","TInt","TFloat","TBool","TObject","TFunction","TClass","TEnum","TUnknown"] };
 ValueType.TNull = ["TNull",0];
+ValueType.TNull.toString = $estr;
 ValueType.TNull.__enum__ = ValueType;
 ValueType.TInt = ["TInt",1];
+ValueType.TInt.toString = $estr;
 ValueType.TInt.__enum__ = ValueType;
 ValueType.TFloat = ["TFloat",2];
+ValueType.TFloat.toString = $estr;
 ValueType.TFloat.__enum__ = ValueType;
 ValueType.TBool = ["TBool",3];
+ValueType.TBool.toString = $estr;
 ValueType.TBool.__enum__ = ValueType;
 ValueType.TObject = ["TObject",4];
+ValueType.TObject.toString = $estr;
 ValueType.TObject.__enum__ = ValueType;
 ValueType.TFunction = ["TFunction",5];
+ValueType.TFunction.toString = $estr;
 ValueType.TFunction.__enum__ = ValueType;
-ValueType.TClass = function(c) { var $x = ["TClass",6,c]; $x.__enum__ = ValueType; return $x; };
-ValueType.TEnum = function(e) { var $x = ["TEnum",7,e]; $x.__enum__ = ValueType; return $x; };
+ValueType.TClass = function(c) { var $x = ["TClass",6,c]; $x.__enum__ = ValueType; $x.toString = $estr; return $x; };
+ValueType.TEnum = function(e) { var $x = ["TEnum",7,e]; $x.__enum__ = ValueType; $x.toString = $estr; return $x; };
 ValueType.TUnknown = ["TUnknown",8];
+ValueType.TUnknown.toString = $estr;
 ValueType.TUnknown.__enum__ = ValueType;
 var Type = function() { };
 Type.__name__ = ["Type"];
@@ -420,15 +403,6 @@ dom.Html.parseAll = function(html) {
 dom.Html.parse = function(html) {
 	return dom.Html.parseList(html)[0];
 };
-dom.Dom = function() { };
-dom.Dom.__name__ = ["dom","Dom"];
-dom.Dom.ready = function() {
-	var deferred = new promhx.Promise();
-	window.document.addEventListener("DOMContentLoaded",function(_) {
-		deferred.resolve(thx.core.Nil.nil);
-	},false);
-	return deferred;
-};
 dom.Query = function() { };
 dom.Query.__name__ = ["dom","Query"];
 dom.Query.first = function(selector,ctx) {
@@ -449,11 +423,12 @@ dom._Dom.H.toArray = function(list) {
 var haxe = {};
 haxe.StackItem = { __ename__ : ["haxe","StackItem"], __constructs__ : ["CFunction","Module","FilePos","Method","LocalFunction"] };
 haxe.StackItem.CFunction = ["CFunction",0];
+haxe.StackItem.CFunction.toString = $estr;
 haxe.StackItem.CFunction.__enum__ = haxe.StackItem;
-haxe.StackItem.Module = function(m) { var $x = ["Module",1,m]; $x.__enum__ = haxe.StackItem; return $x; };
-haxe.StackItem.FilePos = function(s,file,line) { var $x = ["FilePos",2,s,file,line]; $x.__enum__ = haxe.StackItem; return $x; };
-haxe.StackItem.Method = function(classname,method) { var $x = ["Method",3,classname,method]; $x.__enum__ = haxe.StackItem; return $x; };
-haxe.StackItem.LocalFunction = function(v) { var $x = ["LocalFunction",4,v]; $x.__enum__ = haxe.StackItem; return $x; };
+haxe.StackItem.Module = function(m) { var $x = ["Module",1,m]; $x.__enum__ = haxe.StackItem; $x.toString = $estr; return $x; };
+haxe.StackItem.FilePos = function(s,file,line) { var $x = ["FilePos",2,s,file,line]; $x.__enum__ = haxe.StackItem; $x.toString = $estr; return $x; };
+haxe.StackItem.Method = function(classname,method) { var $x = ["Method",3,classname,method]; $x.__enum__ = haxe.StackItem; $x.toString = $estr; return $x; };
+haxe.StackItem.LocalFunction = function(v) { var $x = ["LocalFunction",4,v]; $x.__enum__ = haxe.StackItem; $x.toString = $estr; return $x; };
 haxe.CallStack = function() { };
 haxe.CallStack.__name__ = ["haxe","CallStack"];
 haxe.CallStack.callStack = function() {
@@ -563,8 +538,9 @@ haxe.ds.ObjectMap.prototype = {
 	,__class__: haxe.ds.ObjectMap
 };
 haxe.ds.Option = { __ename__ : ["haxe","ds","Option"], __constructs__ : ["Some","None"] };
-haxe.ds.Option.Some = function(v) { var $x = ["Some",0,v]; $x.__enum__ = haxe.ds.Option; return $x; };
+haxe.ds.Option.Some = function(v) { var $x = ["Some",0,v]; $x.__enum__ = haxe.ds.Option; $x.toString = $estr; return $x; };
 haxe.ds.Option.None = ["None",1];
+haxe.ds.Option.None.toString = $estr;
 haxe.ds.Option.None.__enum__ = haxe.ds.Option;
 haxe.ds.StringMap = function() {
 	this.h = { };
@@ -758,316 +734,6 @@ js.Boot.__instanceof = function(o,cl) {
 js.Boot.__cast = function(o,t) {
 	if(js.Boot.__instanceof(o,t)) return o; else throw "Cannot cast " + Std.string(o) + " to " + Std.string(t);
 };
-var promhx = {};
-promhx.base = {};
-promhx.base.AsyncBase = function(errorf) {
-	this.id = promhx.base.AsyncBase.id_ctr += 1;
-	this._resolved = false;
-	this._pending = false;
-	this._fulfilled = false;
-	this._update = [];
-	this._error = [];
-	if(errorf != null) this._error.push(errorf);
-};
-promhx.base.AsyncBase.__name__ = ["promhx","base","AsyncBase"];
-promhx.base.AsyncBase.link = function(current,next,f) {
-	current._update.push({ async : next, linkf : function(x) {
-		next.resolve(f(x));
-	}});
-	promhx.base.AsyncBase.immediateLinkUpdate(current,next,f);
-};
-promhx.base.AsyncBase.immediateLinkUpdate = function(current,next,f) {
-	if(current._resolved && !current._pending) try {
-		next.resolve(f(current._val));
-	} catch( e ) {
-		next.handleError(e);
-	}
-};
-promhx.base.AsyncBase.linkAll = function(all,next) {
-	var cthen = function(arr,current,v) {
-		if(arr.length == 0 || promhx.base.AsyncBase.allFulfilled(arr)) {
-			var vals;
-			var _g = [];
-			var $it0 = $iterator(all)();
-			while( $it0.hasNext() ) {
-				var a = $it0.next();
-				_g.push(a == current?v:a._val);
-			}
-			vals = _g;
-			next.resolve(vals);
-		}
-		return null;
-	};
-	var $it1 = $iterator(all)();
-	while( $it1.hasNext() ) {
-		var a1 = $it1.next();
-		a1._update.push({ async : next, linkf : (function(f,a11,a2) {
-			return function(v1) {
-				return f(a11,a2,v1);
-			};
-		})(cthen,(function($this) {
-			var $r;
-			var _g1 = [];
-			var $it2 = $iterator(all)();
-			while( $it2.hasNext() ) {
-				var a21 = $it2.next();
-				if(a21 != a1) _g1.push(a21);
-			}
-			$r = _g1;
-			return $r;
-		}(this)),a1)});
-	}
-	if(promhx.base.AsyncBase.allFulfilled(all)) next.resolve((function($this) {
-		var $r;
-		var _g2 = [];
-		var $it3 = $iterator(all)();
-		while( $it3.hasNext() ) {
-			var a3 = $it3.next();
-			_g2.push(a3._val);
-		}
-		$r = _g2;
-		return $r;
-	}(this)));
-};
-promhx.base.AsyncBase.pipeLink = function(current,ret,f) {
-	var linked = false;
-	var linkf = function(x) {
-		if(!linked) {
-			linked = true;
-			var pipe_ret = f(x);
-			pipe_ret._update.push({ async : ret, linkf : $bind(ret,ret.resolve)});
-			promhx.base.AsyncBase.immediateLinkUpdate(pipe_ret,ret,function(x1) {
-				return x1;
-			});
-		}
-	};
-	current._update.push({ async : ret, linkf : linkf});
-	if(current._resolved && !current._pending) try {
-		linkf(current._val);
-	} catch( e ) {
-		ret.handleError(e);
-	}
-};
-promhx.base.AsyncBase.allResolved = function($as) {
-	var $it0 = $iterator($as)();
-	while( $it0.hasNext() ) {
-		var a = $it0.next();
-		if(!a._resolved) return false;
-	}
-	return true;
-};
-promhx.base.AsyncBase.allFulfilled = function($as) {
-	var $it0 = $iterator($as)();
-	while( $it0.hasNext() ) {
-		var a = $it0.next();
-		if(!a._fulfilled) return false;
-	}
-	return true;
-};
-promhx.base.AsyncBase.prototype = {
-	id: null
-	,_val: null
-	,_resolved: null
-	,_fulfilled: null
-	,_pending: null
-	,_update: null
-	,_error: null
-	,_errorMap: null
-	,catchError: function(f) {
-		this._error.push(f);
-		return this;
-	}
-	,errorThen: function(f) {
-		this._errorMap = f;
-		return this;
-	}
-	,isResolved: function() {
-		return this._resolved;
-	}
-	,isFulfilled: function() {
-		return this._fulfilled;
-	}
-	,isPending: function() {
-		return this._pending;
-	}
-	,resolve: function(val) {
-		this._resolve(val);
-	}
-	,_resolve: function(val,cleanup) {
-		var _g = this;
-		if(this._pending) return promhx.base.EventLoop.enqueue((function(f,a1,a2) {
-			return function() {
-				return f(a1,a2);
-			};
-		})($bind(this,this._resolve),val,cleanup));
-		this._resolved = true;
-		this._pending = true;
-		promhx.base.EventLoop.queue.add(function() {
-			_g._val = val;
-			var _g1 = 0;
-			var _g2 = _g._update;
-			while(_g1 < _g2.length) {
-				var up = _g2[_g1];
-				++_g1;
-				try {
-					up.linkf(val);
-				} catch( e ) {
-					up.async.handleError(e);
-				}
-			}
-			_g._fulfilled = true;
-			_g._pending = false;
-			if(cleanup != null) cleanup();
-		});
-		promhx.base.EventLoop.continueOnNextLoop();
-	}
-	,handleError: function(error) {
-		var _g = this;
-		var update_errors = function(e) {
-			if(_g._error.length > 0) {
-				var _g1 = 0;
-				var _g2 = _g._error;
-				while(_g1 < _g2.length) {
-					var ef = _g2[_g1];
-					++_g1;
-					ef(e);
-				}
-			} else if(_g._update.length > 0) {
-				var _g11 = 0;
-				var _g21 = _g._update;
-				while(_g11 < _g21.length) {
-					var up = _g21[_g11];
-					++_g11;
-					up.async.handleError(e);
-				}
-			} else throw e;
-		};
-		promhx.base.EventLoop.queue.add(function() {
-			if(_g._errorMap != null) try {
-				_g.resolve(_g._errorMap(error));
-			} catch( e1 ) {
-				update_errors(e1);
-			} else update_errors(error);
-		});
-		promhx.base.EventLoop.continueOnNextLoop();
-	}
-	,then: function(f) {
-		var ret = new promhx.base.AsyncBase();
-		promhx.base.AsyncBase.link(this,ret,f);
-		return ret;
-	}
-	,unlink: function(to) {
-		var _g = this;
-		promhx.base.EventLoop.queue.add(function() {
-			_g._update = _g._update.filter(function(x) {
-				return x.async != to;
-			});
-		});
-		promhx.base.EventLoop.continueOnNextLoop();
-	}
-	,isLinked: function(to) {
-		var updated = false;
-		var _g = 0;
-		var _g1 = this._update;
-		while(_g < _g1.length) {
-			var u = _g1[_g];
-			++_g;
-			if(u.async == to) return true;
-		}
-		return updated;
-	}
-	,__class__: promhx.base.AsyncBase
-};
-promhx.Promise = $hx_exports.promhx.Promise = function(errorf) {
-	promhx.base.AsyncBase.call(this,errorf);
-	this._rejected = false;
-};
-promhx.Promise.__name__ = ["promhx","Promise"];
-promhx.Promise.whenAll = function(itb) {
-	var ret = new promhx.Promise();
-	promhx.base.AsyncBase.linkAll(itb,ret);
-	return ret;
-};
-promhx.Promise.promise = function(_val,errorf) {
-	var ret = new promhx.Promise(errorf);
-	ret.resolve(_val);
-	return ret;
-};
-promhx.Promise.__super__ = promhx.base.AsyncBase;
-promhx.Promise.prototype = $extend(promhx.base.AsyncBase.prototype,{
-	_rejected: null
-	,isRejected: function() {
-		return this._rejected;
-	}
-	,reject: function(e) {
-		this._rejected = true;
-		this.handleError(e);
-	}
-	,resolve: function(val) {
-		if(this._resolved) {
-			var msg = "Promise has already been resolved";
-			throw promhx.error.PromiseError.AlreadyResolved(msg);
-		}
-		this._resolve(val);
-	}
-	,then: function(f) {
-		var ret = new promhx.Promise();
-		promhx.base.AsyncBase.link(this,ret,f);
-		return ret;
-	}
-	,unlink: function(to) {
-		var _g = this;
-		promhx.base.EventLoop.queue.add(function() {
-			if(!_g._fulfilled) {
-				var msg = "Downstream Promise is not fullfilled";
-				_g.handleError(promhx.error.PromiseError.DownstreamNotFullfilled(msg));
-			} else _g._update = _g._update.filter(function(x) {
-				return x.async != to;
-			});
-		});
-		promhx.base.EventLoop.continueOnNextLoop();
-	}
-	,pipe: function(f) {
-		var ret = new promhx.Promise();
-		promhx.base.AsyncBase.pipeLink(this,ret,f);
-		return ret;
-	}
-	,__class__: promhx.Promise
-});
-promhx.base.EventLoop = function() { };
-promhx.base.EventLoop.__name__ = ["promhx","base","EventLoop"];
-promhx.base.EventLoop.enqueue = function(eqf) {
-	promhx.base.EventLoop.queue.add(eqf);
-	promhx.base.EventLoop.continueOnNextLoop();
-};
-promhx.base.EventLoop.set_nextLoop = function(f) {
-	if(promhx.base.EventLoop.nextLoop != null) throw "nextLoop has already been set"; else promhx.base.EventLoop.nextLoop = f;
-	return promhx.base.EventLoop.nextLoop;
-};
-promhx.base.EventLoop.queueLength = function() {
-	return promhx.base.EventLoop.queue.length;
-};
-promhx.base.EventLoop.finish = function(max_iterations) {
-	if(max_iterations == null) max_iterations = 1000;
-	while(promhx.base.EventLoop.queue.length > 0 && max_iterations-- > 0) (promhx.base.EventLoop.queue.pop())();
-	return promhx.base.EventLoop.queue.length == 0;
-};
-promhx.base.EventLoop.clear = function() {
-	promhx.base.EventLoop.queue = new List();
-};
-promhx.base.EventLoop.continueOnNextLoop = function() {
-	var f = function() {
-		if(promhx.base.EventLoop.queue.length > 0) {
-			(promhx.base.EventLoop.queue.pop())();
-			promhx.base.EventLoop.continueOnNextLoop();
-		}
-	};
-	if(promhx.base.EventLoop.nextLoop != null) promhx.base.EventLoop.nextLoop(f); else setImmediate(f);
-};
-promhx.error = {};
-promhx.error.PromiseError = { __ename__ : ["promhx","error","PromiseError"], __constructs__ : ["AlreadyResolved","DownstreamNotFullfilled"] };
-promhx.error.PromiseError.AlreadyResolved = function(message) { var $x = ["AlreadyResolved",0,message]; $x.__enum__ = promhx.error.PromiseError; return $x; };
-promhx.error.PromiseError.DownstreamNotFullfilled = function(message) { var $x = ["DownstreamNotFullfilled",1,message]; $x.__enum__ = promhx.error.PromiseError; return $x; };
 var steamer = {};
 steamer._Consumer = {};
 steamer._Consumer.Consumer_Impl_ = function() { };
@@ -1825,14 +1491,16 @@ steamer.Bus.prototype = {
 	,__class__: steamer.Bus
 };
 steamer.Pulse = { __ename__ : ["steamer","Pulse"], __constructs__ : ["Emit","End","Fail"] };
-steamer.Pulse.Emit = function(value) { var $x = ["Emit",0,value]; $x.__enum__ = steamer.Pulse; return $x; };
+steamer.Pulse.Emit = function(value) { var $x = ["Emit",0,value]; $x.__enum__ = steamer.Pulse; $x.toString = $estr; return $x; };
 steamer.Pulse.End = ["End",1];
+steamer.Pulse.End.toString = $estr;
 steamer.Pulse.End.__enum__ = steamer.Pulse;
-steamer.Pulse.Fail = function(error) { var $x = ["Fail",2,error]; $x.__enum__ = steamer.Pulse; return $x; };
+steamer.Pulse.Fail = function(error) { var $x = ["Fail",2,error]; $x.__enum__ = steamer.Pulse; $x.toString = $estr; return $x; };
 var thx = {};
 thx.core = {};
 thx.core.Nil = { __ename__ : ["thx","core","Nil"], __constructs__ : ["nil"] };
 thx.core.Nil.nil = ["nil",0];
+thx.core.Nil.nil.toString = $estr;
 thx.core.Nil.nil.__enum__ = thx.core.Nil;
 steamer.Pulses = function() { };
 steamer.Pulses.__name__ = ["steamer","Pulses"];
@@ -2399,7 +2067,7 @@ thx.Assert.floatEquals = function(expected,value,approx,msg,pos) {
 	return thx.Assert.isTrue(thx.Assert._floatEquals(expected,value,approx),msg,pos);
 };
 thx.Assert._floatEquals = function(expected,value,approx) {
-	if(isNaN(expected)) return isNaN(value); else if(isNaN(value)) return false; else if(!isFinite(expected) && !isFinite(value)) return expected > 0 == value > 0;
+	if(Math.isNaN(expected)) return Math.isNaN(value); else if(Math.isNaN(value)) return false; else if(!Math.isFinite(expected) && !Math.isFinite(value)) return expected > 0 == value > 0;
 	if(null == approx) approx = 1e-5;
 	return Math.abs(value - expected) < approx;
 };
@@ -2970,12 +2638,12 @@ thx.core.Arrays.extract = function(a,f) {
 	return null;
 };
 thx.core.Assertion = { __ename__ : ["thx","core","Assertion"], __constructs__ : ["Success","Failure","Error","PreConditionError","PostConditionError","Warning"] };
-thx.core.Assertion.Success = function(pos) { var $x = ["Success",0,pos]; $x.__enum__ = thx.core.Assertion; return $x; };
-thx.core.Assertion.Failure = function(msg,pos) { var $x = ["Failure",1,msg,pos]; $x.__enum__ = thx.core.Assertion; return $x; };
-thx.core.Assertion.Error = function(e,stack) { var $x = ["Error",2,e,stack]; $x.__enum__ = thx.core.Assertion; return $x; };
-thx.core.Assertion.PreConditionError = function(e,stack) { var $x = ["PreConditionError",3,e,stack]; $x.__enum__ = thx.core.Assertion; return $x; };
-thx.core.Assertion.PostConditionError = function(e,stack) { var $x = ["PostConditionError",4,e,stack]; $x.__enum__ = thx.core.Assertion; return $x; };
-thx.core.Assertion.Warning = function(msg) { var $x = ["Warning",5,msg]; $x.__enum__ = thx.core.Assertion; return $x; };
+thx.core.Assertion.Success = function(pos) { var $x = ["Success",0,pos]; $x.__enum__ = thx.core.Assertion; $x.toString = $estr; return $x; };
+thx.core.Assertion.Failure = function(msg,pos) { var $x = ["Failure",1,msg,pos]; $x.__enum__ = thx.core.Assertion; $x.toString = $estr; return $x; };
+thx.core.Assertion.Error = function(e,stack) { var $x = ["Error",2,e,stack]; $x.__enum__ = thx.core.Assertion; $x.toString = $estr; return $x; };
+thx.core.Assertion.PreConditionError = function(e,stack) { var $x = ["PreConditionError",3,e,stack]; $x.__enum__ = thx.core.Assertion; $x.toString = $estr; return $x; };
+thx.core.Assertion.PostConditionError = function(e,stack) { var $x = ["PostConditionError",4,e,stack]; $x.__enum__ = thx.core.Assertion; $x.toString = $estr; return $x; };
+thx.core.Assertion.Warning = function(msg) { var $x = ["Warning",5,msg]; $x.__enum__ = thx.core.Assertion; $x.toString = $estr; return $x; };
 thx.core.Function0 = function() { };
 thx.core.Function0.__name__ = ["thx","core","Function0"];
 thx.core.Function0.noop = function() {
@@ -3040,7 +2708,7 @@ thx.core.Ints.range = function(start,stop,step) {
 		stop = start;
 		start = 0;
 	}
-	if((stop - start) / step == Infinity) throw "infinite range";
+	if((stop - start) / step == Math.POSITIVE_INFINITY) throw "infinite range";
 	var range = [];
 	var i = -1;
 	var j;
@@ -3374,6 +3042,20 @@ thx.core.Strings.ellipsis = function(s,maxlen,symbol) {
 thx.core.Strings.compare = function(a,b) {
 	if(a < b) return -1; else if(a > b) return 1; else return 0;
 };
+thx.core.Timer = function() { };
+thx.core.Timer.__name__ = ["thx","core","Timer"];
+thx.core.Timer.repeat = function(callback,delay) {
+	return setInterval(callback,delay);
+};
+thx.core.Timer.delay = function(callback,delay) {
+	return setTimeout(callback,delay);
+};
+thx.core.Timer.immediate = function(callback) {
+	return setImmediate(callback);
+};
+thx.core.Timer.clear = function(id) {
+	return clearTimeout(id);
+};
 thx.core._Tuple = {};
 thx.core._Tuple.Tuple0_Impl_ = function() { };
 thx.core._Tuple.Tuple0_Impl_.__name__ = ["thx","core","_Tuple","Tuple0_Impl_"];
@@ -3631,6 +3313,421 @@ thx.core.UUID.create = function() {
 	}
 	return s.join("");
 };
+thx.promise = {};
+thx.promise.Deferred = function() {
+	this.promise = new thx.promise.Promise();
+};
+thx.promise.Deferred.__name__ = ["thx","promise","Deferred"];
+thx.promise.Deferred.prototype = {
+	promise: null
+	,rejectWith: function(error) {
+		return this.fulfill(thx.promise.PromiseValue.Failure(thx.core.Error.fromDynamic(error,{ fileName : "Deferred.hx", lineNumber : 13, className : "thx.promise.Deferred", methodName : "rejectWith"})));
+	}
+	,reject: function(error) {
+		return this.fulfill(thx.promise.PromiseValue.Failure(error));
+	}
+	,resolve: function(value) {
+		return this.fulfill(thx.promise.PromiseValue.Success(value));
+	}
+	,fulfill: function(result) {
+		return this.promise.setState(result);
+	}
+	,toString: function() {
+		return "Deferred";
+	}
+	,__class__: thx.promise.Deferred
+};
+thx.promise.Promise = function() {
+	this.handlers = [];
+	this.state = haxe.ds.Option.None;
+};
+thx.promise.Promise.__name__ = ["thx","promise","Promise"];
+thx.promise.Promise.create = function(callback) {
+	var deferred = new thx.promise.Deferred();
+	callback($bind(deferred,deferred.resolve),$bind(deferred,deferred.reject));
+	return deferred.promise;
+};
+thx.promise.Promise.fulfilled = function(callback) {
+	var deferred = new thx.promise.Deferred();
+	callback($bind(deferred,deferred.fulfill));
+	return deferred.promise;
+};
+thx.promise.Promise.all = function(arr) {
+	return thx.promise.Promise.create(function(resolve,reject) {
+		var results = [];
+		var counter = 0;
+		var hasError = false;
+		arr.map(function(p,i) {
+			p.either(function(value) {
+				if(hasError) return;
+				results[i] = value;
+				counter++;
+				if(counter == arr.length) resolve(results);
+			},function(err) {
+				if(hasError) return;
+				hasError = true;
+				reject(err);
+			});
+		});
+	});
+};
+thx.promise.Promise.value = function(v) {
+	return thx.promise.Promise.create(function(resolve,_) {
+		resolve(v);
+	});
+};
+thx.promise.Promise.error = function(err) {
+	return thx.promise.Promise.create(function(_,reject) {
+		reject(err);
+	});
+};
+thx.promise.Promise.prototype = {
+	handlers: null
+	,state: null
+	,then: function(handler) {
+		this.handlers.push(handler);
+		this.update();
+		return this;
+	}
+	,either: function(success,failure) {
+		this.then(function(r) {
+			switch(r[1]) {
+			case 1:
+				var value = r[2];
+				success(value);
+				break;
+			case 0:
+				var error = r[2];
+				failure(error);
+				break;
+			}
+		});
+		return this;
+	}
+	,success: function(success) {
+		return this.either(success,function(_) {
+		});
+	}
+	,failure: function(failure) {
+		return this.either(function(_) {
+		},failure);
+	}
+	,throwFailure: function() {
+		return this.failure(function(err) {
+			throw err;
+		});
+	}
+	,map: function(handler) {
+		var _g = this;
+		return thx.promise.Promise.fulfilled(function(fulfill) {
+			_g.then(function(result) {
+				handler(result).then(fulfill);
+			});
+		});
+	}
+	,mapEither: function(success,failure) {
+		return this.map(function(result) {
+			switch(result[1]) {
+			case 1:
+				var value = result[2];
+				return success(value);
+			case 0:
+				var error = result[2];
+				return failure(error);
+			}
+		});
+	}
+	,mapSuccess: function(success) {
+		return this.mapEither(success,function(err) {
+			return thx.promise.Promise.error(err);
+		});
+	}
+	,mapFailure: function(failure) {
+		return this.mapEither(function(value) {
+			return thx.promise.Promise.value(value);
+		},failure);
+	}
+	,always: function(handler) {
+		this.then(function(_) {
+			handler();
+		});
+	}
+	,mapAlways: function(handler) {
+		this.map(function(_) {
+			return handler();
+		});
+	}
+	,isResolved: function() {
+		{
+			var _g = this.state;
+			switch(_g[1]) {
+			case 1:
+				return false;
+			case 0:
+				switch(_g[2][1]) {
+				case 0:
+					return false;
+				default:
+					return true;
+				}
+				break;
+			}
+		}
+	}
+	,isFailure: function() {
+		{
+			var _g = this.state;
+			switch(_g[1]) {
+			case 1:
+				return false;
+			case 0:
+				switch(_g[2][1]) {
+				case 1:
+					return false;
+				default:
+					return true;
+				}
+				break;
+			}
+		}
+	}
+	,isComplete: function() {
+		{
+			var _g = this.state;
+			switch(_g[1]) {
+			case 1:
+				return false;
+			case 0:
+				return true;
+			}
+		}
+	}
+	,toString: function() {
+		return "Promise";
+	}
+	,setState: function(newstate) {
+		{
+			var _g = this.state;
+			switch(_g[1]) {
+			case 1:
+				this.state = haxe.ds.Option.Some(newstate);
+				break;
+			case 0:
+				var r = _g[2];
+				throw new thx.core.Error("promise was already " + Std.string(r) + ", can't apply new state " + Std.string(newstate),null,{ fileName : "Promise.hx", lineNumber : 128, className : "thx.promise.Promise", methodName : "setState"});
+				break;
+			}
+		}
+		this.update();
+		return this;
+	}
+	,update: function() {
+		{
+			var _g = this.state;
+			switch(_g[1]) {
+			case 1:
+				break;
+			case 0:
+				var result = _g[2];
+				var handler;
+				while(null != (handler = this.handlers.shift())) handler(result);
+				break;
+			}
+		}
+	}
+	,__class__: thx.promise.Promise
+};
+thx.promise.Promises = function() { };
+thx.promise.Promises.__name__ = ["thx","promise","Promises"];
+thx.promise.Promises.log = function(promise,prefix) {
+	if(prefix == null) prefix = "";
+	return promise.either(function(r) {
+		haxe.Log.trace("" + prefix + " SUCCESS: " + Std.string(r),{ fileName : "Promise.hx", lineNumber : 148, className : "thx.promise.Promises", methodName : "log"});
+	},function(e) {
+		haxe.Log.trace("" + prefix + " ERROR: " + e.toString(),{ fileName : "Promise.hx", lineNumber : 149, className : "thx.promise.Promises", methodName : "log"});
+	});
+};
+thx.promise.Promises.delay = function(p,interval) {
+	return p.map(function(r) {
+		return thx.promise.Promise.fulfilled(null == interval?function(fulfill) {
+			thx.core.Timer.immediate((function(f,a1) {
+				return function() {
+					return f(a1);
+				};
+			})(fulfill,r));
+		}:function(fulfill1) {
+			thx.core.Timer.delay((function(f1,a11) {
+				return function() {
+					return f1(a11);
+				};
+			})(fulfill1,r),interval);
+		});
+	});
+};
+thx.promise.Promises.join = function(p1,p2) {
+	return thx.promise.Promise.create(function(resolve,reject) {
+		var hasError = false;
+		var counter = 0;
+		var v1 = null;
+		var v2 = null;
+		var complete = function() {
+			if(counter < 2) return;
+			resolve({ _0 : v1, _1 : v2});
+		};
+		var handleError = function(error) {
+			if(hasError) return;
+			hasError = true;
+			reject(error);
+		};
+		p1.either(function(v) {
+			if(hasError) return;
+			counter++;
+			v1 = v;
+			complete();
+		},handleError);
+		p2.either(function(v3) {
+			if(hasError) return;
+			counter++;
+			v2 = v3;
+			complete();
+		},handleError);
+	});
+};
+thx.promise.PromiseTuple6 = function() { };
+thx.promise.PromiseTuple6.__name__ = ["thx","promise","PromiseTuple6"];
+thx.promise.PromiseTuple6.mapTuple = function(promise,success) {
+	return promise.mapSuccess(function(t) {
+		return success(t._0,t._1,t._2,t._3,t._4,t._5);
+	});
+};
+thx.promise.PromiseTuple6.tuple = function(promise,success,failure) {
+	return promise.either(function(t) {
+		success(t._0,t._1,t._2,t._3,t._4,t._5);
+	},null == failure?function(_) {
+	}:failure);
+};
+thx.promise.PromiseTuple5 = function() { };
+thx.promise.PromiseTuple5.__name__ = ["thx","promise","PromiseTuple5"];
+thx.promise.PromiseTuple5.join = function(p1,p2) {
+	return thx.promise.Promise.create(function(resolve,reject) {
+		thx.promise.Promises.join(p1,p2).either(function(t) {
+			resolve((function($this) {
+				var $r;
+				var this1 = t._0;
+				$r = { _0 : this1._0, _1 : this1._1, _2 : this1._2, _3 : this1._3, _4 : this1._4, _5 : t._1};
+				return $r;
+			}(this)));
+		},function(e) {
+			reject(e);
+		});
+	});
+};
+thx.promise.PromiseTuple5.mapTuple = function(promise,success) {
+	return promise.mapSuccess(function(t) {
+		return success(t._0,t._1,t._2,t._3,t._4);
+	});
+};
+thx.promise.PromiseTuple5.tuple = function(promise,success,failure) {
+	return promise.either(function(t) {
+		success(t._0,t._1,t._2,t._3,t._4);
+	},null == failure?function(_) {
+	}:failure);
+};
+thx.promise.PromiseTuple4 = function() { };
+thx.promise.PromiseTuple4.__name__ = ["thx","promise","PromiseTuple4"];
+thx.promise.PromiseTuple4.join = function(p1,p2) {
+	return thx.promise.Promise.create(function(resolve,reject) {
+		thx.promise.Promises.join(p1,p2).either(function(t) {
+			resolve((function($this) {
+				var $r;
+				var this1 = t._0;
+				$r = { _0 : this1._0, _1 : this1._1, _2 : this1._2, _3 : this1._3, _4 : t._1};
+				return $r;
+			}(this)));
+		},function(e) {
+			reject(e);
+		});
+	});
+};
+thx.promise.PromiseTuple4.mapTuple = function(promise,success) {
+	return promise.mapSuccess(function(t) {
+		return success(t._0,t._1,t._2,t._3);
+	});
+};
+thx.promise.PromiseTuple4.tuple = function(promise,success,failure) {
+	return promise.either(function(t) {
+		success(t._0,t._1,t._2,t._3);
+	},null == failure?function(_) {
+	}:failure);
+};
+thx.promise.PromiseTuple3 = function() { };
+thx.promise.PromiseTuple3.__name__ = ["thx","promise","PromiseTuple3"];
+thx.promise.PromiseTuple3.join = function(p1,p2) {
+	return thx.promise.Promise.create(function(resolve,reject) {
+		thx.promise.Promises.join(p1,p2).either(function(t) {
+			resolve((function($this) {
+				var $r;
+				var this1 = t._0;
+				$r = { _0 : this1._0, _1 : this1._1, _2 : this1._2, _3 : t._1};
+				return $r;
+			}(this)));
+		},function(e) {
+			reject(e);
+		});
+	});
+};
+thx.promise.PromiseTuple3.mapTuple = function(promise,success) {
+	return promise.mapSuccess(function(t) {
+		return success(t._0,t._1,t._2);
+	});
+};
+thx.promise.PromiseTuple3.tuple = function(promise,success,failure) {
+	return promise.either(function(t) {
+		success(t._0,t._1,t._2);
+	},null == failure?function(_) {
+	}:failure);
+};
+thx.promise.PromiseTuple2 = function() { };
+thx.promise.PromiseTuple2.__name__ = ["thx","promise","PromiseTuple2"];
+thx.promise.PromiseTuple2.join = function(p1,p2) {
+	return thx.promise.Promise.create(function(resolve,reject) {
+		thx.promise.Promises.join(p1,p2).either(function(t) {
+			resolve((function($this) {
+				var $r;
+				var this1 = t._0;
+				$r = { _0 : this1._0, _1 : this1._1, _2 : t._1};
+				return $r;
+			}(this)));
+		},function(e) {
+			reject(e);
+		});
+	});
+};
+thx.promise.PromiseTuple2.mapTuple = function(promise,success) {
+	return promise.mapSuccess(function(t) {
+		return success(t._0,t._1);
+	});
+};
+thx.promise.PromiseTuple2.tuple = function(promise,success,failure) {
+	return promise.either(function(t) {
+		success(t._0,t._1);
+	},null == failure?function(_) {
+	}:failure);
+};
+thx.promise.PromiseNil = function() { };
+thx.promise.PromiseNil.__name__ = ["thx","promise","PromiseNil"];
+thx.promise.PromiseNil.join = function(p1,p2) {
+	return thx.promise.Promise.create(function(resolve,reject) {
+		thx.promise.Promises.join(p1,p2).either(function(t) {
+			resolve(t._1);
+		},function(e) {
+			reject(e);
+		});
+	});
+};
+thx.promise.PromiseValue = { __ename__ : ["thx","promise","PromiseValue"], __constructs__ : ["Failure","Success"] };
+thx.promise.PromiseValue.Failure = function(err) { var $x = ["Failure",0,err]; $x.__enum__ = thx.promise.PromiseValue; $x.toString = $estr; return $x; };
+thx.promise.PromiseValue.Success = function(value) { var $x = ["Success",1,value]; $x.__enum__ = thx.promise.PromiseValue; $x.toString = $estr; return $x; };
 thx.ref = {};
 thx.ref.BaseRef = function(parent) {
 	if(null != parent) this.parent = parent; else this.parent = thx.ref.EmptyParent.instance;
@@ -3906,6 +4003,582 @@ thx.ref.ValueRef.prototype = $extend(thx.ref.BaseRef.prototype,{
 	}
 	,__class__: thx.ref.ValueRef
 });
+thx.stream = {};
+thx.stream.Emitter = function(init) {
+	this.init = init;
+};
+thx.stream.Emitter.__name__ = ["thx","stream","Emitter"];
+thx.stream.Emitter.create = function(init) {
+	return new thx.stream.Emitter(init);
+};
+thx.stream.Emitter.prototype = {
+	init: null
+	,sign: function(subscriber) {
+		var stream = new thx.stream.Stream(subscriber);
+		this.init(stream);
+		return stream;
+	}
+	,subscribe: function(pulse,fail,end) {
+		if(null != pulse) pulse = pulse; else pulse = function(_) {
+		};
+		if(null != fail) fail = fail; else fail = function(_1) {
+		};
+		if(null != end) end = end; else end = function(_2) {
+		};
+		var stream = new thx.stream.Stream(function(r) {
+			switch(r[1]) {
+			case 0:
+				var v = r[2];
+				pulse(v);
+				break;
+			case 2:
+				var e = r[2];
+				fail(e);
+				break;
+			case 1:
+				var c = r[2];
+				end(c);
+				break;
+			}
+		});
+		this.init(stream);
+		return stream;
+	}
+	,feed: function(value) {
+		var stream = new thx.stream.Stream(null);
+		stream.subscriber = function(r) {
+			switch(r[1]) {
+			case 0:
+				var v = r[2];
+				value.set(v);
+				break;
+			case 2:
+				var e = r[2];
+				stream.fail(e);
+				break;
+			case 1:
+				var c = r[2];
+				if(c) stream.cancel(); else stream.end();
+				break;
+			}
+		};
+		value.upStreams.push(stream);
+		stream.addCleanUp(function() {
+			HxOverrides.remove(value.upStreams,stream);
+		});
+		this.init(stream);
+		return stream;
+	}
+	,delay: function(time) {
+		var _g = this;
+		return new thx.stream.Emitter(function(stream) {
+			var id = setTimeout(function() {
+				_g.init(stream);
+			},time);
+			stream.addCleanUp((function(f,id1) {
+				return function() {
+					return f(id1);
+				};
+			})(thx.core.Timer.clear,id));
+		});
+	}
+	,map: function(f) {
+		var _g = this;
+		return new thx.stream.Emitter(function(stream) {
+			_g.init(new thx.stream.Stream(function(r) {
+				switch(r[1]) {
+				case 0:
+					var v = r[2];
+					f(v).either(function(vout) {
+						stream.pulse(vout);
+					},function(err) {
+						stream.fail(err);
+					});
+					break;
+				case 2:
+					var e = r[2];
+					stream.fail(e);
+					break;
+				case 1:
+					switch(r[2]) {
+					case true:
+						stream.cancel();
+						break;
+					case false:
+						stream.end();
+						break;
+					}
+					break;
+				}
+			}));
+		});
+	}
+	,mapValue: function(f) {
+		return this.map(function(v) {
+			return thx.promise.Promise.value(f(v));
+		});
+	}
+	,takeUntil: function(f) {
+		var _g = this;
+		return new thx.stream.Emitter(function(stream) {
+			var instream = null;
+			instream = new thx.stream.Stream(function(r) {
+				switch(r[1]) {
+				case 0:
+					var v = r[2];
+					f(v).either(function(c) {
+						if(c) stream.pulse(v); else {
+							instream.end();
+							stream.end();
+						}
+					},$bind(stream,stream.fail));
+					break;
+				case 2:
+					var e = r[2];
+					instream.fail(e);
+					stream.fail(e);
+					break;
+				case 1:
+					switch(r[2]) {
+					case true:
+						instream.cancel();
+						stream.cancel();
+						break;
+					case false:
+						instream.end();
+						stream.end();
+						break;
+					}
+					break;
+				}
+			});
+			_g.init(instream);
+		});
+	}
+	,take: function(count) {
+		return this.takeUntil((function($this) {
+			var $r;
+			var counter = 0;
+			$r = function(_) {
+				return thx.promise.Promise.value(counter++ < count);
+			};
+			return $r;
+		}(this)));
+	}
+	,audit: function(handler) {
+		return this.mapValue(function(v) {
+			handler(v);
+			return v;
+		});
+	}
+	,filter: function(f) {
+		var _g = this;
+		return new thx.stream.Emitter(function(stream) {
+			_g.init(new thx.stream.Stream(function(r) {
+				switch(r[1]) {
+				case 0:
+					var v = r[2];
+					f(v).either(function(c) {
+						if(c) stream.pulse(v);
+					},function(err) {
+						stream.fail(err);
+					});
+					break;
+				case 2:
+					var e = r[2];
+					stream.fail(e);
+					break;
+				case 1:
+					switch(r[2]) {
+					case true:
+						stream.cancel();
+						break;
+					case false:
+						stream.end();
+						break;
+					}
+					break;
+				}
+			}));
+		});
+	}
+	,filterValue: function(f) {
+		return this.filter(function(v) {
+			return thx.promise.Promise.value(f(v));
+		});
+	}
+	,concat: function(other) {
+		var _g = this;
+		return new thx.stream.Emitter(function(stream) {
+			_g.init(new thx.stream.Stream(function(r) {
+				switch(r[1]) {
+				case 0:
+					var v = r[2];
+					stream.pulse(v);
+					break;
+				case 2:
+					var e = r[2];
+					stream.fail(e);
+					break;
+				case 1:
+					switch(r[2]) {
+					case true:
+						stream.cancel();
+						break;
+					case false:
+						other.init(stream);
+						break;
+					}
+					break;
+				}
+			}));
+		});
+	}
+	,merge: function(other) {
+		var _g = this;
+		return new thx.stream.Emitter(function(stream) {
+			_g.init(stream);
+			other.init(stream);
+		});
+	}
+	,reduce: function(acc,f) {
+		var _g = this;
+		return new thx.stream.Emitter(function(stream) {
+			_g.init(new thx.stream.Stream(function(r) {
+				switch(r[1]) {
+				case 0:
+					var v = r[2];
+					acc = f(acc,v);
+					stream.pulse(acc);
+					break;
+				case 2:
+					var e = r[2];
+					stream.fail(e);
+					break;
+				case 1:
+					switch(r[2]) {
+					case true:
+						stream.cancel();
+						break;
+					case false:
+						stream.end();
+						break;
+					}
+					break;
+				}
+			}));
+		});
+	}
+	,toOption: function() {
+		return this.mapValue(function(v) {
+			if(null == v) return haxe.ds.Option.None; else return haxe.ds.Option.Some(v);
+		});
+	}
+	,toNil: function() {
+		return this.mapValue(function(_) {
+			return thx.core.Nil.nil;
+		});
+	}
+	,toTrue: function() {
+		return this.mapValue(function(_) {
+			return true;
+		});
+	}
+	,toFalse: function() {
+		return this.mapValue(function(_) {
+			return false;
+		});
+	}
+	,toValue: function(value) {
+		return this.mapValue(function(_) {
+			return value;
+		});
+	}
+	,log: function(prefix,posInfo) {
+		if(prefix == null) prefix = ""; else prefix = "" + prefix + ": ";
+		return this.mapValue(function(v) {
+			haxe.Log.trace("" + prefix + Std.string(v),posInfo);
+			return v;
+		});
+	}
+	,withValue: function(expected) {
+		return this.filterValue(null == expected?function(v) {
+			return v != null;
+		}:function(v1) {
+			return v1 == expected;
+		});
+	}
+	,__class__: thx.stream.Emitter
+};
+thx.stream.EmitterStrings = function() { };
+thx.stream.EmitterStrings.__name__ = ["thx","stream","EmitterStrings"];
+thx.stream.EmitterStrings.toBool = function(emitter) {
+	return emitter.mapValue(function(s) {
+		return s != null && s != "";
+	});
+};
+thx.stream.EmitterOptions = function() { };
+thx.stream.EmitterOptions.__name__ = ["thx","stream","EmitterOptions"];
+thx.stream.EmitterOptions.filterOption = function(emitter) {
+	return emitter.filterValue(function(opt) {
+		return thx.core.Options.toBool(opt);
+	}).mapValue(function(opt1) {
+		return thx.core.Options.toValue(opt1);
+	});
+};
+thx.stream.EmitterOptions.toValue = function(emitter) {
+	return emitter.mapValue(function(opt) {
+		return thx.core.Options.toValue(opt);
+	});
+};
+thx.stream.EmitterOptions.toBool = function(emitter) {
+	return emitter.mapValue(function(opt) {
+		return thx.core.Options.toBool(opt);
+	});
+};
+thx.stream.Emitters = function() { };
+thx.stream.Emitters.__name__ = ["thx","stream","Emitters"];
+thx.stream.Emitters.skipNull = function(emitter) {
+	return emitter.filterValue(function(value) {
+		return null != value;
+	});
+};
+thx.stream.EmitterBools = function() { };
+thx.stream.EmitterBools.__name__ = ["thx","stream","EmitterBools"];
+thx.stream.EmitterBools.negate = function(emitter) {
+	return emitter.mapValue(function(v) {
+		return !v;
+	});
+};
+thx.stream.EmitterEmitters = function() { };
+thx.stream.EmitterEmitters.__name__ = ["thx","stream","EmitterEmitters"];
+thx.stream.EmitterEmitters.flatMap = function(emitter) {
+	return new thx.stream.Emitter(function(stream) {
+		emitter.init(new thx.stream.Stream(function(r) {
+			switch(r[1]) {
+			case 0:
+				var arr = r[2];
+				arr.map($bind(stream,stream.pulse));
+				break;
+			case 2:
+				var e = r[2];
+				stream.fail(e);
+				break;
+			case 1:
+				switch(r[2]) {
+				case true:
+					stream.cancel();
+					break;
+				case false:
+					stream.end();
+					break;
+				}
+				break;
+			}
+		}));
+	});
+};
+thx.stream.EmitterValues = function() { };
+thx.stream.EmitterValues.__name__ = ["thx","stream","EmitterValues"];
+thx.stream.EmitterValues.left = function(emitter) {
+	return emitter.mapValue(function(v) {
+		return v._0;
+	});
+};
+thx.stream.EmitterValues.right = function(emitter) {
+	return emitter.mapValue(function(v) {
+		return v._1;
+	});
+};
+thx.stream.IStream = function() { };
+thx.stream.IStream.__name__ = ["thx","stream","IStream"];
+thx.stream.IStream.prototype = {
+	cancel: null
+	,__class__: thx.stream.IStream
+};
+thx.stream.Stream = function(subscriber) {
+	this.subscriber = subscriber;
+	this.cleanUps = [];
+	this.finalized = false;
+	this.canceled = false;
+};
+thx.stream.Stream.__name__ = ["thx","stream","Stream"];
+thx.stream.Stream.__interfaces__ = [thx.stream.IStream];
+thx.stream.Stream.prototype = {
+	subscriber: null
+	,cleanUps: null
+	,finalized: null
+	,canceled: null
+	,addCleanUp: function(f) {
+		this.cleanUps.push(f);
+	}
+	,pulse: function(v) {
+		this.subscriber(thx.stream.StreamValue.Pulse(v));
+	}
+	,end: function() {
+		this.finalize(thx.stream.StreamValue.End(false));
+	}
+	,cancel: function() {
+		this.canceled = true;
+		this.finalize(thx.stream.StreamValue.End(true));
+	}
+	,fail: function(error) {
+		this.finalize(thx.stream.StreamValue.Failure(error));
+	}
+	,finalize: function(signal) {
+		if(this.finalized) return;
+		this.finalized = true;
+		while(this.cleanUps.length > 0) (this.cleanUps.shift())();
+		this.subscriber(signal);
+		this.subscriber = function(_) {
+		};
+	}
+	,__class__: thx.stream.Stream
+};
+thx.stream.StreamValue = { __ename__ : ["thx","stream","StreamValue"], __constructs__ : ["Pulse","End","Failure"] };
+thx.stream.StreamValue.Pulse = function(value) { var $x = ["Pulse",0,value]; $x.__enum__ = thx.stream.StreamValue; $x.toString = $estr; return $x; };
+thx.stream.StreamValue.End = function(cancel) { var $x = ["End",1,cancel]; $x.__enum__ = thx.stream.StreamValue; $x.toString = $estr; return $x; };
+thx.stream.StreamValue.Failure = function(err) { var $x = ["Failure",2,err]; $x.__enum__ = thx.stream.StreamValue; $x.toString = $estr; return $x; };
+thx.stream.Value = function(value) {
+	var _g = this;
+	this.value = value;
+	this.downStreams = [];
+	this.upStreams = [];
+	thx.stream.Emitter.call(this,function(stream) {
+		_g.downStreams.push(stream);
+		stream.addCleanUp(function() {
+			HxOverrides.remove(_g.downStreams,stream);
+		});
+		stream.pulse(_g.value);
+	});
+};
+thx.stream.Value.__name__ = ["thx","stream","Value"];
+thx.stream.Value.__super__ = thx.stream.Emitter;
+thx.stream.Value.prototype = $extend(thx.stream.Emitter.prototype,{
+	value: null
+	,downStreams: null
+	,upStreams: null
+	,get: function() {
+		return this.value;
+	}
+	,set: function(value) {
+		if(this.value == value) return;
+		this.value = value;
+		this.update();
+	}
+	,clearStreams: function() {
+		var _g = 0;
+		var _g1 = this.downStreams.slice();
+		while(_g < _g1.length) {
+			var stream = _g1[_g];
+			++_g;
+			stream.end();
+		}
+	}
+	,clearEmitters: function() {
+		var _g = 0;
+		var _g1 = this.upStreams.slice();
+		while(_g < _g1.length) {
+			var stream = _g1[_g];
+			++_g;
+			stream.cancel();
+		}
+	}
+	,clear: function() {
+		this.clearEmitters();
+		this.clearStreams();
+	}
+	,update: function() {
+		var _g = 0;
+		var _g1 = this.downStreams.slice();
+		while(_g < _g1.length) {
+			var stream = _g1[_g];
+			++_g;
+			stream.pulse(this.value);
+		}
+	}
+	,__class__: thx.stream.Value
+});
+thx.stream.dom = {};
+thx.stream.dom.Dom = function() { };
+thx.stream.dom.Dom.__name__ = ["thx","stream","dom","Dom"];
+thx.stream.dom.Dom.ready = function() {
+	return thx.promise.Promise.create(function(resolve,_) {
+		window.document.addEventListener("DOMContentLoaded",function(_1) {
+			resolve(thx.core.Nil.nil);
+		},false);
+	});
+};
+thx.stream.dom.Dom.streamEvent = function(el,name,capture) {
+	if(capture == null) capture = false;
+	return thx.stream.Emitter.create(function(stream) {
+		el.addEventListener(name,$bind(stream,stream.pulse),capture);
+		stream.addCleanUp(function() {
+			el.removeEventListener(name,$bind(stream,stream.pulse),capture);
+		});
+	});
+};
+thx.stream.dom.Dom.streamMouseEvent = function(el,name,capture) {
+	if(capture == null) capture = false;
+	return thx.stream.dom.Dom.streamEvent(el,name,capture);
+};
+thx.stream.dom.Dom.streamKey = function(el,name,capture) {
+	if(capture == null) capture = false;
+	return thx.stream.Emitter.create((function($this) {
+		var $r;
+		if(!StringTools.startsWith(name,"key")) name = "key" + name;
+		$r = function(stream) {
+			el.addEventListener(name,$bind(stream,stream.pulse),capture);
+			stream.addCleanUp(function() {
+				el.removeEventListener(name,$bind(stream,stream.pulse),capture);
+			});
+		};
+		return $r;
+	}(this)));
+};
+thx.stream.dom.Dom.streamClick = function(el,capture) {
+	if(capture == null) capture = false;
+	return thx.stream.dom.Dom.streamEvent(el,"click",capture);
+};
+thx.stream.dom.Dom.streamInput = function(el,capture) {
+	if(capture == null) capture = false;
+	return thx.stream.dom.Dom.streamEvent(el,"input",capture).mapValue(function(_) {
+		return el.value;
+	});
+};
+thx.stream.dom.Dom.subscribeText = function(el) {
+	return function(text) {
+		el.innerText = text;
+	};
+};
+thx.stream.dom.Dom.subscribeHTML = function(el) {
+	return function(html) {
+		el.innerHTML = html;
+	};
+};
+thx.stream.dom.Dom.subscribeFocus = function(el) {
+	return function(focus) {
+		if(focus) el.focus(); else el.blur();
+	};
+};
+thx.stream.dom.Dom.subscribeAttribute = function(el,name) {
+	return function(value) {
+		if(null == value) el.removeAttribute(name); else el.setAttribute(name,value);
+	};
+};
+thx.stream.dom.Dom.subscribeToggleAttribute = function(el,name,value) {
+	if(null == value) value = el.getAttribute(name);
+	return function(on) {
+		if(on) el.removeAttribute(name); else el.setAttribute(name,value);
+	};
+};
+thx.stream.dom.Dom.subscribeToggleVisibility = function(el) {
+	var originalDisplay = el.style.display;
+	if(originalDisplay == "none") originalDisplay = "";
+	return function(on) {
+		if(on) el.style.display = originalDisplay; else el.style.display = "none";
+	};
+};
 var types = {};
 types.ArrayTransform = function() { };
 types.ArrayTransform.__name__ = ["types","ArrayTransform"];
@@ -5142,7 +5815,7 @@ ui.Data.prototype = {
 	,__class__: ui.Data
 };
 ui.DataEvent = { __ename__ : ["ui","DataEvent"], __constructs__ : ["SetValue"] };
-ui.DataEvent.SetValue = function(path,value,type) { var $x = ["SetValue",0,path,value,type]; $x.__enum__ = ui.DataEvent; return $x; };
+ui.DataEvent.SetValue = function(path,value,type) { var $x = ["SetValue",0,path,value,type]; $x.__enum__ = ui.DataEvent; $x.toString = $estr; return $x; };
 ui.Document = function(options) {
 	var _g = this;
 	this.component = new sui.components.Component(options);
@@ -5196,8 +5869,8 @@ ui.Document.prototype = {
 	,__class__: ui.Document
 };
 ui.Expression = { __ename__ : ["ui","Expression"], __constructs__ : ["Fun","SyntaxError"] };
-ui.Expression.Fun = function(f) { var $x = ["Fun",0,f]; $x.__enum__ = ui.Expression; return $x; };
-ui.Expression.SyntaxError = function(msg) { var $x = ["SyntaxError",1,msg]; $x.__enum__ = ui.Expression; return $x; };
+ui.Expression.Fun = function(f) { var $x = ["Fun",0,f]; $x.__enum__ = ui.Expression; $x.toString = $estr; return $x; };
+ui.Expression.SyntaxError = function(msg) { var $x = ["SyntaxError",1,msg]; $x.__enum__ = ui.Expression; $x.toString = $estr; return $x; };
 ui.Expressions = function() { };
 ui.Expressions.__name__ = ["ui","Expressions"];
 ui.Expressions.toErrorOption = function(exp) {
@@ -5548,8 +6221,8 @@ ui.Runtime.prototype = {
 	,__class__: ui.Runtime
 };
 ui.RuntimeResult = { __ename__ : ["ui","RuntimeResult"], __constructs__ : ["Result","Error"] };
-ui.RuntimeResult.Result = function(value) { var $x = ["Result",0,value]; $x.__enum__ = ui.RuntimeResult; return $x; };
-ui.RuntimeResult.Error = function(msg) { var $x = ["Error",1,msg]; $x.__enum__ = ui.RuntimeResult; return $x; };
+ui.RuntimeResult.Result = function(value) { var $x = ["Result",0,value]; $x.__enum__ = ui.RuntimeResult; $x.toString = $estr; return $x; };
+ui.RuntimeResult.Error = function(msg) { var $x = ["Error",1,msg]; $x.__enum__ = ui.RuntimeResult; $x.toString = $estr; return $x; };
 ui.Schema = function() {
 	this.fields = new haxe.ds.StringMap();
 	this.stream = this.feeder = new steamer.Feeder();
@@ -5614,25 +6287,31 @@ ui.Schema.prototype = {
 	,__class__: ui.Schema
 };
 ui.SchemaEvent = { __ename__ : ["ui","SchemaEvent"], __constructs__ : ["ListFields","AddField","DeleteField","RenameField","RetypeField"] };
-ui.SchemaEvent.ListFields = function(list) { var $x = ["ListFields",0,list]; $x.__enum__ = ui.SchemaEvent; return $x; };
-ui.SchemaEvent.AddField = function(name,type) { var $x = ["AddField",1,name,type]; $x.__enum__ = ui.SchemaEvent; return $x; };
-ui.SchemaEvent.DeleteField = function(name) { var $x = ["DeleteField",2,name]; $x.__enum__ = ui.SchemaEvent; return $x; };
-ui.SchemaEvent.RenameField = function(oldname,newname) { var $x = ["RenameField",3,oldname,newname]; $x.__enum__ = ui.SchemaEvent; return $x; };
-ui.SchemaEvent.RetypeField = function(name,type) { var $x = ["RetypeField",4,name,type]; $x.__enum__ = ui.SchemaEvent; return $x; };
+ui.SchemaEvent.ListFields = function(list) { var $x = ["ListFields",0,list]; $x.__enum__ = ui.SchemaEvent; $x.toString = $estr; return $x; };
+ui.SchemaEvent.AddField = function(name,type) { var $x = ["AddField",1,name,type]; $x.__enum__ = ui.SchemaEvent; $x.toString = $estr; return $x; };
+ui.SchemaEvent.DeleteField = function(name) { var $x = ["DeleteField",2,name]; $x.__enum__ = ui.SchemaEvent; $x.toString = $estr; return $x; };
+ui.SchemaEvent.RenameField = function(oldname,newname) { var $x = ["RenameField",3,oldname,newname]; $x.__enum__ = ui.SchemaEvent; $x.toString = $estr; return $x; };
+ui.SchemaEvent.RetypeField = function(name,type) { var $x = ["RetypeField",4,name,type]; $x.__enum__ = ui.SchemaEvent; $x.toString = $estr; return $x; };
 ui.SchemaType = { __ename__ : ["ui","SchemaType"], __constructs__ : ["ArrayType","BoolType","DateType","FloatType","ObjectType","StringType","CodeType","ReferenceType"] };
-ui.SchemaType.ArrayType = function(item) { var $x = ["ArrayType",0,item]; $x.__enum__ = ui.SchemaType; return $x; };
+ui.SchemaType.ArrayType = function(item) { var $x = ["ArrayType",0,item]; $x.__enum__ = ui.SchemaType; $x.toString = $estr; return $x; };
 ui.SchemaType.BoolType = ["BoolType",1];
+ui.SchemaType.BoolType.toString = $estr;
 ui.SchemaType.BoolType.__enum__ = ui.SchemaType;
 ui.SchemaType.DateType = ["DateType",2];
+ui.SchemaType.DateType.toString = $estr;
 ui.SchemaType.DateType.__enum__ = ui.SchemaType;
 ui.SchemaType.FloatType = ["FloatType",3];
+ui.SchemaType.FloatType.toString = $estr;
 ui.SchemaType.FloatType.__enum__ = ui.SchemaType;
-ui.SchemaType.ObjectType = function(fields) { var $x = ["ObjectType",4,fields]; $x.__enum__ = ui.SchemaType; return $x; };
+ui.SchemaType.ObjectType = function(fields) { var $x = ["ObjectType",4,fields]; $x.__enum__ = ui.SchemaType; $x.toString = $estr; return $x; };
 ui.SchemaType.StringType = ["StringType",5];
+ui.SchemaType.StringType.toString = $estr;
 ui.SchemaType.StringType.__enum__ = ui.SchemaType;
 ui.SchemaType.CodeType = ["CodeType",6];
+ui.SchemaType.CodeType.toString = $estr;
 ui.SchemaType.CodeType.__enum__ = ui.SchemaType;
 ui.SchemaType.ReferenceType = ["ReferenceType",7];
+ui.SchemaType.ReferenceType.toString = $estr;
 ui.SchemaType.ReferenceType.__enum__ = ui.SchemaType;
 ui.Scope = function() {
 	this.name = "Franco";
@@ -6082,22 +6761,31 @@ ui.fragments.ReadonlyBlock.prototype = {
 };
 ui.widgets.AnchorPoint = { __ename__ : ["ui","widgets","AnchorPoint"], __constructs__ : ["TopLeft","Top","TopRight","Left","Center","Right","BottomLeft","Bottom","BottomRight"] };
 ui.widgets.AnchorPoint.TopLeft = ["TopLeft",0];
+ui.widgets.AnchorPoint.TopLeft.toString = $estr;
 ui.widgets.AnchorPoint.TopLeft.__enum__ = ui.widgets.AnchorPoint;
 ui.widgets.AnchorPoint.Top = ["Top",1];
+ui.widgets.AnchorPoint.Top.toString = $estr;
 ui.widgets.AnchorPoint.Top.__enum__ = ui.widgets.AnchorPoint;
 ui.widgets.AnchorPoint.TopRight = ["TopRight",2];
+ui.widgets.AnchorPoint.TopRight.toString = $estr;
 ui.widgets.AnchorPoint.TopRight.__enum__ = ui.widgets.AnchorPoint;
 ui.widgets.AnchorPoint.Left = ["Left",3];
+ui.widgets.AnchorPoint.Left.toString = $estr;
 ui.widgets.AnchorPoint.Left.__enum__ = ui.widgets.AnchorPoint;
 ui.widgets.AnchorPoint.Center = ["Center",4];
+ui.widgets.AnchorPoint.Center.toString = $estr;
 ui.widgets.AnchorPoint.Center.__enum__ = ui.widgets.AnchorPoint;
 ui.widgets.AnchorPoint.Right = ["Right",5];
+ui.widgets.AnchorPoint.Right.toString = $estr;
 ui.widgets.AnchorPoint.Right.__enum__ = ui.widgets.AnchorPoint;
 ui.widgets.AnchorPoint.BottomLeft = ["BottomLeft",6];
+ui.widgets.AnchorPoint.BottomLeft.toString = $estr;
 ui.widgets.AnchorPoint.BottomLeft.__enum__ = ui.widgets.AnchorPoint;
 ui.widgets.AnchorPoint.Bottom = ["Bottom",7];
+ui.widgets.AnchorPoint.Bottom.toString = $estr;
 ui.widgets.AnchorPoint.Bottom.__enum__ = ui.widgets.AnchorPoint;
 ui.widgets.AnchorPoint.BottomRight = ["BottomRight",8];
+ui.widgets.AnchorPoint.BottomRight.toString = $estr;
 ui.widgets.AnchorPoint.BottomRight.__enum__ = ui.widgets.AnchorPoint;
 ui.widgets.Button = function(text,icon) {
 	if(text == null) text = "";
@@ -6216,6 +6904,15 @@ function $bind(o,m) { if( m == null ) return null; if( m.__id__ == null ) m.__id
 if(Array.prototype.indexOf) HxOverrides.indexOf = function(a,o,i) {
 	return Array.prototype.indexOf.call(a,o,i);
 };
+Math.NaN = Number.NaN;
+Math.NEGATIVE_INFINITY = Number.NEGATIVE_INFINITY;
+Math.POSITIVE_INFINITY = Number.POSITIVE_INFINITY;
+Math.isFinite = function(i) {
+	return isFinite(i);
+};
+Math.isNaN = function(i1) {
+	return isNaN(i1);
+};
 String.prototype.__class__ = String;
 String.__name__ = ["String"];
 Array.__name__ = ["Array"];
@@ -6250,226 +6947,6 @@ if(Array.prototype.filter == null) Array.prototype.filter = function(f1) {
 	}
 	return a1;
 };
-var global = window;
-(function (global, undefined) {
-    "use strict";
-
-    var tasks = (function () {
-        function Task(handler, args) {
-            this.handler = handler;
-            this.args = args;
-        }
-        Task.prototype.run = function () {
-            // See steps in section 5 of the spec.
-            if (typeof this.handler === "function") {
-                // Choice of `thisArg` is not in the setImmediate spec; `undefined` is in the setTimeout spec though:
-                // http://www.whatwg.org/specs/web-apps/current-work/multipage/timers.html
-                this.handler.apply(undefined, this.args);
-            } else {
-                var scriptSource = "" + this.handler;
-                /*jshint evil: true */
-                eval(scriptSource);
-            }
-        };
-
-        var nextHandle = 1; // Spec says greater than zero
-        var tasksByHandle = {};
-        var currentlyRunningATask = false;
-
-        return {
-            addFromSetImmediateArguments: function (args) {
-                var handler = args[0];
-                var argsToHandle = Array.prototype.slice.call(args, 1);
-                var task = new Task(handler, argsToHandle);
-
-                var thisHandle = nextHandle++;
-                tasksByHandle[thisHandle] = task;
-                return thisHandle;
-            },
-            runIfPresent: function (handle) {
-                // From the spec: "Wait until any invocations of this algorithm started before this one have completed."
-                // So if we're currently running a task, we'll need to delay this invocation.
-                if (!currentlyRunningATask) {
-                    var task = tasksByHandle[handle];
-                    if (task) {
-                        currentlyRunningATask = true;
-                        try {
-                            task.run();
-                        } finally {
-                            delete tasksByHandle[handle];
-                            currentlyRunningATask = false;
-                        }
-                    }
-                } else {
-                    // Delay by doing a setTimeout. setImmediate was tried instead, but in Firefox 7 it generated a
-                    // "too much recursion" error.
-                    global.setTimeout(function () {
-                        tasks.runIfPresent(handle);
-                    }, 0);
-                }
-            },
-            remove: function (handle) {
-                delete tasksByHandle[handle];
-            }
-        };
-    }());
-
-    function canUseNextTick() {
-        // Don't get fooled by e.g. browserify environments.
-        return typeof process === "object" &&
-               Object.prototype.toString.call(process) === "[object process]";
-    }
-
-    function canUseMessageChannel() {
-        return !!global.MessageChannel;
-    }
-
-    function canUsePostMessage() {
-        // The test against `importScripts` prevents this implementation from being installed inside a web worker,
-        // where `global.postMessage` means something completely different and can't be used for this purpose.
-
-        if (!global.postMessage || global.importScripts) {
-            return false;
-        }
-
-        var postMessageIsAsynchronous = true;
-        var oldOnMessage = global.onmessage;
-        global.onmessage = function () {
-            postMessageIsAsynchronous = false;
-        };
-        global.postMessage("", "*");
-        global.onmessage = oldOnMessage;
-
-        return postMessageIsAsynchronous;
-    }
-
-    function canUseReadyStateChange() {
-        return "document" in global && "onreadystatechange" in global.document.createElement("script");
-    }
-
-    function installNextTickImplementation(attachTo) {
-        attachTo.setImmediate = function () {
-            var handle = tasks.addFromSetImmediateArguments(arguments);
-
-            process.nextTick(function () {
-                tasks.runIfPresent(handle);
-            });
-
-            return handle;
-        };
-    }
-
-    function installMessageChannelImplementation(attachTo) {
-        var channel = new global.MessageChannel();
-        channel.port1.onmessage = function (event) {
-            var handle = event.data;
-            tasks.runIfPresent(handle);
-        };
-        attachTo.setImmediate = function () {
-            var handle = tasks.addFromSetImmediateArguments(arguments);
-
-            channel.port2.postMessage(handle);
-
-            return handle;
-        };
-    }
-
-    function installPostMessageImplementation(attachTo) {
-        // Installs an event handler on `global` for the `message` event: see
-        // * https://developer.mozilla.org/en/DOM/window.postMessage
-        // * http://www.whatwg.org/specs/web-apps/current-work/multipage/comms.html#crossDocumentMessages
-
-        var MESSAGE_PREFIX = "com.bn.NobleJS.setImmediate" + Math.random();
-
-        function isStringAndStartsWith(string, putativeStart) {
-            return typeof string === "string" && string.substring(0, putativeStart.length) === putativeStart;
-        }
-
-        function onGlobalMessage(event) {
-            // This will catch all incoming messages (even from other windows!), so we need to try reasonably hard to
-            // avoid letting anyone else trick us into firing off. We test the origin is still this window, and that a
-            // (randomly generated) unpredictable identifying prefix is present.
-            if (event.source === global && isStringAndStartsWith(event.data, MESSAGE_PREFIX)) {
-                var handle = event.data.substring(MESSAGE_PREFIX.length);
-                tasks.runIfPresent(handle);
-            }
-        }
-        if (global.addEventListener) {
-            global.addEventListener("message", onGlobalMessage, false);
-        } else {
-            global.attachEvent("onmessage", onGlobalMessage);
-        }
-
-        attachTo.setImmediate = function () {
-            var handle = tasks.addFromSetImmediateArguments(arguments);
-
-            // Make `global` post a message to itself with the handle and identifying prefix, thus asynchronously
-            // invoking our onGlobalMessage listener above.
-            global.postMessage(MESSAGE_PREFIX + handle, "*");
-
-            return handle;
-        };
-    }
-
-    function installReadyStateChangeImplementation(attachTo) {
-        attachTo.setImmediate = function () {
-            var handle = tasks.addFromSetImmediateArguments(arguments);
-
-            // Create a <script> element; its readystatechange event will be fired asynchronously once it is inserted
-            // into the document. Do so, thus queuing up the task. Remember to clean up once it's been called.
-            var scriptEl = global.document.createElement("script");
-            scriptEl.onreadystatechange = function () {
-                tasks.runIfPresent(handle);
-
-                scriptEl.onreadystatechange = null;
-                scriptEl.parentNode.removeChild(scriptEl);
-                scriptEl = null;
-            };
-            global.document.documentElement.appendChild(scriptEl);
-
-            return handle;
-        };
-    }
-
-    function installSetTimeoutImplementation(attachTo) {
-        attachTo.setImmediate = function () {
-            var handle = tasks.addFromSetImmediateArguments(arguments);
-
-            global.setTimeout(function () {
-                tasks.runIfPresent(handle);
-            }, 0);
-
-            return handle;
-        };
-    }
-
-    if (!global.setImmediate) {
-        // If supported, we should attach to the prototype of global, since that is where setTimeout et al. live.
-        var attachTo = typeof Object.getPrototypeOf === "function" && "setTimeout" in Object.getPrototypeOf(global) ?
-                          Object.getPrototypeOf(global)
-                        : global;
-
-        if (canUseNextTick()) {
-            // For Node.js before 0.9
-            installNextTickImplementation(attachTo);
-        } else if (canUsePostMessage()) {
-            // For non-IE10 modern browsers
-            installPostMessageImplementation(attachTo);
-        } else if (canUseMessageChannel()) {
-            // For web workers, where supported
-            installMessageChannelImplementation(attachTo);
-        } else if (canUseReadyStateChange()) {
-            // For IE 6–8
-            installReadyStateChangeImplementation(attachTo);
-        } else {
-            // For older browsers
-            installSetTimeoutImplementation(attachTo);
-        }
-
-        attachTo.clearImmediate = tasks.remove;
-    }
-}(typeof global === "object" && global ? global : this));
-;
 var posToString = function(pos) {
 	return pos;
 };
@@ -6508,13 +6985,15 @@ var scope = window || this;
 if(!scope.setImmediate) scope.setImmediate = function(callback) {
 	scope.setTimeout(callback,0);
 };
+var scope = ("undefined" !== typeof window && window) || ("undefined" !== typeof global && global) || this;
+if(!scope.setImmediate) scope.setImmediate = function(callback) {
+	scope.setTimeout(callback,0);
+};
 Config.icons = { add : "plus-circle", remove : "ban", dropdown : "reorder", checked : "dot-circle-o", unchecked : "circle-o", switchtype : "bolt", code : "bolt", value : "pencil", reference : "link"};
 Config.selectors = { app : ".card"};
 PropertyFeeder.classes = [{ display : "bold", name : "strong"},{ display : "italic", name : "emphasis"}];
 dom.Query.doc = document;
 haxe.ds.ObjectMap.count = 0;
-promhx.base.AsyncBase.id_ctr = 0;
-promhx.base.EventLoop.queue = new List();
 steamer.Pulses.nil = steamer.Pulse.Emit(thx.core.Nil.nil);
 thx.core.Ints.pattern_parse = new EReg("^[+-]?(\\d+|0x[0-9A-F]+)$","i");
 thx.core.Strings._reSplitWC = new EReg("(\r\n|\n\r|\n|\r)","g");
@@ -6526,6 +7005,7 @@ thx.core.Strings.__ucwordswsPattern = new EReg("\\s[a-z]","g");
 thx.core.Strings.__alphaNumPattern = new EReg("^[a-z0-9]+$","i");
 thx.core.Strings.__digitsPattern = new EReg("^[0-9]+$","");
 thx.core.UUID.itoh = "0123456789ABCDEF";
+thx.promise.Promise.nil = thx.promise.Promise.value(thx.core.Nil.nil);
 thx.ref.EmptyParent.instance = new thx.ref.EmptyParent();
 thx.ref.Ref.reField = new EReg("^\\.?([^.\\[]+)","");
 thx.ref.Ref.reIndex = new EReg("^\\[(\\d+)\\]","");
@@ -6534,6 +7014,6 @@ types.CodeTransform.PATTERN = new EReg("^\\s*\\$\\.([a-z](:?(\\.|\\[\\d+\\])?[a-
 ui.ContextField.tooltip = new ui.widgets.Tooltip({ classes : "tooltip error"});
 ui.Runtime.pattern = new EReg("\\$\\.(.+?)\\b","");
 Main.main();
-})(typeof window != "undefined" ? window : exports);
+})();
 
 //# sourceMappingURL=app.js.map

@@ -1,9 +1,8 @@
 package dom;
 
 import js.html.Element;
-import steamer.Producer;
 import thx.core.Nil;
-import promhx.Promise;
+import thx.promise.Promise;
 
 class Html {
   public static function parseList(html : String) {
@@ -19,16 +18,6 @@ class Html {
   // TODO unsafe cast
   public inline static function parse(html : String) : Element {
     return cast parseList(html)[0];
-  }
-}
-
-class Dom {
-  public static function ready() : Promise<Nil> {
-    var deferred = new promhx.Promise();
-    js.Browser.document.addEventListener("DOMContentLoaded", function(_) {
-      deferred.resolve(nil);
-    }, false);
-    return deferred;
   }
 }
 

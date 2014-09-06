@@ -185,6 +185,9 @@ Std.parseInt = function(x) {
 	if(isNaN(v)) return null;
 	return v;
 };
+Std.random = function(x) {
+	if(x <= 0) return 0; else return Math.floor(Math.random() * x);
+};
 var StringBuf = function() {
 	this.b = "";
 };
@@ -814,6 +817,17 @@ var thx = {};
 thx.core = {};
 thx.core.Arrays = function() { };
 thx.core.Arrays.__name__ = ["thx","core","Arrays"];
+thx.core.Arrays.same = function(a,b,eq) {
+	if(a == null || b == null || a.length != b.length) return false;
+	if(null == eq) eq = thx.core.Function.equality;
+	var _g1 = 0;
+	var _g = a.length;
+	while(_g1 < _g) {
+		var i = _g1++;
+		if(!eq(a[i],b[i])) return false;
+	}
+	return true;
+};
 thx.core.Arrays.cross = function(a,b) {
 	var r = [];
 	var _g = 0;
@@ -858,6 +872,19 @@ thx.core.Arrays.pushIf = function(arr,cond,value) {
 	if(cond) arr.push(value);
 	return arr;
 };
+thx.core.Arrays.eachPair = function(arr,handler) {
+	var _g1 = 0;
+	var _g = arr.length;
+	while(_g1 < _g) {
+		var i = _g1++;
+		var _g3 = i;
+		var _g2 = arr.length;
+		while(_g3 < _g2) {
+			var j = _g3++;
+			if(!handler(arr[i],arr[j])) return;
+		}
+	}
+};
 thx.core.Arrays.mapi = function(arr,handler) {
 	return arr.map(handler);
 };
@@ -881,6 +908,74 @@ thx.core.Arrays.order = function(arr,sort) {
 thx.core.Arrays.isEmpty = function(arr) {
 	return arr.length == 0;
 };
+thx.core.Arrays.contains = function(arr,element,eq) {
+	if(null == eq) return HxOverrides.indexOf(arr,element,0) >= 0; else {
+		var _g1 = 0;
+		var _g = arr.length;
+		while(_g1 < _g) {
+			var i = _g1++;
+			if(eq(arr[i],element)) return true;
+		}
+		return false;
+	}
+};
+thx.core.Arrays.shuffle = function(a) {
+	var t = thx.core.Ints.range(a.length);
+	var arr = [];
+	while(t.length > 0) {
+		var pos = Std.random(t.length);
+		var index = t[pos];
+		t.splice(pos,1);
+		arr.push(a[index]);
+	}
+	return arr;
+};
+thx.core.Arrays.extract = function(a,f) {
+	var _g1 = 0;
+	var _g = a.length;
+	while(_g1 < _g) {
+		var i = _g1++;
+		if(f(a[i])) return a.splice(i,1)[0];
+	}
+	return null;
+};
+thx.core.Function0 = function() { };
+thx.core.Function0.__name__ = ["thx","core","Function0"];
+thx.core.Function0.noop = function() {
+};
+thx.core.Function0.join = function(fa,fb) {
+	return function() {
+		fa();
+		fb();
+	};
+};
+thx.core.Function0.once = function(f) {
+	return function() {
+		f();
+		f = function() {
+		};
+	};
+};
+thx.core.Function1 = function() { };
+thx.core.Function1.__name__ = ["thx","core","Function1"];
+thx.core.Function1.noop = function(_) {
+};
+thx.core.Function1.compose = function(fa,fb) {
+	return function(v) {
+		return fa(fb(v));
+	};
+};
+thx.core.Function1.join = function(fa,fb) {
+	return function(v) {
+		fa(v);
+		fb(v);
+	};
+};
+thx.core.Function = function() { };
+thx.core.Function.__name__ = ["thx","core","Function"];
+thx.core.Function.equality = function(a,b) {
+	return a == b;
+};
 thx.core.Ints = function() { };
 thx.core.Ints.__name__ = ["thx","core","Ints"];
 thx.core.Ints.clamp = function(v,min,max) {
@@ -902,10 +997,26 @@ thx.core.Ints.parse = function(s) {
 thx.core.Ints.compare = function(a,b) {
 	return a - b;
 };
+thx.core.Ints.range = function(start,stop,step) {
+	if(step == null) step = 1;
+	if(null == stop) {
+		stop = start;
+		start = 0;
+	}
+	if((stop - start) / step == Math.POSITIVE_INFINITY) throw "infinite range";
+	var range = [];
+	var i = -1;
+	var j;
+	if(step < 0) while((j = start + step * ++i) > stop) range.push(j); else while((j = start + step * ++i) < stop) range.push(j);
+	return range;
+};
 thx.core.Iterables = function() { };
 thx.core.Iterables.__name__ = ["thx","core","Iterables"];
 thx.core.Iterables.map = function(it,f) {
 	return thx.core.Iterators.map($iterator(it)(),f);
+};
+thx.core.Iterables.eachPair = function(it,handler) {
+	return thx.core.Iterators.eachPair($iterator(it)(),handler);
 };
 thx.core.Iterables.toArray = function(it) {
 	return thx.core.Iterators.toArray($iterator(it)());
@@ -943,6 +1054,9 @@ thx.core.Iterators.mapi = function(it,f) {
 		acc.push(f(v,i++));
 	}
 	return acc;
+};
+thx.core.Iterators.eachPair = function(it,handler) {
+	thx.core.Arrays.eachPair(thx.core.Iterators.toArray(it),handler);
 };
 thx.core.Iterators.toArray = function(it) {
 	var items = [];
@@ -988,6 +1102,9 @@ thx.core.Types.__name__ = ["thx","core","Types"];
 thx.core.Types.isAnonymousObject = function(v) {
 	return Reflect.isObject(v) && null == Type.getClass(v);
 };
+thx.core.Types.sameType = function(a,b) {
+	return thx.core.ValueTypes.toString(Type["typeof"](a)) == thx.core.ValueTypes.toString(Type["typeof"](b));
+};
 thx.core.ClassTypes = function() { };
 thx.core.ClassTypes.__name__ = ["thx","core","ClassTypes"];
 thx.core.ClassTypes.toString = function(cls) {
@@ -998,6 +1115,9 @@ thx.core.ClassTypes["as"] = function(value,type) {
 };
 thx.core.ValueTypes = function() { };
 thx.core.ValueTypes.__name__ = ["thx","core","ValueTypes"];
+thx.core.ValueTypes.typeAsString = function(value) {
+	return thx.core.ValueTypes.toString(Type["typeof"](value));
+};
 thx.core.ValueTypes.toString = function(type) {
 	switch(type[1]) {
 	case 1:
@@ -1363,7 +1483,7 @@ utest.Assert.floatEquals = function(expected,value,approx,msg,pos) {
 	return utest.Assert.isTrue(utest.Assert._floatEquals(expected,value,approx),msg,pos);
 };
 utest.Assert._floatEquals = function(expected,value,approx) {
-	if(isNaN(expected)) return isNaN(value); else if(isNaN(value)) return false; else if(!isFinite(expected) && !isFinite(value)) return expected > 0 == value > 0;
+	if(Math.isNaN(expected)) return Math.isNaN(value); else if(Math.isNaN(value)) return false; else if(!Math.isFinite(expected) && !Math.isFinite(value)) return expected > 0 == value > 0;
 	if(null == approx) approx = 1e-5;
 	return Math.abs(value - expected) < approx;
 };
@@ -3063,6 +3183,15 @@ var $_, $fid = 0;
 function $bind(o,m) { if( m == null ) return null; if( m.__id__ == null ) m.__id__ = $fid++; var f; if( o.hx__closures__ == null ) o.hx__closures__ = {}; else f = o.hx__closures__[m.__id__]; if( f == null ) { f = function(){ return f.method.apply(f.scope, arguments); }; f.scope = o; f.method = m; o.hx__closures__[m.__id__] = f; } return f; }
 if(Array.prototype.indexOf) HxOverrides.indexOf = function(a,o,i) {
 	return Array.prototype.indexOf.call(a,o,i);
+};
+Math.NaN = Number.NaN;
+Math.NEGATIVE_INFINITY = Number.NEGATIVE_INFINITY;
+Math.POSITIVE_INFINITY = Number.POSITIVE_INFINITY;
+Math.isFinite = function(i) {
+	return isFinite(i);
+};
+Math.isNaN = function(i1) {
+	return isNaN(i1);
 };
 String.prototype.__class__ = String;
 String.__name__ = ["String"];
