@@ -2,6 +2,3 @@ Cards
 =====
 
 Dynamic Documents
-
-ToDo
------
