@@ -7,7 +7,7 @@ class Text extends StringProperty {
     super(null == defaultText ? component.el.innerText : defaultText, component, 'text');
     stream.feed({
       emit : function(value) component.el.innerText = value,
-      end : function() component.el.innerText = defaultValue
+      end : function() {}
     });
   }
 }

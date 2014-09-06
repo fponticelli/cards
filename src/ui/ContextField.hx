@@ -113,7 +113,7 @@ class ContextField {
 
     var runtime = options.value.runtime.value.toValue();
     if(null == runtime)
-      fieldValue.setEditor(options.type, options.value.value);
+      fieldValue.setEditor(options.type, options.value.stream.value);
     else {
       var reference = CodeTransform.toReference(runtime.code);
       if(null != reference && "" != reference)
@@ -143,10 +143,10 @@ class ContextField {
         case Some(err):
           tooltip.setContent(err);
           tooltip.anchorTo(component.el, Top, Bottom);
-          tooltip.visible.value = true;
+          tooltip.visible.stream.value = true;
         case _:
           if(tooltip.anchorElement == component.el)
-            tooltip.visible.value = false;
+            tooltip.visible.stream.value = false;
       }
     });
 

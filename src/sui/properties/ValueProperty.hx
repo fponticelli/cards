@@ -8,8 +8,6 @@ using steamer.Producer;
 using steamer.dom.Dom;
 
 class ValueProperty<T> extends Property {
-  public var value(get, set) : T;
-  public var defaultValue(get, null) : T;
   public var stream(default, null) : Value<T>;
   public var runtime(default, null) : Value<Option<Runtime>>;
   public var runtimeError(default, null) : Value<Option<String>>;

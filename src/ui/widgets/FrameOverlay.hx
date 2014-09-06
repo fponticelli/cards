@@ -19,7 +19,7 @@ class FrameOverlay {
     component = new Component(options);
     visible = new Visible(component, false);
     function clear(_) {
-      visible.value = false;
+      visible.stream.value = false;
     }
     visible.stream
       .filter(function(b) {
@@ -43,7 +43,7 @@ class FrameOverlay {
     anchorElement = el;
     this.my = null == my ? TopLeft : my;
     this.at = null == at ? BottomLeft : at;
-    if(visible.value)
+    if(visible.stream.value)
       reposition();
   }
 

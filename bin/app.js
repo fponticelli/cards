@@ -202,7 +202,7 @@ PropertyFeeder.feedFragments = function(fragments) {
 PropertyFeeder.createToggleClass = function(display,name) {
 	return { name : name, display : display, type : ui.SchemaType.BoolType, create : function(component) {
 		var cls = new sui.properties.ToggleClass(component,name,name);
-		cls.set_value(true);
+		cls.stream.set_value(true);
 		return cls;
 	}};
 };
@@ -1885,8 +1885,7 @@ sui.properties.ValueProperty = function(defaultValue,component,name) {
 sui.properties.ValueProperty.__name__ = ["sui","properties","ValueProperty"];
 sui.properties.ValueProperty.__super__ = sui.properties.Property;
 sui.properties.ValueProperty.prototype = $extend(sui.properties.Property.prototype,{
-	defaultValue: null
-	,stream: null
+	stream: null
 	,runtime: null
 	,runtimeError: null
 	,transform: function(value) {
@@ -1945,12 +1944,10 @@ sui.properties.StringProperty.prototype = $extend(sui.properties.ValueProperty.p
 	,__class__: sui.properties.StringProperty
 });
 sui.properties.Text = function(component,defaultText) {
-	var _g = this;
 	sui.properties.StringProperty.call(this,null == defaultText?component.el.innerText:defaultText,component,"text");
 	this.stream.feed(steamer._Consumer.Consumer_Impl_.fromObject({ emit : function(value) {
 		component.el.innerText = value;
 	}, end : function() {
-		component.el.innerText = _g.get_defaultValue();
 	}}));
 };
 sui.properties.Text.__name__ = ["sui","properties","Text"];
@@ -2067,7 +2064,7 @@ thx.Assert.floatEquals = function(expected,value,approx,msg,pos) {
 	return thx.Assert.isTrue(thx.Assert._floatEquals(expected,value,approx),msg,pos);
 };
 thx.Assert._floatEquals = function(expected,value,approx) {
-	if(Math.isNaN(expected)) return Math.isNaN(value); else if(Math.isNaN(value)) return false; else if(!Math.isFinite(expected) && !Math.isFinite(value)) return expected > 0 == value > 0;
+	if(isNaN(expected)) return isNaN(value); else if(isNaN(value)) return false; else if(!isFinite(expected) && !isFinite(value)) return expected > 0 == value > 0;
 	if(null == approx) approx = 1e-5;
 	return Math.abs(value - expected) < approx;
 };
@@ -2708,7 +2705,7 @@ thx.core.Ints.range = function(start,stop,step) {
 		stop = start;
 		start = 0;
 	}
-	if((stop - start) / step == Math.POSITIVE_INFINITY) throw "infinite range";
+	if((stop - start) / step == Infinity) throw "infinite range";
 	var range = [];
 	var i = -1;
 	var j;
@@ -5206,7 +5203,7 @@ ui.widgets.FrameOverlay = function(options) {
 	this.component = new sui.components.Component(options);
 	this.visible = new sui.properties.Visible(this.component,false);
 	var clear = function(_) {
-		_g.visible.set_value(false);
+		_g.visible.stream.set_value(false);
 	};
 	this.visible.stream.filter(function(b) {
 		return !b;
@@ -5258,7 +5255,7 @@ ui.widgets.FrameOverlay.prototype = {
 		this.anchorElement = el;
 		if(null == my) this.my = ui.widgets.AnchorPoint.TopLeft; else this.my = my;
 		if(null == at) this.at = ui.widgets.AnchorPoint.BottomLeft; else this.at = at;
-		if(this.visible.get_value()) this.reposition();
+		if(this.visible.stream.get_value()) this.reposition();
 	}
 	,reposition: function() {
 		if(!this.component.isAttached) {
@@ -5441,7 +5438,7 @@ ui.ContextField = function(options) {
 		}
 	});
 	var runtime1 = thx.core.Options.toValue(options.value.runtime.get_value());
-	if(null == runtime1) this.fieldValue.setEditor(options.type,options.value.get_value()); else {
+	if(null == runtime1) this.fieldValue.setEditor(options.type,options.value.stream.get_value()); else {
 		var reference = types.CodeTransform.toReference(runtime1.code);
 		if(null != reference && "" != reference) this.fieldValue.setEditor(ui.SchemaType.ReferenceType,types.CodeTransform.toReference(runtime1.code)); else this.fieldValue.setEditor(ui.SchemaType.CodeType,runtime1.code);
 	}
@@ -5480,10 +5477,10 @@ ui.ContextField = function(options) {
 				var err = o1[2];
 				ui.ContextField.tooltip.setContent(err);
 				ui.ContextField.tooltip.anchorTo(_g.component.el,ui.widgets.AnchorPoint.Top,ui.widgets.AnchorPoint.Bottom);
-				ui.ContextField.tooltip.visible.set_value(true);
+				ui.ContextField.tooltip.visible.stream.set_value(true);
 				break;
 			default:
-				if(ui.ContextField.tooltip.anchorElement == _g.component.el) ui.ContextField.tooltip.visible.set_value(false);
+				if(ui.ContextField.tooltip.anchorElement == _g.component.el) ui.ContextField.tooltip.visible.stream.set_value(false);
 			}
 		};
 		$r = { onPulse : function(pulse4) {
@@ -6903,15 +6900,6 @@ var $_, $fid = 0;
 function $bind(o,m) { if( m == null ) return null; if( m.__id__ == null ) m.__id__ = $fid++; var f; if( o.hx__closures__ == null ) o.hx__closures__ = {}; else f = o.hx__closures__[m.__id__]; if( f == null ) { f = function(){ return f.method.apply(f.scope, arguments); }; f.scope = o; f.method = m; o.hx__closures__[m.__id__] = f; } return f; }
 if(Array.prototype.indexOf) HxOverrides.indexOf = function(a,o,i) {
 	return Array.prototype.indexOf.call(a,o,i);
-};
-Math.NaN = Number.NaN;
-Math.NEGATIVE_INFINITY = Number.NEGATIVE_INFINITY;
-Math.POSITIVE_INFINITY = Number.POSITIVE_INFINITY;
-Math.isFinite = function(i) {
-	return isFinite(i);
-};
-Math.isNaN = function(i1) {
-	return isNaN(i1);
 };
 String.prototype.__class__ = String;
 String.__name__ = ["String"];
