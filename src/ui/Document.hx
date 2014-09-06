@@ -6,9 +6,9 @@ import ui.fragments.Fragment;
 import ui.widgets.Toolbar;
 import ui.widgets.Statusbar;
 import steamer.Consumer;
-using steamer.Producer;
+using thx.stream.Emitter;
 using thx.core.Options;
-using steamer.dom.Dom;
+using thx.stream.dom.Dom;
 
 class Document {
   public var component(default, null) : Component;

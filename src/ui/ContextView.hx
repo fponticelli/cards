@@ -3,7 +3,7 @@ package ui;
 import dom.Dom;
 import haxe.ds.Option;
 import js.html.Element;
-import steamer.Value;
+import thx.stream.Value;
 import sui.components.Component;
 import sui.components.ComponentOptions;
 import sui.properties.ValueProperties;
@@ -15,7 +15,7 @@ import ui.fragments.Fragment;
 import ui.widgets.Menu;
 import ui.widgets.Toolbar;
 using thx.core.Options;
-using steamer.Producer;
+using thx.stream.Emitter;
 
 class ContextView {
   public var component(default, null) : Component;

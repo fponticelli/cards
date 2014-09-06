@@ -2,10 +2,11 @@ package sui.properties;
 
 import haxe.ds.Option;
 import sui.components.Component;
-import steamer.Value;
 import ui.Runtime;
-using steamer.Producer;
-using steamer.dom.Dom;
+
+import thx.stream.Value;
+using thx.stream.Emitter;
+using thx.stream.dom.Dom;
 
 class ValueProperty<T> extends Property {
   public var stream(default, null) : Value<T>;
@@ -20,46 +21,41 @@ class ValueProperty<T> extends Property {
 
     runtimeError
       .toBool()
-      .feed(component.el.consumeToggleClass('error'));
-    runtime.feed(function(opt : Option<Runtime>) {
-      switch opt {
+      .subscribe(component.el.subscribeToggleClass('error'));
+    runtime
+      .subscribe(function(opt : Option<Runtime>) switch opt {
         case None:
           component.el.classList.remove('error');
-          runtimeError.value = None;
+          runtimeError.set(None);
         case Some(runtime):
           switch runtime.expression {
             case SyntaxError(e):
               component.el.classList.add('error');
-              runtimeError.value = None;
+              runtimeError.set(None);
             case Fun(f):
               component.el.classList.remove('error');
-              runtimeError.value = None;
+              runtimeError.set(None);
               switch f() {
                 case Result(v):
-                  stream.value = transform(v);
+                  stream.set(transform(v));
                 case Error(e):
-                  runtimeError.value = Some(e);
+                  runtimeError.set(Some(e));
               }
           }
-      }
-    });
+      });
   }
 
-  public function transform(value : Dynamic) : T {
+  public function transform(value : Dynamic) : T
     return throw Type.getClassName(Type.getClass(this)).split('.').pop() + '.transform() is abstract and must be overridden';
-  }
 
   override public function dispose() {
-    stream.end();
+    stream.clear();
     super.dispose();
   }
 
-  function get_defaultValue()
-    return stream.defaultValue;
-
   function get_value()
-    return stream.value;
+    return stream.get();
 
   function set_value(value : T)
-    return stream.value = value;
+    return stream.set(value);
 }

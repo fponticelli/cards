@@ -1,10 +1,10 @@
 package ui.widgets;
 
 import js.html.Event;
-import steamer.Producer;
-import steamer.Value;
+import thx.stream.Emitter;
+import thx.stream.Value;
 import sui.components.Component;
-using steamer.dom.Dom;
+using thx.stream.dom.Dom;
 
 class Button {
   public var component(default, null) : Component;

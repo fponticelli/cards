@@ -1,13 +1,13 @@
 package ui.editors;
 
-using steamer.Producer;
+using thx.stream.Emitter;
 import js.html.KeyboardEvent;
 import sui.components.Component;
 import sui.components.ComponentOptions;
-import steamer.Value;
+import thx.stream.Value;
 import sui.properties.Text;
 import ui.SchemaType;
-using steamer.dom.Dom;
+using thx.stream.dom.Dom;
 
 class BoolEditor implements Editor<Bool> {
   public var component(default, null) : Component;

@@ -1,11 +1,11 @@
 package ui;
 
 import haxe.Json;
-import steamer.Producer;
+import thx.stream.Emitter;
 import steamer.Pulse;
 import thx.ref.ObjectRef;
 import thx.ref.IRef;
-import steamer.Value;
+import thx.stream.Value;
 
 class Data {
   var root : ObjectRef;
@@ -40,7 +40,7 @@ class Data {
     cache.set(path, ref);
     if(ref.get() != value) {
       ref.set(value);
-      this.value.value = toObject();
+      this.value.set(toObject());
     }
     return this;
   }
@@ -51,7 +51,7 @@ class Data {
     if(null != value) {
       set("", value);
     }
-    this.value.value = toObject();
+    this.value.set(toObject());
     return this;
   }
 
@@ -63,7 +63,7 @@ class Data {
 
     if(ref.hasValue()) {
       ref.remove();
-      this.value.value = toObject();
+      this.value.set(toObject());
     }
     cache.remove(path);
   }
@@ -74,7 +74,7 @@ class Data {
     var v = get(oldpath);
     remove(oldpath);
     set(newpath, v);
-    this.value.value = toObject();
+    this.value.set(toObject());
     return true;
   }
 

@@ -1,9 +1,9 @@
 package ui.fragments;
 
-import steamer.Value;
+import thx.stream.Value;
 import sui.components.Component;
 import sui.components.ComponentOptions;
-using steamer.dom.Dom;
+using thx.stream.dom.Dom;
 
 class ReadonlyBlock implements Fragment {
   public var name(default, null) : String = 'readonly';

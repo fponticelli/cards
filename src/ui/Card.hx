@@ -4,7 +4,7 @@ import js.html.Element;
 import sui.components.Component;
 import dom.Dom;
 import ui.fragments.FragmentMapper;
-using steamer.Producer;
+using thx.stream.Emitter;
 
 class Card {
   public static function create(model : Model, container : Element, mapper : FragmentMapper) {

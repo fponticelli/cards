@@ -1,14 +1,14 @@
 package ui.editors;
 
-using steamer.Producer;
+using thx.stream.Emitter;
 import js.html.Element;
 import js.html.Event;
 import sui.components.Component;
 import sui.components.ComponentOptions;
-import steamer.Value;
+import thx.stream.Value;
 import sui.properties.Text;
 import ui.SchemaType;
-using steamer.dom.Dom;
+using thx.stream.dom.Dom;
 import js.Browser;
 
 class TextEditor implements Editor<String> {
@@ -26,7 +26,7 @@ class TextEditor implements Editor<String> {
     if(null == options.el && null == options.template)
       options.template = '<div></div>';
     if(null == options.inputEvent)
-      options.inputEvent = function(component : Component) return component.el.produceEvent('input');
+      options.inputEvent = function(component : Component) return component.el.streamEvent('input');
 
     component = new Component(options);
     component.el.classList.add('editor');
@@ -36,50 +36,46 @@ class TextEditor implements Editor<String> {
     // TODO find out how to set the content of :before programmatically
     component.el.style.content = options.placeHolder;
 
-    var text       = new Text(component, options.defaultText),
-      inputPair  = options.inputEvent(component),
-      changePair = component.el.produceEvent('input'),
-      focusPair  = component.el.produceEvent('focus'),
-      blurPair   = component.el.produceEvent('blur');
+    var text   = new Text(component, options.defaultText);
 
     value = text.stream;
-    inputPair.producer
-      .map(function(_) return text.component.el.textContent)
+    var inputStream = options.inputEvent(component)
+      .mapValue(function(_) return text.component.el.textContent)
       .feed(value);
 
     focus = new Value(false);
-    focus.feed(component.el.consumeToggleAttribute('contenteditable', 'true'));
-    focus.filterValue(true).feed(component.el.consumeFocus());
+    focus.subscribe(component.el.subscribeToggleAttribute('contenteditable', 'true'));
+    focus.withValue(true).subscribe(component.el.subscribeFocus());
     focus
-      .filterValue(true)
-      .feed(function(_) {
+      .withValue(true)
+      .subscribe(function(_) {
         Browser.document.getSelection().selectAllChildren(component.el);
       });
 
-    focusPair.producer
-      .map(function(_) return true)
+    var focusStream = component.el.streamEvent('focus')
+      .mapValue(function(_) return true)
       .merge(
-        blurPair.producer
-          .map(function(_) return false)
+        component.el.streamEvent('blur')
+          .mapValue(function(_) return false)
       ).feed(focus);
-    cancel = function() {
-      text.dispose();
-      changePair.cancel();
-      inputPair.cancel();
-      focusPair.cancel();
-      blurPair.cancel();
-    };
 
     var empty = new Value(options.defaultText == '');
-    changePair.producer
-      .map(function(_) return text.component.el.textContent == '')
-      .merge(value.map(function(t) return t ==''))
+    var changeStream = component.el.streamEvent('input')
+      .mapValue(function(_) return text.component.el.textContent == '')
+      .merge(value.mapValue(function(t) return t ==''))
       .feed(empty);
-    empty.feed(component.el.consumeToggleClass('empty'));
+    empty.subscribe(component.el.subscribeToggleClass('empty'));
+
+    cancel = function() {
+      text.dispose();
+      changeStream.cancel();
+      inputStream.cancel();
+      focusStream.cancel();
+    };
   }
 
   public function destroy() {
-    value.end();
+    value.clear();
     component.destroy();
     cancel();
   }
@@ -88,5 +84,5 @@ class TextEditor implements Editor<String> {
 typedef TextEditorOptions = {> ComponentOptions,
   defaultText : String,
   ?placeHolder : String,
-  ?inputEvent : Component -> { producer : Producer<Event>, cancel : Void -> Void }
+  ?inputEvent : Component -> Emitter<Event>
 }

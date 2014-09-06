@@ -1,13 +1,13 @@
 package ui.editors;
 
-import steamer.Producer;
+import thx.stream.Emitter;
 import sui.components.Component;
 import sui.components.ComponentOptions;
-import steamer.Value;
+import thx.stream.Value;
 import sui.properties.Text;
 import ui.SchemaType;
 import ui.editors.TextEditor;
-using steamer.dom.Dom;
+using thx.stream.dom.Dom;
 
 class CodeEditor extends TextEditor {
   public function new(options : TextEditorOptions) {

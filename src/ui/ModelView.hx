@@ -1,21 +1,19 @@
 package ui;
 
 import js.html.Element;
-import steamer.MultiProducer;
-using steamer.Producer;
-import steamer.Pulse;
+import steamer.MultiEmiiter;
+using thx.stream.Emitter;
 import sui.components.Component;
 import thx.Assert;
 import ui.DataEvent;
 import ui.SchemaEvent;
 import ui.widgets.Toolbar;
 import dom.Dom;
-import steamer.Feeder;
 
 class ModelView {
   public var component(default, null) : Component;
-  public var schema(default, null) : Producer<SchemaEvent>;
-  public var data(default, null) : Producer<DataEvent>;
+  public var schema(default, null) : Emiiter<SchemaEvent>;
+  public var data(default, null) : Emiiter<DataEvent>;
   public var toolbar(default, null) : Toolbar;
   public var currentField(default, null) : Null<ModelViewField>;
 
@@ -24,8 +22,8 @@ class ModelView {
   var schemaFeeder : Feeder<SchemaEvent>;
   var dataFeeder : Feeder<DataEvent>;
   var fields : Map<String, ModelViewField>;
-  var fieldFocus : MultiProducer<ModelViewField>;
-  var fieldBlur : MultiProducer<ModelViewField>;
+  var fieldFocus : MultiEmiiter<ModelViewField>;
+  var fieldBlur : MultiEmiiter<ModelViewField>;
 
   public function new() {
     component = new Component({
@@ -54,7 +52,7 @@ class ModelView {
 
     fields = new Map();
 
-    fieldFocus = new MultiProducer();
+    fieldFocus = new MultiEmiiter();
     fieldFocus.feed(function(field) {
       this.currentField = field;
       buttonRemove.enabled.value = null != field;

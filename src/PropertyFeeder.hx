@@ -28,7 +28,7 @@ class PropertyFeeder {
       type    : BoolType,
       create  : function(component : Component) {
         var cls = new ToggleClass(component, name, name);
-        cls.stream.value = true;
+        cls.stream.set(true);
         return cls;
       }
     };

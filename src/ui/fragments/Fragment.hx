@@ -1,6 +1,6 @@
 package ui.fragments;
 
-import steamer.Value;
+import thx.stream.Value;
 import sui.components.Component;
 
 interface Fragment {

@@ -1,6 +1,6 @@
 package sui.properties;
 
-using steamer.dom.Dom;
+using thx.stream.dom.Dom;
 import sui.components.Component;
 
 class ToggleClass extends BoolProperty {
@@ -8,7 +8,7 @@ class ToggleClass extends BoolProperty {
     var defaultValue = component.el.classList.contains(className);
     super(defaultValue, component, name);
     className = null == className ? name : className;
-    stream.feed(component.el.consumeToggleClass(className));
+    stream.subscribe(component.el.subscribeToggleClass(className));
     cancels.push(function() {
       if(defaultValue)
         component.el.classList.add(className);

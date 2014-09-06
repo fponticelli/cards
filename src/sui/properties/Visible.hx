@@ -1,6 +1,6 @@
 package sui.properties;
 
-using steamer.dom.Dom;
+using thx.stream.dom.Dom;
 import sui.components.Component;
 
 class Visible extends BoolProperty {

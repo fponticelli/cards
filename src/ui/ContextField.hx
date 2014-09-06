@@ -1,8 +1,7 @@
 package ui;
 
-import steamer.Feeder;
-import steamer.Producer;
-import steamer.Value;
+import thx.stream.Emitter;
+import thx.stream.Value;
 import sui.components.Component;
 import sui.components.ComponentOptions;
 import dom.Dom;
@@ -15,7 +14,7 @@ import types.TypeTransform;
 import ui.editors.CodeEditor;
 import ui.editors.Editor;
 import ui.editors.EditorPicker;
-using steamer.dom.Dom;
+using thx.stream.dom.Dom;
 import haxe.ds.Option;
 import ui.SchemaType;
 import ui.widgets.Tooltip;

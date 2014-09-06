@@ -1,27 +1,25 @@
 package ui;
 
-import steamer.Consumer;
-import steamer.Feeder;
-import steamer.Producer;
-import steamer.Pulse;
+import thx.stream.Emitter;
+import thx.stream.Value;
 import thx.core.Error;
 import ui.SchemaEvent;
 
 class Schema {
   var fields : Map<String, SchemaType>;
-  public var stream(default, null) : Producer<SchemaEvent>;
-  var feeder : Feeder<SchemaEvent>;
+  public var stream(default, null) : Emitter<SchemaEvent>;
+  var feeder : Value<SchemaEvent>;
 
   public function new() {
     fields = new Map();
-    stream = feeder = new Feeder();
+    stream = feeder = new Value(null);
   }
 
   public function add(name : String, type : SchemaType) {
     if(fields.exists(name))
       throw new Error('Schema already contains a field "$name"');
     fields.set(name, type);
-    feeder.forward(Emit(AddField(name, type)));
+    feeder.set(AddField(name, type));
   }
 
   public function reset(?list : Array<FieldPair>) {
@@ -31,14 +29,14 @@ class Schema {
     list.map(function(pair) {
       fields.set(pair.name, pair.type);
     });
-    feeder.forward(Emit(ListFields(list.copy())));
+    feeder.set(ListFields(list.copy()));
   }
 
   public function delete(name : String) {
     if(!fields.exists(name))
       throw new Error('Schema does not contain a field "${name}"');
     fields.remove(name);
-    feeder.forward(Emit(DeleteField(name)));
+    feeder.set(DeleteField(name));
   }
 
   public function rename(oldname : String, newname : String) {
@@ -47,14 +45,14 @@ class Schema {
     var type = fields.get(oldname);
     fields.remove(oldname);
     fields.set(newname, type);
-    feeder.forward(Emit(RenameField(oldname, newname)));
+    feeder.set(RenameField(oldname, newname));
   }
 
   public function retype(name : String, type : SchemaType) {
     if(!fields.exists(name))
       throw new Error('Schema does not contain a field "${name}"');
     fields.set(name, type);
-    feeder.forward(Emit(RetypeField(name, type)));
+    feeder.set(RetypeField(name, type));
   }
 
   public function get(name : String) {

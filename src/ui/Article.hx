@@ -7,10 +7,10 @@ import thx.Assert;
 import ui.fragments.Block;
 import ui.fragments.ReadonlyBlock;
 import ui.fragments.Fragment;
-import steamer.Value;
+import thx.stream.Value;
 import haxe.ds.Option;
 using thx.core.Options;
-using steamer.Producer;
+using thx.stream.Emitter;
 
 class Article {
   public var component(default, null) : Component;

@@ -1,6 +1,6 @@
 package ui;
 
-import steamer.Producer;
+import thx.stream.Emitter;
 import dom.Dom;
 import sui.components.Component;
 import sui.components.ComponentOptions;
