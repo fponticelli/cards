@@ -188,8 +188,10 @@ a img {
 }
 .card button.fa:before {
   margin-right: 2px;
+  font-family: FontAwesome;
 }
 .card button {
+  font-family: inherit;
   font-size: 0.9em;
   color: #444;
   text-shadow: 1px 1px 1px rgba(255,255,255,0.9);

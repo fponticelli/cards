@@ -31,6 +31,7 @@ class TextEditor implements Editor<String> {
     component = new Component(options);
     component.el.classList.add('editor');
     component.el.setAttribute('tabindex', '0');
+    component.el.setAttribute('contenteditable', 'true');
     component.el.setAttribute('placeholder', options.placeHolder);
 
     // TODO find out how to set the content of :before programmatically
@@ -44,7 +45,8 @@ class TextEditor implements Editor<String> {
       .feed(value);
 
     focus = new Value(false);
-    focus.subscribe(component.el.subscribeToggleAttribute('contenteditable', 'true'));
+    // TODO adding contenteditable dynamically doesn't work very well in FF
+    //focus.subscribe(component.el.subscribeToggleAttribute('contenteditable', 'true'));
     focus.withValue(true).subscribe(component.el.subscribeFocus());
     var focusStream = focus
       .withValue(true)

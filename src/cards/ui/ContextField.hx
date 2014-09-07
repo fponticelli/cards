@@ -45,7 +45,7 @@ class ContextField {
     component = new Component(options);
     // setup field key
     var key = Query.first('.key', component.el);
-    key.innerText = options.display;
+    key.textContent = options.display;
 
     name = options.name;
     type = options.type;
