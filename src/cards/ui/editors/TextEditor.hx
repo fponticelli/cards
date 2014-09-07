@@ -36,8 +36,7 @@ class TextEditor implements Editor<String> {
     // TODO find out how to set the content of :before programmatically
     component.el.style.content = options.placeHolder;
 
-    var text        = new Text(component, options.defaultText),
-        changePair  = component.el.streamEvent('input');
+    var text = new Text(component, options.defaultText);
 
     value = text.stream;
     options.inputEvent(component)

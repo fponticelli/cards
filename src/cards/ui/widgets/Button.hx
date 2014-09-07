@@ -1,7 +1,7 @@
 package cards.ui.widgets;
 
 import js.html.MouseEvent;
-import thx.stream.Emitter;
+using thx.stream.Emitter;
 import thx.stream.Value;
 import cards.components.Component;
 using thx.stream.dom.Dom;
@@ -20,7 +20,7 @@ class Button {
     clicks = component.el.streamClick();
 
     enabled = new Value(true);
-    enabled.subscribe(
+    enabled.negate().subscribe(
       component.el.subscribeToggleAttribute("disabled", "disabled")
     );
   }
