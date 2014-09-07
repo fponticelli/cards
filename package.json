@@ -5,10 +5,25 @@
   "author": "Franco Ponticelli",
   "devDependencies": {},
   "dependencies": {
+    "node-static" : "0.7.*",
     "gulp": "3.8.*",
     "gulp-changed": "0.4.*",
     "gulp-stylus": "1.0.*",
     "fb-flo": "^0.2.1",
     "nib": "^1.0.3"
-  }
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "description": "Cards",
+  "main": "server.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/fponticelli/cards.git"
+  },
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/fponticelli/cards/issues"
+  },
+  "homepage": "https://github.com/fponticelli/cards"
 }

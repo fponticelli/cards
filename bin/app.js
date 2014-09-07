@@ -168,7 +168,9 @@ Lambda.has = function(it,elt) {
 	}
 	return false;
 };
-var Main = function() { };
+var Main = function(some) {
+	haxe.Log.trace("instance " + some,{ fileName : "Main.hx", lineNumber : 36, className : "Main", methodName : "new"});
+};
 Main.__name__ = ["Main"];
 Main.main = function() {
 	thx.stream.dom.Dom.ready().success(function(_) {
@@ -181,7 +183,14 @@ Main.main = function() {
 		var data = new cards.model.Data({ });
 		var model = new cards.model.Model(data);
 		cards.ui.Card.create(model,container,mapper);
+		var f = function(some) {
+			return new Main(some);
+		};
+		f("franco");
 	});
+};
+Main.prototype = {
+	__class__: Main
 };
 var IMap = function() { };
 IMap.__name__ = ["IMap"];
