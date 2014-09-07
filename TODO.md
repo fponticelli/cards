@@ -1,8 +1,3 @@
-+ add ReferenceType
-+ add ReferenceEditor
-+ feed Reference to Value
-- wire reference bidirectionally
-- change fragments to support Reference
 - only allow reference values for editable contents
 
 - helper context (for excel like functions)
@@ -35,6 +30,11 @@ DOC: set focus to currently created block/fragment
 
 DONE:
 
++ add ReferenceType
++ add ReferenceEditor
++ feed Reference to Value
++ wire reference bidirectionally
++ change fragments to support Reference
 + evaluate expressions in context
 + create dependency between model values and context properties
 + refresh evaluation on model change
