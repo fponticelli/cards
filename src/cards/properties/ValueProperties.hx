@@ -3,7 +3,7 @@ package cards.properties;
 import cards.components.Component;
 import cards.properties.ValueProperty;
 import thx.Assert;
-import ui.SchemaType;
+import cards.model.SchemaType;
 
 class ValueProperties {
   public var map : Map<String, ValuePropertyInfo<Dynamic>>;

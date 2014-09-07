@@ -1,0 +1,19 @@
+@import 'nib'
+global-reset()
+
+@import 'colors'
+@import 'variables'
+
+.card, .card *
+  box-sizing border-box
+  //appearance none
+
+.card
+  position absolute
+  width 100%
+  height 100%
+  text-rendering geometricPrecision
+  font-size 10pt
+  font-family "Helvetica Neue", Verdana, Arial, Sans-serif
+.card
+  @import 'cards/ui'

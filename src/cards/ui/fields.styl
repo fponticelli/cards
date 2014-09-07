@@ -1,0 +1,32 @@
+pad = 0.2em
+
+.fields
+  position absolute
+  top toolbar-height
+  overflow auto
+  width 100%
+  fill-height-except-toolbar()
+  user-select none
+  > div
+    margin-top pad
+    display table
+    width 100%
+    //table-layout fixed
+    //border-collapse collapse
+    .field
+      display table-row
+      > div
+        display table-cell
+      .key-container
+        padding pad 0 pad pad
+        .key
+          background-color light-bg-color
+          border-bottom 1px solid #f0f0f0
+          padding pad
+      .value-container
+        width 70%
+        padding pad pad*2 pad pad*1.5
+        .value
+          border-bottom 1px solid #f6f6f6
+      &.active
+        background-color rgba(0,0,0,0.1)

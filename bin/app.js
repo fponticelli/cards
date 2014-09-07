@@ -5,13 +5,16 @@ function $extend(from, fields) {
 	if( fields.toString !== Object.prototype.toString ) proto.toString = fields.toString;
 	return proto;
 }
+var Config = function() { };
+Config.__name__ = ["Config"];
 var EReg = function(r,opt) {
 	opt = opt.split("u").join("");
 	this.r = new RegExp(r,opt);
 };
 EReg.__name__ = ["EReg"];
 EReg.prototype = {
-	match: function(s) {
+	r: null
+	,match: function(s) {
 		if(this.r.global) this.r.lastIndex = 0;
 		this.r.m = this.r.exec(s);
 		this.r.s = s;
@@ -146,22 +149,67 @@ HxOverrides.iter = function(a) {
 		return this.arr[this.cur++];
 	}};
 };
+var Lambda = function() { };
+Lambda.__name__ = ["Lambda"];
+Lambda.array = function(it) {
+	var a = new Array();
+	var $it0 = $iterator(it)();
+	while( $it0.hasNext() ) {
+		var i = $it0.next();
+		a.push(i);
+	}
+	return a;
+};
+Lambda.has = function(it,elt) {
+	var $it0 = $iterator(it)();
+	while( $it0.hasNext() ) {
+		var x = $it0.next();
+		if(x == elt) return true;
+	}
+	return false;
+};
 var Main = function() { };
 Main.__name__ = ["Main"];
 Main.main = function() {
 	thx.stream.dom.Dom.ready().success(function(_) {
+		var values = new cards.properties.ValueProperties();
+		var fragments = new cards.ui.fragments.FragmentProperties();
+		var mapper = new cards.ui.fragments.FragmentMapper(fragments,values);
+		PropertyFeeder.feedProperties(values);
+		PropertyFeeder.feedFragments(fragments);
 		var container = udom.Query.first(".container");
 		var data = new cards.model.Data({ });
 		var model = new cards.model.Model(data);
-		var component = new cards.components.Component({ template : "<div></div>"});
-		component.appendTo(container);
-		var html = new cards.properties.HTML(component);
-		thx.stream.Timer.ofArray(["a","b","C","a","b","X","a","b","c"],400).feed(html.stream);
+		cards.ui.Card.create(model,container,mapper);
 	});
 };
 var IMap = function() { };
 IMap.__name__ = ["IMap"];
 Math.__name__ = ["Math"];
+var PropertyFeeder = function() { };
+PropertyFeeder.__name__ = ["PropertyFeeder"];
+PropertyFeeder.feedProperties = function(properties) {
+	PropertyFeeder.classes.map(function(p) {
+		properties.add(p.name,PropertyFeeder.createToggleClass(p.display,p.name));
+	});
+	properties.add("text",PropertyFeeder.createText());
+};
+PropertyFeeder.feedFragments = function(fragments) {
+	fragments.associateMany("block",["strong","emphasis","text"]);
+	fragments.associateMany("readonly",["strong","emphasis","text"]);
+};
+PropertyFeeder.createToggleClass = function(display,name) {
+	return { name : name, display : display, type : cards.model.SchemaType.BoolType, create : function(component) {
+		var cls = new cards.properties.ToggleClass(component,name,name);
+		cls.stream.set(true);
+		return cls;
+	}};
+};
+PropertyFeeder.createText = function() {
+	return { name : "text", display : "content", type : cards.model.SchemaType.StringType, create : function(component) {
+		return new cards.properties.Text(component,null);
+	}};
+};
 var Reflect = function() { };
 Reflect.__name__ = ["Reflect"];
 Reflect.field = function(o,field) {
@@ -186,6 +234,11 @@ Reflect.fields = function(o) {
 };
 Reflect.isFunction = function(f) {
 	return typeof(f) == "function" && !(f.__name__ || f.__ename__);
+};
+Reflect.compareMethods = function(f1,f2) {
+	if(f1 == f2) return true;
+	if(!Reflect.isFunction(f1) || !Reflect.isFunction(f2)) return false;
+	return f1.scope == f2.scope && f1.method == f2.method && f1.method != null;
 };
 Reflect.isObject = function(v) {
 	if(v == null) return false;
@@ -214,7 +267,8 @@ var StringBuf = function() {
 };
 StringBuf.__name__ = ["StringBuf"];
 StringBuf.prototype = {
-	add: function(x) {
+	b: null
+	,add: function(x) {
 		this.b += Std.string(x);
 	}
 	,__class__: StringBuf
@@ -269,6 +323,10 @@ Type.getClass = function(o) {
 	if(o == null) return null;
 	if((o instanceof Array) && o.__enum__ == null) return Array; else return o.__class__;
 };
+Type.getEnum = function(o) {
+	if(o == null) return null;
+	return o.__enum__;
+};
 Type.getSuperClass = function(c) {
 	return c.__super__;
 };
@@ -279,6 +337,13 @@ Type.getClassName = function(c) {
 Type.getEnumName = function(e) {
 	var a = e.__ename__;
 	return a.join(".");
+};
+Type.getInstanceFields = function(c) {
+	var a = [];
+	for(var i in c.prototype) a.push(i);
+	HxOverrides.remove(a,"__class__");
+	HxOverrides.remove(a,"__properties__");
+	return a;
 };
 Type["typeof"] = function(v) {
 	var _g = typeof(v);
@@ -307,6 +372,15 @@ Type["typeof"] = function(v) {
 		return ValueType.TUnknown;
 	}
 };
+Type.enumConstructor = function(e) {
+	return e[0];
+};
+Type.enumParameters = function(e) {
+	return e.slice(2);
+};
+Type.enumIndex = function(e) {
+	return e[1];
+};
 var cards = {};
 cards.components = {};
 cards.components.Component = function(options) {
@@ -325,7 +399,13 @@ cards.components.Component = function(options) {
 };
 cards.components.Component.__name__ = ["cards","components","Component"];
 cards.components.Component.prototype = {
-	appendTo: function(container) {
+	children: null
+	,isAttached: null
+	,parent: null
+	,properties: null
+	,el: null
+	,list: null
+	,appendTo: function(container) {
 		container.appendChild(this.el);
 		this.isAttached = true;
 	}
@@ -362,7 +442,9 @@ cards.components.Properties = function(target) {
 };
 cards.components.Properties.__name__ = ["cards","components","Properties"];
 cards.components.Properties.prototype = {
-	removeAll: function() {
+	properties: null
+	,target: null
+	,removeAll: function() {
 		var $it0 = this.properties.keys();
 		while( $it0.hasNext() ) {
 			var name = $it0.next();
@@ -394,7 +476,10 @@ cards.model.Data = function(data) {
 };
 cards.model.Data.__name__ = ["cards","model","Data"];
 cards.model.Data.prototype = {
-	resolve: function(path) {
+	root: null
+	,cache: null
+	,value: null
+	,resolve: function(path) {
 		var ref = this.cache.get(path);
 		if(null == ref) {
 			ref = this.root.resolve(path);
@@ -520,7 +605,13 @@ cards.model.Model = function(data) {
 };
 cards.model.Model.__name__ = ["cards","model","Model"];
 cards.model.Model.prototype = {
-	__class__: cards.model.Model
+	data: null
+	,schema: null
+	,dataEventSubscriber: null
+	,schemaEventSubscriber: null
+	,changes: null
+	,bus: null
+	,__class__: cards.model.Model
 };
 cards.model.Runtime = function(expression,code) {
 	this.expression = expression;
@@ -576,7 +667,10 @@ cards.model.Runtime.toErrorOption = function(runtime) {
 	}
 };
 cards.model.Runtime.prototype = {
-	__class__: cards.model.Runtime
+	expression: null
+	,code: null
+	,dependencies: null
+	,__class__: cards.model.Runtime
 };
 cards.model.RuntimeResult = { __ename__ : ["cards","model","RuntimeResult"], __constructs__ : ["Result","Error"] };
 cards.model.RuntimeResult.Result = function(value) { var $x = ["Result",0,value]; $x.__enum__ = cards.model.RuntimeResult; return $x; };
@@ -587,7 +681,10 @@ cards.model.Schema = function() {
 };
 cards.model.Schema.__name__ = ["cards","model","Schema"];
 cards.model.Schema.prototype = {
-	add: function(name,type) {
+	fields: null
+	,stream: null
+	,bus: null
+	,add: function(name,type) {
 		if(this.fields.exists(name)) throw new thx.core.Error("Schema already contains a field \"" + name + "\"",null,{ fileName : "Schema.hx", lineNumber : 20, className : "cards.model.Schema", methodName : "add"});
 		this.fields.set(name,type);
 		this.bus.pulse(cards.model.SchemaEvent.AddField(name,type));
@@ -667,7 +764,8 @@ cards.model.Scope = function() {
 };
 cards.model.Scope.__name__ = ["cards","model","Scope"];
 cards.model.Scope.prototype = {
-	__class__: cards.model.Scope
+	name: null
+	,__class__: cards.model.Scope
 };
 cards.model.ref = {};
 cards.model.ref.BaseRef = function(parent) {
@@ -675,7 +773,8 @@ cards.model.ref.BaseRef = function(parent) {
 };
 cards.model.ref.BaseRef.__name__ = ["cards","model","ref","BaseRef"];
 cards.model.ref.BaseRef.prototype = {
-	getRoot: function() {
+	parent: null
+	,getRoot: function() {
 		var ref = this;
 		while(!js.Boot.__instanceof(ref.parent,cards.model.ref.EmptyParent)) ref = ref.parent;
 		return ref;
@@ -685,12 +784,20 @@ cards.model.ref.BaseRef.prototype = {
 cards.model.ref.IParentRef = function() { };
 cards.model.ref.IParentRef.__name__ = ["cards","model","ref","IParentRef"];
 cards.model.ref.IParentRef.prototype = {
-	__class__: cards.model.ref.IParentRef
+	removeChild: null
+	,__class__: cards.model.ref.IParentRef
 };
 cards.model.ref.IRef = function() { };
 cards.model.ref.IRef.__name__ = ["cards","model","ref","IRef"];
 cards.model.ref.IRef.prototype = {
-	__class__: cards.model.ref.IRef
+	parent: null
+	,get: null
+	,set: null
+	,remove: null
+	,hasValue: null
+	,resolve: null
+	,getRoot: null
+	,__class__: cards.model.ref.IRef
 };
 cards.model.ref.ArrayRef = function(parent) {
 	cards.model.ref.BaseRef.call(this,parent);
@@ -701,7 +808,9 @@ cards.model.ref.ArrayRef.__name__ = ["cards","model","ref","ArrayRef"];
 cards.model.ref.ArrayRef.__interfaces__ = [cards.model.ref.IParentRef,cards.model.ref.IRef];
 cards.model.ref.ArrayRef.__super__ = cards.model.ref.BaseRef;
 cards.model.ref.ArrayRef.prototype = $extend(cards.model.ref.BaseRef.prototype,{
-	get: function() {
+	items: null
+	,inverse: null
+	,get: function() {
 		var _g = this;
 		var res = [];
 		thx.core.Arrays.order(thx.core.Iterators.toArray(this.items.keys()),thx.core.Ints.compare).map(function(i) {
@@ -779,7 +888,9 @@ cards.model.ref.ObjectRef.__name__ = ["cards","model","ref","ObjectRef"];
 cards.model.ref.ObjectRef.__interfaces__ = [cards.model.ref.IParentRef,cards.model.ref.IRef];
 cards.model.ref.ObjectRef.__super__ = cards.model.ref.BaseRef;
 cards.model.ref.ObjectRef.prototype = $extend(cards.model.ref.BaseRef.prototype,{
-	get: function() {
+	fields: null
+	,inverse: null
+	,get: function() {
 		var _g = this;
 		var o = { };
 		thx.core.Iterators.map(this.fields.keys(),function(key) {
@@ -865,7 +976,9 @@ cards.model.ref.UnknownRef.__name__ = ["cards","model","ref","UnknownRef"];
 cards.model.ref.UnknownRef.__interfaces__ = [cards.model.ref.IParentRef,cards.model.ref.IRef];
 cards.model.ref.UnknownRef.__super__ = cards.model.ref.BaseRef;
 cards.model.ref.UnknownRef.prototype = $extend(cards.model.ref.BaseRef.prototype,{
-	get: function() {
+	ref: null
+	,hasRef: null
+	,get: function() {
 		if(this.hasRef) return this.ref.get(); else return null;
 	}
 	,set: function(value) {
@@ -905,7 +1018,9 @@ cards.model.ref.ValueRef.__name__ = ["cards","model","ref","ValueRef"];
 cards.model.ref.ValueRef.__interfaces__ = [cards.model.ref.IRef];
 cards.model.ref.ValueRef.__super__ = cards.model.ref.BaseRef;
 cards.model.ref.ValueRef.prototype = $extend(cards.model.ref.BaseRef.prototype,{
-	get: function() {
+	_hasValue: null
+	,value: null
+	,get: function() {
 		return this.value;
 	}
 	,set: function(value) {
@@ -936,7 +1051,10 @@ cards.properties.Property = function(component,name) {
 };
 cards.properties.Property.__name__ = ["cards","properties","Property"];
 cards.properties.Property.prototype = {
-	dispose: function() {
+	component: null
+	,name: null
+	,cancels: null
+	,dispose: function() {
 		while(this.cancels.length > 0) (this.cancels.shift())();
 		if(this.component.properties.exists(this.name)) {
 			this.component.properties.remove(this.name);
@@ -998,7 +1116,10 @@ cards.properties.ValueProperty = function(defaultValue,component,name) {
 cards.properties.ValueProperty.__name__ = ["cards","properties","ValueProperty"];
 cards.properties.ValueProperty.__super__ = cards.properties.Property;
 cards.properties.ValueProperty.prototype = $extend(cards.properties.Property.prototype,{
-	transform: function(value) {
+	stream: null
+	,runtime: null
+	,runtimeError: null
+	,transform: function(value) {
 		throw Type.getClassName(Type.getClass(this)).split(".").pop() + ".transform() is abstract and must be overridden";
 	}
 	,dispose: function() {
@@ -1015,25 +1136,16 @@ cards.properties.ValueProperty.prototype = $extend(cards.properties.Property.pro
 	}
 	,__class__: cards.properties.ValueProperty
 });
-cards.properties.StringProperty = function(defaultValue,component,name) {
+cards.properties.BoolProperty = function(defaultValue,component,name) {
 	cards.properties.ValueProperty.call(this,defaultValue,component,name);
 };
-cards.properties.StringProperty.__name__ = ["cards","properties","StringProperty"];
-cards.properties.StringProperty.__super__ = cards.properties.ValueProperty;
-cards.properties.StringProperty.prototype = $extend(cards.properties.ValueProperty.prototype,{
+cards.properties.BoolProperty.__name__ = ["cards","properties","BoolProperty"];
+cards.properties.BoolProperty.__super__ = cards.properties.ValueProperty;
+cards.properties.BoolProperty.prototype = $extend(cards.properties.ValueProperty.prototype,{
 	transform: function(value) {
-		return cards.types.DynamicTransform.toString(value);
+		return cards.types.DynamicTransform.toBool(value);
 	}
-	,__class__: cards.properties.StringProperty
-});
-cards.properties.HTML = function(component,defaultHTML) {
-	cards.properties.StringProperty.call(this,null == defaultHTML?component.el.innerHTML:defaultHTML,component,"html");
-	this.stream.subscribe(thx.stream.dom.Dom.subscribeHTML(component.el));
-};
-cards.properties.HTML.__name__ = ["cards","properties","HTML"];
-cards.properties.HTML.__super__ = cards.properties.StringProperty;
-cards.properties.HTML.prototype = $extend(cards.properties.StringProperty.prototype,{
-	__class__: cards.properties.HTML
+	,__class__: cards.properties.BoolProperty
 });
 cards.properties._PropertyName = {};
 cards.properties._PropertyName.PropertyName_Impl_ = function() { };
@@ -1050,6 +1162,72 @@ cards.properties._PropertyName.PropertyName_Impl_._new = function(name) {
 cards.properties._PropertyName.PropertyName_Impl_.toString = function(this1) {
 	return this1;
 };
+cards.properties.StringProperty = function(defaultValue,component,name) {
+	cards.properties.ValueProperty.call(this,defaultValue,component,name);
+};
+cards.properties.StringProperty.__name__ = ["cards","properties","StringProperty"];
+cards.properties.StringProperty.__super__ = cards.properties.ValueProperty;
+cards.properties.StringProperty.prototype = $extend(cards.properties.ValueProperty.prototype,{
+	transform: function(value) {
+		return cards.types.DynamicTransform.toString(value);
+	}
+	,__class__: cards.properties.StringProperty
+});
+cards.properties.Text = function(component,defaultText) {
+	cards.properties.StringProperty.call(this,null == defaultText?component.el.innerText:defaultText,component,"text");
+	this.stream.subscribe(thx.stream.dom.Dom.subscribeText(component.el));
+};
+cards.properties.Text.__name__ = ["cards","properties","Text"];
+cards.properties.Text.__super__ = cards.properties.StringProperty;
+cards.properties.Text.prototype = $extend(cards.properties.StringProperty.prototype,{
+	__class__: cards.properties.Text
+});
+cards.properties.ToggleClass = function(component,name,className) {
+	var defaultValue = component.el.classList.contains(className);
+	cards.properties.BoolProperty.call(this,defaultValue,component,name);
+	if(null == className) className = name; else className = className;
+	this.stream.subscribe(thx.stream.dom.Dom.subscribeToggleClass(component.el,className));
+};
+cards.properties.ToggleClass.__name__ = ["cards","properties","ToggleClass"];
+cards.properties.ToggleClass.__super__ = cards.properties.BoolProperty;
+cards.properties.ToggleClass.prototype = $extend(cards.properties.BoolProperty.prototype,{
+	__class__: cards.properties.ToggleClass
+});
+cards.properties.ValueProperties = function() {
+	this.map = new haxe.ds.StringMap();
+};
+cards.properties.ValueProperties.__name__ = ["cards","properties","ValueProperties"];
+cards.properties.ValueProperties.prototype = {
+	map: null
+	,add: function(name,info) {
+		thx.Assert.isFalse(this.map.exists(name),"ValueProperties already contains \"" + name + "\"",{ fileName : "ValueProperties.hx", lineNumber : 15, className : "cards.properties.ValueProperties", methodName : "add"});
+		this.map.set(name,info);
+	}
+	,remove: function(name) {
+		thx.Assert.isTrue(this.map.exists(name),"ValueProperties does not contain \"" + name + "\"",{ fileName : "ValueProperties.hx", lineNumber : 20, className : "cards.properties.ValueProperties", methodName : "remove"});
+		this.map.remove(name);
+	}
+	,get: function(name) {
+		thx.Assert.isTrue(this.map.exists(name),"ValueProperties does not contain \"" + name + "\"",{ fileName : "ValueProperties.hx", lineNumber : 25, className : "cards.properties.ValueProperties", methodName : "get"});
+		return this.map.get(name);
+	}
+	,ensure: function(name,component) {
+		if(component.properties.exists(name)) return js.Boot.__cast(component.properties.get(name) , cards.properties.ValueProperty); else return this.get(name).create(component);
+	}
+	,list: function() {
+		return this.map.keys();
+	}
+	,__class__: cards.properties.ValueProperties
+};
+cards.properties.Visible = function(component,defaultValue) {
+	cards.properties.BoolProperty.call(this,defaultValue,component,"visible");
+	this.stream.subscribe(thx.stream.dom.Dom.subscribeToggleVisibility(component.el));
+};
+cards.properties.Visible.__name__ = ["cards","properties","Visible"];
+cards.properties.Visible.__super__ = cards.properties.BoolProperty;
+cards.properties.Visible.prototype = $extend(cards.properties.BoolProperty.prototype,{
+	__class__: cards.properties.Visible
+});
 cards.types = {};
 cards.types.ArrayTransform = function() { };
 cards.types.ArrayTransform.__name__ = ["cards","types","ArrayTransform"];
@@ -1111,6 +1289,59 @@ cards.types.BoolTransform.toCode = function(value) {
 };
 cards.types.BoolTransform.toReference = function(value) {
 	return "";
+};
+cards.types.CodeTransform = function() { };
+cards.types.CodeTransform.__name__ = ["cards","types","CodeTransform"];
+cards.types.CodeTransform.toArray = function(value) {
+	try {
+		var t = JSON.parse(cards.types.CodeTransform.toCode(value));
+		if((t instanceof Array) && t.__enum__ == null) return t; else return cards.types.DynamicTransform.toArray(t);
+	} catch( _ ) {
+		return [];
+	}
+};
+cards.types.CodeTransform.toBool = function(value) {
+	var _g = cards.types.CodeTransform.toCode(value);
+	switch(_g) {
+	case "true":case "1":
+		return true;
+	default:
+		return false;
+	}
+};
+cards.types.CodeTransform.toDate = function(value) {
+	if(cards.types.CodeTransform.datePattern.match(value)) {
+		var t = Std.parseFloat(cards.types.CodeTransform.datePattern.matched(1));
+		var d = new Date();
+		d.setTime(t);
+		return d;
+	} else return new Date();
+};
+cards.types.CodeTransform.toFloat = function(value) {
+	return Std.parseFloat(cards.types.CodeTransform.toCode(value));
+};
+cards.types.CodeTransform.toObject = function(value) {
+	try {
+		var t = JSON.parse(cards.types.CodeTransform.toCode(value));
+		if(Reflect.isObject(t) && !(typeof(t) == "string")) return t; else return cards.types.DynamicTransform.toObject(t);
+	} catch( _ ) {
+		return { };
+	}
+};
+cards.types.CodeTransform.toString = function(value) {
+	try {
+		var t = JSON.parse(cards.types.CodeTransform.toCode(value));
+		if(typeof(t) == "string") return t; else return cards.types.DynamicTransform.toString(t);
+	} catch( _ ) {
+		return "";
+	}
+};
+cards.types.CodeTransform.toCode = function(value) {
+	if(null != value) return StringTools.trim(value); else return "null";
+};
+cards.types.CodeTransform.toReference = function(value) {
+	var code = cards.types.CodeTransform.toCode(value);
+	if(cards.types.CodeTransform.PATTERN.match(code)) return cards.types.CodeTransform.PATTERN.matched(1); else return "";
 };
 cards.types.DateTransform = function() { };
 cards.types.DateTransform.__name__ = ["cards","types","DateTransform"];
@@ -1288,6 +1519,33 @@ cards.types.ObjectTransform.toCode = function(value) {
 cards.types.ObjectTransform.toReference = function(value) {
 	return "";
 };
+cards.types.ReferenceTransform = function() { };
+cards.types.ReferenceTransform.__name__ = ["cards","types","ReferenceTransform"];
+cards.types.ReferenceTransform.toArray = function(value) {
+	return cards.types.ArrayTransform.toArray(null);
+};
+cards.types.ReferenceTransform.toBool = function(value) {
+	return cards.types.BoolTransform.toBool(null);
+};
+cards.types.ReferenceTransform.toDate = function(value) {
+	return cards.types.DateTransform.toDate(null);
+};
+cards.types.ReferenceTransform.toFloat = function(value) {
+	return cards.types.FloatTransform.toFloat(null);
+};
+cards.types.ReferenceTransform.toObject = function(value) {
+	return cards.types.ObjectTransform.toObject(null);
+};
+cards.types.ReferenceTransform.toString = function(value) {
+	return cards.types.StringTransform.toString(null);
+};
+cards.types.ReferenceTransform.toCode = function(value) {
+	value = cards.types.ReferenceTransform.toReference(value);
+	if("" == value) return ""; else return "$." + value;
+};
+cards.types.ReferenceTransform.toReference = function(value) {
+	if(null == value) return ""; else return value;
+};
 cards.types.StringTransform = function() { };
 cards.types.StringTransform.__name__ = ["cards","types","StringTransform"];
 cards.types.StringTransform.toArray = function(value) {
@@ -1324,131 +1582,362 @@ cards.types.StringTransform.toCode = function(value) {
 cards.types.StringTransform.toReference = function(value) {
 	return "";
 };
-var haxe = {};
-haxe.StackItem = { __ename__ : ["haxe","StackItem"], __constructs__ : ["CFunction","Module","FilePos","Method","LocalFunction"] };
-haxe.StackItem.CFunction = ["CFunction",0];
-haxe.StackItem.CFunction.__enum__ = haxe.StackItem;
-haxe.StackItem.Module = function(m) { var $x = ["Module",1,m]; $x.__enum__ = haxe.StackItem; return $x; };
-haxe.StackItem.FilePos = function(s,file,line) { var $x = ["FilePos",2,s,file,line]; $x.__enum__ = haxe.StackItem; return $x; };
-haxe.StackItem.Method = function(classname,method) { var $x = ["Method",3,classname,method]; $x.__enum__ = haxe.StackItem; return $x; };
-haxe.StackItem.LocalFunction = function(v) { var $x = ["LocalFunction",4,v]; $x.__enum__ = haxe.StackItem; return $x; };
-haxe.CallStack = function() { };
-haxe.CallStack.__name__ = ["haxe","CallStack"];
-haxe.CallStack.callStack = function() {
-	var oldValue = Error.prepareStackTrace;
-	Error.prepareStackTrace = function(error,callsites) {
-		var stack = [];
-		var _g = 0;
-		while(_g < callsites.length) {
-			var site = callsites[_g];
-			++_g;
-			var method = null;
-			var fullName = site.getFunctionName();
-			if(fullName != null) {
-				var idx = fullName.lastIndexOf(".");
-				if(idx >= 0) {
-					var className = HxOverrides.substr(fullName,0,idx);
-					var methodName = HxOverrides.substr(fullName,idx + 1,null);
-					method = haxe.StackItem.Method(className,methodName);
-				}
-			}
-			stack.push(haxe.StackItem.FilePos(method,site.getFileName(),site.getLineNumber()));
+cards.types.TypeTransform = function() { };
+cards.types.TypeTransform.__name__ = ["cards","types","TypeTransform"];
+cards.types.TypeTransform.transform = function(srcType,dstType) {
+	switch(srcType[1]) {
+	case 0:
+		switch(dstType[1]) {
+		case 0:
+			return cards.types.ArrayTransform.toArray;
+		case 1:
+			return cards.types.ArrayTransform.toBool;
+		case 2:
+			return cards.types.ArrayTransform.toDate;
+		case 3:
+			return cards.types.ArrayTransform.toFloat;
+		case 4:
+			return cards.types.ArrayTransform.toObject;
+		case 5:
+			return cards.types.ArrayTransform.toString;
+		case 6:
+			return cards.types.ArrayTransform.toCode;
+		case 7:
+			return cards.types.ArrayTransform.toReference;
 		}
-		return stack;
+		break;
+	case 1:
+		switch(dstType[1]) {
+		case 0:
+			return cards.types.BoolTransform.toArray;
+		case 1:
+			return cards.types.BoolTransform.toBool;
+		case 2:
+			return cards.types.BoolTransform.toDate;
+		case 3:
+			return cards.types.BoolTransform.toFloat;
+		case 4:
+			return cards.types.BoolTransform.toObject;
+		case 5:
+			return cards.types.BoolTransform.toString;
+		case 6:
+			return cards.types.BoolTransform.toCode;
+		case 7:
+			return cards.types.BoolTransform.toReference;
+		}
+		break;
+	case 2:
+		switch(dstType[1]) {
+		case 0:
+			return cards.types.DateTransform.toArray;
+		case 1:
+			return cards.types.DateTransform.toBool;
+		case 2:
+			return cards.types.DateTransform.toDate;
+		case 3:
+			return cards.types.DateTransform.toFloat;
+		case 4:
+			return cards.types.DateTransform.toObject;
+		case 5:
+			return cards.types.DateTransform.toString;
+		case 6:
+			return cards.types.DateTransform.toCode;
+		case 7:
+			return cards.types.DateTransform.toReference;
+		}
+		break;
+	case 3:
+		switch(dstType[1]) {
+		case 0:
+			return cards.types.FloatTransform.toArray;
+		case 1:
+			return cards.types.FloatTransform.toBool;
+		case 2:
+			return cards.types.FloatTransform.toDate;
+		case 3:
+			return cards.types.FloatTransform.toFloat;
+		case 4:
+			return cards.types.FloatTransform.toObject;
+		case 5:
+			return cards.types.FloatTransform.toString;
+		case 6:
+			return cards.types.FloatTransform.toCode;
+		case 7:
+			return cards.types.FloatTransform.toReference;
+		}
+		break;
+	case 4:
+		switch(dstType[1]) {
+		case 0:
+			return cards.types.ObjectTransform.toArray;
+		case 1:
+			return cards.types.ObjectTransform.toBool;
+		case 2:
+			return cards.types.ObjectTransform.toDate;
+		case 3:
+			return cards.types.ObjectTransform.toFloat;
+		case 4:
+			return cards.types.ObjectTransform.toObject;
+		case 5:
+			return cards.types.ObjectTransform.toString;
+		case 6:
+			return cards.types.ObjectTransform.toCode;
+		case 7:
+			return cards.types.ObjectTransform.toReference;
+		}
+		break;
+	case 5:
+		switch(dstType[1]) {
+		case 0:
+			return cards.types.StringTransform.toArray;
+		case 1:
+			return cards.types.StringTransform.toBool;
+		case 2:
+			return cards.types.StringTransform.toDate;
+		case 3:
+			return cards.types.StringTransform.toFloat;
+		case 4:
+			return cards.types.StringTransform.toObject;
+		case 5:
+			return cards.types.StringTransform.toString;
+		case 6:
+			return cards.types.StringTransform.toCode;
+		case 7:
+			return cards.types.StringTransform.toReference;
+		}
+		break;
+	case 6:
+		switch(dstType[1]) {
+		case 0:
+			return cards.types.CodeTransform.toArray;
+		case 1:
+			return cards.types.CodeTransform.toBool;
+		case 2:
+			return cards.types.CodeTransform.toDate;
+		case 3:
+			return cards.types.CodeTransform.toFloat;
+		case 4:
+			return cards.types.CodeTransform.toObject;
+		case 5:
+			return cards.types.CodeTransform.toString;
+		case 6:
+			return cards.types.CodeTransform.toCode;
+		case 7:
+			return cards.types.CodeTransform.toReference;
+		}
+		break;
+	case 7:
+		switch(dstType[1]) {
+		case 0:
+			return cards.types.ReferenceTransform.toArray;
+		case 1:
+			return cards.types.ReferenceTransform.toBool;
+		case 2:
+			return cards.types.ReferenceTransform.toDate;
+		case 3:
+			return cards.types.ReferenceTransform.toFloat;
+		case 4:
+			return cards.types.ReferenceTransform.toObject;
+		case 5:
+			return cards.types.ReferenceTransform.toString;
+		case 6:
+			return cards.types.ReferenceTransform.toCode;
+		case 7:
+			return cards.types.ReferenceTransform.toReference;
+		}
+		break;
+	}
+};
+cards.ui = {};
+cards.ui.Article = function(options) {
+	if(null == options.el && null == options.template) options.template = "<article></article>";
+	this.component = new cards.components.Component(options);
+	this.fragments = new haxe.ds.ObjectMap();
+	this.fragmentStream = new thx.stream.Bus();
+	this.fragment = new thx.stream.Value(haxe.ds.Option.None);
+	this.fragmentStream.toOption().feed(this.fragment);
+	var filtered = thx.stream.EmitterOptions.filterOption(this.fragment);
+	filtered.previous().subscribe(function(fragment) {
+		fragment.active.set(false);
+	});
+	filtered.subscribe(function(fragment1) {
+		fragment1.active.set(true);
+	});
+};
+cards.ui.Article.__name__ = ["cards","ui","Article"];
+cards.ui.Article.prototype = {
+	component: null
+	,fragment: null
+	,fragmentStream: null
+	,fragments: null
+	,addFragment: function(fragment) {
+		var focusStream = fragment.focus.withValue(true).mapValue(function(_) {
+			return fragment;
+		}).plug(this.fragmentStream);
+		this.fragments.set(fragment,$bind(focusStream,focusStream.cancel));
+	}
+	,addBlock: function() {
+		var fragment = new cards.ui.fragments.Block({ parent : this.component, container : this.component.el, defaultText : "block"});
+		this.addFragment(fragment);
+		return fragment;
+	}
+	,addReadonly: function() {
+		var fragment = new cards.ui.fragments.ReadonlyBlock({ parent : this.component, container : this.component.el});
+		this.addFragment(fragment);
+		return fragment;
+	}
+	,removeFragment: function(fragment) {
+		if(thx.core.Options.equalsValue(this.fragment.get(),fragment)) this.fragment.set(haxe.ds.Option.None);
+		var finalizer = this.fragments.h[fragment.__id__];
+		thx.Assert.notNull(finalizer,null,{ fileName : "Article.hx", lineNumber : 71, className : "cards.ui.Article", methodName : "removeFragment"});
+		finalizer();
+	}
+	,__class__: cards.ui.Article
+};
+cards.ui.Card = function() { };
+cards.ui.Card.__name__ = ["cards","ui","Card"];
+cards.ui.Card.create = function(model,container,mapper) {
+	var card = new cards.components.Component({ template : "<div class=\"card\"><div class=\"doc\"></div><aside><div class=\"context\"></div><div class=\"model\"></div></aside></div>"});
+	var context = udom.Query.first(".context",card.el);
+	var modelView = new cards.ui.ModelView();
+	var document = new cards.ui.Document({ el : udom.Query.first(".doc",card.el)});
+	var context1 = new cards.ui.ContextView(document,model,modelView,mapper,{ el : udom.Query.first(".context",card.el)});
+	modelView.component.appendTo(udom.Query.first(".model",card.el));
+	modelView.schema.subscribe(model.schemaEventSubscriber);
+	modelView.data.subscribe(model.dataEventSubscriber);
+	card.appendTo(container);
+	document.article.addReadonly();
+	var block = document.article.addBlock();
+	mapper.values.ensure("strong",block.component);
+	block = document.article.addBlock();
+	mapper.values.ensure("emphasis",block.component);
+	block = document.article.addBlock();
+	mapper.values.ensure("strong",block.component);
+	mapper.values.ensure("emphasis",block.component);
+	document.article.addBlock();
+};
+cards.ui.widgets = {};
+cards.ui.widgets.FrameOverlay = function(options) {
+	var _g = this;
+	if(null == options.el && null == options.template) options.template = "<div class=\"frame-overlay\"></div>";
+	this.component = new cards.components.Component(options);
+	this.visible = new cards.properties.Visible(this.component,false);
+	var clear = function(_) {
+		_g.visible.stream.set(false);
 	};
-	var a = haxe.CallStack.makeStack(new Error().stack);
-	a.shift();
-	Error.prepareStackTrace = oldValue;
-	return a;
+	this.visible.stream.filterValue(function(b) {
+		return !b;
+	}).subscribe(function(_1) {
+		window.document.removeEventListener("mouseup",clear,false);
+	});
+	this.visible.stream.filterValue(function(b1) {
+		return b1;
+	}).subscribe(function(_2) {
+		window.document.addEventListener("mouseup",clear,false);
+		_g.reposition();
+	});
+	this.anchorElement = window.document.body;
 };
-haxe.CallStack.exceptionStack = function() {
-	return [];
-};
-haxe.CallStack.makeStack = function(s) {
-	if(typeof(s) == "string") {
-		var stack = s.split("\n");
-		var m = [];
-		var _g = 0;
-		while(_g < stack.length) {
-			var line = stack[_g];
-			++_g;
-			m.push(haxe.StackItem.Module(line));
+cards.ui.widgets.FrameOverlay.__name__ = ["cards","ui","widgets","FrameOverlay"];
+cards.ui.widgets.FrameOverlay.prototype = {
+	component: null
+	,visible: null
+	,anchorElement: null
+	,my: null
+	,at: null
+	,anchorTo: function(el,my,at) {
+		this.anchorElement = el;
+		if(null == my) this.my = cards.ui.widgets.AnchorPoint.TopLeft; else this.my = my;
+		if(null == at) this.at = cards.ui.widgets.AnchorPoint.BottomLeft; else this.at = at;
+		if(this.visible.stream.get()) this.reposition();
+	}
+	,reposition: function() {
+		if(!this.component.isAttached) {
+			var parent = [udom.Query.first(Config.selectors.app),window.document.body].filter(function(v) {
+				return null != v;
+			}).shift();
+			this.component.appendTo(parent);
 		}
-		return m;
-	} else return s;
+		var style = this.component.el.style;
+		style.position = "fixed";
+		var atrect = this.anchorElement.getBoundingClientRect();
+		var myrect = this.component.el.getBoundingClientRect();
+		var x = 0.0;
+		var y = 0.0;
+		var _g = this.at;
+		switch(_g[1]) {
+		case 0:case 1:case 2:
+			y = atrect.top;
+			break;
+		case 3:case 4:case 5:
+			y = atrect.top + atrect.height / 2;
+			break;
+		case 6:case 7:case 8:
+			y = atrect.top + atrect.height;
+			break;
+		}
+		var _g1 = this.at;
+		switch(_g1[1]) {
+		case 0:case 3:case 6:
+			x = atrect.left;
+			break;
+		case 1:case 4:case 7:
+			x = atrect.left + atrect.width / 2;
+			break;
+		case 2:case 5:case 8:
+			x = atrect.left + atrect.width;
+			break;
+		}
+		var _g2 = this.my;
+		switch(_g2[1]) {
+		case 0:case 1:case 2:
+			y -= 0;
+			break;
+		case 3:case 4:case 5:
+			y -= myrect.height / 2;
+			break;
+		case 6:case 7:case 8:
+			y -= myrect.height;
+			break;
+		}
+		var _g3 = this.my;
+		switch(_g3[1]) {
+		case 0:case 3:case 6:
+			x -= 0;
+			break;
+		case 1:case 4:case 7:
+			x -= myrect.width / 2;
+			break;
+		case 2:case 5:case 8:
+			x -= myrect.width;
+			break;
+		}
+		style.top = y + "px";
+		style.left = x + "px";
+	}
+	,__class__: cards.ui.widgets.FrameOverlay
 };
-haxe.Log = function() { };
-haxe.Log.__name__ = ["haxe","Log"];
-haxe.Log.trace = function(v,infos) {
-	js.Boot.__trace(v,infos);
+cards.ui.widgets.Tooltip = function(options) {
+	cards.ui.widgets.FrameOverlay.call(this,options);
 };
+cards.ui.widgets.Tooltip.__name__ = ["cards","ui","widgets","Tooltip"];
+cards.ui.widgets.Tooltip.__super__ = cards.ui.widgets.FrameOverlay;
+cards.ui.widgets.Tooltip.prototype = $extend(cards.ui.widgets.FrameOverlay.prototype,{
+	setContent: function(html) {
+		this.component.el.innerHTML = html;
+	}
+	,__class__: cards.ui.widgets.Tooltip
+});
+var haxe = {};
 haxe.ds = {};
-haxe.ds.IntMap = function() {
-	this.h = { };
-};
-haxe.ds.IntMap.__name__ = ["haxe","ds","IntMap"];
-haxe.ds.IntMap.__interfaces__ = [IMap];
-haxe.ds.IntMap.prototype = {
-	set: function(key,value) {
-		this.h[key] = value;
-	}
-	,get: function(key) {
-		return this.h[key];
-	}
-	,remove: function(key) {
-		if(!this.h.hasOwnProperty(key)) return false;
-		delete(this.h[key]);
-		return true;
-	}
-	,keys: function() {
-		var a = [];
-		for( var key in this.h ) {
-		if(this.h.hasOwnProperty(key)) a.push(key | 0);
-		}
-		return HxOverrides.iter(a);
-	}
-	,iterator: function() {
-		return { ref : this.h, it : this.keys(), hasNext : function() {
-			return this.it.hasNext();
-		}, next : function() {
-			var i = this.it.next();
-			return this.ref[i];
-		}};
-	}
-	,__class__: haxe.ds.IntMap
-};
-haxe.ds.ObjectMap = function() {
-	this.h = { };
-	this.h.__keys__ = { };
-};
-haxe.ds.ObjectMap.__name__ = ["haxe","ds","ObjectMap"];
-haxe.ds.ObjectMap.__interfaces__ = [IMap];
-haxe.ds.ObjectMap.prototype = {
-	set: function(key,value) {
-		var id = key.__id__ || (key.__id__ = ++haxe.ds.ObjectMap.count);
-		this.h[id] = value;
-		this.h.__keys__[id] = key;
-	}
-	,remove: function(key) {
-		var id = key.__id__;
-		if(this.h.__keys__[id] == null) return false;
-		delete(this.h[id]);
-		delete(this.h.__keys__[id]);
-		return true;
-	}
-	,__class__: haxe.ds.ObjectMap
-};
-haxe.ds.Option = { __ename__ : ["haxe","ds","Option"], __constructs__ : ["Some","None"] };
-haxe.ds.Option.Some = function(v) { var $x = ["Some",0,v]; $x.__enum__ = haxe.ds.Option; return $x; };
-haxe.ds.Option.None = ["None",1];
-haxe.ds.Option.None.__enum__ = haxe.ds.Option;
 haxe.ds.StringMap = function() {
 	this.h = { };
 };
 haxe.ds.StringMap.__name__ = ["haxe","ds","StringMap"];
 haxe.ds.StringMap.__interfaces__ = [IMap];
 haxe.ds.StringMap.prototype = {
-	set: function(key,value) {
+	h: null
+	,set: function(key,value) {
 		this.h["$" + key] = value;
 	}
 	,get: function(key) {
@@ -1614,8 +2103,2421 @@ js.Boot.__instanceof = function(o,cl) {
 		return o.__enum__ == cl;
 	}
 };
+js.Boot.__cast = function(o,t) {
+	if(js.Boot.__instanceof(o,t)) return o; else throw "Cannot cast " + Std.string(o) + " to " + Std.string(t);
+};
+var udom = {};
+udom.Html = function() { };
+udom.Html.__name__ = ["udom","Html"];
+udom.Html.parseList = function(html) {
+	var el = window.document.createElement("div");
+	el.innerHTML = html;
+	return el.childNodes;
+};
+udom.Html.parseAll = function(html) {
+	return udom._Dom.H.toArray(udom.Html.parseList(StringTools.trim(html)));
+};
+udom.Html.parse = function(html) {
+	return udom.Html.parseList(StringTools.ltrim(html))[0];
+};
 var thx = {};
+thx.stream = {};
+thx.stream.dom = {};
+thx.stream.dom.Dom = function() { };
+thx.stream.dom.Dom.__name__ = ["thx","stream","dom","Dom"];
+thx.stream.dom.Dom.ready = function() {
+	return thx.promise.Promise.create(function(resolve,_) {
+		window.document.addEventListener("DOMContentLoaded",function(_1) {
+			resolve(thx.core.Nil.nil);
+		},false);
+	});
+};
+thx.stream.dom.Dom.streamEvent = function(el,name,capture) {
+	if(capture == null) capture = false;
+	return thx.stream.Emitter.create(function(stream) {
+		el.addEventListener(name,$bind(stream,stream.pulse),capture);
+		stream.addCleanUp(function() {
+			el.removeEventListener(name,$bind(stream,stream.pulse),capture);
+		});
+	});
+};
+thx.stream.dom.Dom.streamMouseEvent = function(el,name,capture) {
+	if(capture == null) capture = false;
+	return thx.stream.dom.Dom.streamEvent(el,name,capture);
+};
+thx.stream.dom.Dom.streamKey = function(el,name,capture) {
+	if(capture == null) capture = false;
+	return thx.stream.Emitter.create((function($this) {
+		var $r;
+		if(!StringTools.startsWith(name,"key")) name = "key" + name;
+		$r = function(stream) {
+			el.addEventListener(name,$bind(stream,stream.pulse),capture);
+			stream.addCleanUp(function() {
+				el.removeEventListener(name,$bind(stream,stream.pulse),capture);
+			});
+		};
+		return $r;
+	}(this)));
+};
+thx.stream.dom.Dom.streamFocus = function(el,capture) {
+	if(capture == null) capture = false;
+	return thx.stream.dom.Dom.streamEvent(el,"focus",capture).toTrue().merge(thx.stream.dom.Dom.streamEvent(el,"blur",capture).toFalse());
+};
+thx.stream.dom.Dom.streamClick = function(el,capture) {
+	if(capture == null) capture = false;
+	return thx.stream.dom.Dom.streamEvent(el,"click",capture);
+};
+thx.stream.dom.Dom.streamInput = function(el,capture) {
+	if(capture == null) capture = false;
+	return thx.stream.dom.Dom.streamEvent(el,"input",capture).mapValue(function(_) {
+		return el.value;
+	});
+};
+thx.stream.dom.Dom.subscribeText = function(el) {
+	return function(text) {
+		el.innerText = text;
+	};
+};
+thx.stream.dom.Dom.subscribeHTML = function(el) {
+	return function(html) {
+		el.innerHTML = html;
+	};
+};
+thx.stream.dom.Dom.subscribeFocus = function(el) {
+	return function(focus) {
+		if(focus) el.focus(); else el.blur();
+	};
+};
+thx.stream.dom.Dom.subscribeAttribute = function(el,name) {
+	return function(value) {
+		if(null == value) el.removeAttribute(name); else el.setAttribute(name,value);
+	};
+};
+thx.stream.dom.Dom.subscribeToggleAttribute = function(el,name,value) {
+	if(null == value) value = el.getAttribute(name);
+	return function(on) {
+		if(on) el.removeAttribute(name); else el.setAttribute(name,value);
+	};
+};
+thx.stream.dom.Dom.subscribeToggleClass = function(el,name) {
+	return function(on) {
+		if(on) el.classList.remove(name); else el.classList.add(name);
+	};
+};
+thx.stream.dom.Dom.subscribeToggleVisibility = function(el) {
+	var originalDisplay = el.style.display;
+	if(originalDisplay == "none") originalDisplay = "";
+	return function(on) {
+		if(on) el.style.display = originalDisplay; else el.style.display = "none";
+	};
+};
+thx.stream.Emitter = function(init) {
+	this.init = init;
+};
+thx.stream.Emitter.__name__ = ["thx","stream","Emitter"];
+thx.stream.Emitter.create = function(init) {
+	return new thx.stream.Emitter(init);
+};
+thx.stream.Emitter.prototype = {
+	init: null
+	,sign: function(subscriber) {
+		var stream = new thx.stream.Stream(subscriber);
+		this.init(stream);
+		return stream;
+	}
+	,subscribe: function(pulse,fail,end) {
+		if(null != pulse) pulse = pulse; else pulse = function(_) {
+		};
+		if(null != fail) fail = fail; else fail = function(_1) {
+		};
+		if(null != end) end = end; else end = function(_2) {
+		};
+		var stream = new thx.stream.Stream(function(r) {
+			switch(r[1]) {
+			case 0:
+				var v = r[2];
+				pulse(v);
+				break;
+			case 2:
+				var e = r[2];
+				fail(e);
+				break;
+			case 1:
+				var c = r[2];
+				end(c);
+				break;
+			}
+		});
+		this.init(stream);
+		return stream;
+	}
+	,feed: function(value) {
+		var stream = new thx.stream.Stream(null);
+		stream.subscriber = function(r) {
+			switch(r[1]) {
+			case 0:
+				var v = r[2];
+				value.set(v);
+				break;
+			case 2:
+				var e = r[2];
+				stream.fail(e);
+				break;
+			case 1:
+				var c = r[2];
+				if(c) stream.cancel(); else stream.end();
+				break;
+			}
+		};
+		value.upStreams.push(stream);
+		stream.addCleanUp(function() {
+			HxOverrides.remove(value.upStreams,stream);
+		});
+		this.init(stream);
+		return stream;
+	}
+	,plug: function(bus) {
+		var stream = new thx.stream.Stream(null);
+		stream.subscriber = $bind(bus,bus.emit);
+		bus.upStreams.push(stream);
+		stream.addCleanUp(function() {
+			HxOverrides.remove(bus.upStreams,stream);
+		});
+		this.init(stream);
+		return stream;
+	}
+	,delay: function(time) {
+		var _g = this;
+		return new thx.stream.Emitter(function(stream) {
+			var id = setTimeout(function() {
+				_g.init(stream);
+			},time);
+			stream.addCleanUp((function(f,id1) {
+				return function() {
+					return f(id1);
+				};
+			})(thx.core.Timer.clear,id));
+		});
+	}
+	,debounce: function(delay) {
+		var _g = this;
+		return new thx.stream.Emitter(function(stream) {
+			var id = null;
+			stream.addCleanUp(function() {
+				clearTimeout(id);
+			});
+			_g.init(new thx.stream.Stream(function(r) {
+				switch(r[1]) {
+				case 0:
+					var v = r[2];
+					clearTimeout(id);
+					id = thx.core.Timer.delay((function(f,v1) {
+						return function() {
+							return f(v1);
+						};
+					})($bind(stream,stream.pulse),v),delay);
+					break;
+				case 2:
+					var e = r[2];
+					stream.fail(e);
+					break;
+				case 1:
+					switch(r[2]) {
+					case true:
+						stream.cancel();
+						break;
+					case false:
+						setTimeout($bind(stream,stream.end),delay);
+						break;
+					}
+					break;
+				}
+			}));
+		});
+	}
+	,map: function(f) {
+		var _g = this;
+		return new thx.stream.Emitter(function(stream) {
+			_g.init(new thx.stream.Stream(function(r) {
+				switch(r[1]) {
+				case 0:
+					var v = r[2];
+					f(v).either(function(vout) {
+						stream.pulse(vout);
+					},function(err) {
+						stream.fail(err);
+					});
+					break;
+				case 2:
+					var e = r[2];
+					stream.fail(e);
+					break;
+				case 1:
+					switch(r[2]) {
+					case true:
+						stream.cancel();
+						break;
+					case false:
+						stream.end();
+						break;
+					}
+					break;
+				}
+			}));
+		});
+	}
+	,mapValue: function(f) {
+		return this.map(function(v) {
+			return thx.promise.Promise.value(f(v));
+		});
+	}
+	,takeUntil: function(f) {
+		var _g = this;
+		return new thx.stream.Emitter(function(stream) {
+			var instream = null;
+			instream = new thx.stream.Stream(function(r) {
+				switch(r[1]) {
+				case 0:
+					var v = r[2];
+					f(v).either(function(c) {
+						if(c) stream.pulse(v); else {
+							instream.end();
+							stream.end();
+						}
+					},$bind(stream,stream.fail));
+					break;
+				case 2:
+					var e = r[2];
+					instream.fail(e);
+					stream.fail(e);
+					break;
+				case 1:
+					switch(r[2]) {
+					case true:
+						instream.cancel();
+						stream.cancel();
+						break;
+					case false:
+						instream.end();
+						stream.end();
+						break;
+					}
+					break;
+				}
+			});
+			_g.init(instream);
+		});
+	}
+	,take: function(count) {
+		return this.takeUntil((function($this) {
+			var $r;
+			var counter = 0;
+			$r = function(_) {
+				return thx.promise.Promise.value(counter++ < count);
+			};
+			return $r;
+		}(this)));
+	}
+	,audit: function(handler) {
+		return this.mapValue(function(v) {
+			handler(v);
+			return v;
+		});
+	}
+	,filter: function(f) {
+		var _g = this;
+		return new thx.stream.Emitter(function(stream) {
+			_g.init(new thx.stream.Stream(function(r) {
+				switch(r[1]) {
+				case 0:
+					var v = r[2];
+					f(v).either(function(c) {
+						if(c) stream.pulse(v);
+					},function(err) {
+						stream.fail(err);
+					});
+					break;
+				case 2:
+					var e = r[2];
+					stream.fail(e);
+					break;
+				case 1:
+					switch(r[2]) {
+					case true:
+						stream.cancel();
+						break;
+					case false:
+						stream.end();
+						break;
+					}
+					break;
+				}
+			}));
+		});
+	}
+	,filterValue: function(f) {
+		return this.filter(function(v) {
+			return thx.promise.Promise.value(f(v));
+		});
+	}
+	,concat: function(other) {
+		var _g = this;
+		return new thx.stream.Emitter(function(stream) {
+			_g.init(new thx.stream.Stream(function(r) {
+				switch(r[1]) {
+				case 0:
+					var v = r[2];
+					stream.pulse(v);
+					break;
+				case 2:
+					var e = r[2];
+					stream.fail(e);
+					break;
+				case 1:
+					switch(r[2]) {
+					case true:
+						stream.cancel();
+						break;
+					case false:
+						other.init(stream);
+						break;
+					}
+					break;
+				}
+			}));
+		});
+	}
+	,merge: function(other) {
+		var _g = this;
+		return new thx.stream.Emitter(function(stream) {
+			_g.init(stream);
+			other.init(stream);
+		});
+	}
+	,reduce: function(acc,f) {
+		var _g = this;
+		return new thx.stream.Emitter(function(stream) {
+			_g.init(new thx.stream.Stream(function(r) {
+				switch(r[1]) {
+				case 0:
+					var v = r[2];
+					acc = f(acc,v);
+					stream.pulse(acc);
+					break;
+				case 2:
+					var e = r[2];
+					stream.fail(e);
+					break;
+				case 1:
+					switch(r[2]) {
+					case true:
+						stream.cancel();
+						break;
+					case false:
+						stream.end();
+						break;
+					}
+					break;
+				}
+			}));
+		});
+	}
+	,toOption: function() {
+		return this.mapValue(function(v) {
+			if(null == v) return haxe.ds.Option.None; else return haxe.ds.Option.Some(v);
+		});
+	}
+	,toNil: function() {
+		return this.mapValue(function(_) {
+			return thx.core.Nil.nil;
+		});
+	}
+	,toTrue: function() {
+		return this.mapValue(function(_) {
+			return true;
+		});
+	}
+	,toFalse: function() {
+		return this.mapValue(function(_) {
+			return false;
+		});
+	}
+	,toValue: function(value) {
+		return this.mapValue(function(_) {
+			return value;
+		});
+	}
+	,log: function(prefix,posInfo) {
+		if(prefix == null) prefix = ""; else prefix = "" + prefix + ": ";
+		return this.mapValue(function(v) {
+			haxe.Log.trace("" + prefix + Std.string(v),posInfo);
+			return v;
+		});
+	}
+	,withValue: function(expected) {
+		return this.filterValue(null == expected?function(v) {
+			return v != null;
+		}:function(v1) {
+			return v1 == expected;
+		});
+	}
+	,distinct: function(equals) {
+		var _g = this;
+		return new thx.stream.Emitter(function(stream) {
+			if(null == equals) equals = function(a,b) {
+				return a == b;
+			};
+			var last = null;
+			_g.init(new thx.stream.Stream(function(r) {
+				switch(r[1]) {
+				case 0:
+					var v = r[2];
+					if(equals(v,last)) return;
+					last = v;
+					stream.pulse(v);
+					break;
+				case 2:
+					var e = r[2];
+					stream.fail(e);
+					break;
+				case 1:
+					switch(r[2]) {
+					case true:
+						stream.cancel();
+						break;
+					case false:
+						stream.end();
+						break;
+					}
+					break;
+				}
+			}));
+		});
+	}
+	,pair: function(other) {
+		var _g = this;
+		return new thx.stream.Emitter(function(stream) {
+			var _0 = null;
+			var _1 = null;
+			stream.addCleanUp(function() {
+				_0 = null;
+				_1 = null;
+			});
+			var pulse = function() {
+				if(null == _0 || null == _1) return;
+				stream.pulse({ _0 : _0, _1 : _1});
+			};
+			_g.init(new thx.stream.Stream(function(r) {
+				switch(r[1]) {
+				case 0:
+					var v = r[2];
+					_0 = v;
+					pulse();
+					break;
+				case 2:
+					var e = r[2];
+					stream.fail(e);
+					break;
+				case 1:
+					switch(r[2]) {
+					case true:
+						stream.cancel();
+						break;
+					case false:
+						stream.end();
+						break;
+					}
+					break;
+				}
+			}));
+			other.init(new thx.stream.Stream(function(r1) {
+				switch(r1[1]) {
+				case 0:
+					var v1 = r1[2];
+					_1 = v1;
+					pulse();
+					break;
+				case 2:
+					var e1 = r1[2];
+					stream.fail(e1);
+					break;
+				case 1:
+					switch(r1[2]) {
+					case true:
+						stream.cancel();
+						break;
+					case false:
+						stream.end();
+						break;
+					}
+					break;
+				}
+			}));
+		});
+	}
+	,zip: function(other) {
+		var _g = this;
+		return new thx.stream.Emitter(function(stream) {
+			var _0 = [];
+			var _1 = [];
+			stream.addCleanUp(function() {
+				_0 = null;
+				_1 = null;
+			});
+			var pulse = function() {
+				if(_0.length == 0 || _1.length == 0) return;
+				stream.pulse((function($this) {
+					var $r;
+					var _01 = _0.shift();
+					var _11 = _1.shift();
+					$r = { _0 : _01, _1 : _11};
+					return $r;
+				}(this)));
+			};
+			_g.init(new thx.stream.Stream(function(r) {
+				switch(r[1]) {
+				case 0:
+					var v = r[2];
+					_0.push(v);
+					pulse();
+					break;
+				case 2:
+					var e = r[2];
+					stream.fail(e);
+					break;
+				case 1:
+					switch(r[2]) {
+					case true:
+						stream.cancel();
+						break;
+					case false:
+						stream.end();
+						break;
+					}
+					break;
+				}
+			}));
+			other.init(new thx.stream.Stream(function(r1) {
+				switch(r1[1]) {
+				case 0:
+					var v1 = r1[2];
+					_1.push(v1);
+					pulse();
+					break;
+				case 2:
+					var e1 = r1[2];
+					stream.fail(e1);
+					break;
+				case 1:
+					switch(r1[2]) {
+					case true:
+						stream.cancel();
+						break;
+					case false:
+						stream.end();
+						break;
+					}
+					break;
+				}
+			}));
+		});
+	}
+	,sampleBy: function(sampler) {
+		var _g = this;
+		return new thx.stream.Emitter(function(stream) {
+			var _0 = null;
+			var _1 = null;
+			stream.addCleanUp(function() {
+				_0 = null;
+				_1 = null;
+			});
+			var pulse = function() {
+				if(null == _0 || null == _1) return;
+				stream.pulse({ _0 : _0, _1 : _1});
+			};
+			_g.init(new thx.stream.Stream(function(r) {
+				switch(r[1]) {
+				case 0:
+					var v = r[2];
+					_0 = v;
+					break;
+				case 2:
+					var e = r[2];
+					stream.fail(e);
+					break;
+				case 1:
+					switch(r[2]) {
+					case true:
+						stream.cancel();
+						break;
+					case false:
+						stream.end();
+						break;
+					}
+					break;
+				}
+			}));
+			sampler.init(new thx.stream.Stream(function(r1) {
+				switch(r1[1]) {
+				case 0:
+					var v1 = r1[2];
+					_1 = v1;
+					pulse();
+					break;
+				case 2:
+					var e1 = r1[2];
+					stream.fail(e1);
+					break;
+				case 1:
+					switch(r1[2]) {
+					case true:
+						stream.cancel();
+						break;
+					case false:
+						stream.end();
+						break;
+					}
+					break;
+				}
+			}));
+		});
+	}
+	,window: function(size,emitWithLess) {
+		if(emitWithLess == null) emitWithLess = false;
+		var _g = this;
+		return new thx.stream.Emitter(function(stream) {
+			var buf = [];
+			var pulse = function() {
+				if(buf.length > size) buf.shift();
+				if(buf.length == size || emitWithLess) stream.pulse(buf.slice());
+			};
+			_g.init(new thx.stream.Stream(function(r) {
+				switch(r[1]) {
+				case 0:
+					var v = r[2];
+					buf.push(v);
+					pulse();
+					break;
+				case 2:
+					var e = r[2];
+					stream.fail(e);
+					break;
+				case 1:
+					switch(r[2]) {
+					case true:
+						stream.cancel();
+						break;
+					case false:
+						stream.end();
+						break;
+					}
+					break;
+				}
+			}));
+		});
+	}
+	,previous: function() {
+		var _g = this;
+		return new thx.stream.Emitter(function(stream) {
+			var value = null;
+			var first = true;
+			var pulse = function() {
+				if(first) {
+					first = false;
+					return;
+				}
+				stream.pulse(value);
+			};
+			_g.init(new thx.stream.Stream(function(r) {
+				switch(r[1]) {
+				case 0:
+					var v = r[2];
+					pulse();
+					value = v;
+					break;
+				case 2:
+					var e = r[2];
+					stream.fail(e);
+					break;
+				case 1:
+					switch(r[2]) {
+					case true:
+						stream.cancel();
+						break;
+					case false:
+						stream.end();
+						break;
+					}
+					break;
+				}
+			}));
+		});
+	}
+	,__class__: thx.stream.Emitter
+};
+thx.stream.Value = function(value) {
+	var _g = this;
+	this.value = value;
+	this.downStreams = [];
+	this.upStreams = [];
+	thx.stream.Emitter.call(this,function(stream) {
+		_g.downStreams.push(stream);
+		stream.addCleanUp(function() {
+			HxOverrides.remove(_g.downStreams,stream);
+		});
+		stream.pulse(_g.value);
+	});
+};
+thx.stream.Value.__name__ = ["thx","stream","Value"];
+thx.stream.Value.__super__ = thx.stream.Emitter;
+thx.stream.Value.prototype = $extend(thx.stream.Emitter.prototype,{
+	value: null
+	,downStreams: null
+	,upStreams: null
+	,get: function() {
+		return this.value;
+	}
+	,set: function(value) {
+		if(this.value == value) return;
+		this.value = value;
+		this.update();
+	}
+	,clearStreams: function() {
+		var _g = 0;
+		var _g1 = this.downStreams.slice();
+		while(_g < _g1.length) {
+			var stream = _g1[_g];
+			++_g;
+			stream.end();
+		}
+	}
+	,clearEmitters: function() {
+		var _g = 0;
+		var _g1 = this.upStreams.slice();
+		while(_g < _g1.length) {
+			var stream = _g1[_g];
+			++_g;
+			stream.cancel();
+		}
+	}
+	,clear: function() {
+		this.clearEmitters();
+		this.clearStreams();
+	}
+	,update: function() {
+		var _g = 0;
+		var _g1 = this.downStreams.slice();
+		while(_g < _g1.length) {
+			var stream = _g1[_g];
+			++_g;
+			stream.pulse(this.value);
+		}
+	}
+	,__class__: thx.stream.Value
+});
+haxe.ds.Option = { __ename__ : ["haxe","ds","Option"], __constructs__ : ["Some","None"] };
+haxe.ds.Option.Some = function(v) { var $x = ["Some",0,v]; $x.__enum__ = haxe.ds.Option; return $x; };
+haxe.ds.Option.None = ["None",1];
+haxe.ds.Option.None.__enum__ = haxe.ds.Option;
+thx.stream.EmitterOptions = function() { };
+thx.stream.EmitterOptions.__name__ = ["thx","stream","EmitterOptions"];
+thx.stream.EmitterOptions.filterOption = function(emitter) {
+	return emitter.filterValue(function(opt) {
+		return thx.core.Options.toBool(opt);
+	}).mapValue(function(opt1) {
+		return thx.core.Options.toValue(opt1);
+	});
+};
+thx.stream.EmitterOptions.toValue = function(emitter) {
+	return emitter.mapValue(function(opt) {
+		return thx.core.Options.toValue(opt);
+	});
+};
+thx.stream.EmitterOptions.toBool = function(emitter) {
+	return emitter.mapValue(function(opt) {
+		return thx.core.Options.toBool(opt);
+	});
+};
+thx.stream.EmitterOptions.either = function(emitter,some,none,fail,end) {
+	if(null == some) some = function(_) {
+	};
+	if(null == none) none = function() {
+	};
+	return emitter.subscribe(function(o) {
+		switch(o[1]) {
+		case 0:
+			var v = o[2];
+			some(v);
+			break;
+		case 1:
+			none;
+			break;
+		}
+	},fail,end);
+};
 thx.core = {};
+thx.core.Options = function() { };
+thx.core.Options.__name__ = ["thx","core","Options"];
+thx.core.Options.toValue = function(option) {
+	switch(option[1]) {
+	case 1:
+		return null;
+	case 0:
+		var v = option[2];
+		return v;
+	}
+};
+thx.core.Options.toBool = function(option) {
+	switch(option[1]) {
+	case 1:
+		return false;
+	case 0:
+		return true;
+	}
+};
+thx.core.Options.toOption = function(value) {
+	if(null == value) return haxe.ds.Option.None; else return haxe.ds.Option.Some(value);
+};
+thx.core.Options.equals = function(a,b,eq) {
+	switch(a[1]) {
+	case 1:
+		switch(b[1]) {
+		case 1:
+			return true;
+		default:
+			return false;
+		}
+		break;
+	case 0:
+		switch(b[1]) {
+		case 0:
+			var a1 = a[2];
+			var b1 = b[2];
+			if(null == eq) eq = function(a2,b2) {
+				return a2 == b2;
+			};
+			return eq(a1,b1);
+		default:
+			return false;
+		}
+		break;
+	}
+};
+thx.core.Options.equalsValue = function(a,b,eq) {
+	return thx.core.Options.equals(a,thx.core.Options.toOption(b));
+};
+cards.ui.ContextField = function(options) {
+	var _g = this;
+	if(null == options.template && null == options.el) options.template = "<div class=\"field\"><div class=\"key-container\"><div class=\"key\"></div></div><div class=\"value-container\"></div></div>";
+	this.component = new cards.components.Component(options);
+	var key = udom.Query.first(".key",this.component.el);
+	key.innerText = options.display;
+	this.name = options.name;
+	this.type = options.type;
+	this.currentType = new thx.stream.Value(options.type);
+	this.focus = new thx.stream.Value(false);
+	this.active = new thx.stream.Value(false);
+	this.withError = new thx.stream.Value(haxe.ds.Option.None);
+	var wireRuntime = function(editor,convert) {
+		var runtime = editor.value.mapValue(convert);
+		runtime.distinct(function(a,b) {
+			return b != null && thx.core.Arrays.same(a.dependencies,b.dependencies);
+		}).subscribe(function(res) {
+			options.model.changes.subscribe(function(path) {
+				if(thx.core.Arrays.contains(res.dependencies,path,function(a1,b1) {
+					return StringTools.startsWith(b1,a1);
+				})) options.value.runtime.set(haxe.ds.Option.Some(convert(editor.value.get())));
+			});
+		});
+		runtime.toOption().feed(options.value.runtime);
+		runtime.mapValue(function(res1) {
+			return cards.model.Expressions.toErrorOption(res1.expression);
+		}).merge(options.value.runtimeError).feed(_g.withError);
+	};
+	var bus = new thx.stream.Bus();
+	this.fieldValue = new cards.ui.FieldValue(this.component,udom.Query.first(".value-container",this.component.el),function(type,editor1) {
+		editor1.focus.feed(_g.focus);
+		_g.currentType.set(type);
+		switch(type[1]) {
+		case 6:
+			wireRuntime(editor1,function(value) {
+				return cards.model.Runtime.toRuntime(value,options.model);
+			});
+			break;
+		case 7:
+			wireRuntime(editor1,function(value1) {
+				return cards.model.Runtime.toRuntime(cards.types.ReferenceTransform.toCode(value1),options.model);
+			});
+			bus.subscribe(function(value2) {
+				var path1 = editor1.value.get();
+				options.modelView.setField(path1,value2,options.type);
+			});
+			options.value.stream.plug(bus);
+			break;
+		default:
+			options.value.runtime.set(haxe.ds.Option.None);
+			editor1.value.feed(options.value.stream);
+			options.value.stream.feed(editor1.value);
+		}
+	},function(type1,editor2) {
+		switch(type1[1]) {
+		case 6:
+			break;
+		case 7:
+			haxe.Log.trace("cancelling",{ fileName : "ContextField.hx", lineNumber : 109, className : "cards.ui.ContextField", methodName : "new"});
+			bus.emit(thx.stream.StreamValue.End(true));
+			break;
+		default:
+		}
+	});
+	var runtime1 = thx.core.Options.toValue(options.value.runtime.get());
+	if(null == runtime1) this.fieldValue.setEditor(options.type,options.value.stream.get()); else {
+		var reference = cards.types.CodeTransform.toReference(runtime1.code);
+		if(null != reference && "" != reference) this.fieldValue.setEditor(cards.model.SchemaType.ReferenceType,cards.types.CodeTransform.toReference(runtime1.code)); else this.fieldValue.setEditor(cards.model.SchemaType.CodeType,runtime1.code);
+	}
+	this.active.subscribe(thx.stream.dom.Dom.subscribeToggleClass(this.component.el,"active"));
+	var clickKeyStream = thx.stream.dom.Dom.streamEvent(key,"click",false).subscribe(function(_) {
+		if(null != _g.fieldValue.editor) _g.fieldValue.editor.focus.set(true);
+	});
+	thx.stream.EmitterOptions.toBool(this.withError).subscribe(thx.stream.dom.Dom.subscribeToggleClass(this.component.el,"error"));
+	thx.stream.EmitterOptions.either(this.withError,function(err) {
+		cards.ui.ContextField.tooltip.setContent(err);
+		cards.ui.ContextField.tooltip.anchorTo(_g.component.el,cards.ui.widgets.AnchorPoint.Top,cards.ui.widgets.AnchorPoint.Bottom);
+		cards.ui.ContextField.tooltip.visible.stream.set(true);
+	},function() {
+		if(cards.ui.ContextField.tooltip.anchorElement == _g.component.el) cards.ui.ContextField.tooltip.visible.stream.set(false);
+	});
+};
+cards.ui.ContextField.__name__ = ["cards","ui","ContextField"];
+cards.ui.ContextField.prototype = {
+	component: null
+	,focus: null
+	,active: null
+	,name: null
+	,withError: null
+	,fieldValue: null
+	,type: null
+	,currentType: null
+	,destroy: function() {
+		this.component.destroy();
+		this.focus = null;
+	}
+	,__class__: cards.ui.ContextField
+};
+cards.ui.ContextView = function(document,model,modelView,mapper,options) {
+	var _g = this;
+	this.document = document;
+	this.model = model;
+	this.modelView = modelView;
+	this.mapper = mapper;
+	this.component = new cards.components.Component(options);
+	this.toolbar = new cards.ui.widgets.Toolbar({ parent : this.component, container : this.component.el});
+	this.el = udom.Html.parseList(StringTools.ltrim("<div class=\"fields\"><div></div></div>"))[0];
+	this.component.el.appendChild(this.el);
+	this.el = udom.Query.first("div",this.el);
+	this.button = { add : this.toolbar.left.addButton("add property",Config.icons.dropdown), toValue : this.toolbar.right.addButton("",Config.icons.value), toCode : this.toolbar.right.addButton("",Config.icons.code), toReference : this.toolbar.right.addButton("",Config.icons.reference), remove : this.toolbar.right.addButton("",Config.icons.remove)};
+	this.menu = { add : new cards.ui.widgets.Menu({ parent : this.component})};
+	this.menu.add.anchorTo(this.button.add.component.el);
+	this.button.add.clicks.toTrue().feed(this.menu.add.visible.stream);
+	this.button.add.enabled.set(false);
+	this.button.remove.clicks.subscribe(function(_) {
+		var field = thx.core.Options.toValue(_g.field.get());
+		var fragment = thx.core.Options.toValue(document.article.fragment.get());
+		fragment.component.properties.get(field.name).dispose();
+		field.destroy();
+		_g.setAddMenuItems(fragment);
+	});
+	this.button.toValue.clicks.subscribe(function(_1) {
+		var field1 = thx.core.Options.toValue(_g.field.get());
+		var type = field1.fieldValue.type;
+		field1.fieldValue.setEditor(field1.type);
+	});
+	this.button.toCode.clicks.subscribe(function(_2) {
+		var field2 = thx.core.Options.toValue(_g.field.get());
+		var type1 = field2.fieldValue.type;
+		field2.fieldValue.setEditor(cards.model.SchemaType.CodeType);
+	});
+	this.button.toReference.clicks.subscribe(function(_3) {
+		var field3 = thx.core.Options.toValue(_g.field.get());
+		var type2 = field3.fieldValue.type;
+		field3.fieldValue.setEditor(cards.model.SchemaType.ReferenceType);
+	});
+	this.field = new thx.stream.Value(haxe.ds.Option.None);
+	var delayed = this.field.debounce(10);
+	thx.stream.EmitterOptions.toBool(delayed).feed(this.button.remove.enabled);
+	thx.stream.EmitterEmitters.flatMap(thx.stream.EmitterOptions.filterOption(this.field).mapValue(function(v) {
+		return v.currentType;
+	})).subscribe(function(type3) {
+		switch(type3[1]) {
+		case 6:
+			_g.button.toCode.enabled.set(false);
+			_g.button.toReference.enabled.set(true);
+			_g.button.toValue.enabled.set(true);
+			break;
+		case 7:
+			_g.button.toCode.enabled.set(true);
+			_g.button.toReference.enabled.set(false);
+			_g.button.toValue.enabled.set(true);
+			break;
+		default:
+			_g.button.toCode.enabled.set(true);
+			_g.button.toReference.enabled.set(true);
+			_g.button.toValue.enabled.set(false);
+		}
+	});
+	var filtered = thx.stream.EmitterOptions.filterOption(this.field);
+	filtered.previous().subscribe(function(field4) {
+		field4.active.set(false);
+	});
+	filtered.subscribe(function(field5) {
+		field5.active.set(true);
+	});
+	thx.stream.EmitterOptions.either(document.article.fragment,$bind(this,this.setFragmentStatus),$bind(this,this.resetFragmentStatus));
+};
+cards.ui.ContextView.__name__ = ["cards","ui","ContextView"];
+cards.ui.ContextView.prototype = {
+	component: null
+	,toolbar: null
+	,document: null
+	,field: null
+	,model: null
+	,modelView: null
+	,el: null
+	,button: null
+	,menu: null
+	,mapper: null
+	,resetFragmentStatus: function() {
+		this.resetFields();
+		this.resetAddMenuItems();
+	}
+	,setFragmentStatus: function(fragment) {
+		this.setFields(fragment);
+		this.setAddMenuItems(fragment);
+	}
+	,resetFields: function() {
+		this.el.innerHTML = "";
+	}
+	,setFields: function(fragment) {
+		var _g = this;
+		this.resetFields();
+		this.mapper.getAttachedPropertiesForFragment(fragment).map(function(info) {
+			var value;
+			value = js.Boot.__cast(fragment.component.properties.get(info.name) , cards.properties.ValueProperty);
+			_g.addField(info,value);
+		});
+	}
+	,addField: function(info,value) {
+		var f = new cards.ui.ContextField({ container : this.el, parent : this.component, display : info.display, name : info.name, type : info.type, value : value, model : this.model, modelView : this.modelView});
+		f.focus.withValue(true).mapValue(function(_) {
+			return haxe.ds.Option.Some(f);
+		}).feed(this.field);
+	}
+	,resetAddMenuItems: function() {
+		this.button.remove.enabled.set(false);
+		this.button.toValue.enabled.set(false);
+		this.button.toCode.enabled.set(false);
+		this.button.toReference.enabled.set(false);
+		this.button.add.enabled.set(false);
+		this.menu.add.clear();
+	}
+	,setAddMenuItems: function(fragment) {
+		var _g = this;
+		this.resetAddMenuItems();
+		var attachables = this.mapper.getAttachablePropertiesForFragment(fragment);
+		this.button.add.enabled.set(attachables.length > 0);
+		attachables.map(function(info) {
+			var button = new cards.ui.widgets.Button("add " + info.display);
+			_g.menu.add.addItem(button.component);
+			button.clicks.subscribe(function(_) {
+				_g.mapper.values.ensure(info.name,fragment.component);
+				_g.setFragmentStatus(fragment);
+			});
+		});
+	}
+	,__class__: cards.ui.ContextView
+};
+cards.ui.Document = function(options) {
+	var _g = this;
+	this.component = new cards.components.Component(options);
+	this.toolbar = new cards.ui.widgets.Toolbar({ parent : this.component, container : this.component.el});
+	this.article = new cards.ui.Article({ parent : this.component, container : this.component.el});
+	this.statusbar = new cards.ui.widgets.Statusbar({ parent : this.component, container : this.component.el});
+	var buttonRemove = this.toolbar.right.addButton("",Config.icons.remove);
+	thx.stream.EmitterOptions.toBool(this.article.fragment).feed(buttonRemove.enabled);
+	var buttonAdd = this.toolbar.left.addButton("",Config.icons.add);
+	buttonAdd.clicks.subscribe(function(_) {
+		_g.article.addBlock();
+	});
+	buttonRemove.enabled.set(false);
+	buttonRemove.clicks.subscribe(function(_1) {
+		thx.core.Options.toValue(_g.article.fragment.get()).component.destroy();
+		_g.article.fragment.set(haxe.ds.Option.None);
+	});
+};
+cards.ui.Document.__name__ = ["cards","ui","Document"];
+cards.ui.Document.prototype = {
+	component: null
+	,toolbar: null
+	,article: null
+	,statusbar: null
+	,__class__: cards.ui.Document
+};
+cards.ui.FieldValue = function(parent,container,afterCreate,afterRemove) {
+	this.parent = parent;
+	this.container = container;
+	this.afterCreate = afterCreate;
+	this.afterRemove = afterRemove;
+};
+cards.ui.FieldValue.__name__ = ["cards","ui","FieldValue"];
+cards.ui.FieldValue.prototype = {
+	type: null
+	,editor: null
+	,parent: null
+	,container: null
+	,afterCreate: null
+	,afterRemove: null
+	,setEditor: function(type,value) {
+		if(null != this.editor) {
+			if(null == value) value = (cards.types.TypeTransform.transform(this.type,type))(this.editor.value.get());
+			this.afterRemove(this.type,this.editor);
+			this.container.innerHTML = "";
+		}
+		this.type = type;
+		this.editor = cards.ui.editors.EditorPicker.pick(type,this.container,this.parent,value);
+		this.editor.component.el.classList.add("value");
+		this.afterCreate(this.type,this.editor);
+	}
+	,__class__: cards.ui.FieldValue
+};
+cards.ui.ModelView = function() {
+	var _g = this;
+	this.component = new cards.components.Component({ template : "<div class=\"modelview\"></div>"});
+	this.toolbar = new cards.ui.widgets.Toolbar({ });
+	this.toolbar.component.appendTo(this.component.el);
+	var buttonAdd = this.toolbar.left.addButton("",Config.icons.add);
+	buttonAdd.clicks.subscribe(function(_) {
+		_g.addField(_g.guessFieldName(),cards.model.SchemaType.StringType);
+	});
+	var buttonRemove = this.toolbar.right.addButton("",Config.icons.remove);
+	buttonRemove.clicks.subscribe(function(_1) {
+		_g.removeField(_g.currentField);
+	});
+	buttonRemove.enabled.set(false);
+	this.pairs = udom.Html.parseList(StringTools.ltrim("<div class=\"fields\"><div></div></div>"))[0];
+	this.component.el.appendChild(this.pairs);
+	this.pairs = udom.Query.first("div",this.pairs);
+	this.schema = this.schemaBus = new thx.stream.Bus();
+	this.data = this.dataBus = new thx.stream.Bus();
+	this.fields = new haxe.ds.StringMap();
+	this.fieldFocus = new thx.stream.Bus();
+	this.fieldFocus.subscribe(function(field) {
+		_g.currentField = field;
+		buttonRemove.enabled.set(null != field);
+	});
+};
+cards.ui.ModelView.__name__ = ["cards","ui","ModelView"];
+cards.ui.ModelView.prototype = {
+	component: null
+	,schema: null
+	,data: null
+	,toolbar: null
+	,currentField: null
+	,pairs: null
+	,schemaBus: null
+	,dataBus: null
+	,fields: null
+	,fieldFocus: null
+	,fieldBlur: null
+	,guessFieldName: function() {
+		var id = 0;
+		var prefix = "field";
+		var t;
+		var assemble = function(id1) {
+			if(id1 > 0) return [prefix,"" + id1].join("_"); else return prefix;
+		};
+		while((function($this) {
+			var $r;
+			var key = t = assemble(id);
+			$r = $this.fields.exists(key);
+			return $r;
+		}(this))) id++;
+		return t;
+	}
+	,removeFieldByName: function(name) {
+		var field = this.fields.get(name);
+		this.removeField(field);
+	}
+	,removeField: function(field) {
+		thx.Assert.notNull(field,"when removing a field it should not be null",{ fileName : "ModelView.hx", lineNumber : 80, className : "cards.ui.ModelView", methodName : "removeField"});
+		var name = field.key.value.get();
+		field.destroy();
+		if(this.fields.remove(name)) this.schemaBus.pulse(cards.model.SchemaEvent.DeleteField(name));
+	}
+	,setField: function(path,value,type) {
+		if(path == "" || path == null) return;
+		var field = this.fields.get(path);
+		if(null == field) field = this.addField(path,type);
+		field.value.value.set((cards.types.TypeTransform.transform(type,field.value.type))(value));
+	}
+	,addField: function(name,type) {
+		var _g = this;
+		var field = new cards.ui.ModelViewField({ container : this.pairs, parent : this.component, key : name});
+		var oldname = null;
+		var createSetValue = function() {
+			return cards.model.DataEvent.SetValue(field.key.value.get(),field.value.value.get(),field.value.type);
+		};
+		field.key.value.filterValue(function(newname) {
+			if(_g.fields.exists(newname)) {
+				field.key.value.set(oldname);
+				return false;
+			} else return true;
+		}).mapValue(function(newname1) {
+			if(null == oldname) {
+				oldname = newname1;
+				return cards.model.SchemaEvent.AddField(newname1,field.value.type);
+			} else {
+				var v = _g.fields.get(oldname);
+				_g.fields.remove(oldname);
+				_g.fields.set(newname1,v);
+				var r = cards.model.SchemaEvent.RenameField(oldname,newname1);
+				oldname = newname1;
+				return r;
+			}
+		}).plug(this.schemaBus);
+		field.value.value.mapValue(function(_) {
+			return createSetValue();
+		}).debounce(250).plug(this.dataBus);
+		field.focus.mapValue(function(v1) {
+			if(v1) return field; else return null;
+		}).plug(this.fieldFocus);
+		this.fields.set(name,field);
+		return field;
+	}
+	,__class__: cards.ui.ModelView
+};
+cards.ui.ModelViewField = function(options) {
+	if(null == options.template && null == options.el) options.template = "<div class=\"field\"><div class=\"key-container\"><div class=\"key\"></div></div><div class=\"value-container\"><div class=\"value\"></div></div></div>";
+	this.component = new cards.components.Component(options);
+	this.key = new cards.ui.editors.TextEditor({ el : udom.Query.first(".key",this.component.el), parent : this.component, defaultText : options.key, placeHolder : "key"});
+	this.value = new cards.ui.editors.TextEditor({ el : udom.Query.first(".value",this.component.el), parent : this.component, defaultText : "", placeHolder : "value"});
+	var f = this.key.focus.merge(this.value.focus);
+	this.focus = f.debounce(250).distinct();
+	this.classActive = new cards.properties.ToggleClass(this.component,"active");
+	f.feed(this.classActive.stream);
+};
+cards.ui.ModelViewField.__name__ = ["cards","ui","ModelViewField"];
+cards.ui.ModelViewField.prototype = {
+	component: null
+	,key: null
+	,value: null
+	,focus: null
+	,classActive: null
+	,destroy: function() {
+		this.classActive.dispose();
+		this.component.destroy();
+		this.key = null;
+		this.value = null;
+		this.focus = null;
+	}
+	,__class__: cards.ui.ModelViewField
+};
+cards.ui.editors = {};
+cards.ui.editors.Editor = function() { };
+cards.ui.editors.Editor.__name__ = ["cards","ui","editors","Editor"];
+cards.ui.editors.Editor.prototype = {
+	value: null
+	,type: null
+	,focus: null
+	,component: null
+	,__class__: cards.ui.editors.Editor
+};
+cards.ui.editors.BoolEditor = function(options) {
+	var _g = this;
+	this.type = cards.model.SchemaType.BoolType;
+	if(null == options.defaultValue) options.defaultValue = false;
+	if(null == options.el && null == options.template) options.template = "<div></div>";
+	this.component = new cards.components.Component(options);
+	var cls = this.component.el.classList;
+	cls.add("fa");
+	cls.add("editor");
+	cls.add("bool");
+	cls.add("fa-" + Config.icons.unchecked);
+	this.component.el.setAttribute("tabindex","0");
+	this.value = new thx.stream.Value(options.defaultValue);
+	this.value.subscribe(thx.stream.dom.Dom.subscribeToggleClass(this.component.el,"fa-" + Config.icons.checked));
+	thx.stream.EmitterBools.negate(this.value).subscribe(thx.stream.dom.Dom.subscribeToggleClass(this.component.el,"fa-" + Config.icons.unchecked));
+	var clickStream = thx.stream.dom.Dom.streamEvent(this.component.el,"click",false).toNil().merge(thx.stream.dom.Dom.streamKey(this.component.el,"up").filterValue(function(e) {
+		var _g1 = e.keyCode;
+		switch(_g1) {
+		case 32:case 13:
+			return true;
+		default:
+			return false;
+		}
+	}).toNil()).mapValue(function(_) {
+		return !_g.value.get();
+	}).feed(this.value);
+	this.focus = new thx.stream.Value(false);
+	this.focus.withValue(true).subscribe(thx.stream.dom.Dom.subscribeFocus(this.component.el));
+	var focusStream = thx.stream.dom.Dom.streamEvent(this.component.el,"focus").toTrue().merge(thx.stream.dom.Dom.streamEvent(this.component.el,"blur").toFalse()).feed(this.focus);
+	this.cancel = function() {
+		clickStream.cancel();
+		focusStream.cancel();
+	};
+};
+cards.ui.editors.BoolEditor.__name__ = ["cards","ui","editors","BoolEditor"];
+cards.ui.editors.BoolEditor.__interfaces__ = [cards.ui.editors.Editor];
+cards.ui.editors.BoolEditor.prototype = {
+	component: null
+	,focus: null
+	,value: null
+	,type: null
+	,cancel: null
+	,destroy: function() {
+		this.cancel();
+		this.component.destroy();
+		this.value.clear();
+	}
+	,__class__: cards.ui.editors.BoolEditor
+};
+cards.ui.editors.TextEditor = function(options) {
+	var _g = this;
+	this.type = cards.model.SchemaType.StringType;
+	if(null == options.defaultText) options.defaultText = "";
+	if(null == options.placeHolder) options.placeHolder = "";
+	if(null == options.el && null == options.template) options.template = "<div></div>";
+	if(null == options.inputEvent) options.inputEvent = function(component) {
+		return thx.stream.dom.Dom.streamEvent(component.el,"input");
+	};
+	this.component = new cards.components.Component(options);
+	this.component.el.classList.add("editor");
+	this.component.el.setAttribute("tabindex","0");
+	this.component.el.setAttribute("placeholder",options.placeHolder);
+	this.component.el.style.content = options.placeHolder;
+	var text = new cards.properties.Text(this.component,options.defaultText);
+	var changePair = thx.stream.dom.Dom.streamEvent(this.component.el,"input");
+	this.value = text.stream;
+	options.inputEvent(this.component).mapValue(function(_) {
+		return text.component.el.textContent;
+	}).feed(this.value);
+	this.focus = new thx.stream.Value(false);
+	this.focus.subscribe(thx.stream.dom.Dom.subscribeToggleAttribute(this.component.el,"contenteditable","true"));
+	this.focus.withValue(true).subscribe(thx.stream.dom.Dom.subscribeFocus(this.component.el));
+	var focusStream = this.focus.withValue(true).subscribe(function(_1) {
+		window.document.getSelection().selectAllChildren(_g.component.el);
+	});
+	thx.stream.dom.Dom.streamFocus(this.component.el).feed(this.focus);
+	this.cancel = function() {
+		text.dispose();
+		focusStream.cancel();
+	};
+	var empty = new thx.stream.Value(options.defaultText == "");
+	thx.stream.dom.Dom.streamEvent(this.component.el,"input").mapValue(function(_2) {
+		return text.component.el.textContent == "";
+	}).merge(this.value.mapValue(function(t) {
+		return t == "";
+	})).feed(empty);
+	empty.subscribe(thx.stream.dom.Dom.subscribeToggleClass(this.component.el,"empty"));
+};
+cards.ui.editors.TextEditor.__name__ = ["cards","ui","editors","TextEditor"];
+cards.ui.editors.TextEditor.__interfaces__ = [cards.ui.editors.Editor];
+cards.ui.editors.TextEditor.prototype = {
+	component: null
+	,focus: null
+	,value: null
+	,type: null
+	,cancel: null
+	,destroy: function() {
+		this.value.clear();
+		this.component.destroy();
+		this.cancel();
+	}
+	,__class__: cards.ui.editors.TextEditor
+};
+cards.ui.editors.CodeEditor = function(options) {
+	if(null == options.inputEvent) options.inputEvent = function(component) {
+		return thx.stream.dom.Dom.streamEvent(component.el,"blur");
+	};
+	cards.ui.editors.TextEditor.call(this,options);
+	this.component.el.classList.add("code");
+};
+cards.ui.editors.CodeEditor.__name__ = ["cards","ui","editors","CodeEditor"];
+cards.ui.editors.CodeEditor.__super__ = cards.ui.editors.TextEditor;
+cards.ui.editors.CodeEditor.prototype = $extend(cards.ui.editors.TextEditor.prototype,{
+	__class__: cards.ui.editors.CodeEditor
+});
+cards.ui.editors.DateEditor = function(options) {
+	this.type = cards.model.SchemaType.BoolType;
+	if(null == options.defaultValue) options.defaultValue = new Date();
+	if(null == options.template) options.template = "<input type=\"date\"/>";
+	this.component = new cards.components.Component(options);
+	var cls = this.component.el.classList;
+	cls.add("editor");
+	cls.add("date");
+	this.component.el.setAttribute("tabindex","0");
+	this.value = new thx.stream.Value(options.defaultValue);
+	this.focus = new thx.stream.Value(false);
+	this.focus.withValue(true).subscribe(thx.stream.dom.Dom.subscribeFocus(this.component.el));
+	var focusStream = thx.stream.dom.Dom.streamFocus(this.component.el).feed(this.focus);
+	var input = this.component.el;
+	thx.stream.dom.Dom.streamInput(input,null).mapValue(function(_) {
+		return input.valueAsDate;
+	}).feed(this.value);
+	this.cancel = function() {
+		focusStream.cancel();
+	};
+};
+cards.ui.editors.DateEditor.__name__ = ["cards","ui","editors","DateEditor"];
+cards.ui.editors.DateEditor.__interfaces__ = [cards.ui.editors.Editor];
+cards.ui.editors.DateEditor.prototype = {
+	component: null
+	,focus: null
+	,value: null
+	,type: null
+	,cancel: null
+	,destroy: function() {
+		this.cancel();
+		this.component.destroy();
+		this.value.clear();
+	}
+	,__class__: cards.ui.editors.DateEditor
+};
+cards.ui.editors.EditorPicker = function() { };
+cards.ui.editors.EditorPicker.__name__ = ["cards","ui","editors","EditorPicker"];
+cards.ui.editors.EditorPicker.pick = function(type,el,parent,value) {
+	switch(type[1]) {
+	case 1:
+		return new cards.ui.editors.BoolEditor({ container : el, parent : parent, defaultValue : value});
+	case 6:
+		return new cards.ui.editors.CodeEditor({ container : el, parent : parent, defaultText : value, placeHolder : "code"});
+	case 7:
+		return new cards.ui.editors.ReferenceEditor({ container : el, parent : parent, defaultText : value, placeHolder : "reference"});
+	case 5:
+		return new cards.ui.editors.TextEditor({ container : el, parent : parent, defaultText : value, placeHolder : "content"});
+	case 2:
+		return new cards.ui.editors.DateEditor({ container : el, parent : parent, defaultValue : value});
+	case 3:
+		return new cards.ui.editors.FloatEditor({ container : el, parent : parent, defaultValue : value});
+	default:
+		throw "Editor for " + Std.string(type) + " has not been implemented yet";
+	}
+};
+cards.ui.editors.FloatEditor = function(options) {
+	var _g = this;
+	this.type = cards.model.SchemaType.BoolType;
+	if(null == options.defaultValue) options.defaultValue = 0.0;
+	if(null == options.template) options.template = "<input type=\"number\"/>";
+	this.component = new cards.components.Component(options);
+	var cls = this.component.el.classList;
+	cls.add("editor");
+	cls.add("float");
+	this.component.el.setAttribute("tabindex","0");
+	this.value = new thx.stream.Value(options.defaultValue);
+	this.focus = new thx.stream.Value(false);
+	this.focus.withValue(true).subscribe(thx.stream.dom.Dom.subscribeFocus(this.component.el));
+	var focusStream = thx.stream.dom.Dom.streamFocus(this.component.el).feed(this.focus);
+	thx.stream.dom.Dom.streamEvent(this.component.el,"input").mapValue(function(_) {
+		return _g.component.el.valueAsNumber;
+	}).feed(this.value);
+	this.cancel = function() {
+		focusStream.cancel();
+	};
+};
+cards.ui.editors.FloatEditor.__name__ = ["cards","ui","editors","FloatEditor"];
+cards.ui.editors.FloatEditor.__interfaces__ = [cards.ui.editors.Editor];
+cards.ui.editors.FloatEditor.prototype = {
+	component: null
+	,focus: null
+	,value: null
+	,type: null
+	,cancel: null
+	,destroy: function() {
+		this.cancel();
+		this.component.destroy();
+		this.value.clear();
+	}
+	,__class__: cards.ui.editors.FloatEditor
+};
+cards.ui.editors.ReferenceEditor = function(options) {
+	if(null == options.inputEvent) options.inputEvent = function(component) {
+		return thx.stream.dom.Dom.streamEvent(component.el,"blur");
+	};
+	cards.ui.editors.TextEditor.call(this,options);
+	this.component.el.classList.add("reference");
+};
+cards.ui.editors.ReferenceEditor.__name__ = ["cards","ui","editors","ReferenceEditor"];
+cards.ui.editors.ReferenceEditor.__super__ = cards.ui.editors.TextEditor;
+cards.ui.editors.ReferenceEditor.prototype = $extend(cards.ui.editors.TextEditor.prototype,{
+	__class__: cards.ui.editors.ReferenceEditor
+});
+cards.ui.fragments = {};
+cards.ui.fragments.Fragment = function() { };
+cards.ui.fragments.Fragment.__name__ = ["cards","ui","fragments","Fragment"];
+cards.ui.fragments.Fragment.prototype = {
+	name: null
+	,component: null
+	,focus: null
+	,active: null
+	,uid: null
+	,toString: null
+	,__class__: cards.ui.fragments.Fragment
+};
+cards.ui.fragments.Block = function(options) {
+	this.name = "block";
+	if(null == options.el && null == options.template) options.template = "<section class=\"block\"></div>";
+	if(null != options.uid) this.uid = options.uid; else this.uid = thx.core.UUID.create();
+	if(null == options.placeHolder) options.placeHolder = "block content";
+	this.editor = new cards.ui.editors.TextEditor(options);
+	this.active = new thx.stream.Value(false);
+	this.active.feed(new cards.properties.ToggleClass(this.editor.component,"active").stream);
+	this.focus = this.editor.focus;
+	this.component = this.editor.component;
+};
+cards.ui.fragments.Block.__name__ = ["cards","ui","fragments","Block"];
+cards.ui.fragments.Block.__interfaces__ = [cards.ui.fragments.Fragment];
+cards.ui.fragments.Block.prototype = {
+	name: null
+	,editor: null
+	,component: null
+	,focus: null
+	,active: null
+	,uid: null
+	,destroy: function() {
+		this.editor.destroy();
+	}
+	,toString: function() {
+		return this.name;
+	}
+	,__class__: cards.ui.fragments.Block
+};
+cards.ui.fragments.FragmentMapper = function(fragments,values) {
+	this.fragments = fragments;
+	this.values = values;
+};
+cards.ui.fragments.FragmentMapper.__name__ = ["cards","ui","fragments","FragmentMapper"];
+cards.ui.fragments.FragmentMapper.prototype = {
+	fragments: null
+	,values: null
+	,getValuePropertyInfoForFragment: function(fragment) {
+		return thx.core.Iterators.map(this.fragments.getAssociations(fragment),($_=this.values,$bind($_,$_.get)));
+	}
+	,getAttachedPropertiesForFragment: function(fragment) {
+		return thx.core.Iterators.filter(this.fragments.getAssociations(fragment.name),function(name) {
+			return fragment.component.properties.exists(name);
+		}).map(($_=this.values,$bind($_,$_.get)));
+	}
+	,getAttachablePropertiesForFragment: function(fragment) {
+		return thx.core.Iterators.filter(this.fragments.getAssociations(fragment.name),function(name) {
+			return !fragment.component.properties.exists(name);
+		}).map(($_=this.values,$bind($_,$_.get)));
+	}
+	,__class__: cards.ui.fragments.FragmentMapper
+};
+cards.ui.fragments._FragmentName = {};
+cards.ui.fragments._FragmentName.FragmentName_Impl_ = function() { };
+cards.ui.fragments._FragmentName.FragmentName_Impl_.__name__ = ["cards","ui","fragments","_FragmentName","FragmentName_Impl_"];
+cards.ui.fragments._FragmentName.FragmentName_Impl_.fromFragment = function(fragment) {
+	return fragment.name;
+};
+cards.ui.fragments._FragmentName.FragmentName_Impl_.fromString = function(name) {
+	return name;
+};
+cards.ui.fragments._FragmentName.FragmentName_Impl_._new = function(name) {
+	return name;
+};
+cards.ui.fragments._FragmentName.FragmentName_Impl_.toString = function(this1) {
+	return this1;
+};
+cards.ui.fragments.FragmentProperties = function() {
+	this.map = new haxe.ds.StringMap();
+};
+cards.ui.fragments.FragmentProperties.__name__ = ["cards","ui","fragments","FragmentProperties"];
+cards.ui.fragments.FragmentProperties.prototype = {
+	map: null
+	,associate: function(fragment,property) {
+		var s = this.map.get(fragment);
+		if(null == s) {
+			var value = s = new thx.core.Set();
+			this.map.set(fragment,value);
+		}
+		s.add(property);
+	}
+	,associateMany: function(fragment,properties) {
+		thx.core.Iterables.map(properties,(function(f,a1) {
+			return function(a2) {
+				return f(a1,a2);
+			};
+		})($bind(this,this.associate),fragment));
+	}
+	,getAssociations: function(fragment) {
+		var s = this.map.get(fragment);
+		if(s == null) s = new thx.core.Set();
+		return s.iterator();
+	}
+	,__class__: cards.ui.fragments.FragmentProperties
+};
+cards.ui.fragments.ReadonlyBlock = function(options) {
+	this.name = "readonly";
+	if(null == options.el && null == options.template) options.template = "<section class=\"readonly block\" tabindex=\"0\">readonly</div>";
+	this.component = new cards.components.Component(options);
+	this.focus = new thx.stream.Value(false);
+	this.active = new thx.stream.Value(false);
+	if(null != options.uid) this.uid = options.uid; else this.uid = thx.core.UUID.create();
+	this.focusStream = thx.stream.dom.Dom.streamEvent(this.component.el,"focus").toTrue().merge(thx.stream.dom.Dom.streamEvent(this.component.el,"blur").toFalse()).feed(this.focus);
+	this.active.subscribe(thx.stream.dom.Dom.subscribeToggleClass(this.component.el,"active"));
+};
+cards.ui.fragments.ReadonlyBlock.__name__ = ["cards","ui","fragments","ReadonlyBlock"];
+cards.ui.fragments.ReadonlyBlock.__interfaces__ = [cards.ui.fragments.Fragment];
+cards.ui.fragments.ReadonlyBlock.prototype = {
+	name: null
+	,component: null
+	,focus: null
+	,active: null
+	,uid: null
+	,focusStream: null
+	,destroy: function() {
+		this.focusStream.cancel();
+		this.component.destroy();
+	}
+	,toString: function() {
+		return this.name;
+	}
+	,__class__: cards.ui.fragments.ReadonlyBlock
+};
+cards.ui.widgets.AnchorPoint = { __ename__ : ["cards","ui","widgets","AnchorPoint"], __constructs__ : ["TopLeft","Top","TopRight","Left","Center","Right","BottomLeft","Bottom","BottomRight"] };
+cards.ui.widgets.AnchorPoint.TopLeft = ["TopLeft",0];
+cards.ui.widgets.AnchorPoint.TopLeft.__enum__ = cards.ui.widgets.AnchorPoint;
+cards.ui.widgets.AnchorPoint.Top = ["Top",1];
+cards.ui.widgets.AnchorPoint.Top.__enum__ = cards.ui.widgets.AnchorPoint;
+cards.ui.widgets.AnchorPoint.TopRight = ["TopRight",2];
+cards.ui.widgets.AnchorPoint.TopRight.__enum__ = cards.ui.widgets.AnchorPoint;
+cards.ui.widgets.AnchorPoint.Left = ["Left",3];
+cards.ui.widgets.AnchorPoint.Left.__enum__ = cards.ui.widgets.AnchorPoint;
+cards.ui.widgets.AnchorPoint.Center = ["Center",4];
+cards.ui.widgets.AnchorPoint.Center.__enum__ = cards.ui.widgets.AnchorPoint;
+cards.ui.widgets.AnchorPoint.Right = ["Right",5];
+cards.ui.widgets.AnchorPoint.Right.__enum__ = cards.ui.widgets.AnchorPoint;
+cards.ui.widgets.AnchorPoint.BottomLeft = ["BottomLeft",6];
+cards.ui.widgets.AnchorPoint.BottomLeft.__enum__ = cards.ui.widgets.AnchorPoint;
+cards.ui.widgets.AnchorPoint.Bottom = ["Bottom",7];
+cards.ui.widgets.AnchorPoint.Bottom.__enum__ = cards.ui.widgets.AnchorPoint;
+cards.ui.widgets.AnchorPoint.BottomRight = ["BottomRight",8];
+cards.ui.widgets.AnchorPoint.BottomRight.__enum__ = cards.ui.widgets.AnchorPoint;
+cards.ui.widgets.Button = function(text,icon) {
+	if(text == null) text = "";
+	this.component = new cards.components.Component({ template : null == icon?"<button>" + text + "</button>":"<button class=\"fa fa-" + icon + "\">" + text + "</button>"});
+	this.clicks = thx.stream.dom.Dom.streamEvent(this.component.el,"click",false);
+	this.enabled = new thx.stream.Value(true);
+	this.enabled.subscribe(thx.stream.dom.Dom.subscribeToggleAttribute(this.component.el,"disabled","disabled"));
+};
+cards.ui.widgets.Button.__name__ = ["cards","ui","widgets","Button"];
+cards.ui.widgets.Button.prototype = {
+	component: null
+	,clicks: null
+	,enabled: null
+	,cancel: null
+	,destroy: function() {
+		this.cancel();
+		this.component.destroy();
+	}
+	,__class__: cards.ui.widgets.Button
+};
+cards.ui.widgets.Menu = function(options) {
+	if(null == options.el && null == options.template) options.template = "<menu class=\"frame-overlay\"><ul></ul></menu>";
+	cards.ui.widgets.FrameOverlay.call(this,options);
+	this.ul = udom.Query.first("ul",this.component.el);
+	this.items = new haxe.ds.ObjectMap();
+};
+cards.ui.widgets.Menu.__name__ = ["cards","ui","widgets","Menu"];
+cards.ui.widgets.Menu.__super__ = cards.ui.widgets.FrameOverlay;
+cards.ui.widgets.Menu.prototype = $extend(cards.ui.widgets.FrameOverlay.prototype,{
+	items: null
+	,ul: null
+	,clear: function() {
+		this.ul.innerHTML = "";
+		this.items = new haxe.ds.ObjectMap();
+	}
+	,addItem: function(item) {
+		var el;
+		var _this = window.document;
+		el = _this.createElement("li");
+		item.appendTo(el);
+		this.component.add(item);
+		this.ul.appendChild(el);
+		this.items.set(item,el);
+	}
+	,removeItem: function(item) {
+		thx.Assert.notNull(item,null,{ fileName : "Menu.hx", lineNumber : 35, className : "cards.ui.widgets.Menu", methodName : "removeItem"});
+		thx.Assert.isTrue(this.items.h.__keys__[item.__id__] != null,null,{ fileName : "Menu.hx", lineNumber : 36, className : "cards.ui.widgets.Menu", methodName : "removeItem"});
+		var el = this.items.h[item.__id__];
+		item.detach();
+		this.ul.removeChild(el);
+	}
+	,__class__: cards.ui.widgets.Menu
+});
+cards.ui.widgets.Statusbar = function(options) {
+	if(null == options.el && null == options.template) options.template = "<footer class=\"statusbar\"></footer>";
+	this.component = new cards.components.Component(options);
+};
+cards.ui.widgets.Statusbar.__name__ = ["cards","ui","widgets","Statusbar"];
+cards.ui.widgets.Statusbar.prototype = {
+	component: null
+	,__class__: cards.ui.widgets.Statusbar
+};
+cards.ui.widgets.Toolbar = function(options) {
+	if(null == options.el && null == options.template) options.template = "<header class=\"toolbar\"><div><div class=\"left\"></div><div class=\"center\"></div><div class=\"right\"></div></div></header>";
+	this.component = new cards.components.Component(options);
+	this.left = new cards.ui.widgets.ToolbarGroup(udom.Query.first(".left",this.component.el),this.component);
+	this.center = new cards.ui.widgets.ToolbarGroup(udom.Query.first(".center",this.component.el),this.component);
+	this.right = new cards.ui.widgets.ToolbarGroup(udom.Query.first(".right",this.component.el),this.component);
+};
+cards.ui.widgets.Toolbar.__name__ = ["cards","ui","widgets","Toolbar"];
+cards.ui.widgets.Toolbar.prototype = {
+	component: null
+	,left: null
+	,center: null
+	,right: null
+	,__class__: cards.ui.widgets.Toolbar
+};
+cards.ui.widgets.ToolbarGroup = function(el,component) {
+	this.el = el;
+	this.component = component;
+};
+cards.ui.widgets.ToolbarGroup.__name__ = ["cards","ui","widgets","ToolbarGroup"];
+cards.ui.widgets.ToolbarGroup.prototype = {
+	el: null
+	,component: null
+	,addButton: function(text,icon) {
+		if(text == null) text = "";
+		var button = new cards.ui.widgets.Button(text,icon);
+		button.component.appendTo(this.el);
+		this.component.add(button.component);
+		return button;
+	}
+	,__class__: cards.ui.widgets.ToolbarGroup
+};
+haxe.StackItem = { __ename__ : ["haxe","StackItem"], __constructs__ : ["CFunction","Module","FilePos","Method","LocalFunction"] };
+haxe.StackItem.CFunction = ["CFunction",0];
+haxe.StackItem.CFunction.__enum__ = haxe.StackItem;
+haxe.StackItem.Module = function(m) { var $x = ["Module",1,m]; $x.__enum__ = haxe.StackItem; return $x; };
+haxe.StackItem.FilePos = function(s,file,line) { var $x = ["FilePos",2,s,file,line]; $x.__enum__ = haxe.StackItem; return $x; };
+haxe.StackItem.Method = function(classname,method) { var $x = ["Method",3,classname,method]; $x.__enum__ = haxe.StackItem; return $x; };
+haxe.StackItem.LocalFunction = function(v) { var $x = ["LocalFunction",4,v]; $x.__enum__ = haxe.StackItem; return $x; };
+haxe.CallStack = function() { };
+haxe.CallStack.__name__ = ["haxe","CallStack"];
+haxe.CallStack.callStack = function() {
+	var oldValue = Error.prepareStackTrace;
+	Error.prepareStackTrace = function(error,callsites) {
+		var stack = [];
+		var _g = 0;
+		while(_g < callsites.length) {
+			var site = callsites[_g];
+			++_g;
+			var method = null;
+			var fullName = site.getFunctionName();
+			if(fullName != null) {
+				var idx = fullName.lastIndexOf(".");
+				if(idx >= 0) {
+					var className = HxOverrides.substr(fullName,0,idx);
+					var methodName = HxOverrides.substr(fullName,idx + 1,null);
+					method = haxe.StackItem.Method(className,methodName);
+				}
+			}
+			stack.push(haxe.StackItem.FilePos(method,site.getFileName(),site.getLineNumber()));
+		}
+		return stack;
+	};
+	var a = haxe.CallStack.makeStack(new Error().stack);
+	a.shift();
+	Error.prepareStackTrace = oldValue;
+	return a;
+};
+haxe.CallStack.exceptionStack = function() {
+	return [];
+};
+haxe.CallStack.makeStack = function(s) {
+	if(typeof(s) == "string") {
+		var stack = s.split("\n");
+		var m = [];
+		var _g = 0;
+		while(_g < stack.length) {
+			var line = stack[_g];
+			++_g;
+			m.push(haxe.StackItem.Module(line));
+		}
+		return m;
+	} else return s;
+};
+haxe.Log = function() { };
+haxe.Log.__name__ = ["haxe","Log"];
+haxe.Log.trace = function(v,infos) {
+	js.Boot.__trace(v,infos);
+};
+haxe.ds.IntMap = function() {
+	this.h = { };
+};
+haxe.ds.IntMap.__name__ = ["haxe","ds","IntMap"];
+haxe.ds.IntMap.__interfaces__ = [IMap];
+haxe.ds.IntMap.prototype = {
+	h: null
+	,set: function(key,value) {
+		this.h[key] = value;
+	}
+	,get: function(key) {
+		return this.h[key];
+	}
+	,remove: function(key) {
+		if(!this.h.hasOwnProperty(key)) return false;
+		delete(this.h[key]);
+		return true;
+	}
+	,keys: function() {
+		var a = [];
+		for( var key in this.h ) {
+		if(this.h.hasOwnProperty(key)) a.push(key | 0);
+		}
+		return HxOverrides.iter(a);
+	}
+	,iterator: function() {
+		return { ref : this.h, it : this.keys(), hasNext : function() {
+			return this.it.hasNext();
+		}, next : function() {
+			var i = this.it.next();
+			return this.ref[i];
+		}};
+	}
+	,__class__: haxe.ds.IntMap
+};
+haxe.ds.ObjectMap = function() {
+	this.h = { };
+	this.h.__keys__ = { };
+};
+haxe.ds.ObjectMap.__name__ = ["haxe","ds","ObjectMap"];
+haxe.ds.ObjectMap.__interfaces__ = [IMap];
+haxe.ds.ObjectMap.prototype = {
+	h: null
+	,set: function(key,value) {
+		var id = key.__id__ || (key.__id__ = ++haxe.ds.ObjectMap.count);
+		this.h[id] = value;
+		this.h.__keys__[id] = key;
+	}
+	,remove: function(key) {
+		var id = key.__id__;
+		if(this.h.__keys__[id] == null) return false;
+		delete(this.h[id]);
+		delete(this.h.__keys__[id]);
+		return true;
+	}
+	,__class__: haxe.ds.ObjectMap
+};
+haxe.io = {};
+haxe.io.Bytes = function() { };
+haxe.io.Bytes.__name__ = ["haxe","io","Bytes"];
+haxe.io.Bytes.prototype = {
+	length: null
+	,b: null
+	,__class__: haxe.io.Bytes
+};
+haxe.io.Eof = function() { };
+haxe.io.Eof.__name__ = ["haxe","io","Eof"];
+haxe.io.Eof.prototype = {
+	toString: function() {
+		return "Eof";
+	}
+	,__class__: haxe.io.Eof
+};
+thx.core.Error = function(message,stack,pos) {
+	this.message = message;
+	if(null == stack) {
+		stack = haxe.CallStack.exceptionStack();
+		if(stack.length == 0) stack = haxe.CallStack.callStack();
+	}
+	this.stack = stack;
+	this.pos = pos;
+};
+thx.core.Error.__name__ = ["thx","core","Error"];
+thx.core.Error.fromDynamic = function(err,pos) {
+	if(js.Boot.__instanceof(err,thx.core.Error)) return err;
+	return new thx.core.Error("" + Std.string(err),null,pos);
+};
+thx.core.Error.__super__ = Error;
+thx.core.Error.prototype = $extend(Error.prototype,{
+	stack: null
+	,pos: null
+	,__class__: thx.core.Error
+});
+thx.Assert = function() { };
+thx.Assert.__name__ = ["thx","Assert"];
+thx.Assert.isTrue = function(cond,msg,pos) {
+	if(thx.Assert.results == null) throw "Assert.results is not currently bound to any assert context";
+	if(null == msg) msg = "expected true";
+	if(cond) thx.Assert.results.add(thx.core.Assertion.Success(pos)); else thx.Assert.results.add(thx.core.Assertion.Failure(msg,pos));
+};
+thx.Assert.isFalse = function(value,msg,pos) {
+	if(null == msg) msg = "expected false";
+	thx.Assert.isTrue(value == false,msg,pos);
+};
+thx.Assert.isNull = function(value,msg,pos) {
+	if(msg == null) msg = "expected null but was " + thx.Assert.q(value);
+	thx.Assert.isTrue(value == null,msg,pos);
+};
+thx.Assert.notNull = function(value,msg,pos) {
+	if(null == msg) msg = "expected not null";
+	thx.Assert.isTrue(value != null,msg,pos);
+};
+thx.Assert["is"] = function(value,type,msg,pos) {
+	if(msg == null) msg = "expected type " + thx.Assert.typeToString(type) + " but was " + thx.Assert.typeToString(value);
+	thx.Assert.isTrue(js.Boot.__instanceof(value,type),msg,pos);
+};
+thx.Assert.notEquals = function(expected,value,msg,pos) {
+	if(msg == null) msg = "expected " + thx.Assert.q(expected) + " and testa value " + thx.Assert.q(value) + " should be different";
+	thx.Assert.isFalse(expected == value,msg,pos);
+};
+thx.Assert.equals = function(expected,value,msg,pos) {
+	if(msg == null) msg = "expected " + thx.Assert.q(expected) + " but was " + thx.Assert.q(value);
+	thx.Assert.isTrue(expected == value,msg,pos);
+};
+thx.Assert.match = function(pattern,value,msg,pos) {
+	if(msg == null) msg = "the value " + thx.Assert.q(value) + "does not match the provided pattern";
+	thx.Assert.isTrue(pattern.match(value),msg,pos);
+};
+thx.Assert.floatEquals = function(expected,value,approx,msg,pos) {
+	if(msg == null) msg = "expected " + thx.Assert.q(expected) + " but was " + thx.Assert.q(value);
+	return thx.Assert.isTrue(thx.Assert._floatEquals(expected,value,approx),msg,pos);
+};
+thx.Assert._floatEquals = function(expected,value,approx) {
+	if(isNaN(expected)) return isNaN(value); else if(isNaN(value)) return false; else if(!isFinite(expected) && !isFinite(value)) return expected > 0 == value > 0;
+	if(null == approx) approx = 1e-5;
+	return Math.abs(value - expected) < approx;
+};
+thx.Assert.getTypeName = function(v) {
+	{
+		var _g = Type["typeof"](v);
+		switch(_g[1]) {
+		case 0:
+			return "[null]";
+		case 1:
+			return "Int";
+		case 2:
+			return "Float";
+		case 3:
+			return "Bool";
+		case 5:
+			return "function";
+		case 6:
+			var c = _g[2];
+			return Type.getClassName(c);
+		case 7:
+			var e = _g[2];
+			return Type.getEnumName(e);
+		case 4:
+			return "Object";
+		case 8:
+			return "Unknown";
+		}
+	}
+};
+thx.Assert.isIterable = function(v,isAnonym) {
+	var fields;
+	if(isAnonym) fields = Reflect.fields(v); else fields = Type.getInstanceFields(Type.getClass(v));
+	if(!Lambda.has(fields,"iterator")) return false;
+	return Reflect.isFunction(Reflect.field(v,"iterator"));
+};
+thx.Assert.isIterator = function(v,isAnonym) {
+	var fields;
+	if(isAnonym) fields = Reflect.fields(v); else fields = Type.getInstanceFields(Type.getClass(v));
+	if(!Lambda.has(fields,"next") || !Lambda.has(fields,"hasNext")) return false;
+	return Reflect.isFunction(Reflect.field(v,"next")) && Reflect.isFunction(Reflect.field(v,"hasNext"));
+};
+thx.Assert.sameAs = function(expected,value,status) {
+	var texpected = thx.Assert.getTypeName(expected);
+	var tvalue = thx.Assert.getTypeName(value);
+	if(texpected != tvalue) {
+		status.error = "expected type " + texpected + " but it is " + tvalue + (status.path == ""?"":" for field " + status.path);
+		return false;
+	}
+	{
+		var _g = Type["typeof"](expected);
+		switch(_g[1]) {
+		case 2:
+			if(!thx.Assert._floatEquals(expected,value)) {
+				status.error = "expected " + thx.Assert.q(expected) + " but it is " + thx.Assert.q(value) + (status.path == ""?"":" for field " + status.path);
+				return false;
+			}
+			return true;
+		case 0:case 1:case 3:
+			if(expected != value) {
+				status.error = "expected " + thx.Assert.q(expected) + " but it is " + thx.Assert.q(value) + (status.path == ""?"":" for field " + status.path);
+				return false;
+			}
+			return true;
+		case 5:
+			if(!Reflect.compareMethods(expected,value)) {
+				status.error = "expected same function reference" + (status.path == ""?"":" for field " + status.path);
+				return false;
+			}
+			return true;
+		case 6:
+			var c = _g[2];
+			var cexpected = Type.getClassName(c);
+			var cvalue = Type.getClassName(Type.getClass(value));
+			if(cexpected != cvalue) {
+				status.error = "expected instance of " + thx.Assert.q(cexpected) + " but it is " + thx.Assert.q(cvalue) + (status.path == ""?"":" for field " + status.path);
+				return false;
+			}
+			if(typeof(expected) == "string" && expected != value) {
+				status.error = "expected '" + Std.string(expected) + "' but it is '" + Std.string(value) + "'";
+				return false;
+			}
+			if((expected instanceof Array) && expected.__enum__ == null) {
+				if(status.recursive || status.path == "") {
+					if(expected.length != value.length) {
+						status.error = "expected " + Std.string(expected.length) + " elements but they were " + Std.string(value.length) + (status.path == ""?"":" for field " + status.path);
+						return false;
+					}
+					var path = status.path;
+					var _g2 = 0;
+					var _g1 = expected.length;
+					while(_g2 < _g1) {
+						var i = _g2++;
+						if(path == "") status.path = "array[" + i + "]"; else status.path = path + "[" + i + "]";
+						if(!thx.Assert.sameAs(expected[i],value[i],status)) {
+							status.error = "expected " + thx.Assert.q(expected) + " but it is " + thx.Assert.q(value) + (status.path == ""?"":" for field " + status.path);
+							return false;
+						}
+					}
+				}
+				return true;
+			}
+			if(js.Boot.__instanceof(expected,Date)) {
+				if(expected.getTime() != value.getTime()) {
+					status.error = "expected " + thx.Assert.q(expected) + " but it is " + thx.Assert.q(value) + (status.path == ""?"":" for field " + status.path);
+					return false;
+				}
+				return true;
+			}
+			if(js.Boot.__instanceof(expected,haxe.io.Bytes)) {
+				if(status.recursive || status.path == "") {
+					var ebytes = expected;
+					var vbytes = value;
+					if(ebytes.length != vbytes.length) return false;
+					var _g21 = 0;
+					var _g11 = ebytes.length;
+					while(_g21 < _g11) {
+						var i1 = _g21++;
+						if(ebytes.b[i1] != vbytes.b[i1]) {
+							status.error = "expected byte " + ebytes.b[i1] + " but wss " + ebytes.b[i1] + (status.path == ""?"":" for field " + status.path);
+							return false;
+						}
+					}
+				}
+				return true;
+			}
+			if(js.Boot.__instanceof(expected,haxe.ds.StringMap) || js.Boot.__instanceof(expected,haxe.ds.IntMap)) {
+				if(status.recursive || status.path == "") {
+					var keys = Lambda.array({ iterator : function() {
+						return expected.keys();
+					}});
+					var vkeys = Lambda.array({ iterator : function() {
+						return value.keys();
+					}});
+					if(keys.length != vkeys.length) {
+						status.error = "expected " + keys.length + " keys but they were " + vkeys.length + (status.path == ""?"":" for field " + status.path);
+						return false;
+					}
+					var path1 = status.path;
+					var _g12 = 0;
+					while(_g12 < keys.length) {
+						var key = keys[_g12];
+						++_g12;
+						if(path1 == "") status.path = "hash[" + key + "]"; else status.path = path1 + "[" + key + "]";
+						if(!thx.Assert.sameAs(expected.get(key),value.get(key),status)) {
+							status.error = "expected " + thx.Assert.q(expected) + " but it is " + thx.Assert.q(value) + (status.path == ""?"":" for field " + status.path);
+							return false;
+						}
+					}
+				}
+				return true;
+			}
+			if(thx.Assert.isIterator(expected,false)) {
+				if(status.recursive || status.path == "") {
+					var evalues = Lambda.array({ iterator : function() {
+						return expected;
+					}});
+					var vvalues = Lambda.array({ iterator : function() {
+						return value;
+					}});
+					if(evalues.length != vvalues.length) {
+						status.error = "expected " + evalues.length + " values in Iterator but they were " + vvalues.length + (status.path == ""?"":" for field " + status.path);
+						return false;
+					}
+					var path2 = status.path;
+					var _g22 = 0;
+					var _g13 = evalues.length;
+					while(_g22 < _g13) {
+						var i2 = _g22++;
+						if(path2 == "") status.path = "iterator[" + i2 + "]"; else status.path = path2 + "[" + i2 + "]";
+						if(!thx.Assert.sameAs(evalues[i2],vvalues[i2],status)) {
+							status.error = "expected " + thx.Assert.q(expected) + " but it is " + thx.Assert.q(value) + (status.path == ""?"":" for field " + status.path);
+							return false;
+						}
+					}
+				}
+				return true;
+			}
+			if(thx.Assert.isIterable(expected,false)) {
+				if(status.recursive || status.path == "") {
+					var evalues1 = Lambda.array(expected);
+					var vvalues1 = Lambda.array(value);
+					if(evalues1.length != vvalues1.length) {
+						status.error = "expected " + evalues1.length + " values in Iterable but they were " + vvalues1.length + (status.path == ""?"":" for field " + status.path);
+						return false;
+					}
+					var path3 = status.path;
+					var _g23 = 0;
+					var _g14 = evalues1.length;
+					while(_g23 < _g14) {
+						var i3 = _g23++;
+						if(path3 == "") status.path = "iterable[" + i3 + "]"; else status.path = path3 + "[" + i3 + "]";
+						if(!thx.Assert.sameAs(evalues1[i3],vvalues1[i3],status)) return false;
+					}
+				}
+				return true;
+			}
+			if(status.recursive || status.path == "") {
+				var fields = Type.getInstanceFields(Type.getClass(expected));
+				var path4 = status.path;
+				var _g15 = 0;
+				while(_g15 < fields.length) {
+					var field = fields[_g15];
+					++_g15;
+					if(path4 == "") status.path = field; else status.path = path4 + "." + field;
+					var e = Reflect.field(expected,field);
+					if(Reflect.isFunction(e)) continue;
+					var v = Reflect.field(value,field);
+					if(!thx.Assert.sameAs(e,v,status)) return false;
+				}
+			}
+			return true;
+		case 7:
+			var e1 = _g[2];
+			var eexpected = Type.getEnumName(e1);
+			var evalue = Type.getEnumName(Type.getEnum(value));
+			if(eexpected != evalue) {
+				status.error = "expected enumeration of " + thx.Assert.q(eexpected) + " but it is " + thx.Assert.q(evalue) + (status.path == ""?"":" for field " + status.path);
+				return false;
+			}
+			if(status.recursive || status.path == "") {
+				if(Type.enumIndex(expected) != Type.enumIndex(value)) {
+					status.error = "expected " + thx.Assert.q(Type.enumConstructor(expected)) + " but is " + thx.Assert.q(Type.enumConstructor(value)) + (status.path == ""?"":" for field " + status.path);
+					return false;
+				}
+				var eparams = Type.enumParameters(expected);
+				var vparams = Type.enumParameters(value);
+				var path5 = status.path;
+				var _g24 = 0;
+				var _g16 = eparams.length;
+				while(_g24 < _g16) {
+					var i4 = _g24++;
+					if(path5 == "") status.path = "enum[" + i4 + "]"; else status.path = path5 + "[" + i4 + "]";
+					if(!thx.Assert.sameAs(eparams[i4],vparams[i4],status)) {
+						status.error = "expected " + thx.Assert.q(expected) + " but it is " + thx.Assert.q(value) + (status.path == ""?"":" for field " + status.path);
+						return false;
+					}
+				}
+			}
+			return true;
+		case 4:
+			if(status.recursive || status.path == "") {
+				var tfields = Reflect.fields(value);
+				var fields1 = Reflect.fields(expected);
+				var path6 = status.path;
+				var _g17 = 0;
+				while(_g17 < fields1.length) {
+					var field1 = fields1[_g17];
+					++_g17;
+					HxOverrides.remove(tfields,field1);
+					if(path6 == "") status.path = field1; else status.path = path6 + "." + field1;
+					if(!Object.prototype.hasOwnProperty.call(value,field1)) {
+						status.error = "expected field " + status.path + " does not exist in " + thx.Assert.q(value);
+						return false;
+					}
+					var e2 = Reflect.field(expected,field1);
+					if(Reflect.isFunction(e2)) continue;
+					var v1 = Reflect.field(value,field1);
+					if(!thx.Assert.sameAs(e2,v1,status)) return false;
+				}
+				if(tfields.length > 0) {
+					status.error = "the tested object has extra field(s) (" + tfields.join(", ") + ") not included in the expected ones";
+					return false;
+				}
+			}
+			if(thx.Assert.isIterator(expected,true)) {
+				if(!thx.Assert.isIterator(value,true)) {
+					status.error = "expected Iterable but it is not " + (status.path == ""?"":" for field " + status.path);
+					return false;
+				}
+				if(status.recursive || status.path == "") {
+					var evalues2 = Lambda.array({ iterator : function() {
+						return expected;
+					}});
+					var vvalues2 = Lambda.array({ iterator : function() {
+						return value;
+					}});
+					if(evalues2.length != vvalues2.length) {
+						status.error = "expected " + evalues2.length + " values in Iterator but they were " + vvalues2.length + (status.path == ""?"":" for field " + status.path);
+						return false;
+					}
+					var path7 = status.path;
+					var _g25 = 0;
+					var _g18 = evalues2.length;
+					while(_g25 < _g18) {
+						var i5 = _g25++;
+						if(path7 == "") status.path = "iterator[" + i5 + "]"; else status.path = path7 + "[" + i5 + "]";
+						if(!thx.Assert.sameAs(evalues2[i5],vvalues2[i5],status)) {
+							status.error = "expected " + thx.Assert.q(expected) + " but it is " + thx.Assert.q(value) + (status.path == ""?"":" for field " + status.path);
+							return false;
+						}
+					}
+				}
+				return true;
+			}
+			if(thx.Assert.isIterable(expected,true)) {
+				if(!thx.Assert.isIterable(value,true)) {
+					status.error = "expected Iterator but it is not " + (status.path == ""?"":" for field " + status.path);
+					return false;
+				}
+				if(status.recursive || status.path == "") {
+					var evalues3 = Lambda.array(expected);
+					var vvalues3 = Lambda.array(value);
+					if(evalues3.length != vvalues3.length) {
+						status.error = "expected " + evalues3.length + " values in Iterable but they were " + vvalues3.length + (status.path == ""?"":" for field " + status.path);
+						return false;
+					}
+					var path8 = status.path;
+					var _g26 = 0;
+					var _g19 = evalues3.length;
+					while(_g26 < _g19) {
+						var i6 = _g26++;
+						if(path8 == "") status.path = "iterable[" + i6 + "]"; else status.path = path8 + "[" + i6 + "]";
+						if(!thx.Assert.sameAs(evalues3[i6],vvalues3[i6],status)) return false;
+					}
+				}
+				return true;
+			}
+			return true;
+		case 8:
+			throw "Unable to compare two unknown types";
+			break;
+		}
+	}
+	throw "Unable to compare values: " + thx.Assert.q(expected) + " and " + thx.Assert.q(value);
+};
+thx.Assert.q = function(v) {
+	if(typeof(v) == "string") return "\"" + StringTools.replace(v,"\"","\\\"") + "\""; else return Std.string(v);
+};
+thx.Assert.same = function(expected,value,recursive,msg,pos) {
+	var status = { recursive : null == recursive?true:recursive, path : "", error : null};
+	if(thx.Assert.sameAs(expected,value,status)) thx.Assert.isTrue(true,msg,pos); else thx.Assert.fail(msg == null?status.error:msg,pos);
+};
+thx.Assert.raises = function(method,type,msgNotThrown,msgWrongType,pos) {
+	if(type == null) type = String;
+	try {
+		method();
+		var name = Type.getClassName(type);
+		if(name == null) name = "" + Std.string(type);
+		if(null == msgNotThrown) msgNotThrown = "exception of type " + name + " not raised";
+		thx.Assert.fail(msgNotThrown,pos);
+	} catch( ex ) {
+		var name1 = Type.getClassName(type);
+		if(name1 == null) name1 = "" + Std.string(type);
+		if(null == msgWrongType) msgWrongType = "expected throw of type " + name1 + " but was " + Std.string(ex);
+		thx.Assert.isTrue(js.Boot.__instanceof(ex,type),msgWrongType,pos);
+	}
+};
+thx.Assert.allows = function(possibilities,value,msg,pos) {
+	if(Lambda.has(possibilities,value)) thx.Assert.isTrue(true,msg,pos); else thx.Assert.fail(msg == null?"value " + thx.Assert.q(value) + " not found in the expected possibilities " + Std.string(possibilities):msg,pos);
+};
+thx.Assert.contains = function(match,values,msg,pos) {
+	if(Lambda.has(values,match)) thx.Assert.isTrue(true,msg,pos); else thx.Assert.fail(msg == null?"values " + thx.Assert.q(values) + " do not contain " + Std.string(match):msg,pos);
+};
+thx.Assert.notContains = function(match,values,msg,pos) {
+	if(!Lambda.has(values,match)) thx.Assert.isTrue(true,msg,pos); else thx.Assert.fail(msg == null?"values " + thx.Assert.q(values) + " do contain " + Std.string(match):msg,pos);
+};
+thx.Assert.stringContains = function(match,value,msg,pos) {
+	if(value != null && value.indexOf(match) >= 0) thx.Assert.isTrue(true,msg,pos); else thx.Assert.fail(msg == null?"value " + thx.Assert.q(value) + " does not contain " + thx.Assert.q(match):msg,pos);
+};
+thx.Assert.stringSequence = function(sequence,value,msg,pos) {
+	if(null == value) {
+		thx.Assert.fail(msg == null?"null argument value":msg,pos);
+		return;
+	}
+	var p = 0;
+	var _g = 0;
+	while(_g < sequence.length) {
+		var s = sequence[_g];
+		++_g;
+		var p2 = value.indexOf(s,p);
+		if(p2 < 0) {
+			if(msg == null) {
+				msg = "expected '" + s + "' after ";
+				if(p > 0) {
+					var cut = HxOverrides.substr(value,0,p);
+					if(cut.length > 30) cut = "..." + HxOverrides.substr(cut,-27,null);
+					msg += " '" + cut + "'";
+				} else msg += " begin";
+			}
+			thx.Assert.fail(msg,pos);
+			return;
+		}
+		p = p2 + s.length;
+	}
+	thx.Assert.isTrue(true,msg,pos);
+};
+thx.Assert.fail = function(msg,pos) {
+	if(msg == null) msg = "failure expected";
+	thx.Assert.isTrue(false,msg,pos);
+};
+thx.Assert.warn = function(msg) {
+	thx.Assert.results.add(thx.core.Assertion.Warning(msg));
+};
+thx.Assert.createAsync = function(f,timeout) {
+	return function() {
+	};
+};
+thx.Assert.createEvent = function(f,timeout) {
+	return function(e) {
+	};
+};
+thx.Assert.typeToString = function(t) {
+	try {
+		var _t = Type.getClass(t);
+		if(_t != null) t = _t;
+	} catch( e ) {
+	}
+	try {
+		return Type.getClassName(t);
+	} catch( e1 ) {
+	}
+	try {
+		var _t1 = Type.getEnum(t);
+		if(_t1 != null) t = _t1;
+	} catch( e2 ) {
+	}
+	try {
+		return Type.getEnumName(t);
+	} catch( e3 ) {
+	}
+	try {
+		return Std.string(Type["typeof"](t));
+	} catch( e4 ) {
+	}
+	try {
+		return Std.string(t);
+	} catch( e5 ) {
+	}
+	return "<unable to retrieve type name>";
+};
 thx.core.Arrays = function() { };
 thx.core.Arrays.__name__ = ["thx","core","Arrays"];
 thx.core.Arrays.same = function(a,b,eq) {
@@ -1740,24 +4642,13 @@ thx.core.Arrays.extract = function(a,f) {
 	}
 	return null;
 };
-thx.core.Error = function(message,stack,pos) {
-	this.message = message;
-	if(null == stack) {
-		stack = haxe.CallStack.exceptionStack();
-		if(stack.length == 0) stack = haxe.CallStack.callStack();
-	}
-	this.stack = stack;
-	this.pos = pos;
-};
-thx.core.Error.__name__ = ["thx","core","Error"];
-thx.core.Error.fromDynamic = function(err,pos) {
-	if(js.Boot.__instanceof(err,thx.core.Error)) return err;
-	return new thx.core.Error("" + Std.string(err),null,pos);
-};
-thx.core.Error.__super__ = Error;
-thx.core.Error.prototype = $extend(Error.prototype,{
-	__class__: thx.core.Error
-});
+thx.core.Assertion = { __ename__ : ["thx","core","Assertion"], __constructs__ : ["Success","Failure","Error","PreConditionError","PostConditionError","Warning"] };
+thx.core.Assertion.Success = function(pos) { var $x = ["Success",0,pos]; $x.__enum__ = thx.core.Assertion; return $x; };
+thx.core.Assertion.Failure = function(msg,pos) { var $x = ["Failure",1,msg,pos]; $x.__enum__ = thx.core.Assertion; return $x; };
+thx.core.Assertion.Error = function(e,stack) { var $x = ["Error",2,e,stack]; $x.__enum__ = thx.core.Assertion; return $x; };
+thx.core.Assertion.PreConditionError = function(e,stack) { var $x = ["PreConditionError",3,e,stack]; $x.__enum__ = thx.core.Assertion; return $x; };
+thx.core.Assertion.PostConditionError = function(e,stack) { var $x = ["PostConditionError",4,e,stack]; $x.__enum__ = thx.core.Assertion; return $x; };
+thx.core.Assertion.Warning = function(msg) { var $x = ["Warning",5,msg]; $x.__enum__ = thx.core.Assertion; return $x; };
 thx.core.Function0 = function() { };
 thx.core.Function0.__name__ = ["thx","core","Function0"];
 thx.core.Function0.noop = function() {
@@ -1919,56 +4810,6 @@ thx.core.Objects.__name__ = ["thx","core","Objects"];
 thx.core.Objects.isEmpty = function(o) {
 	return Reflect.fields(o).length == 0;
 };
-thx.core.Options = function() { };
-thx.core.Options.__name__ = ["thx","core","Options"];
-thx.core.Options.toValue = function(option) {
-	switch(option[1]) {
-	case 1:
-		return null;
-	case 0:
-		var v = option[2];
-		return v;
-	}
-};
-thx.core.Options.toBool = function(option) {
-	switch(option[1]) {
-	case 1:
-		return false;
-	case 0:
-		return true;
-	}
-};
-thx.core.Options.toOption = function(value) {
-	if(null == value) return haxe.ds.Option.None; else return haxe.ds.Option.Some(value);
-};
-thx.core.Options.equals = function(a,b,eq) {
-	switch(a[1]) {
-	case 1:
-		switch(b[1]) {
-		case 1:
-			return true;
-		default:
-			return false;
-		}
-		break;
-	case 0:
-		switch(b[1]) {
-		case 0:
-			var a1 = a[2];
-			var b1 = b[2];
-			if(null == eq) eq = function(a2,b2) {
-				return a2 == b2;
-			};
-			return eq(a1,b1);
-		default:
-			return false;
-		}
-		break;
-	}
-};
-thx.core.Options.equalsValue = function(a,b,eq) {
-	return thx.core.Options.equals(a,thx.core.Options.toOption(b));
-};
 thx.core.Set = function() {
 	this._v = [];
 	this.length = 0;
@@ -1985,7 +4826,9 @@ thx.core.Set.ofArray = function(arr) {
 	return set;
 };
 thx.core.Set.prototype = {
-	add: function(v) {
+	length: null
+	,_v: null
+	,add: function(v) {
 		HxOverrides.remove(this._v,v);
 		this._v.push(v);
 		this.length = this._v.length;
@@ -2159,11 +5002,11 @@ thx.core.Strings.compare = function(a,b) {
 };
 thx.core.Timer = function() { };
 thx.core.Timer.__name__ = ["thx","core","Timer"];
-thx.core.Timer.repeat = function(callback,delay) {
-	return setInterval(callback,delay);
+thx.core.Timer.repeat = function(callback,ms) {
+	return setInterval(callback,ms);
 };
-thx.core.Timer.delay = function(callback,delay) {
-	return setTimeout(callback,delay);
+thx.core.Timer.delay = function(callback,ms) {
+	return setTimeout(callback,ms);
 };
 thx.core.Timer.immediate = function(callback) {
 	return setImmediate(callback);
@@ -2385,13 +5228,57 @@ thx.core.ValueTypes.typeInheritance = function(type) {
 		return null;
 	}
 };
+thx.core.UUID = function() { };
+thx.core.UUID.__name__ = ["thx","core","UUID"];
+thx.core.UUID.random = function() {
+	return Math.floor(Math.random() * 16);
+};
+thx.core.UUID.srandom = function() {
+	return "" + Math.floor(Math.random() * 16);
+};
+thx.core.UUID.create = function() {
+	var s = [];
+	var _g = 0;
+	while(_g < 8) {
+		var i = _g++;
+		s[i] = "" + Math.floor(Math.random() * 16);
+	}
+	s[8] = "-";
+	var _g1 = 9;
+	while(_g1 < 13) {
+		var i1 = _g1++;
+		s[i1] = "" + Math.floor(Math.random() * 16);
+	}
+	s[13] = "-";
+	s[14] = "4";
+	var _g2 = 15;
+	while(_g2 < 18) {
+		var i2 = _g2++;
+		s[i2] = "" + Math.floor(Math.random() * 16);
+	}
+	s[18] = "-";
+	s[19] = "" + (Math.floor(Math.random() * 16) & 3 | 8);
+	var _g3 = 20;
+	while(_g3 < 23) {
+		var i3 = _g3++;
+		s[i3] = "" + Math.floor(Math.random() * 16);
+	}
+	s[23] = "-";
+	var _g4 = 24;
+	while(_g4 < 36) {
+		var i4 = _g4++;
+		s[i4] = "" + Math.floor(Math.random() * 16);
+	}
+	return s.join("");
+};
 thx.promise = {};
 thx.promise.Deferred = function() {
 	this.promise = new thx.promise.Promise();
 };
 thx.promise.Deferred.__name__ = ["thx","promise","Deferred"];
 thx.promise.Deferred.prototype = {
-	rejectWith: function(error) {
+	promise: null
+	,rejectWith: function(error) {
 		return this.fulfill(thx.promise.PromiseValue.Failure(thx.core.Error.fromDynamic(error,{ fileName : "Deferred.hx", lineNumber : 13, className : "thx.promise.Deferred", methodName : "rejectWith"})));
 	}
 	,reject: function(error) {
@@ -2453,7 +5340,9 @@ thx.promise.Promise.error = function(err) {
 	});
 };
 thx.promise.Promise.prototype = {
-	then: function(handler) {
+	handlers: null
+	,state: null
+	,then: function(handler) {
 		this.handlers.push(handler);
 		this.update();
 		return this;
@@ -2797,322 +5686,6 @@ thx.promise.PromiseNil.join = function(p1,p2) {
 thx.promise.PromiseValue = { __ename__ : ["thx","promise","PromiseValue"], __constructs__ : ["Failure","Success"] };
 thx.promise.PromiseValue.Failure = function(err) { var $x = ["Failure",0,err]; $x.__enum__ = thx.promise.PromiseValue; return $x; };
 thx.promise.PromiseValue.Success = function(value) { var $x = ["Success",1,value]; $x.__enum__ = thx.promise.PromiseValue; return $x; };
-thx.stream = {};
-thx.stream.Emitter = function(init) {
-	this.init = init;
-};
-thx.stream.Emitter.__name__ = ["thx","stream","Emitter"];
-thx.stream.Emitter.create = function(init) {
-	return new thx.stream.Emitter(init);
-};
-thx.stream.Emitter.prototype = {
-	sign: function(subscriber) {
-		var stream = new thx.stream.Stream(subscriber);
-		this.init(stream);
-		return stream;
-	}
-	,subscribe: function(pulse,fail,end) {
-		if(null != pulse) pulse = pulse; else pulse = function(_) {
-		};
-		if(null != fail) fail = fail; else fail = function(_1) {
-		};
-		if(null != end) end = end; else end = function(_2) {
-		};
-		var stream = new thx.stream.Stream(function(r) {
-			switch(r[1]) {
-			case 0:
-				var v = r[2];
-				pulse(v);
-				break;
-			case 2:
-				var e = r[2];
-				fail(e);
-				break;
-			case 1:
-				var c = r[2];
-				end(c);
-				break;
-			}
-		});
-		this.init(stream);
-		return stream;
-	}
-	,feed: function(value) {
-		var stream = new thx.stream.Stream(null);
-		stream.subscriber = function(r) {
-			switch(r[1]) {
-			case 0:
-				var v = r[2];
-				value.set(v);
-				break;
-			case 2:
-				var e = r[2];
-				stream.fail(e);
-				break;
-			case 1:
-				var c = r[2];
-				if(c) stream.cancel(); else stream.end();
-				break;
-			}
-		};
-		value.upStreams.push(stream);
-		stream.addCleanUp(function() {
-			HxOverrides.remove(value.upStreams,stream);
-		});
-		this.init(stream);
-		return stream;
-	}
-	,plug: function(bus) {
-		var stream = new thx.stream.Stream(null);
-		stream.subscriber = $bind(bus,bus.emit);
-		bus.upStreams.push(stream);
-		stream.addCleanUp(function() {
-			HxOverrides.remove(bus.upStreams,stream);
-		});
-		this.init(stream);
-		return stream;
-	}
-	,delay: function(time) {
-		var _g = this;
-		return new thx.stream.Emitter(function(stream) {
-			var id = setTimeout(function() {
-				_g.init(stream);
-			},time);
-			stream.addCleanUp((function(f,id1) {
-				return function() {
-					return f(id1);
-				};
-			})(thx.core.Timer.clear,id));
-		});
-	}
-	,map: function(f) {
-		var _g = this;
-		return new thx.stream.Emitter(function(stream) {
-			_g.init(new thx.stream.Stream(function(r) {
-				switch(r[1]) {
-				case 0:
-					var v = r[2];
-					f(v).either(function(vout) {
-						stream.pulse(vout);
-					},function(err) {
-						stream.fail(err);
-					});
-					break;
-				case 2:
-					var e = r[2];
-					stream.fail(e);
-					break;
-				case 1:
-					switch(r[2]) {
-					case true:
-						stream.cancel();
-						break;
-					case false:
-						stream.end();
-						break;
-					}
-					break;
-				}
-			}));
-		});
-	}
-	,mapValue: function(f) {
-		return this.map(function(v) {
-			return thx.promise.Promise.value(f(v));
-		});
-	}
-	,takeUntil: function(f) {
-		var _g = this;
-		return new thx.stream.Emitter(function(stream) {
-			var instream = null;
-			instream = new thx.stream.Stream(function(r) {
-				switch(r[1]) {
-				case 0:
-					var v = r[2];
-					f(v).either(function(c) {
-						if(c) stream.pulse(v); else {
-							instream.end();
-							stream.end();
-						}
-					},$bind(stream,stream.fail));
-					break;
-				case 2:
-					var e = r[2];
-					instream.fail(e);
-					stream.fail(e);
-					break;
-				case 1:
-					switch(r[2]) {
-					case true:
-						instream.cancel();
-						stream.cancel();
-						break;
-					case false:
-						instream.end();
-						stream.end();
-						break;
-					}
-					break;
-				}
-			});
-			_g.init(instream);
-		});
-	}
-	,take: function(count) {
-		return this.takeUntil((function($this) {
-			var $r;
-			var counter = 0;
-			$r = function(_) {
-				return thx.promise.Promise.value(counter++ < count);
-			};
-			return $r;
-		}(this)));
-	}
-	,audit: function(handler) {
-		return this.mapValue(function(v) {
-			handler(v);
-			return v;
-		});
-	}
-	,filter: function(f) {
-		var _g = this;
-		return new thx.stream.Emitter(function(stream) {
-			_g.init(new thx.stream.Stream(function(r) {
-				switch(r[1]) {
-				case 0:
-					var v = r[2];
-					f(v).either(function(c) {
-						if(c) stream.pulse(v);
-					},function(err) {
-						stream.fail(err);
-					});
-					break;
-				case 2:
-					var e = r[2];
-					stream.fail(e);
-					break;
-				case 1:
-					switch(r[2]) {
-					case true:
-						stream.cancel();
-						break;
-					case false:
-						stream.end();
-						break;
-					}
-					break;
-				}
-			}));
-		});
-	}
-	,filterValue: function(f) {
-		return this.filter(function(v) {
-			return thx.promise.Promise.value(f(v));
-		});
-	}
-	,concat: function(other) {
-		var _g = this;
-		return new thx.stream.Emitter(function(stream) {
-			_g.init(new thx.stream.Stream(function(r) {
-				switch(r[1]) {
-				case 0:
-					var v = r[2];
-					stream.pulse(v);
-					break;
-				case 2:
-					var e = r[2];
-					stream.fail(e);
-					break;
-				case 1:
-					switch(r[2]) {
-					case true:
-						stream.cancel();
-						break;
-					case false:
-						other.init(stream);
-						break;
-					}
-					break;
-				}
-			}));
-		});
-	}
-	,merge: function(other) {
-		var _g = this;
-		return new thx.stream.Emitter(function(stream) {
-			_g.init(stream);
-			other.init(stream);
-		});
-	}
-	,reduce: function(acc,f) {
-		var _g = this;
-		return new thx.stream.Emitter(function(stream) {
-			_g.init(new thx.stream.Stream(function(r) {
-				switch(r[1]) {
-				case 0:
-					var v = r[2];
-					acc = f(acc,v);
-					stream.pulse(acc);
-					break;
-				case 2:
-					var e = r[2];
-					stream.fail(e);
-					break;
-				case 1:
-					switch(r[2]) {
-					case true:
-						stream.cancel();
-						break;
-					case false:
-						stream.end();
-						break;
-					}
-					break;
-				}
-			}));
-		});
-	}
-	,toOption: function() {
-		return this.mapValue(function(v) {
-			if(null == v) return haxe.ds.Option.None; else return haxe.ds.Option.Some(v);
-		});
-	}
-	,toNil: function() {
-		return this.mapValue(function(_) {
-			return thx.core.Nil.nil;
-		});
-	}
-	,toTrue: function() {
-		return this.mapValue(function(_) {
-			return true;
-		});
-	}
-	,toFalse: function() {
-		return this.mapValue(function(_) {
-			return false;
-		});
-	}
-	,toValue: function(value) {
-		return this.mapValue(function(_) {
-			return value;
-		});
-	}
-	,log: function(prefix,posInfo) {
-		if(prefix == null) prefix = ""; else prefix = "" + prefix + ": ";
-		return this.mapValue(function(v) {
-			haxe.Log.trace("" + prefix + Std.string(v),posInfo);
-			return v;
-		});
-	}
-	,withValue: function(expected) {
-		return this.filterValue(null == expected?function(v) {
-			return v != null;
-		}:function(v1) {
-			return v1 == expected;
-		});
-	}
-	,__class__: thx.stream.Emitter
-};
 thx.stream.Bus = function() {
 	var _g = this;
 	this.downStreams = [];
@@ -3127,7 +5700,9 @@ thx.stream.Bus = function() {
 thx.stream.Bus.__name__ = ["thx","stream","Bus"];
 thx.stream.Bus.__super__ = thx.stream.Emitter;
 thx.stream.Bus.prototype = $extend(thx.stream.Emitter.prototype,{
-	emit: function(value) {
+	downStreams: null
+	,upStreams: null
+	,emit: function(value) {
 		switch(value[1]) {
 		case 0:
 			var v = value[2];
@@ -3216,23 +5791,11 @@ thx.stream.EmitterStrings.toBool = function(emitter) {
 		return s != null && s != "";
 	});
 };
-thx.stream.EmitterOptions = function() { };
-thx.stream.EmitterOptions.__name__ = ["thx","stream","EmitterOptions"];
-thx.stream.EmitterOptions.filterOption = function(emitter) {
-	return emitter.filterValue(function(opt) {
-		return thx.core.Options.toBool(opt);
-	}).mapValue(function(opt1) {
-		return thx.core.Options.toValue(opt1);
-	});
-};
-thx.stream.EmitterOptions.toValue = function(emitter) {
-	return emitter.mapValue(function(opt) {
-		return thx.core.Options.toValue(opt);
-	});
-};
-thx.stream.EmitterOptions.toBool = function(emitter) {
-	return emitter.mapValue(function(opt) {
-		return thx.core.Options.toBool(opt);
+thx.stream.EmitterInts = function() { };
+thx.stream.EmitterInts.__name__ = ["thx","stream","EmitterInts"];
+thx.stream.EmitterInts.toBool = function(emitter) {
+	return emitter.mapValue(function(i) {
+		return i != 0;
 	});
 };
 thx.stream.Emitters = function() { };
@@ -3252,6 +5815,32 @@ thx.stream.EmitterBools.negate = function(emitter) {
 thx.stream.EmitterEmitters = function() { };
 thx.stream.EmitterEmitters.__name__ = ["thx","stream","EmitterEmitters"];
 thx.stream.EmitterEmitters.flatMap = function(emitter) {
+	return new thx.stream.Emitter(function(stream) {
+		emitter.init(new thx.stream.Stream(function(r) {
+			switch(r[1]) {
+			case 0:
+				var em = r[2];
+				em.init(stream);
+				break;
+			case 2:
+				var e = r[2];
+				stream.fail(e);
+				break;
+			case 1:
+				switch(r[2]) {
+				case true:
+					stream.cancel();
+					break;
+				case false:
+					stream.end();
+					break;
+				}
+				break;
+			}
+		}));
+	});
+};
+thx.stream.EmitterEmitters.flatten = function(emitter) {
 	return new thx.stream.Emitter(function(stream) {
 		emitter.init(new thx.stream.Stream(function(r) {
 			switch(r[1]) {
@@ -3292,7 +5881,8 @@ thx.stream.EmitterValues.right = function(emitter) {
 thx.stream.IStream = function() { };
 thx.stream.IStream.__name__ = ["thx","stream","IStream"];
 thx.stream.IStream.prototype = {
-	__class__: thx.stream.IStream
+	cancel: null
+	,__class__: thx.stream.IStream
 };
 thx.stream.Stream = function(subscriber) {
 	this.subscriber = subscriber;
@@ -3303,7 +5893,11 @@ thx.stream.Stream = function(subscriber) {
 thx.stream.Stream.__name__ = ["thx","stream","Stream"];
 thx.stream.Stream.__interfaces__ = [thx.stream.IStream];
 thx.stream.Stream.prototype = {
-	addCleanUp: function(f) {
+	subscriber: null
+	,cleanUps: null
+	,finalized: null
+	,canceled: null
+	,addCleanUp: function(f) {
 		this.cleanUps.push(f);
 	}
 	,pulse: function(v) {
@@ -3333,204 +5927,6 @@ thx.stream.StreamValue = { __ename__ : ["thx","stream","StreamValue"], __constru
 thx.stream.StreamValue.Pulse = function(value) { var $x = ["Pulse",0,value]; $x.__enum__ = thx.stream.StreamValue; return $x; };
 thx.stream.StreamValue.End = function(cancel) { var $x = ["End",1,cancel]; $x.__enum__ = thx.stream.StreamValue; return $x; };
 thx.stream.StreamValue.Failure = function(err) { var $x = ["Failure",2,err]; $x.__enum__ = thx.stream.StreamValue; return $x; };
-thx.stream.Timer = function() { };
-thx.stream.Timer.__name__ = ["thx","stream","Timer"];
-thx.stream.Timer.repeat = function(repetitions,delay) {
-	return thx.stream.Timer.beacon(delay).take(repetitions);
-};
-thx.stream.Timer.beacon = function(delay) {
-	return thx.stream.Emitter.create(function(stream) {
-		var id = thx.core.Timer.repeat((function(f,v) {
-			return function() {
-				return f(v);
-			};
-		})($bind(stream,stream.pulse),thx.core.Nil.nil),delay);
-		stream.addCleanUp((function(f1,id1) {
-			return function() {
-				return f1(id1);
-			};
-		})(thx.core.Timer.clear,id));
-	});
-};
-thx.stream.Timer.sequenceNil = function(repetitions,delay,build) {
-	return thx.stream.Timer.repeat(repetitions,delay).mapValue(build);
-};
-thx.stream.Timer.sequence = function(repetitions,delay,build) {
-	return thx.stream.Timer.repeat(repetitions,delay).mapValue(function(_) {
-		return build();
-	});
-};
-thx.stream.Timer.sequencei = function(repetitions,delay,build) {
-	return thx.stream.Timer.sequence(repetitions,delay,(function($this) {
-		var $r;
-		var i = 0;
-		$r = function() {
-			return build(i++);
-		};
-		return $r;
-	}(this)));
-};
-thx.stream.Timer.ofArray = function(arr,delay) {
-	return thx.stream.Timer.sequencei(arr.length,delay,function(i) {
-		return arr[i];
-	});
-};
-thx.stream.Value = function(value) {
-	var _g = this;
-	this.value = value;
-	this.downStreams = [];
-	this.upStreams = [];
-	thx.stream.Emitter.call(this,function(stream) {
-		_g.downStreams.push(stream);
-		stream.addCleanUp(function() {
-			HxOverrides.remove(_g.downStreams,stream);
-		});
-		stream.pulse(_g.value);
-	});
-};
-thx.stream.Value.__name__ = ["thx","stream","Value"];
-thx.stream.Value.__super__ = thx.stream.Emitter;
-thx.stream.Value.prototype = $extend(thx.stream.Emitter.prototype,{
-	get: function() {
-		return this.value;
-	}
-	,set: function(value) {
-		if(this.value == value) return;
-		this.value = value;
-		this.update();
-	}
-	,clearStreams: function() {
-		var _g = 0;
-		var _g1 = this.downStreams.slice();
-		while(_g < _g1.length) {
-			var stream = _g1[_g];
-			++_g;
-			stream.end();
-		}
-	}
-	,clearEmitters: function() {
-		var _g = 0;
-		var _g1 = this.upStreams.slice();
-		while(_g < _g1.length) {
-			var stream = _g1[_g];
-			++_g;
-			stream.cancel();
-		}
-	}
-	,clear: function() {
-		this.clearEmitters();
-		this.clearStreams();
-	}
-	,update: function() {
-		var _g = 0;
-		var _g1 = this.downStreams.slice();
-		while(_g < _g1.length) {
-			var stream = _g1[_g];
-			++_g;
-			stream.pulse(this.value);
-		}
-	}
-	,__class__: thx.stream.Value
-});
-thx.stream.dom = {};
-thx.stream.dom.Dom = function() { };
-thx.stream.dom.Dom.__name__ = ["thx","stream","dom","Dom"];
-thx.stream.dom.Dom.ready = function() {
-	return thx.promise.Promise.create(function(resolve,_) {
-		window.document.addEventListener("DOMContentLoaded",function(_1) {
-			resolve(thx.core.Nil.nil);
-		},false);
-	});
-};
-thx.stream.dom.Dom.streamEvent = function(el,name,capture) {
-	if(capture == null) capture = false;
-	return thx.stream.Emitter.create(function(stream) {
-		el.addEventListener(name,$bind(stream,stream.pulse),capture);
-		stream.addCleanUp(function() {
-			el.removeEventListener(name,$bind(stream,stream.pulse),capture);
-		});
-	});
-};
-thx.stream.dom.Dom.streamMouseEvent = function(el,name,capture) {
-	if(capture == null) capture = false;
-	return thx.stream.dom.Dom.streamEvent(el,name,capture);
-};
-thx.stream.dom.Dom.streamKey = function(el,name,capture) {
-	if(capture == null) capture = false;
-	return thx.stream.Emitter.create((function($this) {
-		var $r;
-		if(!StringTools.startsWith(name,"key")) name = "key" + name;
-		$r = function(stream) {
-			el.addEventListener(name,$bind(stream,stream.pulse),capture);
-			stream.addCleanUp(function() {
-				el.removeEventListener(name,$bind(stream,stream.pulse),capture);
-			});
-		};
-		return $r;
-	}(this)));
-};
-thx.stream.dom.Dom.streamClick = function(el,capture) {
-	if(capture == null) capture = false;
-	return thx.stream.dom.Dom.streamEvent(el,"click",capture);
-};
-thx.stream.dom.Dom.streamInput = function(el,capture) {
-	if(capture == null) capture = false;
-	return thx.stream.dom.Dom.streamEvent(el,"input",capture).mapValue(function(_) {
-		return el.value;
-	});
-};
-thx.stream.dom.Dom.subscribeText = function(el) {
-	return function(text) {
-		el.innerText = text;
-	};
-};
-thx.stream.dom.Dom.subscribeHTML = function(el) {
-	return function(html) {
-		el.innerHTML = html;
-	};
-};
-thx.stream.dom.Dom.subscribeFocus = function(el) {
-	return function(focus) {
-		if(focus) el.focus(); else el.blur();
-	};
-};
-thx.stream.dom.Dom.subscribeAttribute = function(el,name) {
-	return function(value) {
-		if(null == value) el.removeAttribute(name); else el.setAttribute(name,value);
-	};
-};
-thx.stream.dom.Dom.subscribeToggleAttribute = function(el,name,value) {
-	if(null == value) value = el.getAttribute(name);
-	return function(on) {
-		if(on) el.removeAttribute(name); else el.setAttribute(name,value);
-	};
-};
-thx.stream.dom.Dom.subscribeToggleClass = function(el,name) {
-	return function(on) {
-		if(on) el.classList.remove(name); else el.classList.add(name);
-	};
-};
-thx.stream.dom.Dom.subscribeToggleVisibility = function(el) {
-	var originalDisplay = el.style.display;
-	if(originalDisplay == "none") originalDisplay = "";
-	return function(on) {
-		if(on) el.style.display = originalDisplay; else el.style.display = "none";
-	};
-};
-var udom = {};
-udom.Html = function() { };
-udom.Html.__name__ = ["udom","Html"];
-udom.Html.parseList = function(html) {
-	var el = window.document.createElement("div");
-	el.innerHTML = html;
-	return el.childNodes;
-};
-udom.Html.parseAll = function(html) {
-	return udom._Dom.H.toArray(udom.Html.parseList(StringTools.trim(html)));
-};
-udom.Html.parse = function(html) {
-	return udom.Html.parseList(StringTools.ltrim(html))[0];
-};
 udom.Query = function() { };
 udom.Query.__name__ = ["udom","Query"];
 udom.Query.first = function(selector,ctx) {
@@ -3577,14 +5973,65 @@ if(Array.prototype.map == null) Array.prototype.map = function(f) {
 	}
 	return a;
 };
+if(Array.prototype.filter == null) Array.prototype.filter = function(f1) {
+	var a1 = [];
+	var _g11 = 0;
+	var _g2 = this.length;
+	while(_g11 < _g2) {
+		var i1 = _g11++;
+		var e = this[i1];
+		if(f1(e)) a1.push(e);
+	}
+	return a1;
+};
+var posToString = function(pos) {
+	return pos;
+};
+thx.Assert.results = { add : function(assertion) {
+	switch(assertion[1]) {
+	case 1:
+		var pos1 = assertion[3];
+		var msg = assertion[2];
+		throw new thx.core.Error(msg,null,pos1);
+		break;
+	case 2:
+		var stack = assertion[3];
+		var e = assertion[2];
+		throw new thx.core.Error(Std.string(e),stack,{ fileName : "Assert.hx", lineNumber : 675, className : "thx.Assert", methodName : "__init__"});
+		break;
+	case 3:
+		var stack = assertion[3];
+		var e = assertion[2];
+		throw new thx.core.Error(Std.string(e),stack,{ fileName : "Assert.hx", lineNumber : 675, className : "thx.Assert", methodName : "__init__"});
+		break;
+	case 4:
+		var stack = assertion[3];
+		var e = assertion[2];
+		throw new thx.core.Error(Std.string(e),stack,{ fileName : "Assert.hx", lineNumber : 675, className : "thx.Assert", methodName : "__init__"});
+		break;
+	case 5:
+		var msg1 = assertion[2];
+		haxe.Log.trace(msg1,{ fileName : "Assert.hx", lineNumber : 677, className : "thx.Assert", methodName : "__init__"});
+		break;
+	case 0:
+		var pos2 = assertion[2];
+		break;
+	}
+}};
 var scope = ("undefined" !== typeof window && window) || ("undefined" !== typeof global && global) || this;
 if(!scope.setImmediate) scope.setImmediate = function(callback) {
 	scope.setTimeout(callback,0);
 };
+Config.icons = { add : "plus-circle", remove : "ban", dropdown : "reorder", checked : "dot-circle-o", unchecked : "circle-o", switchtype : "bolt", code : "bolt", value : "pencil", reference : "link"};
+Config.selectors = { app : ".card"};
+PropertyFeeder.classes = [{ display : "bold", name : "strong"},{ display : "italic", name : "emphasis"}];
 cards.model.Runtime.pattern = new EReg("\\$\\.(.+?)\\b","");
 cards.model.ref.EmptyParent.instance = new cards.model.ref.EmptyParent();
 cards.model.ref.Ref.reField = new EReg("^\\.?([^.\\[]+)","");
 cards.model.ref.Ref.reIndex = new EReg("^\\[(\\d+)\\]","");
+cards.types.CodeTransform.datePattern = new EReg("Date\\(-?\\d+(:?\\.\\d+)?(:?e-?\\d+)?\\)","");
+cards.types.CodeTransform.PATTERN = new EReg("^\\s*\\$\\.([a-z](:?(\\.|\\[\\d+\\])?[a-z0-9]*)*)\\s*$","");
+cards.ui.ContextField.tooltip = new cards.ui.widgets.Tooltip({ classes : "tooltip error"});
 haxe.ds.ObjectMap.count = 0;
 thx.core.Ints.pattern_parse = new EReg("^[+-]?(\\d+|0x[0-9A-F]+)$","i");
 thx.core.Strings._reSplitWC = new EReg("(\r\n|\n\r|\n|\r)","g");
@@ -3595,6 +6042,7 @@ thx.core.Strings.__ucwordsPattern = new EReg("[^a-zA-Z]([a-z])","g");
 thx.core.Strings.__ucwordswsPattern = new EReg("\\s[a-z]","g");
 thx.core.Strings.__alphaNumPattern = new EReg("^[a-z0-9]+$","i");
 thx.core.Strings.__digitsPattern = new EReg("^[0-9]+$","");
+thx.core.UUID.itoh = "0123456789ABCDEF";
 thx.promise.Promise.nil = thx.promise.Promise.value(thx.core.Nil.nil);
 udom.Query.doc = document;
 Main.main();
