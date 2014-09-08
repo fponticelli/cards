@@ -6,6 +6,7 @@ import thx.Assert;
 import cards.ui.fragments.Block;
 import cards.ui.fragments.ReadonlyBlock;
 import cards.ui.fragments.Fragment;
+import cards.ui.fragments.InlineText;
 import thx.stream.Value;
 import haxe.ds.Option;
 using thx.core.Options;
@@ -16,14 +17,15 @@ class Article {
   public var component(default, null) : Component;
   public var fragment(default, null) : Value<Option<Fragment>>;
 
+  // TODO possibly remove
   var fragmentStream : Bus<Fragment>;
-  var fragments : Map<Fragment, Void -> Void>;
+  var fragmentsMap : Map<Fragment, Void -> Void>;
 
   public function new(options : ComponentOptions) {
     if(null == options.el && null == options.template)
       options.template = '<article></article>';
     component = new Component(options);
-    fragments = new Map();
+    fragmentsMap = new Map();
     fragmentStream = new Bus();
     fragment = new Value(None);
     fragmentStream.toOption().feed(fragment);
@@ -42,18 +44,27 @@ class Article {
           .withValue(true)
           .mapValue(function(_) : Fragment return fragment)
           .plug(fragmentStream);
-    fragments.set(fragment, focusStream.cancel);
+    fragmentsMap.set(fragment, focusStream.cancel);
   }
 
   public function addBlock() {
     var fragment = new Block({
         parent : component,
-        container : component.el,
+        container : component.el
+      });
+    addFragment(fragment);
+    addInlineText(fragment);
+    return fragment;
+  }
+
+  public function addInlineText(parent : Block) {
+    var fragment = new InlineText({
+        fragmentParent : parent,
+        container : parent.component.el,
         defaultText : ''
       });
     addFragment(fragment);
     fragment.focus.set(true);
-    return fragment;
   }
 
   public function addReadonly() {
@@ -68,7 +79,8 @@ class Article {
   public function removeFragment(fragment : Fragment) {
     if(this.fragment.get().equalsValue(fragment))
       this.fragment.set(None);
-    var finalizer = fragments.get(fragment);
+    var finalizer = fragmentsMap.get(fragment);
+    fragmentsMap.remove(fragment);
     Assert.notNull(finalizer);
     finalizer();
   }

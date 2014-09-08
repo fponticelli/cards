@@ -27,7 +27,7 @@ class DateEditor implements Editor<Date> {
     var cls = component.el.classList;
     cls.add('editor');
     cls.add('date');
-    component.el.setAttribute('tabindex', '0');
+    component.el.setAttribute('tabindex', '1');
 
     value = new Value(options.defaultValue);
 

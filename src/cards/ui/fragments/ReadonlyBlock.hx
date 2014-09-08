@@ -13,21 +13,18 @@ class ReadonlyBlock implements Fragment {
   public var focus(default, null) : Value<Bool>;
   public var active(default, null) : Value<Bool>;
   public var uid(default, null) : String;
-
+  public var parent(default, null) : Fragment;
   var focusStream : IStream;
   public function new(options : FragmentOptions) {
     if(null == options.el && null == options.template)
-      options.template = '<section class="readonly block" tabindex="0">readonly</div>';
+      options.template = '<div class="readonly block" tabindex="1">readonly</div>';
 
     component = new Component(options);
     focus = new Value(false);
     active = new Value(false);
     uid = null != options.uid ? options.uid : thx.core.UUID.create();
 
-    focusStream = component.el.streamEvent('focus')
-      .toTrue()
-      .merge(component.el.streamEvent('blur').toFalse())
-      .feed(focus);
+    focusStream = component.el.streamFocus().feed(focus);
 
     active.subscribe(component.el.subscribeToggleClass('active'));
   }

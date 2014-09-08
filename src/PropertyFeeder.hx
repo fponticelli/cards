@@ -17,8 +17,9 @@ class PropertyFeeder {
   }
 
   public static function feedFragments(fragments : FragmentProperties) {
-    fragments.associateMany('block', ['strong', 'emphasis', 'text']);
-    fragments.associateMany('readonly', ['strong', 'emphasis', 'text']);
+    fragments.associateMany('text', ['strong', 'emphasis', 'text']);
+    fragments.associateMany('block', ['strong', 'emphasis']);
+    //fragments.associateMany('readonly', ['strong', 'emphasis', 'text']);
   }
 
   static function createToggleClass(display : String, name : String) : ValuePropertyInfo<Bool> {

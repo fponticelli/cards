@@ -27,7 +27,7 @@ class FloatEditor implements Editor<Float> {
     var cls = component.el.classList;
     cls.add('editor');
     cls.add('float');
-    component.el.setAttribute('tabindex', '0');
+    component.el.setAttribute('tabindex', '1');
 
     value = new Value(options.defaultValue);
 

@@ -27,7 +27,7 @@ class BoolEditor implements Editor<Bool> {
     cls.add('editor');
     cls.add('bool');
     cls.add('fa-' + Config.icons.unchecked);
-    component.el.setAttribute('tabindex', '0');
+    component.el.setAttribute('tabindex', '1');
 
     value = new Value(options.defaultValue);
 

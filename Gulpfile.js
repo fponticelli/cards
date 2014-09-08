@@ -1,7 +1,8 @@
-var gulp    = require('gulp'),
-  changed = require('gulp-changed'),
-  stylus  = require('gulp-stylus'),
-  nib     = require('nib');
+var gulp       = require('gulp'),
+    changed    = require('gulp-changed'),
+    stylus     = require('gulp-stylus'),
+    livereload = require('gulp-livereload'),
+    nib        = require('nib');
 
 var paths = {
   src : {
@@ -43,6 +44,8 @@ gulp.task('assets', function() {
 gulp.task('watch', function() {
 //    gulp.watch(paths.src.assets, ['assets']);
     gulp.watch(paths.src.styluses, ['stylus']);
+    livereload.listen();
+    gulp.watch('bin/**').on('change', livereload.changed);
 });
 
 gulp.task('default', [/*'assets', */'stylus', 'watch']);
