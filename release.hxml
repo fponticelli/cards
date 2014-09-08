@@ -6,6 +6,7 @@
 -lib thx.stream
 -lib thx.stream.dom
 -D js-flatten
+-dce full
 -cmd gulp release
 -cmd java -jar tools/compiler.jar --js_output_file=release/app.js release/app.src.js --compilation_level=ADVANCED_OPTIMIZATIONS
 -cmd rm release/app.src.js
