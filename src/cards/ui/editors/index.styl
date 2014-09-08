@@ -1,13 +1,12 @@
 .editor
   text-shadow -0.5px -0.5px 1px rgba(255,255,255,0.7), 0.5px 0.5px 1px rgba(0,0,0,0.2)
-  //box-shadow inset 1px 1px 1px rgba(255,255,255,0.7), 0px 0px 1px rgba(0,0,0,0.3)
   background-color #f0f0f0
   &.active
     background-color #f9f9f9
-    //box-shadow inset 1px 1px 1px rgba(255,255,255,0.9), 0px 0px 1px rgba(0,0,0,0.4)
   &:focus
     outline none
-    background-color #fbfbfb
+    background-color #f9f9f9
+    box-shadow inset 1px 1px 1px rgba(255,255,255,1), 2px 2px 2px rgba(0,0,0,0.2)
   &:hover
     background-color #f9f9f9
 
@@ -40,10 +39,6 @@
     color #aaa
     text-shadow none
     font-style italic
-
-.article
-  .editor.active
-    background-color transparent
 
 .fields
   .value-container

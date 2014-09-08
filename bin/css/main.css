@@ -112,7 +112,9 @@ a img {
 }
 .card .editor:focus {
   outline: none;
-  background-color: #fbfbfb;
+  background-color: #f9f9f9;
+  -webkit-box-shadow: inset 1px 1px 1px #fff, 2px 2px 2px rgba(0,0,0,0.2);
+  box-shadow: inset 1px 1px 1px #fff, 2px 2px 2px rgba(0,0,0,0.2);
 }
 .card .editor:hover {
   background-color: #f9f9f9;
@@ -146,9 +148,6 @@ a img {
   color: #aaa;
   text-shadow: none;
   font-style: italic;
-}
-.card .article .editor.active {
-  background-color: transparent;
 }
 .card .fields .value-container .editor.bool {
   min-width: 4em;
