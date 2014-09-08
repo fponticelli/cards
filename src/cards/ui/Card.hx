@@ -30,15 +30,6 @@ class Card {
 
     card.appendTo(container);
 
-    // TODO remove me
-    document.article.addReadonly();
-    var block = document.article.addBlock();
-    mapper.values.ensure('strong', block.component);
-    block = document.article.addBlock();
-    mapper.values.ensure('emphasis', block.component);
-    block = document.article.addBlock();
-    mapper.values.ensure('strong', block.component);
-    mapper.values.ensure('emphasis', block.component);
     document.article.addBlock();
   }
 }

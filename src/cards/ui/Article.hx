@@ -49,9 +49,10 @@ class Article {
     var fragment = new Block({
         parent : component,
         container : component.el,
-        defaultText : 'block'
+        defaultText : ''
       });
     addFragment(fragment);
+    fragment.focus.set(true);
     return fragment;
   }
 
