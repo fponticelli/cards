@@ -10,8 +10,10 @@ var paths = {
     // assets: './assets/**/*.*'
   },
   dst : {
-    stylus : 'bin/css/'
-    // assets: './www/assets'
+    stylus : 'bin/css/',
+    release : {
+      stylus : 'release/css/',
+    }
   }
 }
 
@@ -20,6 +22,15 @@ gulp.task('stylus', function() {
         .pipe(changed(paths.dst.stylus))
         .pipe(stylus({use: [nib()], errors: true}))
         .pipe(gulp.dest(paths.dst.stylus));
+});
+
+
+
+gulp.task('release', function() {
+    gulp.src(paths.src.stylus)
+        .pipe(changed(paths.dst.stylus))
+        .pipe(stylus({use: [nib()], errors: true}))
+        .pipe(gulp.dest(paths.dst.release.stylus));
 });
 
 /*

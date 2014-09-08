@@ -1,4 +1,5 @@
 (function () { "use strict";
+var $estr = function() { return js_Boot.__string_rec(this,''); };
 function $extend(from, fields) {
 	function Inherit() {} Inherit.prototype = from; var proto = new Inherit();
 	for (var name in fields) proto[name] = fields[name];
@@ -168,29 +169,20 @@ Lambda.has = function(it,elt) {
 	}
 	return false;
 };
-var Main = function(some) {
-	haxe.Log.trace("instance " + some,{ fileName : "Main.hx", lineNumber : 36, className : "Main", methodName : "new"});
-};
+var Main = function() { };
 Main.__name__ = ["Main"];
 Main.main = function() {
-	thx.stream.dom.Dom.ready().success(function(_) {
-		var values = new cards.properties.ValueProperties();
-		var fragments = new cards.ui.fragments.FragmentProperties();
-		var mapper = new cards.ui.fragments.FragmentMapper(fragments,values);
+	thx_stream_dom_Dom.ready().success(function(_) {
+		var values = new cards_properties_ValueProperties();
+		var fragments = new cards_ui_fragments_FragmentProperties();
+		var mapper = new cards_ui_fragments_FragmentMapper(fragments,values);
 		PropertyFeeder.feedProperties(values);
 		PropertyFeeder.feedFragments(fragments);
-		var container = udom.Query.first(".container");
-		var data = new cards.model.Data({ });
-		var model = new cards.model.Model(data);
-		cards.ui.Card.create(model,container,mapper);
-		var f = function(some) {
-			return new Main(some);
-		};
-		f("franco");
+		var container = udom_Query.first(".container");
+		var data = new cards_model_Data({ });
+		var model = new cards_model_Model(data);
+		cards_ui_Card.create(model,container,mapper);
 	});
-};
-Main.prototype = {
-	__class__: Main
 };
 var IMap = function() { };
 IMap.__name__ = ["IMap"];
@@ -208,15 +200,15 @@ PropertyFeeder.feedFragments = function(fragments) {
 	fragments.associateMany("readonly",["strong","emphasis","text"]);
 };
 PropertyFeeder.createToggleClass = function(display,name) {
-	return { name : name, display : display, type : cards.model.SchemaType.BoolType, create : function(component) {
-		var cls = new cards.properties.ToggleClass(component,name,name);
+	return { name : name, display : display, type : cards_model_SchemaType.BoolType, create : function(component) {
+		var cls = new cards_properties_ToggleClass(component,name,name);
 		cls.stream.set(true);
 		return cls;
 	}};
 };
 PropertyFeeder.createText = function() {
-	return { name : "text", display : "content", type : cards.model.SchemaType.StringType, create : function(component) {
-		return new cards.properties.Text(component,null);
+	return { name : "text", display : "content", type : cards_model_SchemaType.StringType, create : function(component) {
+		return new cards_properties_Text(component,null);
 	}};
 };
 var Reflect = function() { };
@@ -257,7 +249,7 @@ Reflect.isObject = function(v) {
 var Std = function() { };
 Std.__name__ = ["Std"];
 Std.string = function(s) {
-	return js.Boot.__string_rec(s,"");
+	return js_Boot.__string_rec(s,"");
 };
 Std.parseInt = function(x) {
 	var v = parseInt(x,10);
@@ -311,20 +303,27 @@ StringTools.replace = function(s,sub,by) {
 };
 var ValueType = { __ename__ : ["ValueType"], __constructs__ : ["TNull","TInt","TFloat","TBool","TObject","TFunction","TClass","TEnum","TUnknown"] };
 ValueType.TNull = ["TNull",0];
+ValueType.TNull.toString = $estr;
 ValueType.TNull.__enum__ = ValueType;
 ValueType.TInt = ["TInt",1];
+ValueType.TInt.toString = $estr;
 ValueType.TInt.__enum__ = ValueType;
 ValueType.TFloat = ["TFloat",2];
+ValueType.TFloat.toString = $estr;
 ValueType.TFloat.__enum__ = ValueType;
 ValueType.TBool = ["TBool",3];
+ValueType.TBool.toString = $estr;
 ValueType.TBool.__enum__ = ValueType;
 ValueType.TObject = ["TObject",4];
+ValueType.TObject.toString = $estr;
 ValueType.TObject.__enum__ = ValueType;
 ValueType.TFunction = ["TFunction",5];
+ValueType.TFunction.toString = $estr;
 ValueType.TFunction.__enum__ = ValueType;
-ValueType.TClass = function(c) { var $x = ["TClass",6,c]; $x.__enum__ = ValueType; return $x; };
-ValueType.TEnum = function(e) { var $x = ["TEnum",7,e]; $x.__enum__ = ValueType; return $x; };
+ValueType.TClass = function(c) { var $x = ["TClass",6,c]; $x.__enum__ = ValueType; $x.toString = $estr; return $x; };
+ValueType.TEnum = function(e) { var $x = ["TEnum",7,e]; $x.__enum__ = ValueType; $x.toString = $estr; return $x; };
 ValueType.TUnknown = ["TUnknown",8];
+ValueType.TUnknown.toString = $estr;
 ValueType.TUnknown.__enum__ = ValueType;
 var Type = function() { };
 Type.__name__ = ["Type"];
@@ -390,24 +389,22 @@ Type.enumParameters = function(e) {
 Type.enumIndex = function(e) {
 	return e[1];
 };
-var cards = {};
-cards.components = {};
-cards.components.Component = function(options) {
+var cards_components_Component = function(options) {
 	this.isAttached = false;
 	this.list = [];
-	this.properties = new cards.components.Properties(this);
+	this.properties = new cards_components_Properties(this);
 	if(null == options.template) {
 		if(null == options.el) throw "" + Std.string(this) + " needs a template"; else {
 			this.el = options.el;
 			if(null != this.el.parentElement) this.isAttached = true;
 		}
-	} else this.el = udom.Html.parseList(StringTools.ltrim(options.template))[0];
+	} else this.el = udom_Html.parseList(StringTools.ltrim(options.template))[0];
 	if(null != options.classes) options.classes.split(" ").map(($_=this.el.classList,$bind($_,$_.add)));
 	if(null != options.parent) options.parent.add(this);
 	if(null != options.container) this.appendTo(options.container);
 };
-cards.components.Component.__name__ = ["cards","components","Component"];
-cards.components.Component.prototype = {
+cards_components_Component.__name__ = ["cards","components","Component"];
+cards_components_Component.prototype = {
 	children: null
 	,isAttached: null
 	,parent: null
@@ -443,14 +440,14 @@ cards.components.Component.prototype = {
 	,toString: function() {
 		return Type.getClassName(Type.getClass(this)).split(".").pop();
 	}
-	,__class__: cards.components.Component
+	,__class__: cards_components_Component
 };
-cards.components.Properties = function(target) {
+var cards_components_Properties = function(target) {
 	this.target = target;
-	this.properties = new haxe.ds.StringMap();
+	this.properties = new haxe_ds_StringMap();
 };
-cards.components.Properties.__name__ = ["cards","components","Properties"];
-cards.components.Properties.prototype = {
+cards_components_Properties.__name__ = ["cards","components","Properties"];
+cards_components_Properties.prototype = {
 	properties: null
 	,target: null
 	,removeAll: function() {
@@ -476,15 +473,14 @@ cards.components.Properties.prototype = {
 		this.properties.remove(name);
 		prop.dispose();
 	}
-	,__class__: cards.components.Properties
+	,__class__: cards_components_Properties
 };
-cards.model = {};
-cards.model.Data = function(data) {
-	this.value = new thx.stream.Value(data);
+var cards_model_Data = function(data) {
+	this.value = new thx_stream_Value(data);
 	this.reset(data);
 };
-cards.model.Data.__name__ = ["cards","model","Data"];
-cards.model.Data.prototype = {
+cards_model_Data.__name__ = ["cards","model","Data"];
+cards_model_Data.prototype = {
 	root: null
 	,cache: null
 	,value: null
@@ -512,8 +508,8 @@ cards.model.Data.prototype = {
 		return this;
 	}
 	,reset: function(value) {
-		this.root = new cards.model.ref.ObjectRef(null);
-		this.cache = new haxe.ds.StringMap();
+		this.root = new cards_model_ref_ObjectRef(null);
+		this.cache = new haxe_ds_StringMap();
 		if(null != value) this.set("",value);
 		this.value.set(this.toObject());
 		return this;
@@ -541,36 +537,36 @@ cards.model.Data.prototype = {
 	,toJSON: function() {
 		return JSON.stringify(this.toObject());
 	}
-	,__class__: cards.model.Data
+	,__class__: cards_model_Data
 };
-cards.model.DataEvent = { __ename__ : ["cards","model","DataEvent"], __constructs__ : ["SetValue"] };
-cards.model.DataEvent.SetValue = function(path,value,type) { var $x = ["SetValue",0,path,value,type]; $x.__enum__ = cards.model.DataEvent; return $x; };
-cards.model.Expression = { __ename__ : ["cards","model","Expression"], __constructs__ : ["Fun","SyntaxError"] };
-cards.model.Expression.Fun = function(f) { var $x = ["Fun",0,f]; $x.__enum__ = cards.model.Expression; return $x; };
-cards.model.Expression.SyntaxError = function(msg) { var $x = ["SyntaxError",1,msg]; $x.__enum__ = cards.model.Expression; return $x; };
-cards.model.Expressions = function() { };
-cards.model.Expressions.__name__ = ["cards","model","Expressions"];
-cards.model.Expressions.toErrorOption = function(exp) {
+var cards_model_DataEvent = { __ename__ : ["cards","model","DataEvent"], __constructs__ : ["SetValue"] };
+cards_model_DataEvent.SetValue = function(path,value,type) { var $x = ["SetValue",0,path,value,type]; $x.__enum__ = cards_model_DataEvent; $x.toString = $estr; return $x; };
+var cards_model_Expression = { __ename__ : ["cards","model","Expression"], __constructs__ : ["Fun","SyntaxError"] };
+cards_model_Expression.Fun = function(f) { var $x = ["Fun",0,f]; $x.__enum__ = cards_model_Expression; $x.toString = $estr; return $x; };
+cards_model_Expression.SyntaxError = function(msg) { var $x = ["SyntaxError",1,msg]; $x.__enum__ = cards_model_Expression; $x.toString = $estr; return $x; };
+var cards_model_Expressions = function() { };
+cards_model_Expressions.__name__ = ["cards","model","Expressions"];
+cards_model_Expressions.toErrorOption = function(exp) {
 	switch(exp[1]) {
 	case 1:
 		var e = exp[2];
-		return haxe.ds.Option.Some(e);
+		return haxe_ds_Option.Some(e);
 	default:
-		return haxe.ds.Option.None;
+		return haxe_ds_Option.None;
 	}
 };
-cards.model.Model = function(data) {
+var cards_model_Model = function(data) {
 	var _g = this;
-	this.changes = this.bus = new thx.stream.Bus();
+	this.changes = this.bus = new thx_stream_Bus();
 	this.data = data;
-	this.schema = new cards.model.Schema();
+	this.schema = new cards_model_Schema();
 	this.dataEventSubscriber = function(e) {
 		{
 			var type = e[4];
 			var value = e[3];
 			var path = e[2];
 			data.set(path,value);
-			_g.bus.emit(thx.stream.StreamValue.Pulse(path));
+			_g.bus.emit(thx_stream_StreamValue.Pulse(path));
 		}
 	};
 	this.schemaEventSubscriber = function(e1) {
@@ -582,7 +578,7 @@ cards.model.Model = function(data) {
 				var item = $it0.next();
 				_g.schema.add(item.name,item.type);
 			}
-			_g.bus.emit(thx.stream.StreamValue.Pulse(""));
+			_g.bus.emit(thx_stream_StreamValue.Pulse(""));
 			break;
 		case 1:
 			var type1 = e1[3];
@@ -593,136 +589,136 @@ cards.model.Model = function(data) {
 			var path2 = e1[2];
 			_g.schema["delete"](path2);
 			data.remove(path2);
-			_g.bus.emit(thx.stream.StreamValue.Pulse(path2));
+			_g.bus.emit(thx_stream_StreamValue.Pulse(path2));
 			break;
 		case 3:
 			var newpath = e1[3];
 			var oldpath = e1[2];
 			_g.schema.rename(oldpath,newpath);
 			data.rename(oldpath,newpath);
-			_g.bus.emit(thx.stream.StreamValue.Pulse(oldpath));
-			_g.bus.emit(thx.stream.StreamValue.Pulse(newpath));
+			_g.bus.emit(thx_stream_StreamValue.Pulse(oldpath));
+			_g.bus.emit(thx_stream_StreamValue.Pulse(newpath));
 			break;
 		case 4:
 			var type2 = e1[3];
 			var path3 = e1[2];
 			_g.schema.retype(path3,type2);
-			_g.bus.emit(thx.stream.StreamValue.Pulse(path3));
+			_g.bus.emit(thx_stream_StreamValue.Pulse(path3));
 			break;
 		}
 	};
 };
-cards.model.Model.__name__ = ["cards","model","Model"];
-cards.model.Model.prototype = {
+cards_model_Model.__name__ = ["cards","model","Model"];
+cards_model_Model.prototype = {
 	data: null
 	,schema: null
 	,dataEventSubscriber: null
 	,schemaEventSubscriber: null
 	,changes: null
 	,bus: null
-	,__class__: cards.model.Model
+	,__class__: cards_model_Model
 };
-cards.model.Runtime = function(expression,code) {
+var cards_model_Runtime = function(expression,code) {
 	this.expression = expression;
 	this.code = code;
-	this.dependencies = cards.model.Runtime.extractDependencies(code);
+	this.dependencies = cards_model_Runtime.extractDependencies(code);
 };
-cards.model.Runtime.__name__ = ["cards","model","Runtime"];
-cards.model.Runtime.createFunction = function(args,code) {
+cards_model_Runtime.__name__ = ["cards","model","Runtime"];
+cards_model_Runtime.createFunction = function(args,code) {
 	return new Function(args.join(","),code);
 };
-cards.model.Runtime.formatCode = function(code,scope) {
+cards_model_Runtime.formatCode = function(code,scope) {
 	var prelim = Reflect.fields(scope).map(function(field) {
 		return "var " + field + " = scope." + field + ";";
 	}).join("\n");
 	return "" + prelim + "\ndelete scope;\nreturn " + code + ";";
 };
-cards.model.Runtime.extractDependencies = function(code) {
-	var set = new thx.core.Set();
-	while(cards.model.Runtime.pattern.match(code)) {
-		set.add(cards.model.Runtime.pattern.matched(1));
-		code = cards.model.Runtime.pattern.matchedRight();
+cards_model_Runtime.extractDependencies = function(code) {
+	var set = new thx_core_Set();
+	while(cards_model_Runtime.pattern.match(code)) {
+		set.add(cards_model_Runtime.pattern.matched(1));
+		code = cards_model_Runtime.pattern.matchedRight();
 	}
-	return thx.core.Iterators.order(set.iterator(),thx.core.Strings.compare);
+	return thx_core_Iterators.order(set.iterator(),thx_core_Strings.compare);
 };
-cards.model.Runtime.toRuntime = function(code,model) {
+cards_model_Runtime.toRuntime = function(code,model) {
 	var expression;
 	try {
-		var scope = new cards.model.Scope();
-		var formatted = cards.model.Runtime.formatCode(code,scope);
-		var f = cards.model.Runtime.createFunction(["$","scope"],formatted);
-		expression = cards.model.Expression.Fun(function() {
+		var scope = new cards_model_Scope();
+		var formatted = cards_model_Runtime.formatCode(code,scope);
+		var f = cards_model_Runtime.createFunction(["$","scope"],formatted);
+		expression = cards_model_Expression.Fun(function() {
 			try {
-				return cards.model.RuntimeResult.Result(f(model.data.toObject(),scope));
+				return cards_model_RuntimeResult.Result(f(model.data.toObject(),scope));
 			} catch( e ) {
-				return cards.model.RuntimeResult.Error(Std.string(e));
+				return cards_model_RuntimeResult.Error(Std.string(e));
 			}
 		});
 	} catch( e1 ) {
-		expression = cards.model.Expression.SyntaxError(Std.string(e1));
+		expression = cards_model_Expression.SyntaxError(Std.string(e1));
 	}
-	return new cards.model.Runtime(expression,code);
+	return new cards_model_Runtime(expression,code);
 };
-cards.model.Runtime.toErrorOption = function(runtime) {
+cards_model_Runtime.toErrorOption = function(runtime) {
 	{
 		var _g = runtime.expression;
 		switch(_g[1]) {
 		case 1:
 			var e = _g[2];
-			return haxe.ds.Option.Some(e);
+			return haxe_ds_Option.Some(e);
 		default:
-			return haxe.ds.Option.None;
+			return haxe_ds_Option.None;
 		}
 	}
 };
-cards.model.Runtime.prototype = {
+cards_model_Runtime.prototype = {
 	expression: null
 	,code: null
 	,dependencies: null
-	,__class__: cards.model.Runtime
+	,__class__: cards_model_Runtime
 };
-cards.model.RuntimeResult = { __ename__ : ["cards","model","RuntimeResult"], __constructs__ : ["Result","Error"] };
-cards.model.RuntimeResult.Result = function(value) { var $x = ["Result",0,value]; $x.__enum__ = cards.model.RuntimeResult; return $x; };
-cards.model.RuntimeResult.Error = function(msg) { var $x = ["Error",1,msg]; $x.__enum__ = cards.model.RuntimeResult; return $x; };
-cards.model.Schema = function() {
-	this.fields = new haxe.ds.StringMap();
-	this.stream = this.bus = new thx.stream.Bus();
+var cards_model_RuntimeResult = { __ename__ : ["cards","model","RuntimeResult"], __constructs__ : ["Result","Error"] };
+cards_model_RuntimeResult.Result = function(value) { var $x = ["Result",0,value]; $x.__enum__ = cards_model_RuntimeResult; $x.toString = $estr; return $x; };
+cards_model_RuntimeResult.Error = function(msg) { var $x = ["Error",1,msg]; $x.__enum__ = cards_model_RuntimeResult; $x.toString = $estr; return $x; };
+var cards_model_Schema = function() {
+	this.fields = new haxe_ds_StringMap();
+	this.stream = this.bus = new thx_stream_Bus();
 };
-cards.model.Schema.__name__ = ["cards","model","Schema"];
-cards.model.Schema.prototype = {
+cards_model_Schema.__name__ = ["cards","model","Schema"];
+cards_model_Schema.prototype = {
 	fields: null
 	,stream: null
 	,bus: null
 	,add: function(name,type) {
-		if(this.fields.exists(name)) throw new thx.core.Error("Schema already contains a field \"" + name + "\"",null,{ fileName : "Schema.hx", lineNumber : 20, className : "cards.model.Schema", methodName : "add"});
+		if(this.fields.exists(name)) throw new thx_core_Error("Schema already contains a field \"" + name + "\"",null,{ fileName : "Schema.hx", lineNumber : 20, className : "cards.model.Schema", methodName : "add"});
 		this.fields.set(name,type);
-		this.bus.pulse(cards.model.SchemaEvent.AddField(name,type));
+		this.bus.pulse(cards_model_SchemaEvent.AddField(name,type));
 	}
 	,reset: function(list) {
 		var _g = this;
 		if(null == list) list = [];
-		this.fields = new haxe.ds.StringMap();
+		this.fields = new haxe_ds_StringMap();
 		list.map(function(pair) {
 			_g.fields.set(pair.name,pair.type);
 		});
-		this.bus.pulse(cards.model.SchemaEvent.ListFields(list.slice()));
+		this.bus.pulse(cards_model_SchemaEvent.ListFields(list.slice()));
 	}
 	,'delete': function(name) {
-		if(!this.fields.exists(name)) throw new thx.core.Error("Schema does not contain a field \"" + name + "\"",null,{ fileName : "Schema.hx", lineNumber : 37, className : "cards.model.Schema", methodName : "delete"});
+		if(!this.fields.exists(name)) throw new thx_core_Error("Schema does not contain a field \"" + name + "\"",null,{ fileName : "Schema.hx", lineNumber : 37, className : "cards.model.Schema", methodName : "delete"});
 		this.fields.remove(name);
-		this.bus.pulse(cards.model.SchemaEvent.DeleteField(name));
+		this.bus.pulse(cards_model_SchemaEvent.DeleteField(name));
 	}
 	,rename: function(oldname,newname) {
-		if(!this.fields.exists(oldname)) throw new thx.core.Error("Schema does not contain a field \"" + oldname + "\"",null,{ fileName : "Schema.hx", lineNumber : 44, className : "cards.model.Schema", methodName : "rename"});
+		if(!this.fields.exists(oldname)) throw new thx_core_Error("Schema does not contain a field \"" + oldname + "\"",null,{ fileName : "Schema.hx", lineNumber : 44, className : "cards.model.Schema", methodName : "rename"});
 		var type = this.fields.get(oldname);
 		this.fields.remove(oldname);
 		this.fields.set(newname,type);
-		this.bus.pulse(cards.model.SchemaEvent.RenameField(oldname,newname));
+		this.bus.pulse(cards_model_SchemaEvent.RenameField(oldname,newname));
 	}
 	,retype: function(name,type) {
-		if(!this.fields.exists(name)) throw new thx.core.Error("Schema does not contain a field \"" + name + "\"",null,{ fileName : "Schema.hx", lineNumber : 53, className : "cards.model.Schema", methodName : "retype"});
+		if(!this.fields.exists(name)) throw new thx_core_Error("Schema does not contain a field \"" + name + "\"",null,{ fileName : "Schema.hx", lineNumber : 53, className : "cards.model.Schema", methodName : "retype"});
 		this.fields.set(name,type);
-		this.bus.pulse(cards.model.SchemaEvent.RetypeField(name,type));
+		this.bus.pulse(cards_model_SchemaEvent.RetypeField(name,type));
 	}
 	,get: function(name) {
 		return this.fields.get(name);
@@ -745,60 +741,65 @@ cards.model.Schema.prototype = {
 			return { name : key, type : _g.fields.get(key)};
 		});
 	}
-	,__class__: cards.model.Schema
+	,__class__: cards_model_Schema
 };
-cards.model.SchemaEvent = { __ename__ : ["cards","model","SchemaEvent"], __constructs__ : ["ListFields","AddField","DeleteField","RenameField","RetypeField"] };
-cards.model.SchemaEvent.ListFields = function(list) { var $x = ["ListFields",0,list]; $x.__enum__ = cards.model.SchemaEvent; return $x; };
-cards.model.SchemaEvent.AddField = function(name,type) { var $x = ["AddField",1,name,type]; $x.__enum__ = cards.model.SchemaEvent; return $x; };
-cards.model.SchemaEvent.DeleteField = function(name) { var $x = ["DeleteField",2,name]; $x.__enum__ = cards.model.SchemaEvent; return $x; };
-cards.model.SchemaEvent.RenameField = function(oldname,newname) { var $x = ["RenameField",3,oldname,newname]; $x.__enum__ = cards.model.SchemaEvent; return $x; };
-cards.model.SchemaEvent.RetypeField = function(name,type) { var $x = ["RetypeField",4,name,type]; $x.__enum__ = cards.model.SchemaEvent; return $x; };
-cards.model.SchemaType = { __ename__ : ["cards","model","SchemaType"], __constructs__ : ["ArrayType","BoolType","DateType","FloatType","ObjectType","StringType","CodeType","ReferenceType"] };
-cards.model.SchemaType.ArrayType = function(item) { var $x = ["ArrayType",0,item]; $x.__enum__ = cards.model.SchemaType; return $x; };
-cards.model.SchemaType.BoolType = ["BoolType",1];
-cards.model.SchemaType.BoolType.__enum__ = cards.model.SchemaType;
-cards.model.SchemaType.DateType = ["DateType",2];
-cards.model.SchemaType.DateType.__enum__ = cards.model.SchemaType;
-cards.model.SchemaType.FloatType = ["FloatType",3];
-cards.model.SchemaType.FloatType.__enum__ = cards.model.SchemaType;
-cards.model.SchemaType.ObjectType = function(fields) { var $x = ["ObjectType",4,fields]; $x.__enum__ = cards.model.SchemaType; return $x; };
-cards.model.SchemaType.StringType = ["StringType",5];
-cards.model.SchemaType.StringType.__enum__ = cards.model.SchemaType;
-cards.model.SchemaType.CodeType = ["CodeType",6];
-cards.model.SchemaType.CodeType.__enum__ = cards.model.SchemaType;
-cards.model.SchemaType.ReferenceType = ["ReferenceType",7];
-cards.model.SchemaType.ReferenceType.__enum__ = cards.model.SchemaType;
-cards.model.Scope = function() {
+var cards_model_SchemaEvent = { __ename__ : ["cards","model","SchemaEvent"], __constructs__ : ["ListFields","AddField","DeleteField","RenameField","RetypeField"] };
+cards_model_SchemaEvent.ListFields = function(list) { var $x = ["ListFields",0,list]; $x.__enum__ = cards_model_SchemaEvent; $x.toString = $estr; return $x; };
+cards_model_SchemaEvent.AddField = function(name,type) { var $x = ["AddField",1,name,type]; $x.__enum__ = cards_model_SchemaEvent; $x.toString = $estr; return $x; };
+cards_model_SchemaEvent.DeleteField = function(name) { var $x = ["DeleteField",2,name]; $x.__enum__ = cards_model_SchemaEvent; $x.toString = $estr; return $x; };
+cards_model_SchemaEvent.RenameField = function(oldname,newname) { var $x = ["RenameField",3,oldname,newname]; $x.__enum__ = cards_model_SchemaEvent; $x.toString = $estr; return $x; };
+cards_model_SchemaEvent.RetypeField = function(name,type) { var $x = ["RetypeField",4,name,type]; $x.__enum__ = cards_model_SchemaEvent; $x.toString = $estr; return $x; };
+var cards_model_SchemaType = { __ename__ : ["cards","model","SchemaType"], __constructs__ : ["ArrayType","BoolType","DateType","FloatType","ObjectType","StringType","CodeType","ReferenceType"] };
+cards_model_SchemaType.ArrayType = function(item) { var $x = ["ArrayType",0,item]; $x.__enum__ = cards_model_SchemaType; $x.toString = $estr; return $x; };
+cards_model_SchemaType.BoolType = ["BoolType",1];
+cards_model_SchemaType.BoolType.toString = $estr;
+cards_model_SchemaType.BoolType.__enum__ = cards_model_SchemaType;
+cards_model_SchemaType.DateType = ["DateType",2];
+cards_model_SchemaType.DateType.toString = $estr;
+cards_model_SchemaType.DateType.__enum__ = cards_model_SchemaType;
+cards_model_SchemaType.FloatType = ["FloatType",3];
+cards_model_SchemaType.FloatType.toString = $estr;
+cards_model_SchemaType.FloatType.__enum__ = cards_model_SchemaType;
+cards_model_SchemaType.ObjectType = function(fields) { var $x = ["ObjectType",4,fields]; $x.__enum__ = cards_model_SchemaType; $x.toString = $estr; return $x; };
+cards_model_SchemaType.StringType = ["StringType",5];
+cards_model_SchemaType.StringType.toString = $estr;
+cards_model_SchemaType.StringType.__enum__ = cards_model_SchemaType;
+cards_model_SchemaType.CodeType = ["CodeType",6];
+cards_model_SchemaType.CodeType.toString = $estr;
+cards_model_SchemaType.CodeType.__enum__ = cards_model_SchemaType;
+cards_model_SchemaType.ReferenceType = ["ReferenceType",7];
+cards_model_SchemaType.ReferenceType.toString = $estr;
+cards_model_SchemaType.ReferenceType.__enum__ = cards_model_SchemaType;
+var cards_model_Scope = function() {
 	this.name = "Franco";
 };
-cards.model.Scope.__name__ = ["cards","model","Scope"];
-cards.model.Scope.prototype = {
+cards_model_Scope.__name__ = ["cards","model","Scope"];
+cards_model_Scope.prototype = {
 	name: null
-	,__class__: cards.model.Scope
+	,__class__: cards_model_Scope
 };
-cards.model.ref = {};
-cards.model.ref.BaseRef = function(parent) {
-	if(null != parent) this.parent = parent; else this.parent = cards.model.ref.EmptyParent.instance;
+var cards_model_ref_BaseRef = function(parent) {
+	if(null != parent) this.parent = parent; else this.parent = cards_model_ref_EmptyParent.instance;
 };
-cards.model.ref.BaseRef.__name__ = ["cards","model","ref","BaseRef"];
-cards.model.ref.BaseRef.prototype = {
+cards_model_ref_BaseRef.__name__ = ["cards","model","ref","BaseRef"];
+cards_model_ref_BaseRef.prototype = {
 	parent: null
 	,getRoot: function() {
 		var ref = this;
-		while(!js.Boot.__instanceof(ref.parent,cards.model.ref.EmptyParent)) ref = ref.parent;
+		while(!js_Boot.__instanceof(ref.parent,cards_model_ref_EmptyParent)) ref = ref.parent;
 		return ref;
 	}
-	,__class__: cards.model.ref.BaseRef
+	,__class__: cards_model_ref_BaseRef
 };
-cards.model.ref.IParentRef = function() { };
-cards.model.ref.IParentRef.__name__ = ["cards","model","ref","IParentRef"];
-cards.model.ref.IParentRef.prototype = {
+var cards_model_ref_IParentRef = function() { };
+cards_model_ref_IParentRef.__name__ = ["cards","model","ref","IParentRef"];
+cards_model_ref_IParentRef.prototype = {
 	removeChild: null
-	,__class__: cards.model.ref.IParentRef
+	,__class__: cards_model_ref_IParentRef
 };
-cards.model.ref.IRef = function() { };
-cards.model.ref.IRef.__name__ = ["cards","model","ref","IRef"];
-cards.model.ref.IRef.prototype = {
+var cards_model_ref_IRef = function() { };
+cards_model_ref_IRef.__name__ = ["cards","model","ref","IRef"];
+cards_model_ref_IRef.prototype = {
 	parent: null
 	,get: null
 	,set: null
@@ -806,23 +807,23 @@ cards.model.ref.IRef.prototype = {
 	,hasValue: null
 	,resolve: null
 	,getRoot: null
-	,__class__: cards.model.ref.IRef
+	,__class__: cards_model_ref_IRef
 };
-cards.model.ref.ArrayRef = function(parent) {
-	cards.model.ref.BaseRef.call(this,parent);
-	this.items = new haxe.ds.IntMap();
-	this.inverse = new haxe.ds.ObjectMap();
+var cards_model_ref_ArrayRef = function(parent) {
+	cards_model_ref_BaseRef.call(this,parent);
+	this.items = new haxe_ds_IntMap();
+	this.inverse = new haxe_ds_ObjectMap();
 };
-cards.model.ref.ArrayRef.__name__ = ["cards","model","ref","ArrayRef"];
-cards.model.ref.ArrayRef.__interfaces__ = [cards.model.ref.IParentRef,cards.model.ref.IRef];
-cards.model.ref.ArrayRef.__super__ = cards.model.ref.BaseRef;
-cards.model.ref.ArrayRef.prototype = $extend(cards.model.ref.BaseRef.prototype,{
+cards_model_ref_ArrayRef.__name__ = ["cards","model","ref","ArrayRef"];
+cards_model_ref_ArrayRef.__interfaces__ = [cards_model_ref_IParentRef,cards_model_ref_IRef];
+cards_model_ref_ArrayRef.__super__ = cards_model_ref_BaseRef;
+cards_model_ref_ArrayRef.prototype = $extend(cards_model_ref_BaseRef.prototype,{
 	items: null
 	,inverse: null
 	,get: function() {
 		var _g = this;
 		var res = [];
-		thx.core.Arrays.order(thx.core.Iterators.toArray(this.items.keys()),thx.core.Ints.compare).map(function(i) {
+		thx_core_Arrays.order(thx_core_Iterators.toArray(this.items.keys()),thx_core_Ints.compare).map(function(i) {
 			return _g.items.get(i);
 		}).map(function(ref) {
 			if(ref.hasValue()) res.push(ref.get());
@@ -835,7 +836,7 @@ cards.model.ref.ArrayRef.prototype = $extend(cards.model.ref.BaseRef.prototype,{
 		value.map(function(v,i) {
 			var ref = _g.items.get(i);
 			if(null == ref) {
-				var value1 = ref = cards.model.ref.Ref.fromValue(v,_g);
+				var value1 = ref = cards_model_ref_Ref.fromValue(v,_g);
 				_g.items.set(i,value1);
 				_g.inverse.set(ref,i);
 			} else ref.set(v);
@@ -866,43 +867,43 @@ cards.model.ref.ArrayRef.prototype = $extend(cards.model.ref.BaseRef.prototype,{
 	,resolve: function(path,terminal) {
 		if(terminal == null) terminal = true;
 		if(path == "") return this;
-		if(!cards.model.ref.Ref.reIndex.match(path)) throw "unable to resolve \"" + path + "\" for ArrayRef";
-		var index = Std.parseInt(cards.model.ref.Ref.reIndex.matched(1));
-		var rest = cards.model.ref.Ref.reIndex.matchedRight();
+		if(!cards_model_ref_Ref.reIndex.match(path)) throw "unable to resolve \"" + path + "\" for ArrayRef";
+		var index = Std.parseInt(cards_model_ref_Ref.reIndex.matched(1));
+		var rest = cards_model_ref_Ref.reIndex.matchedRight();
 		var ref = this.items.get(index);
 		if(null == ref) {
-			var value = ref = cards.model.ref.Ref.fromPath(rest,this,terminal);
+			var value = ref = cards_model_ref_Ref.fromPath(rest,this,terminal);
 			this.items.set(index,value);
 			this.inverse.set(ref,index);
 		}
 		return ref.resolve(rest,terminal);
 	}
-	,__class__: cards.model.ref.ArrayRef
+	,__class__: cards_model_ref_ArrayRef
 });
-cards.model.ref.EmptyParent = function() {
+var cards_model_ref_EmptyParent = function() {
 };
-cards.model.ref.EmptyParent.__name__ = ["cards","model","ref","EmptyParent"];
-cards.model.ref.EmptyParent.__interfaces__ = [cards.model.ref.IParentRef];
-cards.model.ref.EmptyParent.prototype = {
+cards_model_ref_EmptyParent.__name__ = ["cards","model","ref","EmptyParent"];
+cards_model_ref_EmptyParent.__interfaces__ = [cards_model_ref_IParentRef];
+cards_model_ref_EmptyParent.prototype = {
 	removeChild: function(child) {
 	}
-	,__class__: cards.model.ref.EmptyParent
+	,__class__: cards_model_ref_EmptyParent
 };
-cards.model.ref.ObjectRef = function(parent) {
-	cards.model.ref.BaseRef.call(this,parent);
-	this.fields = new haxe.ds.StringMap();
-	this.inverse = new haxe.ds.ObjectMap();
+var cards_model_ref_ObjectRef = function(parent) {
+	cards_model_ref_BaseRef.call(this,parent);
+	this.fields = new haxe_ds_StringMap();
+	this.inverse = new haxe_ds_ObjectMap();
 };
-cards.model.ref.ObjectRef.__name__ = ["cards","model","ref","ObjectRef"];
-cards.model.ref.ObjectRef.__interfaces__ = [cards.model.ref.IParentRef,cards.model.ref.IRef];
-cards.model.ref.ObjectRef.__super__ = cards.model.ref.BaseRef;
-cards.model.ref.ObjectRef.prototype = $extend(cards.model.ref.BaseRef.prototype,{
+cards_model_ref_ObjectRef.__name__ = ["cards","model","ref","ObjectRef"];
+cards_model_ref_ObjectRef.__interfaces__ = [cards_model_ref_IParentRef,cards_model_ref_IRef];
+cards_model_ref_ObjectRef.__super__ = cards_model_ref_BaseRef;
+cards_model_ref_ObjectRef.prototype = $extend(cards_model_ref_BaseRef.prototype,{
 	fields: null
 	,inverse: null
 	,get: function() {
 		var _g = this;
 		var o = { };
-		thx.core.Iterators.map(this.fields.keys(),function(key) {
+		thx_core_Iterators.map(this.fields.keys(),function(key) {
 			var ref = _g.fields.get(key);
 			if(!ref.hasValue()) return;
 			Reflect.setField(o,key,ref.get());
@@ -916,7 +917,7 @@ cards.model.ref.ObjectRef.prototype = $extend(cards.model.ref.BaseRef.prototype,
 			var ref = _g.fields.get(field);
 			var value = Reflect.field(obj,field);
 			if(null == ref) {
-				ref = cards.model.ref.Ref.fromValue(value,_g);
+				ref = cards_model_ref_Ref.fromValue(value,_g);
 				_g.fields.set(field,ref);
 				_g.inverse.set(ref,field);
 			} else ref.set(value);
@@ -931,7 +932,7 @@ cards.model.ref.ObjectRef.prototype = $extend(cards.model.ref.BaseRef.prototype,
 		return false;
 	}
 	,remove: function() {
-		thx.core.Iterators.map(this.fields.iterator(),function(ref) {
+		thx_core_Iterators.map(this.fields.iterator(),function(ref) {
 			ref.remove();
 		});
 		this.parent.removeChild(this);
@@ -945,46 +946,46 @@ cards.model.ref.ObjectRef.prototype = $extend(cards.model.ref.BaseRef.prototype,
 	,resolve: function(path,terminal) {
 		if(terminal == null) terminal = true;
 		if(path == "") return this;
-		if(!cards.model.ref.Ref.reField.match(path)) throw "unable to resolve \"" + path + "\" for ObjectRef";
-		var field = cards.model.ref.Ref.reField.matched(1);
-		var rest = cards.model.ref.Ref.reField.matchedRight();
+		if(!cards_model_ref_Ref.reField.match(path)) throw "unable to resolve \"" + path + "\" for ObjectRef";
+		var field = cards_model_ref_Ref.reField.matched(1);
+		var rest = cards_model_ref_Ref.reField.matchedRight();
 		var ref = this.fields.get(field);
 		if(null == ref) {
-			var value = ref = cards.model.ref.Ref.fromPath(rest,this,terminal);
+			var value = ref = cards_model_ref_Ref.fromPath(rest,this,terminal);
 			this.fields.set(field,value);
 			this.inverse.set(ref,field);
 		}
 		return ref.resolve(rest,terminal);
 	}
-	,__class__: cards.model.ref.ObjectRef
+	,__class__: cards_model_ref_ObjectRef
 });
-cards.model.ref.Ref = function() { };
-cards.model.ref.Ref.__name__ = ["cards","model","ref","Ref"];
-cards.model.ref.Ref.fromValue = function(value,parent) {
-	if(null == parent) parent = cards.model.ref.EmptyParent.instance;
+var cards_model_ref_Ref = function() { };
+cards_model_ref_Ref.__name__ = ["cards","model","ref","Ref"];
+cards_model_ref_Ref.fromValue = function(value,parent) {
+	if(null == parent) parent = cards_model_ref_EmptyParent.instance;
 	var ref;
-	if((value instanceof Array) && value.__enum__ == null) ref = new cards.model.ref.ArrayRef(parent); else if(Reflect.isObject(value) && null == Type.getClass(value)) ref = new cards.model.ref.ObjectRef(parent); else ref = new cards.model.ref.ValueRef(parent);
+	if((value instanceof Array) && value.__enum__ == null) ref = new cards_model_ref_ArrayRef(parent); else if(Reflect.isObject(value) && null == Type.getClass(value)) ref = new cards_model_ref_ObjectRef(parent); else ref = new cards_model_ref_ValueRef(parent);
 	ref.set(value);
 	return ref;
 };
-cards.model.ref.Ref.fromPath = function(path,parent,terminal) {
+cards_model_ref_Ref.fromPath = function(path,parent,terminal) {
 	if(terminal == null) terminal = true;
-	if(null == parent) parent = cards.model.ref.EmptyParent.instance;
-	if(path == "") if(terminal) return new cards.model.ref.ValueRef(parent); else return new cards.model.ref.UnknownRef(parent); else if(cards.model.ref.Ref.reField.match(path)) return new cards.model.ref.ObjectRef(parent); else if(cards.model.ref.Ref.reIndex.match(path)) return new cards.model.ref.ArrayRef(parent); else throw "invalid path \"" + path + "\"";
+	if(null == parent) parent = cards_model_ref_EmptyParent.instance;
+	if(path == "") if(terminal) return new cards_model_ref_ValueRef(parent); else return new cards_model_ref_UnknownRef(parent); else if(cards_model_ref_Ref.reField.match(path)) return new cards_model_ref_ObjectRef(parent); else if(cards_model_ref_Ref.reIndex.match(path)) return new cards_model_ref_ArrayRef(parent); else throw "invalid path \"" + path + "\"";
 };
-cards.model.ref.Ref.resolvePath = function(path,parent,terminal) {
+cards_model_ref_Ref.resolvePath = function(path,parent,terminal) {
 	if(terminal == null) terminal = true;
-	var ref = cards.model.ref.Ref.fromPath(path,parent,terminal);
+	var ref = cards_model_ref_Ref.fromPath(path,parent,terminal);
 	return ref.resolve(path);
 };
-cards.model.ref.UnknownRef = function(parent) {
+var cards_model_ref_UnknownRef = function(parent) {
 	this.hasRef = false;
-	cards.model.ref.BaseRef.call(this,parent);
+	cards_model_ref_BaseRef.call(this,parent);
 };
-cards.model.ref.UnknownRef.__name__ = ["cards","model","ref","UnknownRef"];
-cards.model.ref.UnknownRef.__interfaces__ = [cards.model.ref.IParentRef,cards.model.ref.IRef];
-cards.model.ref.UnknownRef.__super__ = cards.model.ref.BaseRef;
-cards.model.ref.UnknownRef.prototype = $extend(cards.model.ref.BaseRef.prototype,{
+cards_model_ref_UnknownRef.__name__ = ["cards","model","ref","UnknownRef"];
+cards_model_ref_UnknownRef.__interfaces__ = [cards_model_ref_IParentRef,cards_model_ref_IRef];
+cards_model_ref_UnknownRef.__super__ = cards_model_ref_BaseRef;
+cards_model_ref_UnknownRef.prototype = $extend(cards_model_ref_BaseRef.prototype,{
 	ref: null
 	,hasRef: null
 	,get: function() {
@@ -993,7 +994,7 @@ cards.model.ref.UnknownRef.prototype = $extend(cards.model.ref.BaseRef.prototype
 	,set: function(value) {
 		if(this.hasRef) this.ref.set(value); else {
 			this.hasRef = true;
-			this.ref = cards.model.ref.Ref.fromValue(value,this);
+			this.ref = cards_model_ref_Ref.fromValue(value,this);
 		}
 	}
 	,remove: function() {
@@ -1014,19 +1015,19 @@ cards.model.ref.UnknownRef.prototype = $extend(cards.model.ref.BaseRef.prototype
 		if(this.hasRef) return this.ref.resolve(path,terminal);
 		if(path == "") return this;
 		this.hasRef = true;
-		this.ref = cards.model.ref.Ref.fromPath(path,this,terminal);
+		this.ref = cards_model_ref_Ref.fromPath(path,this,terminal);
 		return this.ref.resolve(path,terminal);
 	}
-	,__class__: cards.model.ref.UnknownRef
+	,__class__: cards_model_ref_UnknownRef
 });
-cards.model.ref.ValueRef = function(parent) {
+var cards_model_ref_ValueRef = function(parent) {
 	this._hasValue = false;
-	cards.model.ref.BaseRef.call(this,parent);
+	cards_model_ref_BaseRef.call(this,parent);
 };
-cards.model.ref.ValueRef.__name__ = ["cards","model","ref","ValueRef"];
-cards.model.ref.ValueRef.__interfaces__ = [cards.model.ref.IRef];
-cards.model.ref.ValueRef.__super__ = cards.model.ref.BaseRef;
-cards.model.ref.ValueRef.prototype = $extend(cards.model.ref.BaseRef.prototype,{
+cards_model_ref_ValueRef.__name__ = ["cards","model","ref","ValueRef"];
+cards_model_ref_ValueRef.__interfaces__ = [cards_model_ref_IRef];
+cards_model_ref_ValueRef.__super__ = cards_model_ref_BaseRef;
+cards_model_ref_ValueRef.prototype = $extend(cards_model_ref_BaseRef.prototype,{
 	_hasValue: null
 	,value: null
 	,get: function() {
@@ -1049,17 +1050,16 @@ cards.model.ref.ValueRef.prototype = $extend(cards.model.ref.BaseRef.prototype,{
 		if(path != "") throw "unable to resolve path \"" + path + "\" on ValueRef";
 		return this;
 	}
-	,__class__: cards.model.ref.ValueRef
+	,__class__: cards_model_ref_ValueRef
 });
-cards.properties = {};
-cards.properties.Property = function(component,name) {
+var cards_properties_Property = function(component,name) {
 	this.component = component;
 	this.name = name;
 	this.cancels = [];
 	component.properties.add(this);
 };
-cards.properties.Property.__name__ = ["cards","properties","Property"];
-cards.properties.Property.prototype = {
+cards_properties_Property.__name__ = ["cards","properties","Property"];
+cards_properties_Property.prototype = {
 	component: null
 	,name: null
 	,cancels: null
@@ -1073,20 +1073,20 @@ cards.properties.Property.prototype = {
 	,toString: function() {
 		return Type.getClassName(Type.getClass(this)).split(".").pop();
 	}
-	,__class__: cards.properties.Property
+	,__class__: cards_properties_Property
 };
-cards.properties.ValueProperty = function(defaultValue,component,name) {
+var cards_properties_ValueProperty = function(defaultValue,component,name) {
 	var _g = this;
-	this.stream = new thx.stream.Value(defaultValue);
-	this.runtime = new thx.stream.Value(haxe.ds.Option.None);
-	this.runtimeError = new thx.stream.Value(haxe.ds.Option.None);
-	cards.properties.Property.call(this,component,name);
-	thx.stream.EmitterOptions.toBool(this.runtimeError).subscribe(thx.stream.dom.Dom.subscribeToggleClass(component.el,"error"));
+	this.stream = new thx_stream_Value(defaultValue);
+	this.runtime = new thx_stream_Value(haxe_ds_Option.None);
+	this.runtimeError = new thx_stream_Value(haxe_ds_Option.None);
+	cards_properties_Property.call(this,component,name);
+	thx_stream_EmitterOptions.toBool(this.runtimeError).subscribe(thx_stream_dom_Dom.subscribeToggleClass(component.el,"error"));
 	this.runtime.subscribe(function(opt) {
 		switch(opt[1]) {
 		case 1:
 			component.el.classList.remove("error");
-			_g.runtimeError.set(haxe.ds.Option.None);
+			_g.runtimeError.set(haxe_ds_Option.None);
 			break;
 		case 0:
 			var runtime = opt[2];
@@ -1096,12 +1096,12 @@ cards.properties.ValueProperty = function(defaultValue,component,name) {
 				case 1:
 					var e = _g1[2];
 					component.el.classList.add("error");
-					_g.runtimeError.set(haxe.ds.Option.None);
+					_g.runtimeError.set(haxe_ds_Option.None);
 					break;
 				case 0:
 					var f = _g1[2];
 					component.el.classList.remove("error");
-					_g.runtimeError.set(haxe.ds.Option.None);
+					_g.runtimeError.set(haxe_ds_Option.None);
 					{
 						var _g2 = f();
 						switch(_g2[1]) {
@@ -1111,7 +1111,7 @@ cards.properties.ValueProperty = function(defaultValue,component,name) {
 							break;
 						case 1:
 							var e1 = _g2[2];
-							_g.runtimeError.set(haxe.ds.Option.Some(e1));
+							_g.runtimeError.set(haxe_ds_Option.Some(e1));
 							break;
 						}
 					}
@@ -1122,9 +1122,9 @@ cards.properties.ValueProperty = function(defaultValue,component,name) {
 		}
 	});
 };
-cards.properties.ValueProperty.__name__ = ["cards","properties","ValueProperty"];
-cards.properties.ValueProperty.__super__ = cards.properties.Property;
-cards.properties.ValueProperty.prototype = $extend(cards.properties.Property.prototype,{
+cards_properties_ValueProperty.__name__ = ["cards","properties","ValueProperty"];
+cards_properties_ValueProperty.__super__ = cards_properties_Property;
+cards_properties_ValueProperty.prototype = $extend(cards_properties_Property.prototype,{
 	stream: null
 	,runtime: null
 	,runtimeError: null
@@ -1135,7 +1135,7 @@ cards.properties.ValueProperty.prototype = $extend(cards.properties.Property.pro
 		this.stream.clear();
 		this.runtime.clear();
 		this.runtimeError.clear();
-		cards.properties.Property.prototype.dispose.call(this);
+		cards_properties_Property.prototype.dispose.call(this);
 	}
 	,get_value: function() {
 		return this.stream.get();
@@ -1143,174 +1143,172 @@ cards.properties.ValueProperty.prototype = $extend(cards.properties.Property.pro
 	,set_value: function(value) {
 		return this.stream.set(value);
 	}
-	,__class__: cards.properties.ValueProperty
+	,__class__: cards_properties_ValueProperty
 });
-cards.properties.BoolProperty = function(defaultValue,component,name) {
-	cards.properties.ValueProperty.call(this,defaultValue,component,name);
+var cards_properties_BoolProperty = function(defaultValue,component,name) {
+	cards_properties_ValueProperty.call(this,defaultValue,component,name);
 };
-cards.properties.BoolProperty.__name__ = ["cards","properties","BoolProperty"];
-cards.properties.BoolProperty.__super__ = cards.properties.ValueProperty;
-cards.properties.BoolProperty.prototype = $extend(cards.properties.ValueProperty.prototype,{
+cards_properties_BoolProperty.__name__ = ["cards","properties","BoolProperty"];
+cards_properties_BoolProperty.__super__ = cards_properties_ValueProperty;
+cards_properties_BoolProperty.prototype = $extend(cards_properties_ValueProperty.prototype,{
 	transform: function(value) {
-		return cards.types.DynamicTransform.toBool(value);
+		return cards_types_DynamicTransform.toBool(value);
 	}
-	,__class__: cards.properties.BoolProperty
+	,__class__: cards_properties_BoolProperty
 });
-cards.properties._PropertyName = {};
-cards.properties._PropertyName.PropertyName_Impl_ = function() { };
-cards.properties._PropertyName.PropertyName_Impl_.__name__ = ["cards","properties","_PropertyName","PropertyName_Impl_"];
-cards.properties._PropertyName.PropertyName_Impl_.fromProperty = function(property) {
+var cards_properties__$PropertyName_PropertyName_$Impl_$ = function() { };
+cards_properties__$PropertyName_PropertyName_$Impl_$.__name__ = ["cards","properties","_PropertyName","PropertyName_Impl_"];
+cards_properties__$PropertyName_PropertyName_$Impl_$.fromProperty = function(property) {
 	return property.name;
 };
-cards.properties._PropertyName.PropertyName_Impl_.fromString = function(name) {
+cards_properties__$PropertyName_PropertyName_$Impl_$.fromString = function(name) {
 	return name;
 };
-cards.properties._PropertyName.PropertyName_Impl_._new = function(name) {
+cards_properties__$PropertyName_PropertyName_$Impl_$._new = function(name) {
 	return name;
 };
-cards.properties._PropertyName.PropertyName_Impl_.toString = function(this1) {
+cards_properties__$PropertyName_PropertyName_$Impl_$.toString = function(this1) {
 	return this1;
 };
-cards.properties.StringProperty = function(defaultValue,component,name) {
-	cards.properties.ValueProperty.call(this,defaultValue,component,name);
+var cards_properties_StringProperty = function(defaultValue,component,name) {
+	cards_properties_ValueProperty.call(this,defaultValue,component,name);
 };
-cards.properties.StringProperty.__name__ = ["cards","properties","StringProperty"];
-cards.properties.StringProperty.__super__ = cards.properties.ValueProperty;
-cards.properties.StringProperty.prototype = $extend(cards.properties.ValueProperty.prototype,{
+cards_properties_StringProperty.__name__ = ["cards","properties","StringProperty"];
+cards_properties_StringProperty.__super__ = cards_properties_ValueProperty;
+cards_properties_StringProperty.prototype = $extend(cards_properties_ValueProperty.prototype,{
 	transform: function(value) {
-		return cards.types.DynamicTransform.toString(value);
+		return cards_types_DynamicTransform.toString(value);
 	}
-	,__class__: cards.properties.StringProperty
+	,__class__: cards_properties_StringProperty
 });
-cards.properties.Text = function(component,defaultText) {
-	cards.properties.StringProperty.call(this,null == defaultText?component.el.textContent:defaultText,component,"text");
-	this.stream.subscribe(thx.stream.dom.Dom.subscribeText(component.el));
+var cards_properties_Text = function(component,defaultText) {
+	cards_properties_StringProperty.call(this,null == defaultText?component.el.textContent:defaultText,component,"text");
+	this.stream.subscribe(thx_stream_dom_Dom.subscribeText(component.el));
 };
-cards.properties.Text.__name__ = ["cards","properties","Text"];
-cards.properties.Text.__super__ = cards.properties.StringProperty;
-cards.properties.Text.prototype = $extend(cards.properties.StringProperty.prototype,{
-	__class__: cards.properties.Text
+cards_properties_Text.__name__ = ["cards","properties","Text"];
+cards_properties_Text.__super__ = cards_properties_StringProperty;
+cards_properties_Text.prototype = $extend(cards_properties_StringProperty.prototype,{
+	__class__: cards_properties_Text
 });
-cards.properties.ToggleClass = function(component,name,className) {
+var cards_properties_ToggleClass = function(component,name,className) {
 	var defaultValue = component.el.classList.contains(className);
-	cards.properties.BoolProperty.call(this,defaultValue,component,name);
+	cards_properties_BoolProperty.call(this,defaultValue,component,name);
 	if(null == className) className = name; else className = className;
-	this.stream.subscribe(thx.stream.dom.Dom.subscribeToggleClass(component.el,className));
+	this.stream.subscribe(thx_stream_dom_Dom.subscribeToggleClass(component.el,className));
 };
-cards.properties.ToggleClass.__name__ = ["cards","properties","ToggleClass"];
-cards.properties.ToggleClass.__super__ = cards.properties.BoolProperty;
-cards.properties.ToggleClass.prototype = $extend(cards.properties.BoolProperty.prototype,{
-	__class__: cards.properties.ToggleClass
+cards_properties_ToggleClass.__name__ = ["cards","properties","ToggleClass"];
+cards_properties_ToggleClass.__super__ = cards_properties_BoolProperty;
+cards_properties_ToggleClass.prototype = $extend(cards_properties_BoolProperty.prototype,{
+	__class__: cards_properties_ToggleClass
 });
-cards.properties.ValueProperties = function() {
-	this.map = new haxe.ds.StringMap();
+var cards_properties_ValueProperties = function() {
+	this.map = new haxe_ds_StringMap();
 };
-cards.properties.ValueProperties.__name__ = ["cards","properties","ValueProperties"];
-cards.properties.ValueProperties.prototype = {
+cards_properties_ValueProperties.__name__ = ["cards","properties","ValueProperties"];
+cards_properties_ValueProperties.prototype = {
 	map: null
 	,add: function(name,info) {
-		thx.Assert.isFalse(this.map.exists(name),"ValueProperties already contains \"" + name + "\"",{ fileName : "ValueProperties.hx", lineNumber : 15, className : "cards.properties.ValueProperties", methodName : "add"});
+		thx_Assert.isFalse(this.map.exists(name),"ValueProperties already contains \"" + name + "\"",{ fileName : "ValueProperties.hx", lineNumber : 15, className : "cards.properties.ValueProperties", methodName : "add"});
 		this.map.set(name,info);
 	}
 	,remove: function(name) {
-		thx.Assert.isTrue(this.map.exists(name),"ValueProperties does not contain \"" + name + "\"",{ fileName : "ValueProperties.hx", lineNumber : 20, className : "cards.properties.ValueProperties", methodName : "remove"});
+		thx_Assert.isTrue(this.map.exists(name),"ValueProperties does not contain \"" + name + "\"",{ fileName : "ValueProperties.hx", lineNumber : 20, className : "cards.properties.ValueProperties", methodName : "remove"});
 		this.map.remove(name);
 	}
 	,get: function(name) {
-		thx.Assert.isTrue(this.map.exists(name),"ValueProperties does not contain \"" + name + "\"",{ fileName : "ValueProperties.hx", lineNumber : 25, className : "cards.properties.ValueProperties", methodName : "get"});
+		thx_Assert.isTrue(this.map.exists(name),"ValueProperties does not contain \"" + name + "\"",{ fileName : "ValueProperties.hx", lineNumber : 25, className : "cards.properties.ValueProperties", methodName : "get"});
 		return this.map.get(name);
 	}
 	,ensure: function(name,component) {
-		if(component.properties.exists(name)) return js.Boot.__cast(component.properties.get(name) , cards.properties.ValueProperty); else return this.get(name).create(component);
+		if(component.properties.exists(name)) return js_Boot.__cast(component.properties.get(name) , cards_properties_ValueProperty); else return this.get(name).create(component);
 	}
 	,list: function() {
 		return this.map.keys();
 	}
-	,__class__: cards.properties.ValueProperties
+	,__class__: cards_properties_ValueProperties
 };
-cards.properties.Visible = function(component,defaultValue) {
-	cards.properties.BoolProperty.call(this,defaultValue,component,"visible");
-	this.stream.subscribe(thx.stream.dom.Dom.subscribeToggleVisibility(component.el));
+var cards_properties_Visible = function(component,defaultValue) {
+	cards_properties_BoolProperty.call(this,defaultValue,component,"visible");
+	this.stream.subscribe(thx_stream_dom_Dom.subscribeToggleVisibility(component.el));
 };
-cards.properties.Visible.__name__ = ["cards","properties","Visible"];
-cards.properties.Visible.__super__ = cards.properties.BoolProperty;
-cards.properties.Visible.prototype = $extend(cards.properties.BoolProperty.prototype,{
-	__class__: cards.properties.Visible
+cards_properties_Visible.__name__ = ["cards","properties","Visible"];
+cards_properties_Visible.__super__ = cards_properties_BoolProperty;
+cards_properties_Visible.prototype = $extend(cards_properties_BoolProperty.prototype,{
+	__class__: cards_properties_Visible
 });
-cards.types = {};
-cards.types.ArrayTransform = function() { };
-cards.types.ArrayTransform.__name__ = ["cards","types","ArrayTransform"];
-cards.types.ArrayTransform.toArray = function(value) {
+var cards_types_ArrayTransform = function() { };
+cards_types_ArrayTransform.__name__ = ["cards","types","ArrayTransform"];
+cards_types_ArrayTransform.toArray = function(value) {
 	if(null != value) return value; else return [];
 };
-cards.types.ArrayTransform.toBool = function(value) {
-	return cards.types.ArrayTransform.toArray(value).length > 0;
+cards_types_ArrayTransform.toBool = function(value) {
+	return cards_types_ArrayTransform.toArray(value).length > 0;
 };
-cards.types.ArrayTransform.toDate = function(value) {
+cards_types_ArrayTransform.toDate = function(value) {
 	var defaults = [2000,0,1,0,0,0];
-	var values = cards.types.ArrayTransform.toArray(value).map(cards.types.DynamicTransform.toFloat).map(function(v) {
+	var values = cards_types_ArrayTransform.toArray(value).map(cards_types_DynamicTransform.toFloat).map(function(v) {
 		return Math.round(v);
 	}).slice(0,defaults.length);
 	values = values.concat(defaults.slice(values.length));
 	return new Date(values[0],values[1],values[2],values[3],values[4],values[5]);
 };
-cards.types.ArrayTransform.toFloat = function(value) {
-	return cards.types.ArrayTransform.toArray(value).length;
+cards_types_ArrayTransform.toFloat = function(value) {
+	return cards_types_ArrayTransform.toArray(value).length;
 };
-cards.types.ArrayTransform.toObject = function(value) {
+cards_types_ArrayTransform.toObject = function(value) {
 	var obj = { };
-	thx.core.Arrays.mapi(cards.types.ArrayTransform.toArray(value),function(v,i) {
+	thx_core_Arrays.mapi(cards_types_ArrayTransform.toArray(value),function(v,i) {
 		obj["field_" + (i + 1)] = v;
 	});
 	return obj;
 };
-cards.types.ArrayTransform.toString = function(value) {
-	return cards.types.ArrayTransform.toArray(value).map(cards.types.DynamicTransform.toString).join(", ");
+cards_types_ArrayTransform.toString = function(value) {
+	return cards_types_ArrayTransform.toArray(value).map(cards_types_DynamicTransform.toString).join(", ");
 };
-cards.types.ArrayTransform.toCode = function(value) {
-	return "[" + cards.types.ArrayTransform.toArray(value).map(cards.types.DynamicTransform.toCode).join(",") + "]";
+cards_types_ArrayTransform.toCode = function(value) {
+	return "[" + cards_types_ArrayTransform.toArray(value).map(cards_types_DynamicTransform.toCode).join(",") + "]";
 };
-cards.types.ArrayTransform.toReference = function(value) {
+cards_types_ArrayTransform.toReference = function(value) {
 	return "";
 };
-cards.types.BoolTransform = function() { };
-cards.types.BoolTransform.__name__ = ["cards","types","BoolTransform"];
-cards.types.BoolTransform.toArray = function(value) {
-	return [cards.types.BoolTransform.toBool(value)?false:value];
+var cards_types_BoolTransform = function() { };
+cards_types_BoolTransform.__name__ = ["cards","types","BoolTransform"];
+cards_types_BoolTransform.toArray = function(value) {
+	return [cards_types_BoolTransform.toBool(value)?false:value];
 };
-cards.types.BoolTransform.toBool = function(value) {
+cards_types_BoolTransform.toBool = function(value) {
 	return null != value && value;
 };
-cards.types.BoolTransform.toDate = function(value) {
+cards_types_BoolTransform.toDate = function(value) {
 	return new Date();
 };
-cards.types.BoolTransform.toFloat = function(value) {
-	if(cards.types.BoolTransform.toBool(value)) return 1; else return 0;
+cards_types_BoolTransform.toFloat = function(value) {
+	if(cards_types_BoolTransform.toBool(value)) return 1; else return 0;
 };
-cards.types.BoolTransform.toObject = function(value) {
-	return cards.types.ArrayTransform.toObject([cards.types.BoolTransform.toBool(value)]);
+cards_types_BoolTransform.toObject = function(value) {
+	return cards_types_ArrayTransform.toObject([cards_types_BoolTransform.toBool(value)]);
 };
-cards.types.BoolTransform.toString = function(value) {
-	if(cards.types.BoolTransform.toBool(value)) return "Yes"; else return "No";
+cards_types_BoolTransform.toString = function(value) {
+	if(cards_types_BoolTransform.toBool(value)) return "Yes"; else return "No";
 };
-cards.types.BoolTransform.toCode = function(value) {
-	if(cards.types.BoolTransform.toBool(value)) return "true"; else return "false";
+cards_types_BoolTransform.toCode = function(value) {
+	if(cards_types_BoolTransform.toBool(value)) return "true"; else return "false";
 };
-cards.types.BoolTransform.toReference = function(value) {
+cards_types_BoolTransform.toReference = function(value) {
 	return "";
 };
-cards.types.CodeTransform = function() { };
-cards.types.CodeTransform.__name__ = ["cards","types","CodeTransform"];
-cards.types.CodeTransform.toArray = function(value) {
+var cards_types_CodeTransform = function() { };
+cards_types_CodeTransform.__name__ = ["cards","types","CodeTransform"];
+cards_types_CodeTransform.toArray = function(value) {
 	try {
-		var t = JSON.parse(cards.types.CodeTransform.toCode(value));
-		if((t instanceof Array) && t.__enum__ == null) return t; else return cards.types.DynamicTransform.toArray(t);
+		var t = JSON.parse(cards_types_CodeTransform.toCode(value));
+		if((t instanceof Array) && t.__enum__ == null) return t; else return cards_types_DynamicTransform.toArray(t);
 	} catch( _ ) {
 		return [];
 	}
 };
-cards.types.CodeTransform.toBool = function(value) {
-	var _g = cards.types.CodeTransform.toCode(value);
+cards_types_CodeTransform.toBool = function(value) {
+	var _g = cards_types_CodeTransform.toCode(value);
 	switch(_g) {
 	case "true":case "1":
 		return true;
@@ -1318,250 +1316,250 @@ cards.types.CodeTransform.toBool = function(value) {
 		return false;
 	}
 };
-cards.types.CodeTransform.toDate = function(value) {
-	if(cards.types.CodeTransform.datePattern.match(value)) {
-		var t = Std.parseFloat(cards.types.CodeTransform.datePattern.matched(1));
+cards_types_CodeTransform.toDate = function(value) {
+	if(cards_types_CodeTransform.datePattern.match(value)) {
+		var t = Std.parseFloat(cards_types_CodeTransform.datePattern.matched(1));
 		var d = new Date();
 		d.setTime(t);
 		return d;
 	} else return new Date();
 };
-cards.types.CodeTransform.toFloat = function(value) {
-	return Std.parseFloat(cards.types.CodeTransform.toCode(value));
+cards_types_CodeTransform.toFloat = function(value) {
+	return Std.parseFloat(cards_types_CodeTransform.toCode(value));
 };
-cards.types.CodeTransform.toObject = function(value) {
+cards_types_CodeTransform.toObject = function(value) {
 	try {
-		var t = JSON.parse(cards.types.CodeTransform.toCode(value));
-		if(Reflect.isObject(t) && !(typeof(t) == "string")) return t; else return cards.types.DynamicTransform.toObject(t);
+		var t = JSON.parse(cards_types_CodeTransform.toCode(value));
+		if(Reflect.isObject(t) && !(typeof(t) == "string")) return t; else return cards_types_DynamicTransform.toObject(t);
 	} catch( _ ) {
 		return { };
 	}
 };
-cards.types.CodeTransform.toString = function(value) {
+cards_types_CodeTransform.toString = function(value) {
 	try {
-		var t = JSON.parse(cards.types.CodeTransform.toCode(value));
-		if(typeof(t) == "string") return t; else return cards.types.DynamicTransform.toString(t);
+		var t = JSON.parse(cards_types_CodeTransform.toCode(value));
+		if(typeof(t) == "string") return t; else return cards_types_DynamicTransform.toString(t);
 	} catch( _ ) {
 		return "";
 	}
 };
-cards.types.CodeTransform.toCode = function(value) {
+cards_types_CodeTransform.toCode = function(value) {
 	if(null != value) return StringTools.trim(value); else return "null";
 };
-cards.types.CodeTransform.toReference = function(value) {
-	var code = cards.types.CodeTransform.toCode(value);
-	if(cards.types.CodeTransform.PATTERN.match(code)) return cards.types.CodeTransform.PATTERN.matched(1); else return "";
+cards_types_CodeTransform.toReference = function(value) {
+	var code = cards_types_CodeTransform.toCode(value);
+	if(cards_types_CodeTransform.PATTERN.match(code)) return cards_types_CodeTransform.PATTERN.matched(1); else return "";
 };
-cards.types.DateTransform = function() { };
-cards.types.DateTransform.__name__ = ["cards","types","DateTransform"];
-cards.types.DateTransform.toArray = function(value) {
-	return [cards.types.DateTransform.toDate(value)];
+var cards_types_DateTransform = function() { };
+cards_types_DateTransform.__name__ = ["cards","types","DateTransform"];
+cards_types_DateTransform.toArray = function(value) {
+	return [cards_types_DateTransform.toDate(value)];
 };
-cards.types.DateTransform.toBool = function(value) {
+cards_types_DateTransform.toBool = function(value) {
 	return false;
 };
-cards.types.DateTransform.toDate = function(value) {
+cards_types_DateTransform.toDate = function(value) {
 	if(null != value) return value; else return new Date();
 };
-cards.types.DateTransform.toFloat = function(value) {
-	return cards.types.DateTransform.toDate(value).getTime();
+cards_types_DateTransform.toFloat = function(value) {
+	return cards_types_DateTransform.toDate(value).getTime();
 };
-cards.types.DateTransform.toObject = function(value) {
-	return cards.types.ArrayTransform.toObject([cards.types.DateTransform.toDate(value)]);
+cards_types_DateTransform.toObject = function(value) {
+	return cards_types_ArrayTransform.toObject([cards_types_DateTransform.toDate(value)]);
 };
-cards.types.DateTransform.toString = function(value) {
-	var _this = cards.types.DateTransform.toDate(value);
+cards_types_DateTransform.toString = function(value) {
+	var _this = cards_types_DateTransform.toDate(value);
 	return HxOverrides.dateStr(_this);
 };
-cards.types.DateTransform.toCode = function(value) {
-	return "new Date(" + cards.types.DateTransform.toDate(value).getTime() + ")";
+cards_types_DateTransform.toCode = function(value) {
+	return "new Date(" + cards_types_DateTransform.toDate(value).getTime() + ")";
 };
-cards.types.DateTransform.toReference = function(value) {
+cards_types_DateTransform.toReference = function(value) {
 	return "";
 };
-cards.types.DynamicTransform = function() { };
-cards.types.DynamicTransform.__name__ = ["cards","types","DynamicTransform"];
-cards.types.DynamicTransform.toArray = function(value) {
+var cards_types_DynamicTransform = function() { };
+cards_types_DynamicTransform.__name__ = ["cards","types","DynamicTransform"];
+cards_types_DynamicTransform.toArray = function(value) {
 	if(null == value) return [];
-	if((value instanceof Array) && value.__enum__ == null) return cards.types.ArrayTransform.toArray(value);
-	if(typeof(value) == "boolean") return cards.types.BoolTransform.toArray(value);
-	if(js.Boot.__instanceof(value,Date)) return cards.types.DateTransform.toArray(value);
-	if(typeof(value) == "number") return cards.types.FloatTransform.toArray(value);
-	if(typeof(value) == "string") return cards.types.StringTransform.toArray(value);
-	if(Reflect.isObject(value)) return cards.types.ObjectTransform.toArray(value);
-	if(Reflect.isFunction(value)) return cards.types.DynamicTransform.toArray(null);
+	if((value instanceof Array) && value.__enum__ == null) return cards_types_ArrayTransform.toArray(value);
+	if(typeof(value) == "boolean") return cards_types_BoolTransform.toArray(value);
+	if(js_Boot.__instanceof(value,Date)) return cards_types_DateTransform.toArray(value);
+	if(typeof(value) == "number") return cards_types_FloatTransform.toArray(value);
+	if(typeof(value) == "string") return cards_types_StringTransform.toArray(value);
+	if(Reflect.isObject(value)) return cards_types_ObjectTransform.toArray(value);
+	if(Reflect.isFunction(value)) return cards_types_DynamicTransform.toArray(null);
 	throw "Type of " + Std.string(value) + " cannot be matched by DynamicTransform.toArray";
 };
-cards.types.DynamicTransform.toBool = function(value) {
+cards_types_DynamicTransform.toBool = function(value) {
 	if(null == value) return false;
-	if((value instanceof Array) && value.__enum__ == null) return cards.types.ArrayTransform.toBool(value);
-	if(typeof(value) == "boolean") return cards.types.BoolTransform.toBool(value);
-	if(js.Boot.__instanceof(value,Date)) return cards.types.DateTransform.toBool(value);
-	if(typeof(value) == "number") return cards.types.FloatTransform.toBool(value);
-	if(typeof(value) == "string") return cards.types.StringTransform.toBool(value);
-	if(Reflect.isObject(value)) return cards.types.ObjectTransform.toBool(value);
-	if(Reflect.isFunction(value)) return cards.types.DynamicTransform.toBool(null);
+	if((value instanceof Array) && value.__enum__ == null) return cards_types_ArrayTransform.toBool(value);
+	if(typeof(value) == "boolean") return cards_types_BoolTransform.toBool(value);
+	if(js_Boot.__instanceof(value,Date)) return cards_types_DateTransform.toBool(value);
+	if(typeof(value) == "number") return cards_types_FloatTransform.toBool(value);
+	if(typeof(value) == "string") return cards_types_StringTransform.toBool(value);
+	if(Reflect.isObject(value)) return cards_types_ObjectTransform.toBool(value);
+	if(Reflect.isFunction(value)) return cards_types_DynamicTransform.toBool(null);
 	throw "Type of " + Std.string(value) + " cannot be matched by DynamicTransform.toBool";
 };
-cards.types.DynamicTransform.toDate = function(value) {
+cards_types_DynamicTransform.toDate = function(value) {
 	if(null == value) return new Date();
-	if((value instanceof Array) && value.__enum__ == null) return cards.types.ArrayTransform.toDate(value);
-	if(typeof(value) == "boolean") return cards.types.BoolTransform.toDate(value);
-	if(js.Boot.__instanceof(value,Date)) return cards.types.DateTransform.toDate(value);
-	if(typeof(value) == "number") return cards.types.FloatTransform.toDate(value);
-	if(typeof(value) == "string") return cards.types.StringTransform.toDate(value);
-	if(Reflect.isObject(value)) return cards.types.ObjectTransform.toDate(value);
-	if(Reflect.isFunction(value)) return cards.types.DynamicTransform.toDate(null);
+	if((value instanceof Array) && value.__enum__ == null) return cards_types_ArrayTransform.toDate(value);
+	if(typeof(value) == "boolean") return cards_types_BoolTransform.toDate(value);
+	if(js_Boot.__instanceof(value,Date)) return cards_types_DateTransform.toDate(value);
+	if(typeof(value) == "number") return cards_types_FloatTransform.toDate(value);
+	if(typeof(value) == "string") return cards_types_StringTransform.toDate(value);
+	if(Reflect.isObject(value)) return cards_types_ObjectTransform.toDate(value);
+	if(Reflect.isFunction(value)) return cards_types_DynamicTransform.toDate(null);
 	throw "Type of " + Std.string(value) + " cannot be matched by DynamicTransform.toDate";
 };
-cards.types.DynamicTransform.toFloat = function(value) {
+cards_types_DynamicTransform.toFloat = function(value) {
 	if(null == value) return 0;
-	if((value instanceof Array) && value.__enum__ == null) return cards.types.ArrayTransform.toFloat(value);
-	if(typeof(value) == "boolean") return cards.types.BoolTransform.toFloat(value);
-	if(js.Boot.__instanceof(value,Date)) return cards.types.DateTransform.toFloat(value);
-	if(typeof(value) == "number") return cards.types.FloatTransform.toFloat(value);
-	if(typeof(value) == "string") return cards.types.StringTransform.toFloat(value);
-	if(Reflect.isObject(value)) return cards.types.ObjectTransform.toFloat(value);
-	if(Reflect.isFunction(value)) return cards.types.DynamicTransform.toFloat(null);
+	if((value instanceof Array) && value.__enum__ == null) return cards_types_ArrayTransform.toFloat(value);
+	if(typeof(value) == "boolean") return cards_types_BoolTransform.toFloat(value);
+	if(js_Boot.__instanceof(value,Date)) return cards_types_DateTransform.toFloat(value);
+	if(typeof(value) == "number") return cards_types_FloatTransform.toFloat(value);
+	if(typeof(value) == "string") return cards_types_StringTransform.toFloat(value);
+	if(Reflect.isObject(value)) return cards_types_ObjectTransform.toFloat(value);
+	if(Reflect.isFunction(value)) return cards_types_DynamicTransform.toFloat(null);
 	throw "Type of " + Std.string(value) + " cannot be matched by DynamicTransform.toFloat";
 };
-cards.types.DynamicTransform.toObject = function(value) {
+cards_types_DynamicTransform.toObject = function(value) {
 	if(null == value) return { };
-	if((value instanceof Array) && value.__enum__ == null) return cards.types.ArrayTransform.toObject(value);
-	if(typeof(value) == "boolean") return cards.types.BoolTransform.toObject(value);
-	if(js.Boot.__instanceof(value,Date)) return cards.types.DateTransform.toObject(value);
-	if(typeof(value) == "number") return cards.types.FloatTransform.toObject(value);
-	if(typeof(value) == "string") return cards.types.StringTransform.toObject(value);
-	if(Reflect.isObject(value)) return cards.types.ObjectTransform.toObject(value);
-	if(Reflect.isFunction(value)) return cards.types.DynamicTransform.toObject(null);
+	if((value instanceof Array) && value.__enum__ == null) return cards_types_ArrayTransform.toObject(value);
+	if(typeof(value) == "boolean") return cards_types_BoolTransform.toObject(value);
+	if(js_Boot.__instanceof(value,Date)) return cards_types_DateTransform.toObject(value);
+	if(typeof(value) == "number") return cards_types_FloatTransform.toObject(value);
+	if(typeof(value) == "string") return cards_types_StringTransform.toObject(value);
+	if(Reflect.isObject(value)) return cards_types_ObjectTransform.toObject(value);
+	if(Reflect.isFunction(value)) return cards_types_DynamicTransform.toObject(null);
 	throw "Type of " + Std.string(value) + " cannot be matched by DynamicTransform.toObject";
 };
-cards.types.DynamicTransform.toString = function(value) {
+cards_types_DynamicTransform.toString = function(value) {
 	if(null == value) return "";
-	if((value instanceof Array) && value.__enum__ == null) return cards.types.ArrayTransform.toString(value);
-	if(typeof(value) == "boolean") return cards.types.BoolTransform.toString(value);
-	if(js.Boot.__instanceof(value,Date)) return cards.types.DateTransform.toString(value);
-	if(typeof(value) == "number") return cards.types.FloatTransform.toString(value);
-	if(typeof(value) == "string") return cards.types.StringTransform.toString(value);
-	if(Reflect.isObject(value)) return cards.types.ObjectTransform.toString(value);
-	if(Reflect.isFunction(value)) return cards.types.DynamicTransform.toString(null);
+	if((value instanceof Array) && value.__enum__ == null) return cards_types_ArrayTransform.toString(value);
+	if(typeof(value) == "boolean") return cards_types_BoolTransform.toString(value);
+	if(js_Boot.__instanceof(value,Date)) return cards_types_DateTransform.toString(value);
+	if(typeof(value) == "number") return cards_types_FloatTransform.toString(value);
+	if(typeof(value) == "string") return cards_types_StringTransform.toString(value);
+	if(Reflect.isObject(value)) return cards_types_ObjectTransform.toString(value);
+	if(Reflect.isFunction(value)) return cards_types_DynamicTransform.toString(null);
 	throw "Type of " + Std.string(value) + " cannot be matched by DynamicTransform.toString";
 };
-cards.types.DynamicTransform.toCode = function(value) {
+cards_types_DynamicTransform.toCode = function(value) {
 	if(null == value) return "null";
-	if((value instanceof Array) && value.__enum__ == null) return cards.types.ArrayTransform.toCode(value);
-	if(typeof(value) == "boolean") return cards.types.BoolTransform.toCode(value);
-	if(js.Boot.__instanceof(value,Date)) return cards.types.DateTransform.toCode(value);
-	if(typeof(value) == "number") return cards.types.FloatTransform.toCode(value);
-	if(typeof(value) == "string") return cards.types.StringTransform.toCode(value);
-	if(Reflect.isObject(value)) return cards.types.ObjectTransform.toCode(value);
-	if(Reflect.isFunction(value)) return cards.types.DynamicTransform.toCode(null);
+	if((value instanceof Array) && value.__enum__ == null) return cards_types_ArrayTransform.toCode(value);
+	if(typeof(value) == "boolean") return cards_types_BoolTransform.toCode(value);
+	if(js_Boot.__instanceof(value,Date)) return cards_types_DateTransform.toCode(value);
+	if(typeof(value) == "number") return cards_types_FloatTransform.toCode(value);
+	if(typeof(value) == "string") return cards_types_StringTransform.toCode(value);
+	if(Reflect.isObject(value)) return cards_types_ObjectTransform.toCode(value);
+	if(Reflect.isFunction(value)) return cards_types_DynamicTransform.toCode(null);
 	throw "Type of " + Std.string(value) + " cannot be matched by DynamicTransform.toCode";
 };
-cards.types.DynamicTransform.toReference = function(value) {
+cards_types_DynamicTransform.toReference = function(value) {
 	if(null == value) return "";
-	if((value instanceof Array) && value.__enum__ == null) return cards.types.ArrayTransform.toReference(value);
-	if(typeof(value) == "boolean") return cards.types.BoolTransform.toReference(value);
-	if(js.Boot.__instanceof(value,Date)) return cards.types.DateTransform.toReference(value);
-	if(typeof(value) == "number") return cards.types.FloatTransform.toReference(value);
-	if(typeof(value) == "string") return cards.types.StringTransform.toReference(value);
-	if(Reflect.isObject(value)) return cards.types.ObjectTransform.toReference(value);
-	if(Reflect.isFunction(value)) return cards.types.DynamicTransform.toReference(null);
+	if((value instanceof Array) && value.__enum__ == null) return cards_types_ArrayTransform.toReference(value);
+	if(typeof(value) == "boolean") return cards_types_BoolTransform.toReference(value);
+	if(js_Boot.__instanceof(value,Date)) return cards_types_DateTransform.toReference(value);
+	if(typeof(value) == "number") return cards_types_FloatTransform.toReference(value);
+	if(typeof(value) == "string") return cards_types_StringTransform.toReference(value);
+	if(Reflect.isObject(value)) return cards_types_ObjectTransform.toReference(value);
+	if(Reflect.isFunction(value)) return cards_types_DynamicTransform.toReference(null);
 	throw "Type of " + Std.string(value) + " cannot be matched by DynamicTransform.toReference";
 };
-cards.types.FloatTransform = function() { };
-cards.types.FloatTransform.__name__ = ["cards","types","FloatTransform"];
-cards.types.FloatTransform.toArray = function(value) {
-	return [cards.types.FloatTransform.toFloat(value)];
+var cards_types_FloatTransform = function() { };
+cards_types_FloatTransform.__name__ = ["cards","types","FloatTransform"];
+cards_types_FloatTransform.toArray = function(value) {
+	return [cards_types_FloatTransform.toFloat(value)];
 };
-cards.types.FloatTransform.toBool = function(value) {
-	return cards.types.FloatTransform.toFloat(value) != 0;
+cards_types_FloatTransform.toBool = function(value) {
+	return cards_types_FloatTransform.toFloat(value) != 0;
 };
-cards.types.FloatTransform.toDate = function(value) {
-	var t = cards.types.FloatTransform.toFloat(value);
+cards_types_FloatTransform.toDate = function(value) {
+	var t = cards_types_FloatTransform.toFloat(value);
 	var d = new Date();
 	d.setTime(t);
 	return d;
 };
-cards.types.FloatTransform.toFloat = function(value) {
+cards_types_FloatTransform.toFloat = function(value) {
 	if(null != value) return value; else return 0.0;
 };
-cards.types.FloatTransform.toObject = function(value) {
-	return cards.types.ArrayTransform.toObject([cards.types.FloatTransform.toFloat(value)]);
+cards_types_FloatTransform.toObject = function(value) {
+	return cards_types_ArrayTransform.toObject([cards_types_FloatTransform.toFloat(value)]);
 };
-cards.types.FloatTransform.toString = function(value) {
-	return "" + cards.types.FloatTransform.toFloat(value);
+cards_types_FloatTransform.toString = function(value) {
+	return "" + cards_types_FloatTransform.toFloat(value);
 };
-cards.types.FloatTransform.toCode = function(value) {
-	return "" + cards.types.FloatTransform.toFloat(value);
+cards_types_FloatTransform.toCode = function(value) {
+	return "" + cards_types_FloatTransform.toFloat(value);
 };
-cards.types.FloatTransform.toReference = function(value) {
+cards_types_FloatTransform.toReference = function(value) {
 	return "";
 };
-cards.types.ObjectTransform = function() { };
-cards.types.ObjectTransform.__name__ = ["cards","types","ObjectTransform"];
-cards.types.ObjectTransform.toArray = function(value) {
-	return [cards.types.ObjectTransform.toObject(value)];
+var cards_types_ObjectTransform = function() { };
+cards_types_ObjectTransform.__name__ = ["cards","types","ObjectTransform"];
+cards_types_ObjectTransform.toArray = function(value) {
+	return [cards_types_ObjectTransform.toObject(value)];
 };
-cards.types.ObjectTransform.toBool = function(value) {
-	return !thx.core.Objects.isEmpty(cards.types.ObjectTransform.toObject(value));
+cards_types_ObjectTransform.toBool = function(value) {
+	return !thx_core_Objects.isEmpty(cards_types_ObjectTransform.toObject(value));
 };
-cards.types.ObjectTransform.toDate = function(value) {
+cards_types_ObjectTransform.toDate = function(value) {
 	return new Date();
 };
-cards.types.ObjectTransform.toFloat = function(value) {
-	return Reflect.fields(cards.types.ObjectTransform.toObject(value)).length;
+cards_types_ObjectTransform.toFloat = function(value) {
+	return Reflect.fields(cards_types_ObjectTransform.toObject(value)).length;
 };
-cards.types.ObjectTransform.toObject = function(value) {
+cards_types_ObjectTransform.toObject = function(value) {
 	if(null != value) return value; else return { };
 };
-cards.types.ObjectTransform.toString = function(value) {
-	return Reflect.fields(cards.types.ObjectTransform.toObject(value)).map(function(field) {
-		return "" + field + ": " + cards.types.DynamicTransform.toString(Reflect.field(value,field));
+cards_types_ObjectTransform.toString = function(value) {
+	return Reflect.fields(cards_types_ObjectTransform.toObject(value)).map(function(field) {
+		return "" + field + ": " + cards_types_DynamicTransform.toString(Reflect.field(value,field));
 	}).join(", ");
 };
-cards.types.ObjectTransform.toCode = function(value) {
-	return "{" + Reflect.fields(cards.types.ObjectTransform.toObject(value)).map(function(field) {
-		return "\"" + field + "\" : " + cards.types.DynamicTransform.toCode(Reflect.field(value,field));
+cards_types_ObjectTransform.toCode = function(value) {
+	return "{" + Reflect.fields(cards_types_ObjectTransform.toObject(value)).map(function(field) {
+		return "\"" + field + "\" : " + cards_types_DynamicTransform.toCode(Reflect.field(value,field));
 	}).join(", ") + "}";
 };
-cards.types.ObjectTransform.toReference = function(value) {
+cards_types_ObjectTransform.toReference = function(value) {
 	return "";
 };
-cards.types.ReferenceTransform = function() { };
-cards.types.ReferenceTransform.__name__ = ["cards","types","ReferenceTransform"];
-cards.types.ReferenceTransform.toArray = function(value) {
-	return cards.types.ArrayTransform.toArray(null);
+var cards_types_ReferenceTransform = function() { };
+cards_types_ReferenceTransform.__name__ = ["cards","types","ReferenceTransform"];
+cards_types_ReferenceTransform.toArray = function(value) {
+	return cards_types_ArrayTransform.toArray(null);
 };
-cards.types.ReferenceTransform.toBool = function(value) {
-	return cards.types.BoolTransform.toBool(null);
+cards_types_ReferenceTransform.toBool = function(value) {
+	return cards_types_BoolTransform.toBool(null);
 };
-cards.types.ReferenceTransform.toDate = function(value) {
-	return cards.types.DateTransform.toDate(null);
+cards_types_ReferenceTransform.toDate = function(value) {
+	return cards_types_DateTransform.toDate(null);
 };
-cards.types.ReferenceTransform.toFloat = function(value) {
-	return cards.types.FloatTransform.toFloat(null);
+cards_types_ReferenceTransform.toFloat = function(value) {
+	return cards_types_FloatTransform.toFloat(null);
 };
-cards.types.ReferenceTransform.toObject = function(value) {
-	return cards.types.ObjectTransform.toObject(null);
+cards_types_ReferenceTransform.toObject = function(value) {
+	return cards_types_ObjectTransform.toObject(null);
 };
-cards.types.ReferenceTransform.toString = function(value) {
-	return cards.types.StringTransform.toString(null);
+cards_types_ReferenceTransform.toString = function(value) {
+	return cards_types_StringTransform.toString(null);
 };
-cards.types.ReferenceTransform.toCode = function(value) {
-	value = cards.types.ReferenceTransform.toReference(value);
+cards_types_ReferenceTransform.toCode = function(value) {
+	value = cards_types_ReferenceTransform.toReference(value);
 	if("" == value) return ""; else return "$." + value;
 };
-cards.types.ReferenceTransform.toReference = function(value) {
+cards_types_ReferenceTransform.toReference = function(value) {
 	if(null == value) return ""; else return value;
 };
-cards.types.StringTransform = function() { };
-cards.types.StringTransform.__name__ = ["cards","types","StringTransform"];
-cards.types.StringTransform.toArray = function(value) {
-	return cards.types.StringTransform.toString(value).split(",").map(StringTools.trim);
+var cards_types_StringTransform = function() { };
+cards_types_StringTransform.__name__ = ["cards","types","StringTransform"];
+cards_types_StringTransform.toArray = function(value) {
+	return cards_types_StringTransform.toString(value).split(",").map(StringTools.trim);
 };
-cards.types.StringTransform.toBool = function(value) {
-	var _g = StringTools.trim(cards.types.StringTransform.toString(value)).toLowerCase();
+cards_types_StringTransform.toBool = function(value) {
+	var _g = StringTools.trim(cards_types_StringTransform.toString(value)).toLowerCase();
 	switch(_g) {
 	case "":case "off":case "no":case "false":case "0":
 		return false;
@@ -1569,203 +1567,202 @@ cards.types.StringTransform.toBool = function(value) {
 		return true;
 	}
 };
-cards.types.StringTransform.toDate = function(value) {
+cards_types_StringTransform.toDate = function(value) {
 	try {
 		return HxOverrides.strDate(value);
 	} catch( e ) {
 		return new Date();
 	}
 };
-cards.types.StringTransform.toFloat = function(value) {
-	return Std.parseFloat(cards.types.StringTransform.toString(value));
+cards_types_StringTransform.toFloat = function(value) {
+	return Std.parseFloat(cards_types_StringTransform.toString(value));
 };
-cards.types.StringTransform.toObject = function(value) {
-	return cards.types.ArrayTransform.toObject([cards.types.StringTransform.toString(value)]);
+cards_types_StringTransform.toObject = function(value) {
+	return cards_types_ArrayTransform.toObject([cards_types_StringTransform.toString(value)]);
 };
-cards.types.StringTransform.toString = function(value) {
+cards_types_StringTransform.toString = function(value) {
 	if(null != value) return value; else return "";
 };
-cards.types.StringTransform.toCode = function(value) {
-	return "\"" + StringTools.replace(cards.types.StringTransform.toString(value),"\"","\\\"") + "\"";
+cards_types_StringTransform.toCode = function(value) {
+	return "\"" + StringTools.replace(cards_types_StringTransform.toString(value),"\"","\\\"") + "\"";
 };
-cards.types.StringTransform.toReference = function(value) {
+cards_types_StringTransform.toReference = function(value) {
 	return "";
 };
-cards.types.TypeTransform = function() { };
-cards.types.TypeTransform.__name__ = ["cards","types","TypeTransform"];
-cards.types.TypeTransform.transform = function(srcType,dstType) {
+var cards_types_TypeTransform = function() { };
+cards_types_TypeTransform.__name__ = ["cards","types","TypeTransform"];
+cards_types_TypeTransform.transform = function(srcType,dstType) {
 	switch(srcType[1]) {
 	case 0:
 		switch(dstType[1]) {
 		case 0:
-			return cards.types.ArrayTransform.toArray;
+			return cards_types_ArrayTransform.toArray;
 		case 1:
-			return cards.types.ArrayTransform.toBool;
+			return cards_types_ArrayTransform.toBool;
 		case 2:
-			return cards.types.ArrayTransform.toDate;
+			return cards_types_ArrayTransform.toDate;
 		case 3:
-			return cards.types.ArrayTransform.toFloat;
+			return cards_types_ArrayTransform.toFloat;
 		case 4:
-			return cards.types.ArrayTransform.toObject;
+			return cards_types_ArrayTransform.toObject;
 		case 5:
-			return cards.types.ArrayTransform.toString;
+			return cards_types_ArrayTransform.toString;
 		case 6:
-			return cards.types.ArrayTransform.toCode;
+			return cards_types_ArrayTransform.toCode;
 		case 7:
-			return cards.types.ArrayTransform.toReference;
+			return cards_types_ArrayTransform.toReference;
 		}
 		break;
 	case 1:
 		switch(dstType[1]) {
 		case 0:
-			return cards.types.BoolTransform.toArray;
+			return cards_types_BoolTransform.toArray;
 		case 1:
-			return cards.types.BoolTransform.toBool;
+			return cards_types_BoolTransform.toBool;
 		case 2:
-			return cards.types.BoolTransform.toDate;
+			return cards_types_BoolTransform.toDate;
 		case 3:
-			return cards.types.BoolTransform.toFloat;
+			return cards_types_BoolTransform.toFloat;
 		case 4:
-			return cards.types.BoolTransform.toObject;
+			return cards_types_BoolTransform.toObject;
 		case 5:
-			return cards.types.BoolTransform.toString;
+			return cards_types_BoolTransform.toString;
 		case 6:
-			return cards.types.BoolTransform.toCode;
+			return cards_types_BoolTransform.toCode;
 		case 7:
-			return cards.types.BoolTransform.toReference;
+			return cards_types_BoolTransform.toReference;
 		}
 		break;
 	case 2:
 		switch(dstType[1]) {
 		case 0:
-			return cards.types.DateTransform.toArray;
+			return cards_types_DateTransform.toArray;
 		case 1:
-			return cards.types.DateTransform.toBool;
+			return cards_types_DateTransform.toBool;
 		case 2:
-			return cards.types.DateTransform.toDate;
+			return cards_types_DateTransform.toDate;
 		case 3:
-			return cards.types.DateTransform.toFloat;
+			return cards_types_DateTransform.toFloat;
 		case 4:
-			return cards.types.DateTransform.toObject;
+			return cards_types_DateTransform.toObject;
 		case 5:
-			return cards.types.DateTransform.toString;
+			return cards_types_DateTransform.toString;
 		case 6:
-			return cards.types.DateTransform.toCode;
+			return cards_types_DateTransform.toCode;
 		case 7:
-			return cards.types.DateTransform.toReference;
+			return cards_types_DateTransform.toReference;
 		}
 		break;
 	case 3:
 		switch(dstType[1]) {
 		case 0:
-			return cards.types.FloatTransform.toArray;
+			return cards_types_FloatTransform.toArray;
 		case 1:
-			return cards.types.FloatTransform.toBool;
+			return cards_types_FloatTransform.toBool;
 		case 2:
-			return cards.types.FloatTransform.toDate;
+			return cards_types_FloatTransform.toDate;
 		case 3:
-			return cards.types.FloatTransform.toFloat;
+			return cards_types_FloatTransform.toFloat;
 		case 4:
-			return cards.types.FloatTransform.toObject;
+			return cards_types_FloatTransform.toObject;
 		case 5:
-			return cards.types.FloatTransform.toString;
+			return cards_types_FloatTransform.toString;
 		case 6:
-			return cards.types.FloatTransform.toCode;
+			return cards_types_FloatTransform.toCode;
 		case 7:
-			return cards.types.FloatTransform.toReference;
+			return cards_types_FloatTransform.toReference;
 		}
 		break;
 	case 4:
 		switch(dstType[1]) {
 		case 0:
-			return cards.types.ObjectTransform.toArray;
+			return cards_types_ObjectTransform.toArray;
 		case 1:
-			return cards.types.ObjectTransform.toBool;
+			return cards_types_ObjectTransform.toBool;
 		case 2:
-			return cards.types.ObjectTransform.toDate;
+			return cards_types_ObjectTransform.toDate;
 		case 3:
-			return cards.types.ObjectTransform.toFloat;
+			return cards_types_ObjectTransform.toFloat;
 		case 4:
-			return cards.types.ObjectTransform.toObject;
+			return cards_types_ObjectTransform.toObject;
 		case 5:
-			return cards.types.ObjectTransform.toString;
+			return cards_types_ObjectTransform.toString;
 		case 6:
-			return cards.types.ObjectTransform.toCode;
+			return cards_types_ObjectTransform.toCode;
 		case 7:
-			return cards.types.ObjectTransform.toReference;
+			return cards_types_ObjectTransform.toReference;
 		}
 		break;
 	case 5:
 		switch(dstType[1]) {
 		case 0:
-			return cards.types.StringTransform.toArray;
+			return cards_types_StringTransform.toArray;
 		case 1:
-			return cards.types.StringTransform.toBool;
+			return cards_types_StringTransform.toBool;
 		case 2:
-			return cards.types.StringTransform.toDate;
+			return cards_types_StringTransform.toDate;
 		case 3:
-			return cards.types.StringTransform.toFloat;
+			return cards_types_StringTransform.toFloat;
 		case 4:
-			return cards.types.StringTransform.toObject;
+			return cards_types_StringTransform.toObject;
 		case 5:
-			return cards.types.StringTransform.toString;
+			return cards_types_StringTransform.toString;
 		case 6:
-			return cards.types.StringTransform.toCode;
+			return cards_types_StringTransform.toCode;
 		case 7:
-			return cards.types.StringTransform.toReference;
+			return cards_types_StringTransform.toReference;
 		}
 		break;
 	case 6:
 		switch(dstType[1]) {
 		case 0:
-			return cards.types.CodeTransform.toArray;
+			return cards_types_CodeTransform.toArray;
 		case 1:
-			return cards.types.CodeTransform.toBool;
+			return cards_types_CodeTransform.toBool;
 		case 2:
-			return cards.types.CodeTransform.toDate;
+			return cards_types_CodeTransform.toDate;
 		case 3:
-			return cards.types.CodeTransform.toFloat;
+			return cards_types_CodeTransform.toFloat;
 		case 4:
-			return cards.types.CodeTransform.toObject;
+			return cards_types_CodeTransform.toObject;
 		case 5:
-			return cards.types.CodeTransform.toString;
+			return cards_types_CodeTransform.toString;
 		case 6:
-			return cards.types.CodeTransform.toCode;
+			return cards_types_CodeTransform.toCode;
 		case 7:
-			return cards.types.CodeTransform.toReference;
+			return cards_types_CodeTransform.toReference;
 		}
 		break;
 	case 7:
 		switch(dstType[1]) {
 		case 0:
-			return cards.types.ReferenceTransform.toArray;
+			return cards_types_ReferenceTransform.toArray;
 		case 1:
-			return cards.types.ReferenceTransform.toBool;
+			return cards_types_ReferenceTransform.toBool;
 		case 2:
-			return cards.types.ReferenceTransform.toDate;
+			return cards_types_ReferenceTransform.toDate;
 		case 3:
-			return cards.types.ReferenceTransform.toFloat;
+			return cards_types_ReferenceTransform.toFloat;
 		case 4:
-			return cards.types.ReferenceTransform.toObject;
+			return cards_types_ReferenceTransform.toObject;
 		case 5:
-			return cards.types.ReferenceTransform.toString;
+			return cards_types_ReferenceTransform.toString;
 		case 6:
-			return cards.types.ReferenceTransform.toCode;
+			return cards_types_ReferenceTransform.toCode;
 		case 7:
-			return cards.types.ReferenceTransform.toReference;
+			return cards_types_ReferenceTransform.toReference;
 		}
 		break;
 	}
 };
-cards.ui = {};
-cards.ui.Article = function(options) {
+var cards_ui_Article = function(options) {
 	if(null == options.el && null == options.template) options.template = "<article></article>";
-	this.component = new cards.components.Component(options);
-	this.fragments = new haxe.ds.ObjectMap();
-	this.fragmentStream = new thx.stream.Bus();
-	this.fragment = new thx.stream.Value(haxe.ds.Option.None);
+	this.component = new cards_components_Component(options);
+	this.fragments = new haxe_ds_ObjectMap();
+	this.fragmentStream = new thx_stream_Bus();
+	this.fragment = new thx_stream_Value(haxe_ds_Option.None);
 	this.fragmentStream.toOption().feed(this.fragment);
-	var filtered = thx.stream.EmitterOptions.filterOption(this.fragment);
+	var filtered = thx_stream_EmitterOptions.filterOption(this.fragment);
 	filtered.previous().subscribe(function(fragment) {
 		fragment.active.set(false);
 	});
@@ -1773,8 +1770,8 @@ cards.ui.Article = function(options) {
 		fragment1.active.set(true);
 	});
 };
-cards.ui.Article.__name__ = ["cards","ui","Article"];
-cards.ui.Article.prototype = {
+cards_ui_Article.__name__ = ["cards","ui","Article"];
+cards_ui_Article.prototype = {
 	component: null
 	,fragment: null
 	,fragmentStream: null
@@ -1786,32 +1783,32 @@ cards.ui.Article.prototype = {
 		this.fragments.set(fragment,$bind(focusStream,focusStream.cancel));
 	}
 	,addBlock: function() {
-		var fragment = new cards.ui.fragments.Block({ parent : this.component, container : this.component.el, defaultText : "block"});
+		var fragment = new cards_ui_fragments_Block({ parent : this.component, container : this.component.el, defaultText : "block"});
 		this.addFragment(fragment);
 		return fragment;
 	}
 	,addReadonly: function() {
-		var fragment = new cards.ui.fragments.ReadonlyBlock({ parent : this.component, container : this.component.el});
+		var fragment = new cards_ui_fragments_ReadonlyBlock({ parent : this.component, container : this.component.el});
 		this.addFragment(fragment);
 		return fragment;
 	}
 	,removeFragment: function(fragment) {
-		if(thx.core.Options.equalsValue(this.fragment.get(),fragment)) this.fragment.set(haxe.ds.Option.None);
+		if(thx_core_Options.equalsValue(this.fragment.get(),fragment)) this.fragment.set(haxe_ds_Option.None);
 		var finalizer = this.fragments.h[fragment.__id__];
-		thx.Assert.notNull(finalizer,null,{ fileName : "Article.hx", lineNumber : 71, className : "cards.ui.Article", methodName : "removeFragment"});
+		thx_Assert.notNull(finalizer,null,{ fileName : "Article.hx", lineNumber : 71, className : "cards.ui.Article", methodName : "removeFragment"});
 		finalizer();
 	}
-	,__class__: cards.ui.Article
+	,__class__: cards_ui_Article
 };
-cards.ui.Card = function() { };
-cards.ui.Card.__name__ = ["cards","ui","Card"];
-cards.ui.Card.create = function(model,container,mapper) {
-	var card = new cards.components.Component({ template : "<div class=\"card\"><div class=\"doc\"></div><aside><div class=\"context\"></div><div class=\"model\"></div></aside></div>"});
-	var context = udom.Query.first(".context",card.el);
-	var modelView = new cards.ui.ModelView();
-	var document = new cards.ui.Document({ el : udom.Query.first(".doc",card.el)});
-	var context1 = new cards.ui.ContextView(document,model,modelView,mapper,{ el : udom.Query.first(".context",card.el)});
-	modelView.component.appendTo(udom.Query.first(".model",card.el));
+var cards_ui_Card = function() { };
+cards_ui_Card.__name__ = ["cards","ui","Card"];
+cards_ui_Card.create = function(model,container,mapper) {
+	var card = new cards_components_Component({ template : "<div class=\"card\"><div class=\"doc\"></div><aside><div class=\"context\"></div><div class=\"model\"></div></aside></div>"});
+	var context = udom_Query.first(".context",card.el);
+	var modelView = new cards_ui_ModelView();
+	var document = new cards_ui_Document({ el : udom_Query.first(".doc",card.el)});
+	var context1 = new cards_ui_ContextView(document,model,modelView,mapper,{ el : udom_Query.first(".context",card.el)});
+	modelView.component.appendTo(udom_Query.first(".model",card.el));
 	modelView.schema.subscribe(model.schemaEventSubscriber);
 	modelView.data.subscribe(model.dataEventSubscriber);
 	card.appendTo(container);
@@ -1825,12 +1822,11 @@ cards.ui.Card.create = function(model,container,mapper) {
 	mapper.values.ensure("emphasis",block.component);
 	document.article.addBlock();
 };
-cards.ui.widgets = {};
-cards.ui.widgets.FrameOverlay = function(options) {
+var cards_ui_widgets_FrameOverlay = function(options) {
 	var _g = this;
 	if(null == options.el && null == options.template) options.template = "<div class=\"frame-overlay\"></div>";
-	this.component = new cards.components.Component(options);
-	this.visible = new cards.properties.Visible(this.component,false);
+	this.component = new cards_components_Component(options);
+	this.visible = new cards_properties_Visible(this.component,false);
 	var clear = function(_) {
 		_g.visible.stream.set(false);
 	};
@@ -1847,8 +1843,8 @@ cards.ui.widgets.FrameOverlay = function(options) {
 	});
 	this.anchorElement = window.document.body;
 };
-cards.ui.widgets.FrameOverlay.__name__ = ["cards","ui","widgets","FrameOverlay"];
-cards.ui.widgets.FrameOverlay.prototype = {
+cards_ui_widgets_FrameOverlay.__name__ = ["cards","ui","widgets","FrameOverlay"];
+cards_ui_widgets_FrameOverlay.prototype = {
 	component: null
 	,visible: null
 	,anchorElement: null
@@ -1856,13 +1852,13 @@ cards.ui.widgets.FrameOverlay.prototype = {
 	,at: null
 	,anchorTo: function(el,my,at) {
 		this.anchorElement = el;
-		if(null == my) this.my = cards.ui.widgets.AnchorPoint.TopLeft; else this.my = my;
-		if(null == at) this.at = cards.ui.widgets.AnchorPoint.BottomLeft; else this.at = at;
+		if(null == my) this.my = cards_ui_widgets_AnchorPoint.TopLeft; else this.my = my;
+		if(null == at) this.at = cards_ui_widgets_AnchorPoint.BottomLeft; else this.at = at;
 		if(this.visible.stream.get()) this.reposition();
 	}
 	,reposition: function() {
 		if(!this.component.isAttached) {
-			var parent = [udom.Query.first(Config.selectors.app),window.document.body].filter(function(v) {
+			var parent = [udom_Query.first(Config.selectors.app),window.document.body].filter(function(v) {
 				return null != v;
 			}).shift();
 			this.component.appendTo(parent);
@@ -1924,86 +1920,44 @@ cards.ui.widgets.FrameOverlay.prototype = {
 		style.top = y + "px";
 		style.left = x + "px";
 	}
-	,__class__: cards.ui.widgets.FrameOverlay
+	,__class__: cards_ui_widgets_FrameOverlay
 };
-cards.ui.widgets.Tooltip = function(options) {
-	cards.ui.widgets.FrameOverlay.call(this,options);
+var cards_ui_widgets_Tooltip = function(options) {
+	cards_ui_widgets_FrameOverlay.call(this,options);
 };
-cards.ui.widgets.Tooltip.__name__ = ["cards","ui","widgets","Tooltip"];
-cards.ui.widgets.Tooltip.__super__ = cards.ui.widgets.FrameOverlay;
-cards.ui.widgets.Tooltip.prototype = $extend(cards.ui.widgets.FrameOverlay.prototype,{
+cards_ui_widgets_Tooltip.__name__ = ["cards","ui","widgets","Tooltip"];
+cards_ui_widgets_Tooltip.__super__ = cards_ui_widgets_FrameOverlay;
+cards_ui_widgets_Tooltip.prototype = $extend(cards_ui_widgets_FrameOverlay.prototype,{
 	setContent: function(html) {
 		this.component.el.innerHTML = html;
 	}
-	,__class__: cards.ui.widgets.Tooltip
+	,__class__: cards_ui_widgets_Tooltip
 });
-var haxe = {};
-haxe.ds = {};
-haxe.ds.StringMap = function() {
-	this.h = { };
-};
-haxe.ds.StringMap.__name__ = ["haxe","ds","StringMap"];
-haxe.ds.StringMap.__interfaces__ = [IMap];
-haxe.ds.StringMap.prototype = {
-	h: null
-	,set: function(key,value) {
-		this.h["$" + key] = value;
-	}
-	,get: function(key) {
-		return this.h["$" + key];
-	}
-	,exists: function(key) {
-		return this.h.hasOwnProperty("$" + key);
-	}
-	,remove: function(key) {
-		key = "$" + key;
-		if(!this.h.hasOwnProperty(key)) return false;
-		delete(this.h[key]);
-		return true;
-	}
-	,keys: function() {
-		var a = [];
-		for( var key in this.h ) {
-		if(this.h.hasOwnProperty(key)) a.push(key.substr(1));
-		}
-		return HxOverrides.iter(a);
-	}
-	,iterator: function() {
-		return { ref : this.h, it : this.keys(), hasNext : function() {
-			return this.it.hasNext();
-		}, next : function() {
-			var i = this.it.next();
-			return this.ref["$" + i];
-		}};
-	}
-	,__class__: haxe.ds.StringMap
-};
-var js = {};
-js.Boot = function() { };
-js.Boot.__name__ = ["js","Boot"];
-js.Boot.__unhtml = function(s) {
+var js_Boot = function() { };
+js_Boot.__name__ = ["js","Boot"];
+js_Boot.__unhtml = function(s) {
 	return s.split("&").join("&amp;").split("<").join("&lt;").split(">").join("&gt;");
 };
-js.Boot.__trace = function(v,i) {
+js_Boot.__trace = function(v,i) {
 	var msg;
 	if(i != null) msg = i.fileName + ":" + i.lineNumber + ": "; else msg = "";
-	msg += js.Boot.__string_rec(v,"");
+	msg += js_Boot.__string_rec(v,"");
 	if(i != null && i.customParams != null) {
 		var _g = 0;
 		var _g1 = i.customParams;
 		while(_g < _g1.length) {
 			var v1 = _g1[_g];
 			++_g;
-			msg += "," + js.Boot.__string_rec(v1,"");
+			msg += "," + js_Boot.__string_rec(v1,"");
 		}
 	}
 	var d;
-	if(typeof(document) != "undefined" && (d = document.getElementById("haxe:trace")) != null) d.innerHTML += js.Boot.__unhtml(msg) + "<br/>"; else if(typeof console != "undefined" && console.log != null) console.log(msg);
+	if(typeof(document) != "undefined" && (d = document.getElementById("haxe:trace")) != null) d.innerHTML += js_Boot.__unhtml(msg) + "<br/>"; else if(typeof console != "undefined" && console.log != null) console.log(msg);
 };
-js.Boot.getClass = function(o) {
+js_Boot.getClass = function(o) {
 	if((o instanceof Array) && o.__enum__ == null) return Array; else return o.__class__;
 };
-js.Boot.__string_rec = function(o,s) {
+js_Boot.__string_rec = function(o,s) {
 	if(o == null) return "null";
 	if(s.length >= 5) return "<...>";
 	var t = typeof(o);
@@ -2019,7 +1973,7 @@ js.Boot.__string_rec = function(o,s) {
 				var _g = o.length;
 				while(_g1 < _g) {
 					var i = _g1++;
-					if(i != 2) str += "," + js.Boot.__string_rec(o[i],s); else str += js.Boot.__string_rec(o[i],s);
+					if(i != 2) str += "," + js_Boot.__string_rec(o[i],s); else str += js_Boot.__string_rec(o[i],s);
 				}
 				return str + ")";
 			}
@@ -2030,7 +1984,7 @@ js.Boot.__string_rec = function(o,s) {
 			var _g2 = 0;
 			while(_g2 < l) {
 				var i2 = _g2++;
-				str1 += (i2 > 0?",":"") + js.Boot.__string_rec(o[i2],s);
+				str1 += (i2 > 0?",":"") + js_Boot.__string_rec(o[i2],s);
 			}
 			str1 += "]";
 			return str1;
@@ -2057,7 +2011,7 @@ js.Boot.__string_rec = function(o,s) {
 			continue;
 		}
 		if(str2.length != 2) str2 += ", \n";
-		str2 += s + k + " : " + js.Boot.__string_rec(o[k],s);
+		str2 += s + k + " : " + js_Boot.__string_rec(o[k],s);
 		}
 		s = s.substring(1);
 		str2 += "\n" + s + "}";
@@ -2070,7 +2024,7 @@ js.Boot.__string_rec = function(o,s) {
 		return String(o);
 	}
 };
-js.Boot.__interfLoop = function(cc,cl) {
+js_Boot.__interfLoop = function(cc,cl) {
 	if(cc == null) return false;
 	if(cc == cl) return true;
 	var intf = cc.__interfaces__;
@@ -2080,12 +2034,12 @@ js.Boot.__interfLoop = function(cc,cl) {
 		while(_g1 < _g) {
 			var i = _g1++;
 			var i1 = intf[i];
-			if(i1 == cl || js.Boot.__interfLoop(i1,cl)) return true;
+			if(i1 == cl || js_Boot.__interfLoop(i1,cl)) return true;
 		}
 	}
-	return js.Boot.__interfLoop(cc.__super__,cl);
+	return js_Boot.__interfLoop(cc.__super__,cl);
 };
-js.Boot.__instanceof = function(o,cl) {
+js_Boot.__instanceof = function(o,cl) {
 	if(cl == null) return false;
 	switch(cl) {
 	case Int:
@@ -2104,7 +2058,7 @@ js.Boot.__instanceof = function(o,cl) {
 		if(o != null) {
 			if(typeof(cl) == "function") {
 				if(o instanceof cl) return true;
-				if(js.Boot.__interfLoop(js.Boot.getClass(o),cl)) return true;
+				if(js_Boot.__interfLoop(js_Boot.getClass(o),cl)) return true;
 			}
 		} else return false;
 		if(cl == Class && o.__name__ != null) return true;
@@ -2112,63 +2066,59 @@ js.Boot.__instanceof = function(o,cl) {
 		return o.__enum__ == cl;
 	}
 };
-js.Boot.__cast = function(o,t) {
-	if(js.Boot.__instanceof(o,t)) return o; else throw "Cannot cast " + Std.string(o) + " to " + Std.string(t);
+js_Boot.__cast = function(o,t) {
+	if(js_Boot.__instanceof(o,t)) return o; else throw "Cannot cast " + Std.string(o) + " to " + Std.string(t);
 };
-var udom = {};
-udom.Html = function() { };
-udom.Html.__name__ = ["udom","Html"];
-udom.Html.parseList = function(html) {
+var udom_Html = function() { };
+udom_Html.__name__ = ["udom","Html"];
+udom_Html.parseList = function(html) {
 	var el = window.document.createElement("div");
 	el.innerHTML = html;
 	return el.childNodes;
 };
-udom.Html.parseAll = function(html) {
-	return udom._Dom.H.toArray(udom.Html.parseList(StringTools.trim(html)));
+udom_Html.parseAll = function(html) {
+	return udom__$Dom_H.toArray(udom_Html.parseList(StringTools.trim(html)));
 };
-udom.Html.parse = function(html) {
-	return udom.Html.parseList(StringTools.ltrim(html))[0];
+udom_Html.parse = function(html) {
+	return udom_Html.parseList(StringTools.ltrim(html))[0];
 };
-var thx = {};
-thx.stream = {};
-thx.stream.dom = {};
-thx.stream.dom.Dom = function() { };
-thx.stream.dom.Dom.__name__ = ["thx","stream","dom","Dom"];
-thx.stream.dom.Dom.ready = function() {
-	return thx.promise.Promise.create(function(resolve,_) {
+var thx_stream_dom_Dom = function() { };
+thx_stream_dom_Dom.__name__ = ["thx","stream","dom","Dom"];
+thx_stream_dom_Dom.ready = function() {
+	return thx_promise_Promise.create(function(resolve,_) {
 		window.document.addEventListener("DOMContentLoaded",function(_1) {
-			resolve(thx.core.Nil.nil);
+			resolve(thx_core_Nil.nil);
 		},false);
 	});
 };
-thx.stream.dom.Dom.streamEvent = function(el,name,capture) {
+thx_stream_dom_Dom.streamEvent = function(el,name,capture) {
 	if(capture == null) capture = false;
-	return thx.stream.Emitter.create(function(stream) {
+	return thx_stream_Emitter.create(function(stream) {
 		el.addEventListener(name,$bind(stream,stream.pulse),capture);
 		stream.addCleanUp(function() {
 			el.removeEventListener(name,$bind(stream,stream.pulse),capture);
 		});
 	});
 };
-thx.stream.dom.Dom.streamMouseEvent = function(el,name,capture) {
+thx_stream_dom_Dom.streamMouseEvent = function(el,name,capture) {
 	if(capture == null) capture = false;
-	return thx.stream.dom.Dom.streamEvent(el,name,capture);
+	return thx_stream_dom_Dom.streamEvent(el,name,capture);
 };
-thx.stream.dom.Dom.streamMouseMove = function(el,capture) {
+thx_stream_dom_Dom.streamMouseMove = function(el,capture) {
 	if(capture == null) capture = false;
-	return thx.stream.dom.Dom.streamEvent(el,"mousemove",capture);
+	return thx_stream_dom_Dom.streamEvent(el,"mousemove",capture);
 };
-thx.stream.dom.Dom.streamMouseDown = function(el,capture) {
+thx_stream_dom_Dom.streamMouseDown = function(el,capture) {
 	if(capture == null) capture = false;
-	return thx.stream.dom.Dom.streamEvent(el,"mousedown",capture);
+	return thx_stream_dom_Dom.streamEvent(el,"mousedown",capture);
 };
-thx.stream.dom.Dom.streamMouseUp = function(el,capture) {
+thx_stream_dom_Dom.streamMouseUp = function(el,capture) {
 	if(capture == null) capture = false;
-	return thx.stream.dom.Dom.streamEvent(el,"mouseup",capture);
+	return thx_stream_dom_Dom.streamEvent(el,"mouseup",capture);
 };
-thx.stream.dom.Dom.streamKey = function(el,name,capture) {
+thx_stream_dom_Dom.streamKey = function(el,name,capture) {
 	if(capture == null) capture = false;
-	return thx.stream.Emitter.create((function($this) {
+	return thx_stream_Emitter.create((function($this) {
 		var $r;
 		if(!StringTools.startsWith(name,"key")) name = "key" + name;
 		$r = function(stream) {
@@ -2180,70 +2130,70 @@ thx.stream.dom.Dom.streamKey = function(el,name,capture) {
 		return $r;
 	}(this)));
 };
-thx.stream.dom.Dom.streamFocus = function(el,capture) {
+thx_stream_dom_Dom.streamFocus = function(el,capture) {
 	if(capture == null) capture = false;
-	return thx.stream.dom.Dom.streamEvent(el,"focus",capture).toTrue().merge(thx.stream.dom.Dom.streamEvent(el,"blur",capture).toFalse());
+	return thx_stream_dom_Dom.streamEvent(el,"focus",capture).toTrue().merge(thx_stream_dom_Dom.streamEvent(el,"blur",capture).toFalse());
 };
-thx.stream.dom.Dom.streamClick = function(el,capture) {
+thx_stream_dom_Dom.streamClick = function(el,capture) {
 	if(capture == null) capture = false;
-	return thx.stream.dom.Dom.streamEvent(el,"click",capture);
+	return thx_stream_dom_Dom.streamEvent(el,"click",capture);
 };
-thx.stream.dom.Dom.streamInput = function(el,capture) {
+thx_stream_dom_Dom.streamInput = function(el,capture) {
 	if(capture == null) capture = false;
-	return thx.stream.dom.Dom.streamEvent(el,"input",capture).mapValue(function(_) {
+	return thx_stream_dom_Dom.streamEvent(el,"input",capture).mapValue(function(_) {
 		return el.value;
 	});
 };
-thx.stream.dom.Dom.subscribeText = function(el,force) {
+thx_stream_dom_Dom.subscribeText = function(el,force) {
 	if(force == null) force = false;
 	return function(text) {
 		if(el.textContent != text || force) el.textContent = text;
 	};
 };
-thx.stream.dom.Dom.subscribeHTML = function(el) {
+thx_stream_dom_Dom.subscribeHTML = function(el) {
 	return function(html) {
 		el.innerHTML = html;
 	};
 };
-thx.stream.dom.Dom.subscribeFocus = function(el) {
+thx_stream_dom_Dom.subscribeFocus = function(el) {
 	return function(focus) {
 		if(focus) el.focus(); else el.blur();
 	};
 };
-thx.stream.dom.Dom.subscribeAttribute = function(el,name) {
+thx_stream_dom_Dom.subscribeAttribute = function(el,name) {
 	return function(value) {
 		if(null == value) el.removeAttribute(name); else el.setAttribute(name,value);
 	};
 };
-thx.stream.dom.Dom.subscribeToggleAttribute = function(el,name,value) {
+thx_stream_dom_Dom.subscribeToggleAttribute = function(el,name,value) {
 	if(null == value) value = el.getAttribute(name);
 	return function(on) {
 		if(on) el.setAttribute(name,value); else el.removeAttribute(name);
 	};
 };
-thx.stream.dom.Dom.subscribeToggleClass = function(el,name) {
+thx_stream_dom_Dom.subscribeToggleClass = function(el,name) {
 	return function(on) {
 		if(on) el.classList.add(name); else el.classList.remove(name);
 	};
 };
-thx.stream.dom.Dom.subscribeToggleVisibility = function(el) {
+thx_stream_dom_Dom.subscribeToggleVisibility = function(el) {
 	var originalDisplay = el.style.display;
 	if(originalDisplay == "none") originalDisplay = "";
 	return function(on) {
 		if(on) el.style.display = originalDisplay; else el.style.display = "none";
 	};
 };
-thx.stream.Emitter = function(init) {
+var thx_stream_Emitter = function(init) {
 	this.init = init;
 };
-thx.stream.Emitter.__name__ = ["thx","stream","Emitter"];
-thx.stream.Emitter.create = function(init) {
-	return new thx.stream.Emitter(init);
+thx_stream_Emitter.__name__ = ["thx","stream","Emitter"];
+thx_stream_Emitter.create = function(init) {
+	return new thx_stream_Emitter(init);
 };
-thx.stream.Emitter.prototype = {
+thx_stream_Emitter.prototype = {
 	init: null
 	,sign: function(subscriber) {
-		var stream = new thx.stream.Stream(subscriber);
+		var stream = new thx_stream_Stream(subscriber);
 		this.init(stream);
 		return stream;
 	}
@@ -2254,7 +2204,7 @@ thx.stream.Emitter.prototype = {
 		};
 		if(null != end) end = end; else end = function(_2) {
 		};
-		var stream = new thx.stream.Stream(function(r) {
+		var stream = new thx_stream_Stream(function(r) {
 			switch(r[1]) {
 			case 0:
 				var v = r[2];
@@ -2274,7 +2224,7 @@ thx.stream.Emitter.prototype = {
 		return stream;
 	}
 	,feed: function(value) {
-		var stream = new thx.stream.Stream(null);
+		var stream = new thx_stream_Stream(null);
 		stream.subscriber = function(r) {
 			switch(r[1]) {
 			case 0:
@@ -2299,7 +2249,7 @@ thx.stream.Emitter.prototype = {
 		return stream;
 	}
 	,plug: function(bus) {
-		var stream = new thx.stream.Stream(null);
+		var stream = new thx_stream_Stream(null);
 		stream.subscriber = $bind(bus,bus.emit);
 		bus.upStreams.push(stream);
 		stream.addCleanUp(function() {
@@ -2310,7 +2260,7 @@ thx.stream.Emitter.prototype = {
 	}
 	,delay: function(time) {
 		var _g = this;
-		return new thx.stream.Emitter(function(stream) {
+		return new thx_stream_Emitter(function(stream) {
 			var id = setTimeout(function() {
 				_g.init(stream);
 			},time);
@@ -2318,22 +2268,22 @@ thx.stream.Emitter.prototype = {
 				return function() {
 					return f(id1);
 				};
-			})(thx.core.Timer.clear,id));
+			})(thx_core_Timer.clear,id));
 		});
 	}
 	,debounce: function(delay) {
 		var _g = this;
-		return new thx.stream.Emitter(function(stream) {
+		return new thx_stream_Emitter(function(stream) {
 			var id = null;
 			stream.addCleanUp(function() {
 				clearTimeout(id);
 			});
-			_g.init(new thx.stream.Stream(function(r) {
+			_g.init(new thx_stream_Stream(function(r) {
 				switch(r[1]) {
 				case 0:
 					var v = r[2];
 					clearTimeout(id);
-					id = thx.core.Timer.delay((function(f,v1) {
+					id = thx_core_Timer.delay((function(f,v1) {
 						return function() {
 							return f(v1);
 						};
@@ -2359,8 +2309,8 @@ thx.stream.Emitter.prototype = {
 	}
 	,map: function(f) {
 		var _g = this;
-		return new thx.stream.Emitter(function(stream) {
-			_g.init(new thx.stream.Stream(function(r) {
+		return new thx_stream_Emitter(function(stream) {
+			_g.init(new thx_stream_Stream(function(r) {
 				switch(r[1]) {
 				case 0:
 					var v = r[2];
@@ -2390,14 +2340,14 @@ thx.stream.Emitter.prototype = {
 	}
 	,mapValue: function(f) {
 		return this.map(function(v) {
-			return thx.promise.Promise.value(f(v));
+			return thx_promise_Promise.value(f(v));
 		});
 	}
 	,takeUntil: function(f) {
 		var _g = this;
-		return new thx.stream.Emitter(function(stream) {
+		return new thx_stream_Emitter(function(stream) {
 			var instream = null;
-			instream = new thx.stream.Stream(function(r) {
+			instream = new thx_stream_Stream(function(r) {
 				switch(r[1]) {
 				case 0:
 					var v = r[2];
@@ -2435,7 +2385,7 @@ thx.stream.Emitter.prototype = {
 			var $r;
 			var counter = 0;
 			$r = function(_) {
-				return thx.promise.Promise.value(counter++ < count);
+				return thx_promise_Promise.value(counter++ < count);
 			};
 			return $r;
 		}(this)));
@@ -2448,8 +2398,8 @@ thx.stream.Emitter.prototype = {
 	}
 	,filter: function(f) {
 		var _g = this;
-		return new thx.stream.Emitter(function(stream) {
-			_g.init(new thx.stream.Stream(function(r) {
+		return new thx_stream_Emitter(function(stream) {
+			_g.init(new thx_stream_Stream(function(r) {
 				switch(r[1]) {
 				case 0:
 					var v = r[2];
@@ -2479,13 +2429,13 @@ thx.stream.Emitter.prototype = {
 	}
 	,filterValue: function(f) {
 		return this.filter(function(v) {
-			return thx.promise.Promise.value(f(v));
+			return thx_promise_Promise.value(f(v));
 		});
 	}
 	,concat: function(other) {
 		var _g = this;
-		return new thx.stream.Emitter(function(stream) {
-			_g.init(new thx.stream.Stream(function(r) {
+		return new thx_stream_Emitter(function(stream) {
+			_g.init(new thx_stream_Stream(function(r) {
 				switch(r[1]) {
 				case 0:
 					var v = r[2];
@@ -2511,15 +2461,15 @@ thx.stream.Emitter.prototype = {
 	}
 	,merge: function(other) {
 		var _g = this;
-		return new thx.stream.Emitter(function(stream) {
+		return new thx_stream_Emitter(function(stream) {
 			_g.init(stream);
 			other.init(stream);
 		});
 	}
 	,reduce: function(acc,f) {
 		var _g = this;
-		return new thx.stream.Emitter(function(stream) {
-			_g.init(new thx.stream.Stream(function(r) {
+		return new thx_stream_Emitter(function(stream) {
+			_g.init(new thx_stream_Stream(function(r) {
 				switch(r[1]) {
 				case 0:
 					var v = r[2];
@@ -2546,12 +2496,12 @@ thx.stream.Emitter.prototype = {
 	}
 	,toOption: function() {
 		return this.mapValue(function(v) {
-			if(null == v) return haxe.ds.Option.None; else return haxe.ds.Option.Some(v);
+			if(null == v) return haxe_ds_Option.None; else return haxe_ds_Option.Some(v);
 		});
 	}
 	,toNil: function() {
 		return this.mapValue(function(_) {
-			return thx.core.Nil.nil;
+			return thx_core_Nil.nil;
 		});
 	}
 	,toTrue: function() {
@@ -2572,7 +2522,7 @@ thx.stream.Emitter.prototype = {
 	,log: function(prefix,posInfo) {
 		if(prefix == null) prefix = ""; else prefix = "" + prefix + ": ";
 		return this.mapValue(function(v) {
-			haxe.Log.trace("" + prefix + Std.string(v),posInfo);
+			haxe_Log.trace("" + prefix + Std.string(v),posInfo);
 			return v;
 		});
 	}
@@ -2585,12 +2535,12 @@ thx.stream.Emitter.prototype = {
 	}
 	,distinct: function(equals) {
 		var _g = this;
-		return new thx.stream.Emitter(function(stream) {
+		return new thx_stream_Emitter(function(stream) {
 			if(null == equals) equals = function(a,b) {
 				return a == b;
 			};
 			var last = null;
-			_g.init(new thx.stream.Stream(function(r) {
+			_g.init(new thx_stream_Stream(function(r) {
 				switch(r[1]) {
 				case 0:
 					var v = r[2];
@@ -2618,7 +2568,7 @@ thx.stream.Emitter.prototype = {
 	}
 	,pair: function(other) {
 		var _g = this;
-		return new thx.stream.Emitter(function(stream) {
+		return new thx_stream_Emitter(function(stream) {
 			var _0 = null;
 			var _1 = null;
 			stream.addCleanUp(function() {
@@ -2629,7 +2579,7 @@ thx.stream.Emitter.prototype = {
 				if(null == _0 || null == _1) return;
 				stream.pulse({ _0 : _0, _1 : _1});
 			};
-			_g.init(new thx.stream.Stream(function(r) {
+			_g.init(new thx_stream_Stream(function(r) {
 				switch(r[1]) {
 				case 0:
 					var v = r[2];
@@ -2652,7 +2602,7 @@ thx.stream.Emitter.prototype = {
 					break;
 				}
 			}));
-			other.init(new thx.stream.Stream(function(r1) {
+			other.init(new thx_stream_Stream(function(r1) {
 				switch(r1[1]) {
 				case 0:
 					var v1 = r1[2];
@@ -2679,7 +2629,7 @@ thx.stream.Emitter.prototype = {
 	}
 	,zip: function(other) {
 		var _g = this;
-		return new thx.stream.Emitter(function(stream) {
+		return new thx_stream_Emitter(function(stream) {
 			var _0 = [];
 			var _1 = [];
 			stream.addCleanUp(function() {
@@ -2696,7 +2646,7 @@ thx.stream.Emitter.prototype = {
 					return $r;
 				}(this)));
 			};
-			_g.init(new thx.stream.Stream(function(r) {
+			_g.init(new thx_stream_Stream(function(r) {
 				switch(r[1]) {
 				case 0:
 					var v = r[2];
@@ -2719,7 +2669,7 @@ thx.stream.Emitter.prototype = {
 					break;
 				}
 			}));
-			other.init(new thx.stream.Stream(function(r1) {
+			other.init(new thx_stream_Stream(function(r1) {
 				switch(r1[1]) {
 				case 0:
 					var v1 = r1[2];
@@ -2746,7 +2696,7 @@ thx.stream.Emitter.prototype = {
 	}
 	,sampleBy: function(sampler) {
 		var _g = this;
-		return new thx.stream.Emitter(function(stream) {
+		return new thx_stream_Emitter(function(stream) {
 			var _0 = null;
 			var _1 = null;
 			stream.addCleanUp(function() {
@@ -2757,7 +2707,7 @@ thx.stream.Emitter.prototype = {
 				if(null == _0 || null == _1) return;
 				stream.pulse({ _0 : _0, _1 : _1});
 			};
-			_g.init(new thx.stream.Stream(function(r) {
+			_g.init(new thx_stream_Stream(function(r) {
 				switch(r[1]) {
 				case 0:
 					var v = r[2];
@@ -2779,7 +2729,7 @@ thx.stream.Emitter.prototype = {
 					break;
 				}
 			}));
-			sampler.init(new thx.stream.Stream(function(r1) {
+			sampler.init(new thx_stream_Stream(function(r1) {
 				switch(r1[1]) {
 				case 0:
 					var v1 = r1[2];
@@ -2807,13 +2757,13 @@ thx.stream.Emitter.prototype = {
 	,window: function(size,emitWithLess) {
 		if(emitWithLess == null) emitWithLess = false;
 		var _g = this;
-		return new thx.stream.Emitter(function(stream) {
+		return new thx_stream_Emitter(function(stream) {
 			var buf = [];
 			var pulse = function() {
 				if(buf.length > size) buf.shift();
 				if(buf.length == size || emitWithLess) stream.pulse(buf.slice());
 			};
-			_g.init(new thx.stream.Stream(function(r) {
+			_g.init(new thx_stream_Stream(function(r) {
 				switch(r[1]) {
 				case 0:
 					var v = r[2];
@@ -2840,7 +2790,7 @@ thx.stream.Emitter.prototype = {
 	}
 	,previous: function() {
 		var _g = this;
-		return new thx.stream.Emitter(function(stream) {
+		return new thx_stream_Emitter(function(stream) {
 			var value = null;
 			var first = true;
 			var pulse = function() {
@@ -2850,7 +2800,7 @@ thx.stream.Emitter.prototype = {
 				}
 				stream.pulse(value);
 			};
-			_g.init(new thx.stream.Stream(function(r) {
+			_g.init(new thx_stream_Stream(function(r) {
 				switch(r[1]) {
 				case 0:
 					var v = r[2];
@@ -2875,14 +2825,14 @@ thx.stream.Emitter.prototype = {
 			}));
 		});
 	}
-	,__class__: thx.stream.Emitter
+	,__class__: thx_stream_Emitter
 };
-thx.stream.Value = function(value) {
+var thx_stream_Value = function(value) {
 	var _g = this;
 	this.value = value;
 	this.downStreams = [];
 	this.upStreams = [];
-	thx.stream.Emitter.call(this,function(stream) {
+	thx_stream_Emitter.call(this,function(stream) {
 		_g.downStreams.push(stream);
 		stream.addCleanUp(function() {
 			HxOverrides.remove(_g.downStreams,stream);
@@ -2890,9 +2840,9 @@ thx.stream.Value = function(value) {
 		stream.pulse(_g.value);
 	});
 };
-thx.stream.Value.__name__ = ["thx","stream","Value"];
-thx.stream.Value.__super__ = thx.stream.Emitter;
-thx.stream.Value.prototype = $extend(thx.stream.Emitter.prototype,{
+thx_stream_Value.__name__ = ["thx","stream","Value"];
+thx_stream_Value.__super__ = thx_stream_Emitter;
+thx_stream_Value.prototype = $extend(thx_stream_Emitter.prototype,{
 	value: null
 	,downStreams: null
 	,upStreams: null
@@ -2935,32 +2885,33 @@ thx.stream.Value.prototype = $extend(thx.stream.Emitter.prototype,{
 			stream.pulse(this.value);
 		}
 	}
-	,__class__: thx.stream.Value
+	,__class__: thx_stream_Value
 });
-haxe.ds.Option = { __ename__ : ["haxe","ds","Option"], __constructs__ : ["Some","None"] };
-haxe.ds.Option.Some = function(v) { var $x = ["Some",0,v]; $x.__enum__ = haxe.ds.Option; return $x; };
-haxe.ds.Option.None = ["None",1];
-haxe.ds.Option.None.__enum__ = haxe.ds.Option;
-thx.stream.EmitterOptions = function() { };
-thx.stream.EmitterOptions.__name__ = ["thx","stream","EmitterOptions"];
-thx.stream.EmitterOptions.filterOption = function(emitter) {
+var haxe_ds_Option = { __ename__ : ["haxe","ds","Option"], __constructs__ : ["Some","None"] };
+haxe_ds_Option.Some = function(v) { var $x = ["Some",0,v]; $x.__enum__ = haxe_ds_Option; $x.toString = $estr; return $x; };
+haxe_ds_Option.None = ["None",1];
+haxe_ds_Option.None.toString = $estr;
+haxe_ds_Option.None.__enum__ = haxe_ds_Option;
+var thx_stream_EmitterOptions = function() { };
+thx_stream_EmitterOptions.__name__ = ["thx","stream","EmitterOptions"];
+thx_stream_EmitterOptions.filterOption = function(emitter) {
 	return emitter.filterValue(function(opt) {
-		return thx.core.Options.toBool(opt);
+		return thx_core_Options.toBool(opt);
 	}).mapValue(function(opt1) {
-		return thx.core.Options.toValue(opt1);
+		return thx_core_Options.toValue(opt1);
 	});
 };
-thx.stream.EmitterOptions.toValue = function(emitter) {
+thx_stream_EmitterOptions.toValue = function(emitter) {
 	return emitter.mapValue(function(opt) {
-		return thx.core.Options.toValue(opt);
+		return thx_core_Options.toValue(opt);
 	});
 };
-thx.stream.EmitterOptions.toBool = function(emitter) {
+thx_stream_EmitterOptions.toBool = function(emitter) {
 	return emitter.mapValue(function(opt) {
-		return thx.core.Options.toBool(opt);
+		return thx_core_Options.toBool(opt);
 	});
 };
-thx.stream.EmitterOptions.either = function(emitter,some,none,fail,end) {
+thx_stream_EmitterOptions.either = function(emitter,some,none,fail,end) {
 	if(null == some) some = function(_) {
 	};
 	if(null == none) none = function() {
@@ -2977,10 +2928,9 @@ thx.stream.EmitterOptions.either = function(emitter,some,none,fail,end) {
 		}
 	},fail,end);
 };
-thx.core = {};
-thx.core.Options = function() { };
-thx.core.Options.__name__ = ["thx","core","Options"];
-thx.core.Options.toValue = function(option) {
+var thx_core_Options = function() { };
+thx_core_Options.__name__ = ["thx","core","Options"];
+thx_core_Options.toValue = function(option) {
 	switch(option[1]) {
 	case 1:
 		return null;
@@ -2989,7 +2939,7 @@ thx.core.Options.toValue = function(option) {
 		return v;
 	}
 };
-thx.core.Options.toBool = function(option) {
+thx_core_Options.toBool = function(option) {
 	switch(option[1]) {
 	case 1:
 		return false;
@@ -2997,10 +2947,10 @@ thx.core.Options.toBool = function(option) {
 		return true;
 	}
 };
-thx.core.Options.toOption = function(value) {
-	if(null == value) return haxe.ds.Option.None; else return haxe.ds.Option.Some(value);
+thx_core_Options.toOption = function(value) {
+	if(null == value) return haxe_ds_Option.None; else return haxe_ds_Option.Some(value);
 };
-thx.core.Options.equals = function(a,b,eq) {
+thx_core_Options.equals = function(a,b,eq) {
 	switch(a[1]) {
 	case 1:
 		switch(b[1]) {
@@ -3025,50 +2975,50 @@ thx.core.Options.equals = function(a,b,eq) {
 		break;
 	}
 };
-thx.core.Options.equalsValue = function(a,b,eq) {
-	return thx.core.Options.equals(a,thx.core.Options.toOption(b));
+thx_core_Options.equalsValue = function(a,b,eq) {
+	return thx_core_Options.equals(a,thx_core_Options.toOption(b));
 };
-cards.ui.ContextField = function(options) {
+var cards_ui_ContextField = function(options) {
 	var _g = this;
 	if(null == options.template && null == options.el) options.template = "<div class=\"field\"><div class=\"key-container\"><div class=\"key\"></div></div><div class=\"value-container\"></div></div>";
-	this.component = new cards.components.Component(options);
-	var key = udom.Query.first(".key",this.component.el);
+	this.component = new cards_components_Component(options);
+	var key = udom_Query.first(".key",this.component.el);
 	key.textContent = options.display;
 	this.name = options.name;
 	this.type = options.type;
-	this.currentType = new thx.stream.Value(options.type);
-	this.focus = new thx.stream.Value(false);
-	this.active = new thx.stream.Value(false);
-	this.withError = new thx.stream.Value(haxe.ds.Option.None);
+	this.currentType = new thx_stream_Value(options.type);
+	this.focus = new thx_stream_Value(false);
+	this.active = new thx_stream_Value(false);
+	this.withError = new thx_stream_Value(haxe_ds_Option.None);
 	var wireRuntime = function(editor,convert) {
 		var runtime = editor.value.mapValue(convert);
 		runtime.distinct(function(a,b) {
-			return b != null && thx.core.Arrays.same(a.dependencies,b.dependencies);
+			return b != null && thx_core_Arrays.same(a.dependencies,b.dependencies);
 		}).subscribe(function(res) {
 			options.model.changes.subscribe(function(path) {
-				if(thx.core.Arrays.contains(res.dependencies,path,function(a1,b1) {
+				if(thx_core_Arrays.contains(res.dependencies,path,function(a1,b1) {
 					return StringTools.startsWith(b1,a1);
-				})) options.value.runtime.set(haxe.ds.Option.Some(convert(editor.value.get())));
+				})) options.value.runtime.set(haxe_ds_Option.Some(convert(editor.value.get())));
 			});
 		});
 		runtime.toOption().feed(options.value.runtime);
 		runtime.mapValue(function(res1) {
-			return cards.model.Expressions.toErrorOption(res1.expression);
+			return cards_model_Expressions.toErrorOption(res1.expression);
 		}).merge(options.value.runtimeError).feed(_g.withError);
 	};
-	var bus = new thx.stream.Bus();
-	this.fieldValue = new cards.ui.FieldValue(this.component,udom.Query.first(".value-container",this.component.el),function(type,editor1) {
+	var bus = new thx_stream_Bus();
+	this.fieldValue = new cards_ui_FieldValue(this.component,udom_Query.first(".value-container",this.component.el),function(type,editor1) {
 		editor1.focus.feed(_g.focus);
 		_g.currentType.set(type);
 		switch(type[1]) {
 		case 6:
 			wireRuntime(editor1,function(value) {
-				return cards.model.Runtime.toRuntime(value,options.model);
+				return cards_model_Runtime.toRuntime(value,options.model);
 			});
 			break;
 		case 7:
 			wireRuntime(editor1,function(value1) {
-				return cards.model.Runtime.toRuntime(cards.types.ReferenceTransform.toCode(value1),options.model);
+				return cards_model_Runtime.toRuntime(cards_types_ReferenceTransform.toCode(value1),options.model);
 			});
 			bus.subscribe(function(value2) {
 				var path1 = editor1.value.get();
@@ -3077,7 +3027,7 @@ cards.ui.ContextField = function(options) {
 			options.value.stream.plug(bus);
 			break;
 		default:
-			options.value.runtime.set(haxe.ds.Option.None);
+			options.value.runtime.set(haxe_ds_Option.None);
 			editor1.value.feed(options.value.stream);
 			options.value.stream.feed(editor1.value);
 		}
@@ -3086,32 +3036,32 @@ cards.ui.ContextField = function(options) {
 		case 6:
 			break;
 		case 7:
-			haxe.Log.trace("cancelling",{ fileName : "ContextField.hx", lineNumber : 109, className : "cards.ui.ContextField", methodName : "new"});
-			bus.emit(thx.stream.StreamValue.End(true));
+			haxe_Log.trace("cancelling",{ fileName : "ContextField.hx", lineNumber : 109, className : "cards.ui.ContextField", methodName : "new"});
+			bus.emit(thx_stream_StreamValue.End(true));
 			break;
 		default:
 		}
 	});
-	var runtime1 = thx.core.Options.toValue(options.value.runtime.get());
+	var runtime1 = thx_core_Options.toValue(options.value.runtime.get());
 	if(null == runtime1) this.fieldValue.setEditor(options.type,options.value.stream.get()); else {
-		var reference = cards.types.CodeTransform.toReference(runtime1.code);
-		if(null != reference && "" != reference) this.fieldValue.setEditor(cards.model.SchemaType.ReferenceType,cards.types.CodeTransform.toReference(runtime1.code)); else this.fieldValue.setEditor(cards.model.SchemaType.CodeType,runtime1.code);
+		var reference = cards_types_CodeTransform.toReference(runtime1.code);
+		if(null != reference && "" != reference) this.fieldValue.setEditor(cards_model_SchemaType.ReferenceType,cards_types_CodeTransform.toReference(runtime1.code)); else this.fieldValue.setEditor(cards_model_SchemaType.CodeType,runtime1.code);
 	}
-	this.active.subscribe(thx.stream.dom.Dom.subscribeToggleClass(this.component.el,"active"));
-	var clickKeyStream = thx.stream.dom.Dom.streamEvent(key,"click",false).subscribe(function(_) {
+	this.active.subscribe(thx_stream_dom_Dom.subscribeToggleClass(this.component.el,"active"));
+	var clickKeyStream = thx_stream_dom_Dom.streamEvent(key,"click",false).subscribe(function(_) {
 		if(null != _g.fieldValue.editor) _g.fieldValue.editor.focus.set(true);
 	});
-	thx.stream.EmitterOptions.toBool(this.withError).subscribe(thx.stream.dom.Dom.subscribeToggleClass(this.component.el,"error"));
-	thx.stream.EmitterOptions.either(this.withError,function(err) {
-		cards.ui.ContextField.tooltip.setContent(err);
-		cards.ui.ContextField.tooltip.anchorTo(_g.component.el,cards.ui.widgets.AnchorPoint.Top,cards.ui.widgets.AnchorPoint.Bottom);
-		cards.ui.ContextField.tooltip.visible.stream.set(true);
+	thx_stream_EmitterOptions.toBool(this.withError).subscribe(thx_stream_dom_Dom.subscribeToggleClass(this.component.el,"error"));
+	thx_stream_EmitterOptions.either(this.withError,function(err) {
+		cards_ui_ContextField.tooltip.setContent(err);
+		cards_ui_ContextField.tooltip.anchorTo(_g.component.el,cards_ui_widgets_AnchorPoint.Top,cards_ui_widgets_AnchorPoint.Bottom);
+		cards_ui_ContextField.tooltip.visible.stream.set(true);
 	},function() {
-		if(cards.ui.ContextField.tooltip.anchorElement == _g.component.el) cards.ui.ContextField.tooltip.visible.stream.set(false);
+		if(cards_ui_ContextField.tooltip.anchorElement == _g.component.el) cards_ui_ContextField.tooltip.visible.stream.set(false);
 	});
 };
-cards.ui.ContextField.__name__ = ["cards","ui","ContextField"];
-cards.ui.ContextField.prototype = {
+cards_ui_ContextField.__name__ = ["cards","ui","ContextField"];
+cards_ui_ContextField.prototype = {
 	component: null
 	,focus: null
 	,active: null
@@ -3124,50 +3074,50 @@ cards.ui.ContextField.prototype = {
 		this.component.destroy();
 		this.focus = null;
 	}
-	,__class__: cards.ui.ContextField
+	,__class__: cards_ui_ContextField
 };
-cards.ui.ContextView = function(document,model,modelView,mapper,options) {
+var cards_ui_ContextView = function(document,model,modelView,mapper,options) {
 	var _g = this;
 	this.document = document;
 	this.model = model;
 	this.modelView = modelView;
 	this.mapper = mapper;
-	this.component = new cards.components.Component(options);
-	this.toolbar = new cards.ui.widgets.Toolbar({ parent : this.component, container : this.component.el});
-	this.el = udom.Html.parseList(StringTools.ltrim("<div class=\"fields\"><div></div></div>"))[0];
+	this.component = new cards_components_Component(options);
+	this.toolbar = new cards_ui_widgets_Toolbar({ parent : this.component, container : this.component.el});
+	this.el = udom_Html.parseList(StringTools.ltrim("<div class=\"fields\"><div></div></div>"))[0];
 	this.component.el.appendChild(this.el);
-	this.el = udom.Query.first("div",this.el);
+	this.el = udom_Query.first("div",this.el);
 	this.button = { add : this.toolbar.left.addButton("add property",Config.icons.dropdown), toValue : this.toolbar.right.addButton("",Config.icons.value), toCode : this.toolbar.right.addButton("",Config.icons.code), toReference : this.toolbar.right.addButton("",Config.icons.reference), remove : this.toolbar.right.addButton("",Config.icons.remove)};
-	this.menu = { add : new cards.ui.widgets.Menu({ parent : this.component})};
+	this.menu = { add : new cards_ui_widgets_Menu({ parent : this.component})};
 	this.menu.add.anchorTo(this.button.add.component.el);
 	this.button.add.clicks.toTrue().feed(this.menu.add.visible.stream);
 	this.button.add.enabled.set(false);
 	this.button.remove.clicks.subscribe(function(_) {
-		var field = thx.core.Options.toValue(_g.field.get());
-		var fragment = thx.core.Options.toValue(document.article.fragment.get());
+		var field = thx_core_Options.toValue(_g.field.get());
+		var fragment = thx_core_Options.toValue(document.article.fragment.get());
 		fragment.component.properties.get(field.name).dispose();
 		field.destroy();
 		_g.setAddMenuItems(fragment);
 	});
 	this.button.toValue.clicks.subscribe(function(_1) {
-		var field1 = thx.core.Options.toValue(_g.field.get());
+		var field1 = thx_core_Options.toValue(_g.field.get());
 		var type = field1.fieldValue.type;
 		field1.fieldValue.setEditor(field1.type);
 	});
 	this.button.toCode.clicks.subscribe(function(_2) {
-		var field2 = thx.core.Options.toValue(_g.field.get());
+		var field2 = thx_core_Options.toValue(_g.field.get());
 		var type1 = field2.fieldValue.type;
-		field2.fieldValue.setEditor(cards.model.SchemaType.CodeType);
+		field2.fieldValue.setEditor(cards_model_SchemaType.CodeType);
 	});
 	this.button.toReference.clicks.subscribe(function(_3) {
-		var field3 = thx.core.Options.toValue(_g.field.get());
+		var field3 = thx_core_Options.toValue(_g.field.get());
 		var type2 = field3.fieldValue.type;
-		field3.fieldValue.setEditor(cards.model.SchemaType.ReferenceType);
+		field3.fieldValue.setEditor(cards_model_SchemaType.ReferenceType);
 	});
-	this.field = new thx.stream.Value(haxe.ds.Option.None);
+	this.field = new thx_stream_Value(haxe_ds_Option.None);
 	var delayed = this.field.debounce(10);
-	thx.stream.EmitterOptions.toBool(delayed).feed(this.button.remove.enabled);
-	thx.stream.EmitterEmitters.flatMap(thx.stream.EmitterOptions.filterOption(this.field).mapValue(function(v) {
+	thx_stream_EmitterOptions.toBool(delayed).feed(this.button.remove.enabled);
+	thx_stream_EmitterEmitters.flatMap(thx_stream_EmitterOptions.filterOption(this.field).mapValue(function(v) {
 		return v.currentType;
 	})).subscribe(function(type3) {
 		switch(type3[1]) {
@@ -3187,17 +3137,17 @@ cards.ui.ContextView = function(document,model,modelView,mapper,options) {
 			_g.button.toValue.enabled.set(false);
 		}
 	});
-	var filtered = thx.stream.EmitterOptions.filterOption(this.field);
+	var filtered = thx_stream_EmitterOptions.filterOption(this.field);
 	filtered.previous().subscribe(function(field4) {
 		field4.active.set(false);
 	});
 	filtered.subscribe(function(field5) {
 		field5.active.set(true);
 	});
-	thx.stream.EmitterOptions.either(document.article.fragment,$bind(this,this.setFragmentStatus),$bind(this,this.resetFragmentStatus));
+	thx_stream_EmitterOptions.either(document.article.fragment,$bind(this,this.setFragmentStatus),$bind(this,this.resetFragmentStatus));
 };
-cards.ui.ContextView.__name__ = ["cards","ui","ContextView"];
-cards.ui.ContextView.prototype = {
+cards_ui_ContextView.__name__ = ["cards","ui","ContextView"];
+cards_ui_ContextView.prototype = {
 	component: null
 	,toolbar: null
 	,document: null
@@ -3224,14 +3174,14 @@ cards.ui.ContextView.prototype = {
 		this.resetFields();
 		this.mapper.getAttachedPropertiesForFragment(fragment).map(function(info) {
 			var value;
-			value = js.Boot.__cast(fragment.component.properties.get(info.name) , cards.properties.ValueProperty);
+			value = js_Boot.__cast(fragment.component.properties.get(info.name) , cards_properties_ValueProperty);
 			_g.addField(info,value);
 		});
 	}
 	,addField: function(info,value) {
-		var f = new cards.ui.ContextField({ container : this.el, parent : this.component, display : info.display, name : info.name, type : info.type, value : value, model : this.model, modelView : this.modelView});
+		var f = new cards_ui_ContextField({ container : this.el, parent : this.component, display : info.display, name : info.name, type : info.type, value : value, model : this.model, modelView : this.modelView});
 		f.focus.withValue(true).mapValue(function(_) {
-			return haxe.ds.Option.Some(f);
+			return haxe_ds_Option.Some(f);
 		}).feed(this.field);
 	}
 	,resetAddMenuItems: function() {
@@ -3248,7 +3198,7 @@ cards.ui.ContextView.prototype = {
 		var attachables = this.mapper.getAttachablePropertiesForFragment(fragment);
 		this.button.add.enabled.set(attachables.length > 0);
 		attachables.map(function(info) {
-			var button = new cards.ui.widgets.Button("add " + info.display);
+			var button = new cards_ui_widgets_Button("add " + info.display);
 			_g.menu.add.addItem(button.component);
 			button.clicks.subscribe(function(_) {
 				_g.mapper.values.ensure(info.name,fragment.component);
@@ -3256,42 +3206,42 @@ cards.ui.ContextView.prototype = {
 			});
 		});
 	}
-	,__class__: cards.ui.ContextView
+	,__class__: cards_ui_ContextView
 };
-cards.ui.Document = function(options) {
+var cards_ui_Document = function(options) {
 	var _g = this;
-	this.component = new cards.components.Component(options);
-	this.toolbar = new cards.ui.widgets.Toolbar({ parent : this.component, container : this.component.el});
-	this.article = new cards.ui.Article({ parent : this.component, container : this.component.el});
-	this.statusbar = new cards.ui.widgets.Statusbar({ parent : this.component, container : this.component.el});
+	this.component = new cards_components_Component(options);
+	this.toolbar = new cards_ui_widgets_Toolbar({ parent : this.component, container : this.component.el});
+	this.article = new cards_ui_Article({ parent : this.component, container : this.component.el});
+	this.statusbar = new cards_ui_widgets_Statusbar({ parent : this.component, container : this.component.el});
 	var buttonRemove = this.toolbar.right.addButton("",Config.icons.remove);
-	thx.stream.EmitterOptions.toBool(this.article.fragment).feed(buttonRemove.enabled);
+	thx_stream_EmitterOptions.toBool(this.article.fragment).feed(buttonRemove.enabled);
 	var buttonAdd = this.toolbar.left.addButton("",Config.icons.add);
 	buttonAdd.clicks.subscribe(function(_) {
 		_g.article.addBlock();
 	});
 	buttonRemove.enabled.set(false);
 	buttonRemove.clicks.subscribe(function(_1) {
-		thx.core.Options.toValue(_g.article.fragment.get()).component.destroy();
-		_g.article.fragment.set(haxe.ds.Option.None);
+		thx_core_Options.toValue(_g.article.fragment.get()).component.destroy();
+		_g.article.fragment.set(haxe_ds_Option.None);
 	});
 };
-cards.ui.Document.__name__ = ["cards","ui","Document"];
-cards.ui.Document.prototype = {
+cards_ui_Document.__name__ = ["cards","ui","Document"];
+cards_ui_Document.prototype = {
 	component: null
 	,toolbar: null
 	,article: null
 	,statusbar: null
-	,__class__: cards.ui.Document
+	,__class__: cards_ui_Document
 };
-cards.ui.FieldValue = function(parent,container,afterCreate,afterRemove) {
+var cards_ui_FieldValue = function(parent,container,afterCreate,afterRemove) {
 	this.parent = parent;
 	this.container = container;
 	this.afterCreate = afterCreate;
 	this.afterRemove = afterRemove;
 };
-cards.ui.FieldValue.__name__ = ["cards","ui","FieldValue"];
-cards.ui.FieldValue.prototype = {
+cards_ui_FieldValue.__name__ = ["cards","ui","FieldValue"];
+cards_ui_FieldValue.prototype = {
 	type: null
 	,editor: null
 	,parent: null
@@ -3300,45 +3250,45 @@ cards.ui.FieldValue.prototype = {
 	,afterRemove: null
 	,setEditor: function(type,value) {
 		if(null != this.editor) {
-			if(null == value) value = (cards.types.TypeTransform.transform(this.type,type))(this.editor.value.get());
+			if(null == value) value = (cards_types_TypeTransform.transform(this.type,type))(this.editor.value.get());
 			this.afterRemove(this.type,this.editor);
 			this.container.innerHTML = "";
 		}
 		this.type = type;
-		this.editor = cards.ui.editors.EditorPicker.pick(type,this.container,this.parent,value);
+		this.editor = cards_ui_editors_EditorPicker.pick(type,this.container,this.parent,value);
 		this.editor.component.el.classList.add("value");
 		this.afterCreate(this.type,this.editor);
 	}
-	,__class__: cards.ui.FieldValue
+	,__class__: cards_ui_FieldValue
 };
-cards.ui.ModelView = function() {
+var cards_ui_ModelView = function() {
 	var _g = this;
-	this.component = new cards.components.Component({ template : "<div class=\"modelview\"></div>"});
-	this.toolbar = new cards.ui.widgets.Toolbar({ });
+	this.component = new cards_components_Component({ template : "<div class=\"modelview\"></div>"});
+	this.toolbar = new cards_ui_widgets_Toolbar({ });
 	this.toolbar.component.appendTo(this.component.el);
 	var buttonAdd = this.toolbar.left.addButton("",Config.icons.add);
 	buttonAdd.clicks.subscribe(function(_) {
-		_g.addField(_g.guessFieldName(),cards.model.SchemaType.StringType);
+		_g.addField(_g.guessFieldName(),cards_model_SchemaType.StringType);
 	});
 	var buttonRemove = this.toolbar.right.addButton("",Config.icons.remove);
 	buttonRemove.clicks.subscribe(function(_1) {
 		_g.removeField(_g.currentField);
 	});
 	buttonRemove.enabled.set(false);
-	this.pairs = udom.Html.parseList(StringTools.ltrim("<div class=\"fields\"><div></div></div>"))[0];
+	this.pairs = udom_Html.parseList(StringTools.ltrim("<div class=\"fields\"><div></div></div>"))[0];
 	this.component.el.appendChild(this.pairs);
-	this.pairs = udom.Query.first("div",this.pairs);
-	this.schema = this.schemaBus = new thx.stream.Bus();
-	this.data = this.dataBus = new thx.stream.Bus();
-	this.fields = new haxe.ds.StringMap();
-	this.fieldFocus = new thx.stream.Bus();
+	this.pairs = udom_Query.first("div",this.pairs);
+	this.schema = this.schemaBus = new thx_stream_Bus();
+	this.data = this.dataBus = new thx_stream_Bus();
+	this.fields = new haxe_ds_StringMap();
+	this.fieldFocus = new thx_stream_Bus();
 	this.fieldFocus.subscribe(function(field) {
 		_g.currentField = field;
 		buttonRemove.enabled.set(null != field);
 	});
 };
-cards.ui.ModelView.__name__ = ["cards","ui","ModelView"];
-cards.ui.ModelView.prototype = {
+cards_ui_ModelView.__name__ = ["cards","ui","ModelView"];
+cards_ui_ModelView.prototype = {
 	component: null
 	,schema: null
 	,data: null
@@ -3370,23 +3320,23 @@ cards.ui.ModelView.prototype = {
 		this.removeField(field);
 	}
 	,removeField: function(field) {
-		thx.Assert.notNull(field,"when removing a field it should not be null",{ fileName : "ModelView.hx", lineNumber : 80, className : "cards.ui.ModelView", methodName : "removeField"});
+		thx_Assert.notNull(field,"when removing a field it should not be null",{ fileName : "ModelView.hx", lineNumber : 80, className : "cards.ui.ModelView", methodName : "removeField"});
 		var name = field.key.value.get();
 		field.destroy();
-		if(this.fields.remove(name)) this.schemaBus.pulse(cards.model.SchemaEvent.DeleteField(name));
+		if(this.fields.remove(name)) this.schemaBus.pulse(cards_model_SchemaEvent.DeleteField(name));
 	}
 	,setField: function(path,value,type) {
 		if(path == "" || path == null) return;
 		var field = this.fields.get(path);
 		if(null == field) field = this.addField(path,type);
-		field.value.value.set((cards.types.TypeTransform.transform(type,field.value.type))(value));
+		field.value.value.set((cards_types_TypeTransform.transform(type,field.value.type))(value));
 	}
 	,addField: function(name,type) {
 		var _g = this;
-		var field = new cards.ui.ModelViewField({ container : this.pairs, parent : this.component, key : name});
+		var field = new cards_ui_ModelViewField({ container : this.pairs, parent : this.component, key : name});
 		var oldname = null;
 		var createSetValue = function() {
-			return cards.model.DataEvent.SetValue(field.key.value.get(),field.value.value.get(),field.value.type);
+			return cards_model_DataEvent.SetValue(field.key.value.get(),field.value.value.get(),field.value.type);
 		};
 		field.key.value.filterValue(function(newname) {
 			if(_g.fields.exists(newname)) {
@@ -3396,12 +3346,12 @@ cards.ui.ModelView.prototype = {
 		}).mapValue(function(newname1) {
 			if(null == oldname) {
 				oldname = newname1;
-				return cards.model.SchemaEvent.AddField(newname1,field.value.type);
+				return cards_model_SchemaEvent.AddField(newname1,field.value.type);
 			} else {
 				var v = _g.fields.get(oldname);
 				_g.fields.remove(oldname);
 				_g.fields.set(newname1,v);
-				var r = cards.model.SchemaEvent.RenameField(oldname,newname1);
+				var r = cards_model_SchemaEvent.RenameField(oldname,newname1);
 				oldname = newname1;
 				return r;
 			}
@@ -3415,20 +3365,20 @@ cards.ui.ModelView.prototype = {
 		this.fields.set(name,field);
 		return field;
 	}
-	,__class__: cards.ui.ModelView
+	,__class__: cards_ui_ModelView
 };
-cards.ui.ModelViewField = function(options) {
+var cards_ui_ModelViewField = function(options) {
 	if(null == options.template && null == options.el) options.template = "<div class=\"field\"><div class=\"key-container\"><div class=\"key\"></div></div><div class=\"value-container\"><div class=\"value\"></div></div></div>";
-	this.component = new cards.components.Component(options);
-	this.key = new cards.ui.editors.TextEditor({ el : udom.Query.first(".key",this.component.el), parent : this.component, defaultText : options.key, placeHolder : "key"});
-	this.value = new cards.ui.editors.TextEditor({ el : udom.Query.first(".value",this.component.el), parent : this.component, defaultText : "", placeHolder : "value"});
+	this.component = new cards_components_Component(options);
+	this.key = new cards_ui_editors_TextEditor({ el : udom_Query.first(".key",this.component.el), parent : this.component, defaultText : options.key, placeHolder : "key"});
+	this.value = new cards_ui_editors_TextEditor({ el : udom_Query.first(".value",this.component.el), parent : this.component, defaultText : "", placeHolder : "value"});
 	var f = this.key.focus.merge(this.value.focus);
 	this.focus = f.debounce(250).distinct();
-	this.classActive = new cards.properties.ToggleClass(this.component,"active");
+	this.classActive = new cards_properties_ToggleClass(this.component,"active");
 	f.feed(this.classActive.stream);
 };
-cards.ui.ModelViewField.__name__ = ["cards","ui","ModelViewField"];
-cards.ui.ModelViewField.prototype = {
+cards_ui_ModelViewField.__name__ = ["cards","ui","ModelViewField"];
+cards_ui_ModelViewField.prototype = {
 	component: null
 	,key: null
 	,value: null
@@ -3441,34 +3391,33 @@ cards.ui.ModelViewField.prototype = {
 		this.value = null;
 		this.focus = null;
 	}
-	,__class__: cards.ui.ModelViewField
+	,__class__: cards_ui_ModelViewField
 };
-cards.ui.editors = {};
-cards.ui.editors.Editor = function() { };
-cards.ui.editors.Editor.__name__ = ["cards","ui","editors","Editor"];
-cards.ui.editors.Editor.prototype = {
+var cards_ui_editors_Editor = function() { };
+cards_ui_editors_Editor.__name__ = ["cards","ui","editors","Editor"];
+cards_ui_editors_Editor.prototype = {
 	value: null
 	,type: null
 	,focus: null
 	,component: null
-	,__class__: cards.ui.editors.Editor
+	,__class__: cards_ui_editors_Editor
 };
-cards.ui.editors.BoolEditor = function(options) {
+var cards_ui_editors_BoolEditor = function(options) {
 	var _g = this;
-	this.type = cards.model.SchemaType.BoolType;
+	this.type = cards_model_SchemaType.BoolType;
 	if(null == options.defaultValue) options.defaultValue = false;
 	if(null == options.el && null == options.template) options.template = "<div></div>";
-	this.component = new cards.components.Component(options);
+	this.component = new cards_components_Component(options);
 	var cls = this.component.el.classList;
 	cls.add("fa");
 	cls.add("editor");
 	cls.add("bool");
 	cls.add("fa-" + Config.icons.unchecked);
 	this.component.el.setAttribute("tabindex","0");
-	this.value = new thx.stream.Value(options.defaultValue);
-	this.value.subscribe(thx.stream.dom.Dom.subscribeToggleClass(this.component.el,"fa-" + Config.icons.checked));
-	thx.stream.EmitterBools.negate(this.value).subscribe(thx.stream.dom.Dom.subscribeToggleClass(this.component.el,"fa-" + Config.icons.unchecked));
-	var clickStream = thx.stream.dom.Dom.streamEvent(this.component.el,"click",false).toNil().merge(thx.stream.dom.Dom.streamKey(this.component.el,"up").filterValue(function(e) {
+	this.value = new thx_stream_Value(options.defaultValue);
+	this.value.subscribe(thx_stream_dom_Dom.subscribeToggleClass(this.component.el,"fa-" + Config.icons.checked));
+	thx_stream_EmitterBools.negate(this.value).subscribe(thx_stream_dom_Dom.subscribeToggleClass(this.component.el,"fa-" + Config.icons.unchecked));
+	var clickStream = thx_stream_dom_Dom.streamEvent(this.component.el,"click",false).toNil().merge(thx_stream_dom_Dom.streamKey(this.component.el,"up").filterValue(function(e) {
 		var _g1 = e.keyCode;
 		switch(_g1) {
 		case 32:case 13:
@@ -3479,17 +3428,17 @@ cards.ui.editors.BoolEditor = function(options) {
 	}).toNil()).mapValue(function(_) {
 		return !_g.value.get();
 	}).feed(this.value);
-	this.focus = new thx.stream.Value(false);
-	this.focus.withValue(true).subscribe(thx.stream.dom.Dom.subscribeFocus(this.component.el));
-	var focusStream = thx.stream.dom.Dom.streamEvent(this.component.el,"focus").toTrue().merge(thx.stream.dom.Dom.streamEvent(this.component.el,"blur").toFalse()).feed(this.focus);
+	this.focus = new thx_stream_Value(false);
+	this.focus.withValue(true).subscribe(thx_stream_dom_Dom.subscribeFocus(this.component.el));
+	var focusStream = thx_stream_dom_Dom.streamEvent(this.component.el,"focus").toTrue().merge(thx_stream_dom_Dom.streamEvent(this.component.el,"blur").toFalse()).feed(this.focus);
 	this.cancel = function() {
 		clickStream.cancel();
 		focusStream.cancel();
 	};
 };
-cards.ui.editors.BoolEditor.__name__ = ["cards","ui","editors","BoolEditor"];
-cards.ui.editors.BoolEditor.__interfaces__ = [cards.ui.editors.Editor];
-cards.ui.editors.BoolEditor.prototype = {
+cards_ui_editors_BoolEditor.__name__ = ["cards","ui","editors","BoolEditor"];
+cards_ui_editors_BoolEditor.__interfaces__ = [cards_ui_editors_Editor];
+cards_ui_editors_BoolEditor.prototype = {
 	component: null
 	,focus: null
 	,value: null
@@ -3500,49 +3449,49 @@ cards.ui.editors.BoolEditor.prototype = {
 		this.component.destroy();
 		this.value.clear();
 	}
-	,__class__: cards.ui.editors.BoolEditor
+	,__class__: cards_ui_editors_BoolEditor
 };
-cards.ui.editors.TextEditor = function(options) {
+var cards_ui_editors_TextEditor = function(options) {
 	var _g = this;
-	this.type = cards.model.SchemaType.StringType;
+	this.type = cards_model_SchemaType.StringType;
 	if(null == options.defaultText) options.defaultText = "";
 	if(null == options.placeHolder) options.placeHolder = "";
 	if(null == options.el && null == options.template) options.template = "<div></div>";
 	if(null == options.inputEvent) options.inputEvent = function(component) {
-		return thx.stream.dom.Dom.streamEvent(component.el,"input");
+		return thx_stream_dom_Dom.streamEvent(component.el,"input");
 	};
-	this.component = new cards.components.Component(options);
+	this.component = new cards_components_Component(options);
 	this.component.el.classList.add("editor");
 	this.component.el.setAttribute("tabindex","0");
 	this.component.el.setAttribute("contenteditable","true");
 	this.component.el.setAttribute("placeholder",options.placeHolder);
 	this.component.el.style.content = options.placeHolder;
-	var text = new cards.properties.Text(this.component,options.defaultText);
+	var text = new cards_properties_Text(this.component,options.defaultText);
 	this.value = text.stream;
 	options.inputEvent(this.component).mapValue(function(_) {
 		return text.component.el.textContent;
 	}).feed(this.value);
-	this.focus = new thx.stream.Value(false);
-	this.focus.withValue(true).subscribe(thx.stream.dom.Dom.subscribeFocus(this.component.el));
+	this.focus = new thx_stream_Value(false);
+	this.focus.withValue(true).subscribe(thx_stream_dom_Dom.subscribeFocus(this.component.el));
 	var focusStream = this.focus.withValue(true).subscribe(function(_1) {
 		window.document.getSelection().selectAllChildren(_g.component.el);
 	});
-	thx.stream.dom.Dom.streamFocus(this.component.el).feed(this.focus);
+	thx_stream_dom_Dom.streamFocus(this.component.el).feed(this.focus);
 	this.cancel = function() {
 		text.dispose();
 		focusStream.cancel();
 	};
-	var empty = new thx.stream.Value(options.defaultText == "");
-	thx.stream.dom.Dom.streamEvent(this.component.el,"input").mapValue(function(_2) {
+	var empty = new thx_stream_Value(options.defaultText == "");
+	thx_stream_dom_Dom.streamEvent(this.component.el,"input").mapValue(function(_2) {
 		return text.component.el.textContent == "";
 	}).merge(this.value.mapValue(function(t) {
 		return t == "";
 	})).feed(empty);
-	empty.subscribe(thx.stream.dom.Dom.subscribeToggleClass(this.component.el,"empty"));
+	empty.subscribe(thx_stream_dom_Dom.subscribeToggleClass(this.component.el,"empty"));
 };
-cards.ui.editors.TextEditor.__name__ = ["cards","ui","editors","TextEditor"];
-cards.ui.editors.TextEditor.__interfaces__ = [cards.ui.editors.Editor];
-cards.ui.editors.TextEditor.prototype = {
+cards_ui_editors_TextEditor.__name__ = ["cards","ui","editors","TextEditor"];
+cards_ui_editors_TextEditor.__interfaces__ = [cards_ui_editors_Editor];
+cards_ui_editors_TextEditor.prototype = {
 	component: null
 	,focus: null
 	,value: null
@@ -3553,44 +3502,44 @@ cards.ui.editors.TextEditor.prototype = {
 		this.component.destroy();
 		this.cancel();
 	}
-	,__class__: cards.ui.editors.TextEditor
+	,__class__: cards_ui_editors_TextEditor
 };
-cards.ui.editors.CodeEditor = function(options) {
+var cards_ui_editors_CodeEditor = function(options) {
 	if(null == options.inputEvent) options.inputEvent = function(component) {
-		return thx.stream.dom.Dom.streamEvent(component.el,"blur");
+		return thx_stream_dom_Dom.streamEvent(component.el,"blur");
 	};
-	cards.ui.editors.TextEditor.call(this,options);
+	cards_ui_editors_TextEditor.call(this,options);
 	this.component.el.classList.add("code");
 };
-cards.ui.editors.CodeEditor.__name__ = ["cards","ui","editors","CodeEditor"];
-cards.ui.editors.CodeEditor.__super__ = cards.ui.editors.TextEditor;
-cards.ui.editors.CodeEditor.prototype = $extend(cards.ui.editors.TextEditor.prototype,{
-	__class__: cards.ui.editors.CodeEditor
+cards_ui_editors_CodeEditor.__name__ = ["cards","ui","editors","CodeEditor"];
+cards_ui_editors_CodeEditor.__super__ = cards_ui_editors_TextEditor;
+cards_ui_editors_CodeEditor.prototype = $extend(cards_ui_editors_TextEditor.prototype,{
+	__class__: cards_ui_editors_CodeEditor
 });
-cards.ui.editors.DateEditor = function(options) {
-	this.type = cards.model.SchemaType.BoolType;
+var cards_ui_editors_DateEditor = function(options) {
+	this.type = cards_model_SchemaType.BoolType;
 	if(null == options.defaultValue) options.defaultValue = new Date();
 	if(null == options.template) options.template = "<input type=\"date\"/>";
-	this.component = new cards.components.Component(options);
+	this.component = new cards_components_Component(options);
 	var cls = this.component.el.classList;
 	cls.add("editor");
 	cls.add("date");
 	this.component.el.setAttribute("tabindex","0");
-	this.value = new thx.stream.Value(options.defaultValue);
-	this.focus = new thx.stream.Value(false);
-	this.focus.withValue(true).subscribe(thx.stream.dom.Dom.subscribeFocus(this.component.el));
-	var focusStream = thx.stream.dom.Dom.streamFocus(this.component.el).feed(this.focus);
+	this.value = new thx_stream_Value(options.defaultValue);
+	this.focus = new thx_stream_Value(false);
+	this.focus.withValue(true).subscribe(thx_stream_dom_Dom.subscribeFocus(this.component.el));
+	var focusStream = thx_stream_dom_Dom.streamFocus(this.component.el).feed(this.focus);
 	var input = this.component.el;
-	thx.stream.dom.Dom.streamInput(input,null).mapValue(function(_) {
+	thx_stream_dom_Dom.streamInput(input,null).mapValue(function(_) {
 		return input.valueAsDate;
 	}).feed(this.value);
 	this.cancel = function() {
 		focusStream.cancel();
 	};
 };
-cards.ui.editors.DateEditor.__name__ = ["cards","ui","editors","DateEditor"];
-cards.ui.editors.DateEditor.__interfaces__ = [cards.ui.editors.Editor];
-cards.ui.editors.DateEditor.prototype = {
+cards_ui_editors_DateEditor.__name__ = ["cards","ui","editors","DateEditor"];
+cards_ui_editors_DateEditor.__interfaces__ = [cards_ui_editors_Editor];
+cards_ui_editors_DateEditor.prototype = {
 	component: null
 	,focus: null
 	,value: null
@@ -3601,52 +3550,52 @@ cards.ui.editors.DateEditor.prototype = {
 		this.component.destroy();
 		this.value.clear();
 	}
-	,__class__: cards.ui.editors.DateEditor
+	,__class__: cards_ui_editors_DateEditor
 };
-cards.ui.editors.EditorPicker = function() { };
-cards.ui.editors.EditorPicker.__name__ = ["cards","ui","editors","EditorPicker"];
-cards.ui.editors.EditorPicker.pick = function(type,el,parent,value) {
+var cards_ui_editors_EditorPicker = function() { };
+cards_ui_editors_EditorPicker.__name__ = ["cards","ui","editors","EditorPicker"];
+cards_ui_editors_EditorPicker.pick = function(type,el,parent,value) {
 	switch(type[1]) {
 	case 1:
-		return new cards.ui.editors.BoolEditor({ container : el, parent : parent, defaultValue : value});
+		return new cards_ui_editors_BoolEditor({ container : el, parent : parent, defaultValue : value});
 	case 6:
-		return new cards.ui.editors.CodeEditor({ container : el, parent : parent, defaultText : value, placeHolder : "code"});
+		return new cards_ui_editors_CodeEditor({ container : el, parent : parent, defaultText : value, placeHolder : "code"});
 	case 7:
-		return new cards.ui.editors.ReferenceEditor({ container : el, parent : parent, defaultText : value, placeHolder : "reference"});
+		return new cards_ui_editors_ReferenceEditor({ container : el, parent : parent, defaultText : value, placeHolder : "reference"});
 	case 5:
-		return new cards.ui.editors.TextEditor({ container : el, parent : parent, defaultText : value, placeHolder : "content"});
+		return new cards_ui_editors_TextEditor({ container : el, parent : parent, defaultText : value, placeHolder : "content"});
 	case 2:
-		return new cards.ui.editors.DateEditor({ container : el, parent : parent, defaultValue : value});
+		return new cards_ui_editors_DateEditor({ container : el, parent : parent, defaultValue : value});
 	case 3:
-		return new cards.ui.editors.FloatEditor({ container : el, parent : parent, defaultValue : value});
+		return new cards_ui_editors_FloatEditor({ container : el, parent : parent, defaultValue : value});
 	default:
 		throw "Editor for " + Std.string(type) + " has not been implemented yet";
 	}
 };
-cards.ui.editors.FloatEditor = function(options) {
+var cards_ui_editors_FloatEditor = function(options) {
 	var _g = this;
-	this.type = cards.model.SchemaType.BoolType;
+	this.type = cards_model_SchemaType.BoolType;
 	if(null == options.defaultValue) options.defaultValue = 0.0;
 	if(null == options.template) options.template = "<input type=\"number\"/>";
-	this.component = new cards.components.Component(options);
+	this.component = new cards_components_Component(options);
 	var cls = this.component.el.classList;
 	cls.add("editor");
 	cls.add("float");
 	this.component.el.setAttribute("tabindex","0");
-	this.value = new thx.stream.Value(options.defaultValue);
-	this.focus = new thx.stream.Value(false);
-	this.focus.withValue(true).subscribe(thx.stream.dom.Dom.subscribeFocus(this.component.el));
-	var focusStream = thx.stream.dom.Dom.streamFocus(this.component.el).feed(this.focus);
-	thx.stream.dom.Dom.streamEvent(this.component.el,"input").mapValue(function(_) {
+	this.value = new thx_stream_Value(options.defaultValue);
+	this.focus = new thx_stream_Value(false);
+	this.focus.withValue(true).subscribe(thx_stream_dom_Dom.subscribeFocus(this.component.el));
+	var focusStream = thx_stream_dom_Dom.streamFocus(this.component.el).feed(this.focus);
+	thx_stream_dom_Dom.streamEvent(this.component.el,"input").mapValue(function(_) {
 		return _g.component.el.valueAsNumber;
 	}).feed(this.value);
 	this.cancel = function() {
 		focusStream.cancel();
 	};
 };
-cards.ui.editors.FloatEditor.__name__ = ["cards","ui","editors","FloatEditor"];
-cards.ui.editors.FloatEditor.__interfaces__ = [cards.ui.editors.Editor];
-cards.ui.editors.FloatEditor.prototype = {
+cards_ui_editors_FloatEditor.__name__ = ["cards","ui","editors","FloatEditor"];
+cards_ui_editors_FloatEditor.__interfaces__ = [cards_ui_editors_Editor];
+cards_ui_editors_FloatEditor.prototype = {
 	component: null
 	,focus: null
 	,value: null
@@ -3657,46 +3606,45 @@ cards.ui.editors.FloatEditor.prototype = {
 		this.component.destroy();
 		this.value.clear();
 	}
-	,__class__: cards.ui.editors.FloatEditor
+	,__class__: cards_ui_editors_FloatEditor
 };
-cards.ui.editors.ReferenceEditor = function(options) {
+var cards_ui_editors_ReferenceEditor = function(options) {
 	if(null == options.inputEvent) options.inputEvent = function(component) {
-		return thx.stream.dom.Dom.streamEvent(component.el,"blur");
+		return thx_stream_dom_Dom.streamEvent(component.el,"blur");
 	};
-	cards.ui.editors.TextEditor.call(this,options);
+	cards_ui_editors_TextEditor.call(this,options);
 	this.component.el.classList.add("reference");
 };
-cards.ui.editors.ReferenceEditor.__name__ = ["cards","ui","editors","ReferenceEditor"];
-cards.ui.editors.ReferenceEditor.__super__ = cards.ui.editors.TextEditor;
-cards.ui.editors.ReferenceEditor.prototype = $extend(cards.ui.editors.TextEditor.prototype,{
-	__class__: cards.ui.editors.ReferenceEditor
+cards_ui_editors_ReferenceEditor.__name__ = ["cards","ui","editors","ReferenceEditor"];
+cards_ui_editors_ReferenceEditor.__super__ = cards_ui_editors_TextEditor;
+cards_ui_editors_ReferenceEditor.prototype = $extend(cards_ui_editors_TextEditor.prototype,{
+	__class__: cards_ui_editors_ReferenceEditor
 });
-cards.ui.fragments = {};
-cards.ui.fragments.Fragment = function() { };
-cards.ui.fragments.Fragment.__name__ = ["cards","ui","fragments","Fragment"];
-cards.ui.fragments.Fragment.prototype = {
+var cards_ui_fragments_Fragment = function() { };
+cards_ui_fragments_Fragment.__name__ = ["cards","ui","fragments","Fragment"];
+cards_ui_fragments_Fragment.prototype = {
 	name: null
 	,component: null
 	,focus: null
 	,active: null
 	,uid: null
 	,toString: null
-	,__class__: cards.ui.fragments.Fragment
+	,__class__: cards_ui_fragments_Fragment
 };
-cards.ui.fragments.Block = function(options) {
+var cards_ui_fragments_Block = function(options) {
 	this.name = "block";
 	if(null == options.el && null == options.template) options.template = "<section class=\"block\"></div>";
-	if(null != options.uid) this.uid = options.uid; else this.uid = thx.core.UUID.create();
+	if(null != options.uid) this.uid = options.uid; else this.uid = thx_core_UUID.create();
 	if(null == options.placeHolder) options.placeHolder = "block content";
-	this.editor = new cards.ui.editors.TextEditor(options);
-	this.active = new thx.stream.Value(false);
-	this.active.feed(new cards.properties.ToggleClass(this.editor.component,"active").stream);
+	this.editor = new cards_ui_editors_TextEditor(options);
+	this.active = new thx_stream_Value(false);
+	this.active.feed(new cards_properties_ToggleClass(this.editor.component,"active").stream);
 	this.focus = this.editor.focus;
 	this.component = this.editor.component;
 };
-cards.ui.fragments.Block.__name__ = ["cards","ui","fragments","Block"];
-cards.ui.fragments.Block.__interfaces__ = [cards.ui.fragments.Fragment];
-cards.ui.fragments.Block.prototype = {
+cards_ui_fragments_Block.__name__ = ["cards","ui","fragments","Block"];
+cards_ui_fragments_Block.__interfaces__ = [cards_ui_fragments_Fragment];
+cards_ui_fragments_Block.prototype = {
 	name: null
 	,editor: null
 	,component: null
@@ -3709,62 +3657,61 @@ cards.ui.fragments.Block.prototype = {
 	,toString: function() {
 		return this.name;
 	}
-	,__class__: cards.ui.fragments.Block
+	,__class__: cards_ui_fragments_Block
 };
-cards.ui.fragments.FragmentMapper = function(fragments,values) {
+var cards_ui_fragments_FragmentMapper = function(fragments,values) {
 	this.fragments = fragments;
 	this.values = values;
 };
-cards.ui.fragments.FragmentMapper.__name__ = ["cards","ui","fragments","FragmentMapper"];
-cards.ui.fragments.FragmentMapper.prototype = {
+cards_ui_fragments_FragmentMapper.__name__ = ["cards","ui","fragments","FragmentMapper"];
+cards_ui_fragments_FragmentMapper.prototype = {
 	fragments: null
 	,values: null
 	,getValuePropertyInfoForFragment: function(fragment) {
-		return thx.core.Iterators.map(this.fragments.getAssociations(fragment),($_=this.values,$bind($_,$_.get)));
+		return thx_core_Iterators.map(this.fragments.getAssociations(fragment),($_=this.values,$bind($_,$_.get)));
 	}
 	,getAttachedPropertiesForFragment: function(fragment) {
-		return thx.core.Iterators.filter(this.fragments.getAssociations(fragment.name),function(name) {
+		return thx_core_Iterators.filter(this.fragments.getAssociations(fragment.name),function(name) {
 			return fragment.component.properties.exists(name);
 		}).map(($_=this.values,$bind($_,$_.get)));
 	}
 	,getAttachablePropertiesForFragment: function(fragment) {
-		return thx.core.Iterators.filter(this.fragments.getAssociations(fragment.name),function(name) {
+		return thx_core_Iterators.filter(this.fragments.getAssociations(fragment.name),function(name) {
 			return !fragment.component.properties.exists(name);
 		}).map(($_=this.values,$bind($_,$_.get)));
 	}
-	,__class__: cards.ui.fragments.FragmentMapper
+	,__class__: cards_ui_fragments_FragmentMapper
 };
-cards.ui.fragments._FragmentName = {};
-cards.ui.fragments._FragmentName.FragmentName_Impl_ = function() { };
-cards.ui.fragments._FragmentName.FragmentName_Impl_.__name__ = ["cards","ui","fragments","_FragmentName","FragmentName_Impl_"];
-cards.ui.fragments._FragmentName.FragmentName_Impl_.fromFragment = function(fragment) {
+var cards_ui_fragments__$FragmentName_FragmentName_$Impl_$ = function() { };
+cards_ui_fragments__$FragmentName_FragmentName_$Impl_$.__name__ = ["cards","ui","fragments","_FragmentName","FragmentName_Impl_"];
+cards_ui_fragments__$FragmentName_FragmentName_$Impl_$.fromFragment = function(fragment) {
 	return fragment.name;
 };
-cards.ui.fragments._FragmentName.FragmentName_Impl_.fromString = function(name) {
+cards_ui_fragments__$FragmentName_FragmentName_$Impl_$.fromString = function(name) {
 	return name;
 };
-cards.ui.fragments._FragmentName.FragmentName_Impl_._new = function(name) {
+cards_ui_fragments__$FragmentName_FragmentName_$Impl_$._new = function(name) {
 	return name;
 };
-cards.ui.fragments._FragmentName.FragmentName_Impl_.toString = function(this1) {
+cards_ui_fragments__$FragmentName_FragmentName_$Impl_$.toString = function(this1) {
 	return this1;
 };
-cards.ui.fragments.FragmentProperties = function() {
-	this.map = new haxe.ds.StringMap();
+var cards_ui_fragments_FragmentProperties = function() {
+	this.map = new haxe_ds_StringMap();
 };
-cards.ui.fragments.FragmentProperties.__name__ = ["cards","ui","fragments","FragmentProperties"];
-cards.ui.fragments.FragmentProperties.prototype = {
+cards_ui_fragments_FragmentProperties.__name__ = ["cards","ui","fragments","FragmentProperties"];
+cards_ui_fragments_FragmentProperties.prototype = {
 	map: null
 	,associate: function(fragment,property) {
 		var s = this.map.get(fragment);
 		if(null == s) {
-			var value = s = new thx.core.Set();
+			var value = s = new thx_core_Set();
 			this.map.set(fragment,value);
 		}
 		s.add(property);
 	}
 	,associateMany: function(fragment,properties) {
-		thx.core.Iterables.map(properties,(function(f,a1) {
+		thx_core_Iterables.map(properties,(function(f,a1) {
 			return function(a2) {
 				return f(a1,a2);
 			};
@@ -3772,24 +3719,24 @@ cards.ui.fragments.FragmentProperties.prototype = {
 	}
 	,getAssociations: function(fragment) {
 		var s = this.map.get(fragment);
-		if(s == null) s = new thx.core.Set();
+		if(s == null) s = new thx_core_Set();
 		return s.iterator();
 	}
-	,__class__: cards.ui.fragments.FragmentProperties
+	,__class__: cards_ui_fragments_FragmentProperties
 };
-cards.ui.fragments.ReadonlyBlock = function(options) {
+var cards_ui_fragments_ReadonlyBlock = function(options) {
 	this.name = "readonly";
 	if(null == options.el && null == options.template) options.template = "<section class=\"readonly block\" tabindex=\"0\">readonly</div>";
-	this.component = new cards.components.Component(options);
-	this.focus = new thx.stream.Value(false);
-	this.active = new thx.stream.Value(false);
-	if(null != options.uid) this.uid = options.uid; else this.uid = thx.core.UUID.create();
-	this.focusStream = thx.stream.dom.Dom.streamEvent(this.component.el,"focus").toTrue().merge(thx.stream.dom.Dom.streamEvent(this.component.el,"blur").toFalse()).feed(this.focus);
-	this.active.subscribe(thx.stream.dom.Dom.subscribeToggleClass(this.component.el,"active"));
+	this.component = new cards_components_Component(options);
+	this.focus = new thx_stream_Value(false);
+	this.active = new thx_stream_Value(false);
+	if(null != options.uid) this.uid = options.uid; else this.uid = thx_core_UUID.create();
+	this.focusStream = thx_stream_dom_Dom.streamEvent(this.component.el,"focus").toTrue().merge(thx_stream_dom_Dom.streamEvent(this.component.el,"blur").toFalse()).feed(this.focus);
+	this.active.subscribe(thx_stream_dom_Dom.subscribeToggleClass(this.component.el,"active"));
 };
-cards.ui.fragments.ReadonlyBlock.__name__ = ["cards","ui","fragments","ReadonlyBlock"];
-cards.ui.fragments.ReadonlyBlock.__interfaces__ = [cards.ui.fragments.Fragment];
-cards.ui.fragments.ReadonlyBlock.prototype = {
+cards_ui_fragments_ReadonlyBlock.__name__ = ["cards","ui","fragments","ReadonlyBlock"];
+cards_ui_fragments_ReadonlyBlock.__interfaces__ = [cards_ui_fragments_Fragment];
+cards_ui_fragments_ReadonlyBlock.prototype = {
 	name: null
 	,component: null
 	,focus: null
@@ -3803,36 +3750,45 @@ cards.ui.fragments.ReadonlyBlock.prototype = {
 	,toString: function() {
 		return this.name;
 	}
-	,__class__: cards.ui.fragments.ReadonlyBlock
+	,__class__: cards_ui_fragments_ReadonlyBlock
 };
-cards.ui.widgets.AnchorPoint = { __ename__ : ["cards","ui","widgets","AnchorPoint"], __constructs__ : ["TopLeft","Top","TopRight","Left","Center","Right","BottomLeft","Bottom","BottomRight"] };
-cards.ui.widgets.AnchorPoint.TopLeft = ["TopLeft",0];
-cards.ui.widgets.AnchorPoint.TopLeft.__enum__ = cards.ui.widgets.AnchorPoint;
-cards.ui.widgets.AnchorPoint.Top = ["Top",1];
-cards.ui.widgets.AnchorPoint.Top.__enum__ = cards.ui.widgets.AnchorPoint;
-cards.ui.widgets.AnchorPoint.TopRight = ["TopRight",2];
-cards.ui.widgets.AnchorPoint.TopRight.__enum__ = cards.ui.widgets.AnchorPoint;
-cards.ui.widgets.AnchorPoint.Left = ["Left",3];
-cards.ui.widgets.AnchorPoint.Left.__enum__ = cards.ui.widgets.AnchorPoint;
-cards.ui.widgets.AnchorPoint.Center = ["Center",4];
-cards.ui.widgets.AnchorPoint.Center.__enum__ = cards.ui.widgets.AnchorPoint;
-cards.ui.widgets.AnchorPoint.Right = ["Right",5];
-cards.ui.widgets.AnchorPoint.Right.__enum__ = cards.ui.widgets.AnchorPoint;
-cards.ui.widgets.AnchorPoint.BottomLeft = ["BottomLeft",6];
-cards.ui.widgets.AnchorPoint.BottomLeft.__enum__ = cards.ui.widgets.AnchorPoint;
-cards.ui.widgets.AnchorPoint.Bottom = ["Bottom",7];
-cards.ui.widgets.AnchorPoint.Bottom.__enum__ = cards.ui.widgets.AnchorPoint;
-cards.ui.widgets.AnchorPoint.BottomRight = ["BottomRight",8];
-cards.ui.widgets.AnchorPoint.BottomRight.__enum__ = cards.ui.widgets.AnchorPoint;
-cards.ui.widgets.Button = function(text,icon) {
+var cards_ui_widgets_AnchorPoint = { __ename__ : ["cards","ui","widgets","AnchorPoint"], __constructs__ : ["TopLeft","Top","TopRight","Left","Center","Right","BottomLeft","Bottom","BottomRight"] };
+cards_ui_widgets_AnchorPoint.TopLeft = ["TopLeft",0];
+cards_ui_widgets_AnchorPoint.TopLeft.toString = $estr;
+cards_ui_widgets_AnchorPoint.TopLeft.__enum__ = cards_ui_widgets_AnchorPoint;
+cards_ui_widgets_AnchorPoint.Top = ["Top",1];
+cards_ui_widgets_AnchorPoint.Top.toString = $estr;
+cards_ui_widgets_AnchorPoint.Top.__enum__ = cards_ui_widgets_AnchorPoint;
+cards_ui_widgets_AnchorPoint.TopRight = ["TopRight",2];
+cards_ui_widgets_AnchorPoint.TopRight.toString = $estr;
+cards_ui_widgets_AnchorPoint.TopRight.__enum__ = cards_ui_widgets_AnchorPoint;
+cards_ui_widgets_AnchorPoint.Left = ["Left",3];
+cards_ui_widgets_AnchorPoint.Left.toString = $estr;
+cards_ui_widgets_AnchorPoint.Left.__enum__ = cards_ui_widgets_AnchorPoint;
+cards_ui_widgets_AnchorPoint.Center = ["Center",4];
+cards_ui_widgets_AnchorPoint.Center.toString = $estr;
+cards_ui_widgets_AnchorPoint.Center.__enum__ = cards_ui_widgets_AnchorPoint;
+cards_ui_widgets_AnchorPoint.Right = ["Right",5];
+cards_ui_widgets_AnchorPoint.Right.toString = $estr;
+cards_ui_widgets_AnchorPoint.Right.__enum__ = cards_ui_widgets_AnchorPoint;
+cards_ui_widgets_AnchorPoint.BottomLeft = ["BottomLeft",6];
+cards_ui_widgets_AnchorPoint.BottomLeft.toString = $estr;
+cards_ui_widgets_AnchorPoint.BottomLeft.__enum__ = cards_ui_widgets_AnchorPoint;
+cards_ui_widgets_AnchorPoint.Bottom = ["Bottom",7];
+cards_ui_widgets_AnchorPoint.Bottom.toString = $estr;
+cards_ui_widgets_AnchorPoint.Bottom.__enum__ = cards_ui_widgets_AnchorPoint;
+cards_ui_widgets_AnchorPoint.BottomRight = ["BottomRight",8];
+cards_ui_widgets_AnchorPoint.BottomRight.toString = $estr;
+cards_ui_widgets_AnchorPoint.BottomRight.__enum__ = cards_ui_widgets_AnchorPoint;
+var cards_ui_widgets_Button = function(text,icon) {
 	if(text == null) text = "";
-	this.component = new cards.components.Component({ template : null == icon?"<button>" + text + "</button>":"<button class=\"fa fa-" + icon + "\">" + text + "</button>"});
-	this.clicks = thx.stream.dom.Dom.streamEvent(this.component.el,"click",false);
-	this.enabled = new thx.stream.Value(true);
-	thx.stream.EmitterBools.negate(this.enabled).subscribe(thx.stream.dom.Dom.subscribeToggleAttribute(this.component.el,"disabled","disabled"));
+	this.component = new cards_components_Component({ template : null == icon?"<button>" + text + "</button>":"<button class=\"fa fa-" + icon + "\">" + text + "</button>"});
+	this.clicks = thx_stream_dom_Dom.streamEvent(this.component.el,"click",false);
+	this.enabled = new thx_stream_Value(true);
+	thx_stream_EmitterBools.negate(this.enabled).subscribe(thx_stream_dom_Dom.subscribeToggleAttribute(this.component.el,"disabled","disabled"));
 };
-cards.ui.widgets.Button.__name__ = ["cards","ui","widgets","Button"];
-cards.ui.widgets.Button.prototype = {
+cards_ui_widgets_Button.__name__ = ["cards","ui","widgets","Button"];
+cards_ui_widgets_Button.prototype = {
 	component: null
 	,clicks: null
 	,enabled: null
@@ -3841,22 +3797,22 @@ cards.ui.widgets.Button.prototype = {
 		this.cancel();
 		this.component.destroy();
 	}
-	,__class__: cards.ui.widgets.Button
+	,__class__: cards_ui_widgets_Button
 };
-cards.ui.widgets.Menu = function(options) {
+var cards_ui_widgets_Menu = function(options) {
 	if(null == options.el && null == options.template) options.template = "<menu class=\"frame-overlay\"><ul></ul></menu>";
-	cards.ui.widgets.FrameOverlay.call(this,options);
-	this.ul = udom.Query.first("ul",this.component.el);
-	this.items = new haxe.ds.ObjectMap();
+	cards_ui_widgets_FrameOverlay.call(this,options);
+	this.ul = udom_Query.first("ul",this.component.el);
+	this.items = new haxe_ds_ObjectMap();
 };
-cards.ui.widgets.Menu.__name__ = ["cards","ui","widgets","Menu"];
-cards.ui.widgets.Menu.__super__ = cards.ui.widgets.FrameOverlay;
-cards.ui.widgets.Menu.prototype = $extend(cards.ui.widgets.FrameOverlay.prototype,{
+cards_ui_widgets_Menu.__name__ = ["cards","ui","widgets","Menu"];
+cards_ui_widgets_Menu.__super__ = cards_ui_widgets_FrameOverlay;
+cards_ui_widgets_Menu.prototype = $extend(cards_ui_widgets_FrameOverlay.prototype,{
 	items: null
 	,ul: null
 	,clear: function() {
 		this.ul.innerHTML = "";
-		this.items = new haxe.ds.ObjectMap();
+		this.items = new haxe_ds_ObjectMap();
 	}
 	,addItem: function(item) {
 		var el;
@@ -3868,65 +3824,66 @@ cards.ui.widgets.Menu.prototype = $extend(cards.ui.widgets.FrameOverlay.prototyp
 		this.items.set(item,el);
 	}
 	,removeItem: function(item) {
-		thx.Assert.notNull(item,null,{ fileName : "Menu.hx", lineNumber : 35, className : "cards.ui.widgets.Menu", methodName : "removeItem"});
-		thx.Assert.isTrue(this.items.h.__keys__[item.__id__] != null,null,{ fileName : "Menu.hx", lineNumber : 36, className : "cards.ui.widgets.Menu", methodName : "removeItem"});
+		thx_Assert.notNull(item,null,{ fileName : "Menu.hx", lineNumber : 35, className : "cards.ui.widgets.Menu", methodName : "removeItem"});
+		thx_Assert.isTrue(this.items.h.__keys__[item.__id__] != null,null,{ fileName : "Menu.hx", lineNumber : 36, className : "cards.ui.widgets.Menu", methodName : "removeItem"});
 		var el = this.items.h[item.__id__];
 		item.detach();
 		this.ul.removeChild(el);
 	}
-	,__class__: cards.ui.widgets.Menu
+	,__class__: cards_ui_widgets_Menu
 });
-cards.ui.widgets.Statusbar = function(options) {
+var cards_ui_widgets_Statusbar = function(options) {
 	if(null == options.el && null == options.template) options.template = "<footer class=\"statusbar\"></footer>";
-	this.component = new cards.components.Component(options);
+	this.component = new cards_components_Component(options);
 };
-cards.ui.widgets.Statusbar.__name__ = ["cards","ui","widgets","Statusbar"];
-cards.ui.widgets.Statusbar.prototype = {
+cards_ui_widgets_Statusbar.__name__ = ["cards","ui","widgets","Statusbar"];
+cards_ui_widgets_Statusbar.prototype = {
 	component: null
-	,__class__: cards.ui.widgets.Statusbar
+	,__class__: cards_ui_widgets_Statusbar
 };
-cards.ui.widgets.Toolbar = function(options) {
+var cards_ui_widgets_Toolbar = function(options) {
 	if(null == options.el && null == options.template) options.template = "<header class=\"toolbar\"><div><div class=\"left\"></div><div class=\"center\"></div><div class=\"right\"></div></div></header>";
-	this.component = new cards.components.Component(options);
-	this.left = new cards.ui.widgets.ToolbarGroup(udom.Query.first(".left",this.component.el),this.component);
-	this.center = new cards.ui.widgets.ToolbarGroup(udom.Query.first(".center",this.component.el),this.component);
-	this.right = new cards.ui.widgets.ToolbarGroup(udom.Query.first(".right",this.component.el),this.component);
+	this.component = new cards_components_Component(options);
+	this.left = new cards_ui_widgets_ToolbarGroup(udom_Query.first(".left",this.component.el),this.component);
+	this.center = new cards_ui_widgets_ToolbarGroup(udom_Query.first(".center",this.component.el),this.component);
+	this.right = new cards_ui_widgets_ToolbarGroup(udom_Query.first(".right",this.component.el),this.component);
 };
-cards.ui.widgets.Toolbar.__name__ = ["cards","ui","widgets","Toolbar"];
-cards.ui.widgets.Toolbar.prototype = {
+cards_ui_widgets_Toolbar.__name__ = ["cards","ui","widgets","Toolbar"];
+cards_ui_widgets_Toolbar.prototype = {
 	component: null
 	,left: null
 	,center: null
 	,right: null
-	,__class__: cards.ui.widgets.Toolbar
+	,__class__: cards_ui_widgets_Toolbar
 };
-cards.ui.widgets.ToolbarGroup = function(el,component) {
+var cards_ui_widgets_ToolbarGroup = function(el,component) {
 	this.el = el;
 	this.component = component;
 };
-cards.ui.widgets.ToolbarGroup.__name__ = ["cards","ui","widgets","ToolbarGroup"];
-cards.ui.widgets.ToolbarGroup.prototype = {
+cards_ui_widgets_ToolbarGroup.__name__ = ["cards","ui","widgets","ToolbarGroup"];
+cards_ui_widgets_ToolbarGroup.prototype = {
 	el: null
 	,component: null
 	,addButton: function(text,icon) {
 		if(text == null) text = "";
-		var button = new cards.ui.widgets.Button(text,icon);
+		var button = new cards_ui_widgets_Button(text,icon);
 		button.component.appendTo(this.el);
 		this.component.add(button.component);
 		return button;
 	}
-	,__class__: cards.ui.widgets.ToolbarGroup
+	,__class__: cards_ui_widgets_ToolbarGroup
 };
-haxe.StackItem = { __ename__ : ["haxe","StackItem"], __constructs__ : ["CFunction","Module","FilePos","Method","LocalFunction"] };
-haxe.StackItem.CFunction = ["CFunction",0];
-haxe.StackItem.CFunction.__enum__ = haxe.StackItem;
-haxe.StackItem.Module = function(m) { var $x = ["Module",1,m]; $x.__enum__ = haxe.StackItem; return $x; };
-haxe.StackItem.FilePos = function(s,file,line) { var $x = ["FilePos",2,s,file,line]; $x.__enum__ = haxe.StackItem; return $x; };
-haxe.StackItem.Method = function(classname,method) { var $x = ["Method",3,classname,method]; $x.__enum__ = haxe.StackItem; return $x; };
-haxe.StackItem.LocalFunction = function(v) { var $x = ["LocalFunction",4,v]; $x.__enum__ = haxe.StackItem; return $x; };
-haxe.CallStack = function() { };
-haxe.CallStack.__name__ = ["haxe","CallStack"];
-haxe.CallStack.callStack = function() {
+var haxe_StackItem = { __ename__ : ["haxe","StackItem"], __constructs__ : ["CFunction","Module","FilePos","Method","LocalFunction"] };
+haxe_StackItem.CFunction = ["CFunction",0];
+haxe_StackItem.CFunction.toString = $estr;
+haxe_StackItem.CFunction.__enum__ = haxe_StackItem;
+haxe_StackItem.Module = function(m) { var $x = ["Module",1,m]; $x.__enum__ = haxe_StackItem; $x.toString = $estr; return $x; };
+haxe_StackItem.FilePos = function(s,file,line) { var $x = ["FilePos",2,s,file,line]; $x.__enum__ = haxe_StackItem; $x.toString = $estr; return $x; };
+haxe_StackItem.Method = function(classname,method) { var $x = ["Method",3,classname,method]; $x.__enum__ = haxe_StackItem; $x.toString = $estr; return $x; };
+haxe_StackItem.LocalFunction = function(v) { var $x = ["LocalFunction",4,v]; $x.__enum__ = haxe_StackItem; $x.toString = $estr; return $x; };
+var haxe_CallStack = function() { };
+haxe_CallStack.__name__ = ["haxe","CallStack"];
+haxe_CallStack.callStack = function() {
 	var oldValue = Error.prepareStackTrace;
 	Error.prepareStackTrace = function(error,callsites) {
 		var stack = [];
@@ -3941,22 +3898,22 @@ haxe.CallStack.callStack = function() {
 				if(idx >= 0) {
 					var className = HxOverrides.substr(fullName,0,idx);
 					var methodName = HxOverrides.substr(fullName,idx + 1,null);
-					method = haxe.StackItem.Method(className,methodName);
+					method = haxe_StackItem.Method(className,methodName);
 				}
 			}
-			stack.push(haxe.StackItem.FilePos(method,site.getFileName(),site.getLineNumber()));
+			stack.push(haxe_StackItem.FilePos(method,site.getFileName(),site.getLineNumber()));
 		}
 		return stack;
 	};
-	var a = haxe.CallStack.makeStack(new Error().stack);
+	var a = haxe_CallStack.makeStack(new Error().stack);
 	a.shift();
 	Error.prepareStackTrace = oldValue;
 	return a;
 };
-haxe.CallStack.exceptionStack = function() {
+haxe_CallStack.exceptionStack = function() {
 	return [];
 };
-haxe.CallStack.makeStack = function(s) {
+haxe_CallStack.makeStack = function(s) {
 	if(typeof(s) == "string") {
 		var stack = s.split("\n");
 		var m = [];
@@ -3964,22 +3921,22 @@ haxe.CallStack.makeStack = function(s) {
 		while(_g < stack.length) {
 			var line = stack[_g];
 			++_g;
-			m.push(haxe.StackItem.Module(line));
+			m.push(haxe_StackItem.Module(line));
 		}
 		return m;
 	} else return s;
 };
-haxe.Log = function() { };
-haxe.Log.__name__ = ["haxe","Log"];
-haxe.Log.trace = function(v,infos) {
-	js.Boot.__trace(v,infos);
+var haxe_Log = function() { };
+haxe_Log.__name__ = ["haxe","Log"];
+haxe_Log.trace = function(v,infos) {
+	js_Boot.__trace(v,infos);
 };
-haxe.ds.IntMap = function() {
+var haxe_ds_IntMap = function() {
 	this.h = { };
 };
-haxe.ds.IntMap.__name__ = ["haxe","ds","IntMap"];
-haxe.ds.IntMap.__interfaces__ = [IMap];
-haxe.ds.IntMap.prototype = {
+haxe_ds_IntMap.__name__ = ["haxe","ds","IntMap"];
+haxe_ds_IntMap.__interfaces__ = [IMap];
+haxe_ds_IntMap.prototype = {
 	h: null
 	,set: function(key,value) {
 		this.h[key] = value;
@@ -4007,18 +3964,18 @@ haxe.ds.IntMap.prototype = {
 			return this.ref[i];
 		}};
 	}
-	,__class__: haxe.ds.IntMap
+	,__class__: haxe_ds_IntMap
 };
-haxe.ds.ObjectMap = function() {
+var haxe_ds_ObjectMap = function() {
 	this.h = { };
 	this.h.__keys__ = { };
 };
-haxe.ds.ObjectMap.__name__ = ["haxe","ds","ObjectMap"];
-haxe.ds.ObjectMap.__interfaces__ = [IMap];
-haxe.ds.ObjectMap.prototype = {
+haxe_ds_ObjectMap.__name__ = ["haxe","ds","ObjectMap"];
+haxe_ds_ObjectMap.__interfaces__ = [IMap];
+haxe_ds_ObjectMap.prototype = {
 	h: null
 	,set: function(key,value) {
-		var id = key.__id__ || (key.__id__ = ++haxe.ds.ObjectMap.count);
+		var id = key.__id__ || (key.__id__ = ++haxe_ds_ObjectMap.count);
 		this.h[id] = value;
 		this.h.__keys__[id] = key;
 	}
@@ -4029,89 +3986,127 @@ haxe.ds.ObjectMap.prototype = {
 		delete(this.h.__keys__[id]);
 		return true;
 	}
-	,__class__: haxe.ds.ObjectMap
+	,__class__: haxe_ds_ObjectMap
 };
-haxe.io = {};
-haxe.io.Bytes = function() { };
-haxe.io.Bytes.__name__ = ["haxe","io","Bytes"];
-haxe.io.Bytes.prototype = {
+var haxe_ds_StringMap = function() {
+	this.h = { };
+};
+haxe_ds_StringMap.__name__ = ["haxe","ds","StringMap"];
+haxe_ds_StringMap.__interfaces__ = [IMap];
+haxe_ds_StringMap.prototype = {
+	h: null
+	,set: function(key,value) {
+		this.h["$" + key] = value;
+	}
+	,get: function(key) {
+		return this.h["$" + key];
+	}
+	,exists: function(key) {
+		return this.h.hasOwnProperty("$" + key);
+	}
+	,remove: function(key) {
+		key = "$" + key;
+		if(!this.h.hasOwnProperty(key)) return false;
+		delete(this.h[key]);
+		return true;
+	}
+	,keys: function() {
+		var a = [];
+		for( var key in this.h ) {
+		if(this.h.hasOwnProperty(key)) a.push(key.substr(1));
+		}
+		return HxOverrides.iter(a);
+	}
+	,iterator: function() {
+		return { ref : this.h, it : this.keys(), hasNext : function() {
+			return this.it.hasNext();
+		}, next : function() {
+			var i = this.it.next();
+			return this.ref["$" + i];
+		}};
+	}
+	,__class__: haxe_ds_StringMap
+};
+var haxe_io_Bytes = function() { };
+haxe_io_Bytes.__name__ = ["haxe","io","Bytes"];
+haxe_io_Bytes.prototype = {
 	length: null
 	,b: null
-	,__class__: haxe.io.Bytes
+	,__class__: haxe_io_Bytes
 };
-haxe.io.Eof = function() { };
-haxe.io.Eof.__name__ = ["haxe","io","Eof"];
-haxe.io.Eof.prototype = {
+var haxe_io_Eof = function() { };
+haxe_io_Eof.__name__ = ["haxe","io","Eof"];
+haxe_io_Eof.prototype = {
 	toString: function() {
 		return "Eof";
 	}
-	,__class__: haxe.io.Eof
+	,__class__: haxe_io_Eof
 };
-thx.core.Error = function(message,stack,pos) {
+var thx_core_Error = function(message,stack,pos) {
 	this.message = message;
 	if(null == stack) {
-		stack = haxe.CallStack.exceptionStack();
-		if(stack.length == 0) stack = haxe.CallStack.callStack();
+		stack = haxe_CallStack.exceptionStack();
+		if(stack.length == 0) stack = haxe_CallStack.callStack();
 	}
 	this.stack = stack;
 	this.pos = pos;
 };
-thx.core.Error.__name__ = ["thx","core","Error"];
-thx.core.Error.fromDynamic = function(err,pos) {
-	if(js.Boot.__instanceof(err,thx.core.Error)) return err;
-	return new thx.core.Error("" + Std.string(err),null,pos);
+thx_core_Error.__name__ = ["thx","core","Error"];
+thx_core_Error.fromDynamic = function(err,pos) {
+	if(js_Boot.__instanceof(err,thx_core_Error)) return err;
+	return new thx_core_Error("" + Std.string(err),null,pos);
 };
-thx.core.Error.__super__ = Error;
-thx.core.Error.prototype = $extend(Error.prototype,{
+thx_core_Error.__super__ = Error;
+thx_core_Error.prototype = $extend(Error.prototype,{
 	stack: null
 	,pos: null
-	,__class__: thx.core.Error
+	,__class__: thx_core_Error
 });
-thx.Assert = function() { };
-thx.Assert.__name__ = ["thx","Assert"];
-thx.Assert.isTrue = function(cond,msg,pos) {
-	if(thx.Assert.results == null) throw "Assert.results is not currently bound to any assert context";
+var thx_Assert = function() { };
+thx_Assert.__name__ = ["thx","Assert"];
+thx_Assert.isTrue = function(cond,msg,pos) {
+	if(thx_Assert.results == null) throw "Assert.results is not currently bound to any assert context";
 	if(null == msg) msg = "expected true";
-	if(cond) thx.Assert.results.add(thx.core.Assertion.Success(pos)); else thx.Assert.results.add(thx.core.Assertion.Failure(msg,pos));
+	if(cond) thx_Assert.results.add(thx_core_Assertion.Success(pos)); else thx_Assert.results.add(thx_core_Assertion.Failure(msg,pos));
 };
-thx.Assert.isFalse = function(value,msg,pos) {
+thx_Assert.isFalse = function(value,msg,pos) {
 	if(null == msg) msg = "expected false";
-	thx.Assert.isTrue(value == false,msg,pos);
+	thx_Assert.isTrue(value == false,msg,pos);
 };
-thx.Assert.isNull = function(value,msg,pos) {
-	if(msg == null) msg = "expected null but was " + thx.Assert.q(value);
-	thx.Assert.isTrue(value == null,msg,pos);
+thx_Assert.isNull = function(value,msg,pos) {
+	if(msg == null) msg = "expected null but was " + thx_Assert.q(value);
+	thx_Assert.isTrue(value == null,msg,pos);
 };
-thx.Assert.notNull = function(value,msg,pos) {
+thx_Assert.notNull = function(value,msg,pos) {
 	if(null == msg) msg = "expected not null";
-	thx.Assert.isTrue(value != null,msg,pos);
+	thx_Assert.isTrue(value != null,msg,pos);
 };
-thx.Assert["is"] = function(value,type,msg,pos) {
-	if(msg == null) msg = "expected type " + thx.Assert.typeToString(type) + " but was " + thx.Assert.typeToString(value);
-	thx.Assert.isTrue(js.Boot.__instanceof(value,type),msg,pos);
+thx_Assert["is"] = function(value,type,msg,pos) {
+	if(msg == null) msg = "expected type " + thx_Assert.typeToString(type) + " but was " + thx_Assert.typeToString(value);
+	thx_Assert.isTrue(js_Boot.__instanceof(value,type),msg,pos);
 };
-thx.Assert.notEquals = function(expected,value,msg,pos) {
-	if(msg == null) msg = "expected " + thx.Assert.q(expected) + " and testa value " + thx.Assert.q(value) + " should be different";
-	thx.Assert.isFalse(expected == value,msg,pos);
+thx_Assert.notEquals = function(expected,value,msg,pos) {
+	if(msg == null) msg = "expected " + thx_Assert.q(expected) + " and testa value " + thx_Assert.q(value) + " should be different";
+	thx_Assert.isFalse(expected == value,msg,pos);
 };
-thx.Assert.equals = function(expected,value,msg,pos) {
-	if(msg == null) msg = "expected " + thx.Assert.q(expected) + " but was " + thx.Assert.q(value);
-	thx.Assert.isTrue(expected == value,msg,pos);
+thx_Assert.equals = function(expected,value,msg,pos) {
+	if(msg == null) msg = "expected " + thx_Assert.q(expected) + " but was " + thx_Assert.q(value);
+	thx_Assert.isTrue(expected == value,msg,pos);
 };
-thx.Assert.match = function(pattern,value,msg,pos) {
-	if(msg == null) msg = "the value " + thx.Assert.q(value) + "does not match the provided pattern";
-	thx.Assert.isTrue(pattern.match(value),msg,pos);
+thx_Assert.match = function(pattern,value,msg,pos) {
+	if(msg == null) msg = "the value " + thx_Assert.q(value) + "does not match the provided pattern";
+	thx_Assert.isTrue(pattern.match(value),msg,pos);
 };
-thx.Assert.floatEquals = function(expected,value,approx,msg,pos) {
-	if(msg == null) msg = "expected " + thx.Assert.q(expected) + " but was " + thx.Assert.q(value);
-	return thx.Assert.isTrue(thx.Assert._floatEquals(expected,value,approx),msg,pos);
+thx_Assert.floatEquals = function(expected,value,approx,msg,pos) {
+	if(msg == null) msg = "expected " + thx_Assert.q(expected) + " but was " + thx_Assert.q(value);
+	return thx_Assert.isTrue(thx_Assert._floatEquals(expected,value,approx),msg,pos);
 };
-thx.Assert._floatEquals = function(expected,value,approx) {
-	if(isNaN(expected)) return isNaN(value); else if(isNaN(value)) return false; else if(!isFinite(expected) && !isFinite(value)) return expected > 0 == value > 0;
+thx_Assert._floatEquals = function(expected,value,approx) {
+	if(Math.isNaN(expected)) return Math.isNaN(value); else if(Math.isNaN(value)) return false; else if(!Math.isFinite(expected) && !Math.isFinite(value)) return expected > 0 == value > 0;
 	if(null == approx) approx = 1e-5;
 	return Math.abs(value - expected) < approx;
 };
-thx.Assert.getTypeName = function(v) {
+thx_Assert.getTypeName = function(v) {
 	{
 		var _g = Type["typeof"](v);
 		switch(_g[1]) {
@@ -4138,21 +4133,21 @@ thx.Assert.getTypeName = function(v) {
 		}
 	}
 };
-thx.Assert.isIterable = function(v,isAnonym) {
+thx_Assert.isIterable = function(v,isAnonym) {
 	var fields;
 	if(isAnonym) fields = Reflect.fields(v); else fields = Type.getInstanceFields(Type.getClass(v));
 	if(!Lambda.has(fields,"iterator")) return false;
 	return Reflect.isFunction(Reflect.field(v,"iterator"));
 };
-thx.Assert.isIterator = function(v,isAnonym) {
+thx_Assert.isIterator = function(v,isAnonym) {
 	var fields;
 	if(isAnonym) fields = Reflect.fields(v); else fields = Type.getInstanceFields(Type.getClass(v));
 	if(!Lambda.has(fields,"next") || !Lambda.has(fields,"hasNext")) return false;
 	return Reflect.isFunction(Reflect.field(v,"next")) && Reflect.isFunction(Reflect.field(v,"hasNext"));
 };
-thx.Assert.sameAs = function(expected,value,status) {
-	var texpected = thx.Assert.getTypeName(expected);
-	var tvalue = thx.Assert.getTypeName(value);
+thx_Assert.sameAs = function(expected,value,status) {
+	var texpected = thx_Assert.getTypeName(expected);
+	var tvalue = thx_Assert.getTypeName(value);
 	if(texpected != tvalue) {
 		status.error = "expected type " + texpected + " but it is " + tvalue + (status.path == ""?"":" for field " + status.path);
 		return false;
@@ -4161,14 +4156,14 @@ thx.Assert.sameAs = function(expected,value,status) {
 		var _g = Type["typeof"](expected);
 		switch(_g[1]) {
 		case 2:
-			if(!thx.Assert._floatEquals(expected,value)) {
-				status.error = "expected " + thx.Assert.q(expected) + " but it is " + thx.Assert.q(value) + (status.path == ""?"":" for field " + status.path);
+			if(!thx_Assert._floatEquals(expected,value)) {
+				status.error = "expected " + thx_Assert.q(expected) + " but it is " + thx_Assert.q(value) + (status.path == ""?"":" for field " + status.path);
 				return false;
 			}
 			return true;
 		case 0:case 1:case 3:
 			if(expected != value) {
-				status.error = "expected " + thx.Assert.q(expected) + " but it is " + thx.Assert.q(value) + (status.path == ""?"":" for field " + status.path);
+				status.error = "expected " + thx_Assert.q(expected) + " but it is " + thx_Assert.q(value) + (status.path == ""?"":" for field " + status.path);
 				return false;
 			}
 			return true;
@@ -4183,7 +4178,7 @@ thx.Assert.sameAs = function(expected,value,status) {
 			var cexpected = Type.getClassName(c);
 			var cvalue = Type.getClassName(Type.getClass(value));
 			if(cexpected != cvalue) {
-				status.error = "expected instance of " + thx.Assert.q(cexpected) + " but it is " + thx.Assert.q(cvalue) + (status.path == ""?"":" for field " + status.path);
+				status.error = "expected instance of " + thx_Assert.q(cexpected) + " but it is " + thx_Assert.q(cvalue) + (status.path == ""?"":" for field " + status.path);
 				return false;
 			}
 			if(typeof(expected) == "string" && expected != value) {
@@ -4202,22 +4197,22 @@ thx.Assert.sameAs = function(expected,value,status) {
 					while(_g2 < _g1) {
 						var i = _g2++;
 						if(path == "") status.path = "array[" + i + "]"; else status.path = path + "[" + i + "]";
-						if(!thx.Assert.sameAs(expected[i],value[i],status)) {
-							status.error = "expected " + thx.Assert.q(expected) + " but it is " + thx.Assert.q(value) + (status.path == ""?"":" for field " + status.path);
+						if(!thx_Assert.sameAs(expected[i],value[i],status)) {
+							status.error = "expected " + thx_Assert.q(expected) + " but it is " + thx_Assert.q(value) + (status.path == ""?"":" for field " + status.path);
 							return false;
 						}
 					}
 				}
 				return true;
 			}
-			if(js.Boot.__instanceof(expected,Date)) {
+			if(js_Boot.__instanceof(expected,Date)) {
 				if(expected.getTime() != value.getTime()) {
-					status.error = "expected " + thx.Assert.q(expected) + " but it is " + thx.Assert.q(value) + (status.path == ""?"":" for field " + status.path);
+					status.error = "expected " + thx_Assert.q(expected) + " but it is " + thx_Assert.q(value) + (status.path == ""?"":" for field " + status.path);
 					return false;
 				}
 				return true;
 			}
-			if(js.Boot.__instanceof(expected,haxe.io.Bytes)) {
+			if(js_Boot.__instanceof(expected,haxe_io_Bytes)) {
 				if(status.recursive || status.path == "") {
 					var ebytes = expected;
 					var vbytes = value;
@@ -4234,7 +4229,7 @@ thx.Assert.sameAs = function(expected,value,status) {
 				}
 				return true;
 			}
-			if(js.Boot.__instanceof(expected,haxe.ds.StringMap) || js.Boot.__instanceof(expected,haxe.ds.IntMap)) {
+			if(js_Boot.__instanceof(expected,haxe_ds_StringMap) || js_Boot.__instanceof(expected,haxe_ds_IntMap)) {
 				if(status.recursive || status.path == "") {
 					var keys = Lambda.array({ iterator : function() {
 						return expected.keys();
@@ -4252,15 +4247,15 @@ thx.Assert.sameAs = function(expected,value,status) {
 						var key = keys[_g12];
 						++_g12;
 						if(path1 == "") status.path = "hash[" + key + "]"; else status.path = path1 + "[" + key + "]";
-						if(!thx.Assert.sameAs(expected.get(key),value.get(key),status)) {
-							status.error = "expected " + thx.Assert.q(expected) + " but it is " + thx.Assert.q(value) + (status.path == ""?"":" for field " + status.path);
+						if(!thx_Assert.sameAs(expected.get(key),value.get(key),status)) {
+							status.error = "expected " + thx_Assert.q(expected) + " but it is " + thx_Assert.q(value) + (status.path == ""?"":" for field " + status.path);
 							return false;
 						}
 					}
 				}
 				return true;
 			}
-			if(thx.Assert.isIterator(expected,false)) {
+			if(thx_Assert.isIterator(expected,false)) {
 				if(status.recursive || status.path == "") {
 					var evalues = Lambda.array({ iterator : function() {
 						return expected;
@@ -4278,15 +4273,15 @@ thx.Assert.sameAs = function(expected,value,status) {
 					while(_g22 < _g13) {
 						var i2 = _g22++;
 						if(path2 == "") status.path = "iterator[" + i2 + "]"; else status.path = path2 + "[" + i2 + "]";
-						if(!thx.Assert.sameAs(evalues[i2],vvalues[i2],status)) {
-							status.error = "expected " + thx.Assert.q(expected) + " but it is " + thx.Assert.q(value) + (status.path == ""?"":" for field " + status.path);
+						if(!thx_Assert.sameAs(evalues[i2],vvalues[i2],status)) {
+							status.error = "expected " + thx_Assert.q(expected) + " but it is " + thx_Assert.q(value) + (status.path == ""?"":" for field " + status.path);
 							return false;
 						}
 					}
 				}
 				return true;
 			}
-			if(thx.Assert.isIterable(expected,false)) {
+			if(thx_Assert.isIterable(expected,false)) {
 				if(status.recursive || status.path == "") {
 					var evalues1 = Lambda.array(expected);
 					var vvalues1 = Lambda.array(value);
@@ -4300,7 +4295,7 @@ thx.Assert.sameAs = function(expected,value,status) {
 					while(_g23 < _g14) {
 						var i3 = _g23++;
 						if(path3 == "") status.path = "iterable[" + i3 + "]"; else status.path = path3 + "[" + i3 + "]";
-						if(!thx.Assert.sameAs(evalues1[i3],vvalues1[i3],status)) return false;
+						if(!thx_Assert.sameAs(evalues1[i3],vvalues1[i3],status)) return false;
 					}
 				}
 				return true;
@@ -4316,7 +4311,7 @@ thx.Assert.sameAs = function(expected,value,status) {
 					var e = Reflect.field(expected,field);
 					if(Reflect.isFunction(e)) continue;
 					var v = Reflect.field(value,field);
-					if(!thx.Assert.sameAs(e,v,status)) return false;
+					if(!thx_Assert.sameAs(e,v,status)) return false;
 				}
 			}
 			return true;
@@ -4325,12 +4320,12 @@ thx.Assert.sameAs = function(expected,value,status) {
 			var eexpected = Type.getEnumName(e1);
 			var evalue = Type.getEnumName(Type.getEnum(value));
 			if(eexpected != evalue) {
-				status.error = "expected enumeration of " + thx.Assert.q(eexpected) + " but it is " + thx.Assert.q(evalue) + (status.path == ""?"":" for field " + status.path);
+				status.error = "expected enumeration of " + thx_Assert.q(eexpected) + " but it is " + thx_Assert.q(evalue) + (status.path == ""?"":" for field " + status.path);
 				return false;
 			}
 			if(status.recursive || status.path == "") {
 				if(Type.enumIndex(expected) != Type.enumIndex(value)) {
-					status.error = "expected " + thx.Assert.q(Type.enumConstructor(expected)) + " but is " + thx.Assert.q(Type.enumConstructor(value)) + (status.path == ""?"":" for field " + status.path);
+					status.error = "expected " + thx_Assert.q(Type.enumConstructor(expected)) + " but is " + thx_Assert.q(Type.enumConstructor(value)) + (status.path == ""?"":" for field " + status.path);
 					return false;
 				}
 				var eparams = Type.enumParameters(expected);
@@ -4341,8 +4336,8 @@ thx.Assert.sameAs = function(expected,value,status) {
 				while(_g24 < _g16) {
 					var i4 = _g24++;
 					if(path5 == "") status.path = "enum[" + i4 + "]"; else status.path = path5 + "[" + i4 + "]";
-					if(!thx.Assert.sameAs(eparams[i4],vparams[i4],status)) {
-						status.error = "expected " + thx.Assert.q(expected) + " but it is " + thx.Assert.q(value) + (status.path == ""?"":" for field " + status.path);
+					if(!thx_Assert.sameAs(eparams[i4],vparams[i4],status)) {
+						status.error = "expected " + thx_Assert.q(expected) + " but it is " + thx_Assert.q(value) + (status.path == ""?"":" for field " + status.path);
 						return false;
 					}
 				}
@@ -4360,21 +4355,21 @@ thx.Assert.sameAs = function(expected,value,status) {
 					HxOverrides.remove(tfields,field1);
 					if(path6 == "") status.path = field1; else status.path = path6 + "." + field1;
 					if(!Object.prototype.hasOwnProperty.call(value,field1)) {
-						status.error = "expected field " + status.path + " does not exist in " + thx.Assert.q(value);
+						status.error = "expected field " + status.path + " does not exist in " + thx_Assert.q(value);
 						return false;
 					}
 					var e2 = Reflect.field(expected,field1);
 					if(Reflect.isFunction(e2)) continue;
 					var v1 = Reflect.field(value,field1);
-					if(!thx.Assert.sameAs(e2,v1,status)) return false;
+					if(!thx_Assert.sameAs(e2,v1,status)) return false;
 				}
 				if(tfields.length > 0) {
 					status.error = "the tested object has extra field(s) (" + tfields.join(", ") + ") not included in the expected ones";
 					return false;
 				}
 			}
-			if(thx.Assert.isIterator(expected,true)) {
-				if(!thx.Assert.isIterator(value,true)) {
+			if(thx_Assert.isIterator(expected,true)) {
+				if(!thx_Assert.isIterator(value,true)) {
 					status.error = "expected Iterable but it is not " + (status.path == ""?"":" for field " + status.path);
 					return false;
 				}
@@ -4395,16 +4390,16 @@ thx.Assert.sameAs = function(expected,value,status) {
 					while(_g25 < _g18) {
 						var i5 = _g25++;
 						if(path7 == "") status.path = "iterator[" + i5 + "]"; else status.path = path7 + "[" + i5 + "]";
-						if(!thx.Assert.sameAs(evalues2[i5],vvalues2[i5],status)) {
-							status.error = "expected " + thx.Assert.q(expected) + " but it is " + thx.Assert.q(value) + (status.path == ""?"":" for field " + status.path);
+						if(!thx_Assert.sameAs(evalues2[i5],vvalues2[i5],status)) {
+							status.error = "expected " + thx_Assert.q(expected) + " but it is " + thx_Assert.q(value) + (status.path == ""?"":" for field " + status.path);
 							return false;
 						}
 					}
 				}
 				return true;
 			}
-			if(thx.Assert.isIterable(expected,true)) {
-				if(!thx.Assert.isIterable(value,true)) {
+			if(thx_Assert.isIterable(expected,true)) {
+				if(!thx_Assert.isIterable(value,true)) {
 					status.error = "expected Iterator but it is not " + (status.path == ""?"":" for field " + status.path);
 					return false;
 				}
@@ -4421,7 +4416,7 @@ thx.Assert.sameAs = function(expected,value,status) {
 					while(_g26 < _g19) {
 						var i6 = _g26++;
 						if(path8 == "") status.path = "iterable[" + i6 + "]"; else status.path = path8 + "[" + i6 + "]";
-						if(!thx.Assert.sameAs(evalues3[i6],vvalues3[i6],status)) return false;
+						if(!thx_Assert.sameAs(evalues3[i6],vvalues3[i6],status)) return false;
 					}
 				}
 				return true;
@@ -4432,45 +4427,45 @@ thx.Assert.sameAs = function(expected,value,status) {
 			break;
 		}
 	}
-	throw "Unable to compare values: " + thx.Assert.q(expected) + " and " + thx.Assert.q(value);
+	throw "Unable to compare values: " + thx_Assert.q(expected) + " and " + thx_Assert.q(value);
 };
-thx.Assert.q = function(v) {
+thx_Assert.q = function(v) {
 	if(typeof(v) == "string") return "\"" + StringTools.replace(v,"\"","\\\"") + "\""; else return Std.string(v);
 };
-thx.Assert.same = function(expected,value,recursive,msg,pos) {
+thx_Assert.same = function(expected,value,recursive,msg,pos) {
 	var status = { recursive : null == recursive?true:recursive, path : "", error : null};
-	if(thx.Assert.sameAs(expected,value,status)) thx.Assert.isTrue(true,msg,pos); else thx.Assert.fail(msg == null?status.error:msg,pos);
+	if(thx_Assert.sameAs(expected,value,status)) thx_Assert.isTrue(true,msg,pos); else thx_Assert.fail(msg == null?status.error:msg,pos);
 };
-thx.Assert.raises = function(method,type,msgNotThrown,msgWrongType,pos) {
+thx_Assert.raises = function(method,type,msgNotThrown,msgWrongType,pos) {
 	if(type == null) type = String;
 	try {
 		method();
 		var name = Type.getClassName(type);
 		if(name == null) name = "" + Std.string(type);
 		if(null == msgNotThrown) msgNotThrown = "exception of type " + name + " not raised";
-		thx.Assert.fail(msgNotThrown,pos);
+		thx_Assert.fail(msgNotThrown,pos);
 	} catch( ex ) {
 		var name1 = Type.getClassName(type);
 		if(name1 == null) name1 = "" + Std.string(type);
 		if(null == msgWrongType) msgWrongType = "expected throw of type " + name1 + " but was " + Std.string(ex);
-		thx.Assert.isTrue(js.Boot.__instanceof(ex,type),msgWrongType,pos);
+		thx_Assert.isTrue(js_Boot.__instanceof(ex,type),msgWrongType,pos);
 	}
 };
-thx.Assert.allows = function(possibilities,value,msg,pos) {
-	if(Lambda.has(possibilities,value)) thx.Assert.isTrue(true,msg,pos); else thx.Assert.fail(msg == null?"value " + thx.Assert.q(value) + " not found in the expected possibilities " + Std.string(possibilities):msg,pos);
+thx_Assert.allows = function(possibilities,value,msg,pos) {
+	if(Lambda.has(possibilities,value)) thx_Assert.isTrue(true,msg,pos); else thx_Assert.fail(msg == null?"value " + thx_Assert.q(value) + " not found in the expected possibilities " + Std.string(possibilities):msg,pos);
 };
-thx.Assert.contains = function(match,values,msg,pos) {
-	if(Lambda.has(values,match)) thx.Assert.isTrue(true,msg,pos); else thx.Assert.fail(msg == null?"values " + thx.Assert.q(values) + " do not contain " + Std.string(match):msg,pos);
+thx_Assert.contains = function(match,values,msg,pos) {
+	if(Lambda.has(values,match)) thx_Assert.isTrue(true,msg,pos); else thx_Assert.fail(msg == null?"values " + thx_Assert.q(values) + " do not contain " + Std.string(match):msg,pos);
 };
-thx.Assert.notContains = function(match,values,msg,pos) {
-	if(!Lambda.has(values,match)) thx.Assert.isTrue(true,msg,pos); else thx.Assert.fail(msg == null?"values " + thx.Assert.q(values) + " do contain " + Std.string(match):msg,pos);
+thx_Assert.notContains = function(match,values,msg,pos) {
+	if(!Lambda.has(values,match)) thx_Assert.isTrue(true,msg,pos); else thx_Assert.fail(msg == null?"values " + thx_Assert.q(values) + " do contain " + Std.string(match):msg,pos);
 };
-thx.Assert.stringContains = function(match,value,msg,pos) {
-	if(value != null && value.indexOf(match) >= 0) thx.Assert.isTrue(true,msg,pos); else thx.Assert.fail(msg == null?"value " + thx.Assert.q(value) + " does not contain " + thx.Assert.q(match):msg,pos);
+thx_Assert.stringContains = function(match,value,msg,pos) {
+	if(value != null && value.indexOf(match) >= 0) thx_Assert.isTrue(true,msg,pos); else thx_Assert.fail(msg == null?"value " + thx_Assert.q(value) + " does not contain " + thx_Assert.q(match):msg,pos);
 };
-thx.Assert.stringSequence = function(sequence,value,msg,pos) {
+thx_Assert.stringSequence = function(sequence,value,msg,pos) {
 	if(null == value) {
-		thx.Assert.fail(msg == null?"null argument value":msg,pos);
+		thx_Assert.fail(msg == null?"null argument value":msg,pos);
 		return;
 	}
 	var p = 0;
@@ -4488,29 +4483,29 @@ thx.Assert.stringSequence = function(sequence,value,msg,pos) {
 					msg += " '" + cut + "'";
 				} else msg += " begin";
 			}
-			thx.Assert.fail(msg,pos);
+			thx_Assert.fail(msg,pos);
 			return;
 		}
 		p = p2 + s.length;
 	}
-	thx.Assert.isTrue(true,msg,pos);
+	thx_Assert.isTrue(true,msg,pos);
 };
-thx.Assert.fail = function(msg,pos) {
+thx_Assert.fail = function(msg,pos) {
 	if(msg == null) msg = "failure expected";
-	thx.Assert.isTrue(false,msg,pos);
+	thx_Assert.isTrue(false,msg,pos);
 };
-thx.Assert.warn = function(msg) {
-	thx.Assert.results.add(thx.core.Assertion.Warning(msg));
+thx_Assert.warn = function(msg) {
+	thx_Assert.results.add(thx_core_Assertion.Warning(msg));
 };
-thx.Assert.createAsync = function(f,timeout) {
+thx_Assert.createAsync = function(f,timeout) {
 	return function() {
 	};
 };
-thx.Assert.createEvent = function(f,timeout) {
+thx_Assert.createEvent = function(f,timeout) {
 	return function(e) {
 	};
 };
-thx.Assert.typeToString = function(t) {
+thx_Assert.typeToString = function(t) {
 	try {
 		var _t = Type.getClass(t);
 		if(_t != null) t = _t;
@@ -4539,11 +4534,11 @@ thx.Assert.typeToString = function(t) {
 	}
 	return "<unable to retrieve type name>";
 };
-thx.core.Arrays = function() { };
-thx.core.Arrays.__name__ = ["thx","core","Arrays"];
-thx.core.Arrays.same = function(a,b,eq) {
+var thx_core_Arrays = function() { };
+thx_core_Arrays.__name__ = ["thx","core","Arrays"];
+thx_core_Arrays.same = function(a,b,eq) {
 	if(a == null || b == null || a.length != b.length) return false;
-	if(null == eq) eq = thx.core.Function.equality;
+	if(null == eq) eq = thx_core_Function.equality;
 	var _g1 = 0;
 	var _g = a.length;
 	while(_g1 < _g) {
@@ -4552,7 +4547,7 @@ thx.core.Arrays.same = function(a,b,eq) {
 	}
 	return true;
 };
-thx.core.Arrays.cross = function(a,b) {
+thx_core_Arrays.cross = function(a,b) {
 	var r = [];
 	var _g = 0;
 	while(_g < a.length) {
@@ -4567,7 +4562,7 @@ thx.core.Arrays.cross = function(a,b) {
 	}
 	return r;
 };
-thx.core.Arrays.crossMulti = function(a) {
+thx_core_Arrays.crossMulti = function(a) {
 	var acopy = a.slice();
 	var result = acopy.shift().map(function(v) {
 		return [v];
@@ -4592,11 +4587,11 @@ thx.core.Arrays.crossMulti = function(a) {
 	}
 	return result;
 };
-thx.core.Arrays.pushIf = function(arr,cond,value) {
+thx_core_Arrays.pushIf = function(arr,cond,value) {
 	if(cond) arr.push(value);
 	return arr;
 };
-thx.core.Arrays.eachPair = function(arr,handler) {
+thx_core_Arrays.eachPair = function(arr,handler) {
 	var _g1 = 0;
 	var _g = arr.length;
 	while(_g1 < _g) {
@@ -4609,30 +4604,30 @@ thx.core.Arrays.eachPair = function(arr,handler) {
 		}
 	}
 };
-thx.core.Arrays.mapi = function(arr,handler) {
+thx_core_Arrays.mapi = function(arr,handler) {
 	return arr.map(handler);
 };
-thx.core.Arrays.flatMap = function(arr,callback) {
-	return thx.core.Arrays.flatten(arr.map(callback));
+thx_core_Arrays.flatMap = function(arr,callback) {
+	return thx_core_Arrays.flatten(arr.map(callback));
 };
-thx.core.Arrays.flatten = function(arr) {
+thx_core_Arrays.flatten = function(arr) {
 	return Array.prototype.concat.apply([],arr);
 };
-thx.core.Arrays.reduce = function(arr,callback,initial) {
+thx_core_Arrays.reduce = function(arr,callback,initial) {
 	return arr.reduce(callback,initial);
 };
-thx.core.Arrays.reducei = function(arr,callback,initial) {
+thx_core_Arrays.reducei = function(arr,callback,initial) {
 	return arr.reduce(callback,initial);
 };
-thx.core.Arrays.order = function(arr,sort) {
+thx_core_Arrays.order = function(arr,sort) {
 	var n = arr.slice();
 	n.sort(sort);
 	return n;
 };
-thx.core.Arrays.isEmpty = function(arr) {
+thx_core_Arrays.isEmpty = function(arr) {
 	return arr.length == 0;
 };
-thx.core.Arrays.contains = function(arr,element,eq) {
+thx_core_Arrays.contains = function(arr,element,eq) {
 	if(null == eq) return HxOverrides.indexOf(arr,element,0) >= 0; else {
 		var _g1 = 0;
 		var _g = arr.length;
@@ -4643,8 +4638,8 @@ thx.core.Arrays.contains = function(arr,element,eq) {
 		return false;
 	}
 };
-thx.core.Arrays.shuffle = function(a) {
-	var t = thx.core.Ints.range(a.length);
+thx_core_Arrays.shuffle = function(a) {
+	var t = thx_core_Ints.range(a.length);
 	var arr = [];
 	while(t.length > 0) {
 		var pos = Std.random(t.length);
@@ -4654,7 +4649,7 @@ thx.core.Arrays.shuffle = function(a) {
 	}
 	return arr;
 };
-thx.core.Arrays.extract = function(a,f) {
+thx_core_Arrays.extract = function(a,f) {
 	var _g1 = 0;
 	var _g = a.length;
 	while(_g1 < _g) {
@@ -4663,113 +4658,113 @@ thx.core.Arrays.extract = function(a,f) {
 	}
 	return null;
 };
-thx.core.Assertion = { __ename__ : ["thx","core","Assertion"], __constructs__ : ["Success","Failure","Error","PreConditionError","PostConditionError","Warning"] };
-thx.core.Assertion.Success = function(pos) { var $x = ["Success",0,pos]; $x.__enum__ = thx.core.Assertion; return $x; };
-thx.core.Assertion.Failure = function(msg,pos) { var $x = ["Failure",1,msg,pos]; $x.__enum__ = thx.core.Assertion; return $x; };
-thx.core.Assertion.Error = function(e,stack) { var $x = ["Error",2,e,stack]; $x.__enum__ = thx.core.Assertion; return $x; };
-thx.core.Assertion.PreConditionError = function(e,stack) { var $x = ["PreConditionError",3,e,stack]; $x.__enum__ = thx.core.Assertion; return $x; };
-thx.core.Assertion.PostConditionError = function(e,stack) { var $x = ["PostConditionError",4,e,stack]; $x.__enum__ = thx.core.Assertion; return $x; };
-thx.core.Assertion.Warning = function(msg) { var $x = ["Warning",5,msg]; $x.__enum__ = thx.core.Assertion; return $x; };
-thx.core.Function0 = function() { };
-thx.core.Function0.__name__ = ["thx","core","Function0"];
-thx.core.Function0.noop = function() {
+var thx_core_Assertion = { __ename__ : ["thx","core","Assertion"], __constructs__ : ["Success","Failure","Error","PreConditionError","PostConditionError","Warning"] };
+thx_core_Assertion.Success = function(pos) { var $x = ["Success",0,pos]; $x.__enum__ = thx_core_Assertion; $x.toString = $estr; return $x; };
+thx_core_Assertion.Failure = function(msg,pos) { var $x = ["Failure",1,msg,pos]; $x.__enum__ = thx_core_Assertion; $x.toString = $estr; return $x; };
+thx_core_Assertion.Error = function(e,stack) { var $x = ["Error",2,e,stack]; $x.__enum__ = thx_core_Assertion; $x.toString = $estr; return $x; };
+thx_core_Assertion.PreConditionError = function(e,stack) { var $x = ["PreConditionError",3,e,stack]; $x.__enum__ = thx_core_Assertion; $x.toString = $estr; return $x; };
+thx_core_Assertion.PostConditionError = function(e,stack) { var $x = ["PostConditionError",4,e,stack]; $x.__enum__ = thx_core_Assertion; $x.toString = $estr; return $x; };
+thx_core_Assertion.Warning = function(msg) { var $x = ["Warning",5,msg]; $x.__enum__ = thx_core_Assertion; $x.toString = $estr; return $x; };
+var thx_core_Function0 = function() { };
+thx_core_Function0.__name__ = ["thx","core","Function0"];
+thx_core_Function0.noop = function() {
 };
-thx.core.Function0.join = function(fa,fb) {
+thx_core_Function0.join = function(fa,fb) {
 	return function() {
 		fa();
 		fb();
 	};
 };
-thx.core.Function0.once = function(f) {
+thx_core_Function0.once = function(f) {
 	return function() {
 		f();
 		f = function() {
 		};
 	};
 };
-thx.core.Function1 = function() { };
-thx.core.Function1.__name__ = ["thx","core","Function1"];
-thx.core.Function1.noop = function(_) {
+var thx_core_Function1 = function() { };
+thx_core_Function1.__name__ = ["thx","core","Function1"];
+thx_core_Function1.noop = function(_) {
 };
-thx.core.Function1.compose = function(fa,fb) {
+thx_core_Function1.compose = function(fa,fb) {
 	return function(v) {
 		return fa(fb(v));
 	};
 };
-thx.core.Function1.join = function(fa,fb) {
+thx_core_Function1.join = function(fa,fb) {
 	return function(v) {
 		fa(v);
 		fb(v);
 	};
 };
-thx.core.Function = function() { };
-thx.core.Function.__name__ = ["thx","core","Function"];
-thx.core.Function.equality = function(a,b) {
+var thx_core_Function = function() { };
+thx_core_Function.__name__ = ["thx","core","Function"];
+thx_core_Function.equality = function(a,b) {
 	return a == b;
 };
-thx.core.Ints = function() { };
-thx.core.Ints.__name__ = ["thx","core","Ints"];
-thx.core.Ints.clamp = function(v,min,max) {
+var thx_core_Ints = function() { };
+thx_core_Ints.__name__ = ["thx","core","Ints"];
+thx_core_Ints.clamp = function(v,min,max) {
 	if(v < min) return min; else if(v > max) return max; else return v;
 };
-thx.core.Ints.canParse = function(s) {
-	return thx.core.Ints.pattern_parse.match(s);
+thx_core_Ints.canParse = function(s) {
+	return thx_core_Ints.pattern_parse.match(s);
 };
-thx.core.Ints.min = function(a,b) {
+thx_core_Ints.min = function(a,b) {
 	if(a < b) return a; else return b;
 };
-thx.core.Ints.max = function(a,b) {
+thx_core_Ints.max = function(a,b) {
 	if(a > b) return a; else return b;
 };
-thx.core.Ints.parse = function(s) {
+thx_core_Ints.parse = function(s) {
 	if(HxOverrides.substr(s,0,1) == "+") s = HxOverrides.substr(s,1,null);
 	return Std.parseInt(s);
 };
-thx.core.Ints.compare = function(a,b) {
+thx_core_Ints.compare = function(a,b) {
 	return a - b;
 };
-thx.core.Ints.range = function(start,stop,step) {
+thx_core_Ints.range = function(start,stop,step) {
 	if(step == null) step = 1;
 	if(null == stop) {
 		stop = start;
 		start = 0;
 	}
-	if((stop - start) / step == Infinity) throw "infinite range";
+	if((stop - start) / step == Math.POSITIVE_INFINITY) throw "infinite range";
 	var range = [];
 	var i = -1;
 	var j;
 	if(step < 0) while((j = start + step * ++i) > stop) range.push(j); else while((j = start + step * ++i) < stop) range.push(j);
 	return range;
 };
-thx.core.Iterables = function() { };
-thx.core.Iterables.__name__ = ["thx","core","Iterables"];
-thx.core.Iterables.map = function(it,f) {
-	return thx.core.Iterators.map($iterator(it)(),f);
+var thx_core_Iterables = function() { };
+thx_core_Iterables.__name__ = ["thx","core","Iterables"];
+thx_core_Iterables.map = function(it,f) {
+	return thx_core_Iterators.map($iterator(it)(),f);
 };
-thx.core.Iterables.eachPair = function(it,handler) {
-	return thx.core.Iterators.eachPair($iterator(it)(),handler);
+thx_core_Iterables.eachPair = function(it,handler) {
+	return thx_core_Iterators.eachPair($iterator(it)(),handler);
 };
-thx.core.Iterables.toArray = function(it) {
-	return thx.core.Iterators.toArray($iterator(it)());
+thx_core_Iterables.toArray = function(it) {
+	return thx_core_Iterators.toArray($iterator(it)());
 };
-thx.core.Iterables.order = function(it,sort) {
-	return thx.core.Iterators.order($iterator(it)(),sort);
+thx_core_Iterables.order = function(it,sort) {
+	return thx_core_Iterators.order($iterator(it)(),sort);
 };
-thx.core.Iterables.reduce = function(it,callback,initial) {
-	return thx.core.Iterators.reduce($iterator(it)(),callback,initial);
+thx_core_Iterables.reduce = function(it,callback,initial) {
+	return thx_core_Iterators.reduce($iterator(it)(),callback,initial);
 };
-thx.core.Iterables.reducei = function(it,callback,initial) {
-	return thx.core.Iterators.reducei($iterator(it)(),callback,initial);
+thx_core_Iterables.reducei = function(it,callback,initial) {
+	return thx_core_Iterators.reducei($iterator(it)(),callback,initial);
 };
-thx.core.Iterables.isEmpty = function(it) {
-	return thx.core.Iterators.isEmpty($iterator(it)());
+thx_core_Iterables.isEmpty = function(it) {
+	return thx_core_Iterators.isEmpty($iterator(it)());
 };
-thx.core.Iterables.filter = function(it,predicate) {
-	return thx.core.Iterators.filter($iterator(it)(),predicate);
+thx_core_Iterables.filter = function(it,predicate) {
+	return thx_core_Iterators.filter($iterator(it)(),predicate);
 };
-thx.core.Iterators = function() { };
-thx.core.Iterators.__name__ = ["thx","core","Iterators"];
-thx.core.Iterators.map = function(it,f) {
+var thx_core_Iterators = function() { };
+thx_core_Iterators.__name__ = ["thx","core","Iterators"];
+thx_core_Iterators.map = function(it,f) {
 	var acc = [];
 	while( it.hasNext() ) {
 		var v = it.next();
@@ -4777,7 +4772,7 @@ thx.core.Iterators.map = function(it,f) {
 	}
 	return acc;
 };
-thx.core.Iterators.mapi = function(it,f) {
+thx_core_Iterators.mapi = function(it,f) {
 	var acc = [];
 	var i = 0;
 	while( it.hasNext() ) {
@@ -4786,10 +4781,10 @@ thx.core.Iterators.mapi = function(it,f) {
 	}
 	return acc;
 };
-thx.core.Iterators.eachPair = function(it,handler) {
-	thx.core.Arrays.eachPair(thx.core.Iterators.toArray(it),handler);
+thx_core_Iterators.eachPair = function(it,handler) {
+	thx_core_Arrays.eachPair(thx_core_Iterators.toArray(it),handler);
 };
-thx.core.Iterators.toArray = function(it) {
+thx_core_Iterators.toArray = function(it) {
 	var items = [];
 	while( it.hasNext() ) {
 		var item = it.next();
@@ -4797,47 +4792,48 @@ thx.core.Iterators.toArray = function(it) {
 	}
 	return items;
 };
-thx.core.Iterators.order = function(it,sort) {
-	var n = thx.core.Iterators.toArray(it);
+thx_core_Iterators.order = function(it,sort) {
+	var n = thx_core_Iterators.toArray(it);
 	n.sort(sort);
 	return n;
 };
-thx.core.Iterators.reduce = function(it,callback,initial) {
-	thx.core.Iterators.map(it,function(v) {
+thx_core_Iterators.reduce = function(it,callback,initial) {
+	thx_core_Iterators.map(it,function(v) {
 		initial = callback(initial,v);
 	});
 	return initial;
 };
-thx.core.Iterators.reducei = function(it,callback,initial) {
-	thx.core.Iterators.mapi(it,function(v,i) {
+thx_core_Iterators.reducei = function(it,callback,initial) {
+	thx_core_Iterators.mapi(it,function(v,i) {
 		initial = callback(initial,v,i);
 	});
 	return initial;
 };
-thx.core.Iterators.isEmpty = function(it) {
+thx_core_Iterators.isEmpty = function(it) {
 	return !it.hasNext();
 };
-thx.core.Iterators.filter = function(it,predicate) {
-	return thx.core.Iterators.reduce(it,function(acc,item) {
+thx_core_Iterators.filter = function(it,predicate) {
+	return thx_core_Iterators.reduce(it,function(acc,item) {
 		if(predicate(item)) acc.push(item);
 		return acc;
 	},[]);
 };
-thx.core.Nil = { __ename__ : ["thx","core","Nil"], __constructs__ : ["nil"] };
-thx.core.Nil.nil = ["nil",0];
-thx.core.Nil.nil.__enum__ = thx.core.Nil;
-thx.core.Objects = function() { };
-thx.core.Objects.__name__ = ["thx","core","Objects"];
-thx.core.Objects.isEmpty = function(o) {
+var thx_core_Nil = { __ename__ : ["thx","core","Nil"], __constructs__ : ["nil"] };
+thx_core_Nil.nil = ["nil",0];
+thx_core_Nil.nil.toString = $estr;
+thx_core_Nil.nil.__enum__ = thx_core_Nil;
+var thx_core_Objects = function() { };
+thx_core_Objects.__name__ = ["thx","core","Objects"];
+thx_core_Objects.isEmpty = function(o) {
 	return Reflect.fields(o).length == 0;
 };
-thx.core.Set = function() {
+var thx_core_Set = function() {
 	this._v = [];
 	this.length = 0;
 };
-thx.core.Set.__name__ = ["thx","core","Set"];
-thx.core.Set.ofArray = function(arr) {
-	var set = new thx.core.Set();
+thx_core_Set.__name__ = ["thx","core","Set"];
+thx_core_Set.ofArray = function(arr) {
+	var set = new thx_core_Set();
 	var _g = 0;
 	while(_g < arr.length) {
 		var item = arr[_g];
@@ -4846,7 +4842,7 @@ thx.core.Set.ofArray = function(arr) {
 	}
 	return set;
 };
-thx.core.Set.prototype = {
+thx_core_Set.prototype = {
 	length: null
 	,_v: null
 	,add: function(v) {
@@ -4878,19 +4874,19 @@ thx.core.Set.prototype = {
 	,toString: function() {
 		return "{" + this._v.join(", ") + "}";
 	}
-	,__class__: thx.core.Set
+	,__class__: thx_core_Set
 };
-thx.core.Strings = function() { };
-thx.core.Strings.__name__ = ["thx","core","Strings"];
-thx.core.Strings.upTo = function(value,searchFor) {
+var thx_core_Strings = function() { };
+thx_core_Strings.__name__ = ["thx","core","Strings"];
+thx_core_Strings.upTo = function(value,searchFor) {
 	var pos = value.indexOf(searchFor);
 	if(pos < 0) return value; else return HxOverrides.substr(value,0,pos);
 };
-thx.core.Strings.startFrom = function(value,searchFor) {
+thx_core_Strings.startFrom = function(value,searchFor) {
 	var pos = value.indexOf(searchFor);
 	if(pos < 0) return value; else return HxOverrides.substr(value,pos + searchFor.length,null);
 };
-thx.core.Strings.rtrim = function(value,charlist) {
+thx_core_Strings.rtrim = function(value,charlist) {
 	var len = value.length;
 	while(len > 0) {
 		var c = HxOverrides.substr(value,len - 1,1);
@@ -4899,7 +4895,7 @@ thx.core.Strings.rtrim = function(value,charlist) {
 	}
 	return HxOverrides.substr(value,0,len);
 };
-thx.core.Strings.ltrim = function(value,charlist) {
+thx_core_Strings.ltrim = function(value,charlist) {
 	var start = 0;
 	while(start < value.length) {
 		var c = HxOverrides.substr(value,start,1);
@@ -4908,43 +4904,43 @@ thx.core.Strings.ltrim = function(value,charlist) {
 	}
 	return HxOverrides.substr(value,start,null);
 };
-thx.core.Strings.trim = function(value,charlist) {
-	return thx.core.Strings.rtrim(thx.core.Strings.ltrim(value,charlist),charlist);
+thx_core_Strings.trim = function(value,charlist) {
+	return thx_core_Strings.rtrim(thx_core_Strings.ltrim(value,charlist),charlist);
 };
-thx.core.Strings.collapse = function(value) {
-	return thx.core.Strings._reCollapse.replace(StringTools.trim(value)," ");
+thx_core_Strings.collapse = function(value) {
+	return thx_core_Strings._reCollapse.replace(StringTools.trim(value)," ");
 };
-thx.core.Strings.ucfirst = function(value) {
+thx_core_Strings.ucfirst = function(value) {
 	if(value == null) return null; else return value.charAt(0).toUpperCase() + HxOverrides.substr(value,1,null);
 };
-thx.core.Strings.lcfirst = function(value) {
+thx_core_Strings.lcfirst = function(value) {
 	if(value == null) return null; else return value.charAt(0).toLowerCase() + HxOverrides.substr(value,1,null);
 };
-thx.core.Strings.empty = function(value) {
+thx_core_Strings.empty = function(value) {
 	return value == null || value == "";
 };
-thx.core.Strings.isAlphaNum = function(value) {
-	if(value == null) return false; else return thx.core.Strings.__alphaNumPattern.match(value);
+thx_core_Strings.isAlphaNum = function(value) {
+	if(value == null) return false; else return thx_core_Strings.__alphaNumPattern.match(value);
 };
-thx.core.Strings.digitsOnly = function(value) {
-	if(value == null) return false; else return thx.core.Strings.__digitsPattern.match(value);
+thx_core_Strings.digitsOnly = function(value) {
+	if(value == null) return false; else return thx_core_Strings.__digitsPattern.match(value);
 };
-thx.core.Strings.ucwords = function(value) {
-	return thx.core.Strings.__ucwordsPattern.map(value == null?null:value.charAt(0).toUpperCase() + HxOverrides.substr(value,1,null),thx.core.Strings.__upperMatch);
+thx_core_Strings.ucwords = function(value) {
+	return thx_core_Strings.__ucwordsPattern.map(value == null?null:value.charAt(0).toUpperCase() + HxOverrides.substr(value,1,null),thx_core_Strings.__upperMatch);
 };
-thx.core.Strings.ucwordsws = function(value) {
-	return thx.core.Strings.__ucwordswsPattern.map(value == null?null:value.charAt(0).toUpperCase() + HxOverrides.substr(value,1,null),thx.core.Strings.__upperMatch);
+thx_core_Strings.ucwordsws = function(value) {
+	return thx_core_Strings.__ucwordswsPattern.map(value == null?null:value.charAt(0).toUpperCase() + HxOverrides.substr(value,1,null),thx_core_Strings.__upperMatch);
 };
-thx.core.Strings.__upperMatch = function(re) {
+thx_core_Strings.__upperMatch = function(re) {
 	return re.matched(0).toUpperCase();
 };
-thx.core.Strings.humanize = function(s) {
-	return StringTools.replace(thx.core.Strings.underscore(s),"_"," ");
+thx_core_Strings.humanize = function(s) {
+	return StringTools.replace(thx_core_Strings.underscore(s),"_"," ");
 };
-thx.core.Strings.capitalize = function(s) {
+thx_core_Strings.capitalize = function(s) {
 	return HxOverrides.substr(s,0,1).toUpperCase() + HxOverrides.substr(s,1,null);
 };
-thx.core.Strings.succ = function(s) {
+thx_core_Strings.succ = function(s) {
 	return HxOverrides.substr(s,0,-1) + String.fromCharCode((function($this) {
 		var $r;
 		var _this = HxOverrides.substr(s,-1,null);
@@ -4952,17 +4948,17 @@ thx.core.Strings.succ = function(s) {
 		return $r;
 	}(this)) + 1);
 };
-thx.core.Strings.underscore = function(s) {
+thx_core_Strings.underscore = function(s) {
 	s = new EReg("::","g").replace(s,"/");
 	s = new EReg("([A-Z]+)([A-Z][a-z])","g").replace(s,"$1_$2");
 	s = new EReg("([a-z\\d])([A-Z])","g").replace(s,"$1_$2");
 	s = new EReg("-","g").replace(s,"_");
 	return s.toLowerCase();
 };
-thx.core.Strings.dasherize = function(s) {
+thx_core_Strings.dasherize = function(s) {
 	return StringTools.replace(s,"_","-");
 };
-thx.core.Strings.repeat = function(s,times) {
+thx_core_Strings.repeat = function(s,times) {
 	var b = [];
 	var _g = 0;
 	while(_g < times) {
@@ -4971,21 +4967,21 @@ thx.core.Strings.repeat = function(s,times) {
 	}
 	return b.join("");
 };
-thx.core.Strings.wrapColumns = function(s,columns,indent,newline) {
+thx_core_Strings.wrapColumns = function(s,columns,indent,newline) {
 	if(newline == null) newline = "\n";
 	if(indent == null) indent = "";
 	if(columns == null) columns = 78;
-	var parts = thx.core.Strings._reSplitWC.split(s);
+	var parts = thx_core_Strings._reSplitWC.split(s);
 	var result = [];
 	var _g = 0;
 	while(_g < parts.length) {
 		var part = parts[_g];
 		++_g;
-		result.push(thx.core.Strings._wrapColumns(StringTools.trim(thx.core.Strings._reReduceWS.replace(part," ")),columns,indent,newline));
+		result.push(thx_core_Strings._wrapColumns(StringTools.trim(thx_core_Strings._reReduceWS.replace(part," ")),columns,indent,newline));
 	}
 	return result.join(newline);
 };
-thx.core.Strings._wrapColumns = function(s,columns,indent,newline) {
+thx_core_Strings._wrapColumns = function(s,columns,indent,newline) {
 	var parts = [];
 	var pos = 0;
 	var len = s.length;
@@ -5010,197 +5006,196 @@ thx.core.Strings._wrapColumns = function(s,columns,indent,newline) {
 	}
 	return indent + parts.join(newline + indent);
 };
-thx.core.Strings.stripTags = function(s) {
-	return thx.core.Strings._reStripTags.replace(s,"");
+thx_core_Strings.stripTags = function(s) {
+	return thx_core_Strings._reStripTags.replace(s,"");
 };
-thx.core.Strings.ellipsis = function(s,maxlen,symbol) {
+thx_core_Strings.ellipsis = function(s,maxlen,symbol) {
 	if(symbol == null) symbol = "...";
 	if(maxlen == null) maxlen = 20;
 	if(s.length > maxlen) return HxOverrides.substr(s,0,symbol.length > maxlen - symbol.length?symbol.length:maxlen - symbol.length) + symbol; else return s;
 };
-thx.core.Strings.compare = function(a,b) {
+thx_core_Strings.compare = function(a,b) {
 	if(a < b) return -1; else if(a > b) return 1; else return 0;
 };
-thx.core.Timer = function() { };
-thx.core.Timer.__name__ = ["thx","core","Timer"];
-thx.core.Timer.repeat = function(callback,ms) {
+var thx_core_Timer = function() { };
+thx_core_Timer.__name__ = ["thx","core","Timer"];
+thx_core_Timer.repeat = function(callback,ms) {
 	return setInterval(callback,ms);
 };
-thx.core.Timer.delay = function(callback,ms) {
+thx_core_Timer.delay = function(callback,ms) {
 	return setTimeout(callback,ms);
 };
-thx.core.Timer.immediate = function(callback) {
+thx_core_Timer.immediate = function(callback) {
 	return setImmediate(callback);
 };
-thx.core.Timer.clear = function(id) {
+thx_core_Timer.clear = function(id) {
 	return clearTimeout(id);
 };
-thx.core._Tuple = {};
-thx.core._Tuple.Tuple0_Impl_ = function() { };
-thx.core._Tuple.Tuple0_Impl_.__name__ = ["thx","core","_Tuple","Tuple0_Impl_"];
-thx.core._Tuple.Tuple0_Impl_._new = function() {
-	return thx.core.Nil.nil;
+var thx_core__$Tuple_Tuple0_$Impl_$ = function() { };
+thx_core__$Tuple_Tuple0_$Impl_$.__name__ = ["thx","core","_Tuple","Tuple0_Impl_"];
+thx_core__$Tuple_Tuple0_$Impl_$._new = function() {
+	return thx_core_Nil.nil;
 };
-thx.core._Tuple.Tuple0_Impl_.toTuple1 = function(this1,v) {
+thx_core__$Tuple_Tuple0_$Impl_$.toTuple1 = function(this1,v) {
 	return v;
 };
-thx.core._Tuple.Tuple0_Impl_.toString = function(this1) {
+thx_core__$Tuple_Tuple0_$Impl_$.toString = function(this1) {
 	return "Tuple0()";
 };
-thx.core._Tuple.Tuple0_Impl_.toNil = function(this1) {
+thx_core__$Tuple_Tuple0_$Impl_$.toNil = function(this1) {
 	return this1;
 };
-thx.core._Tuple.Tuple0_Impl_.nilToTuple = function(v) {
-	return thx.core.Nil.nil;
+thx_core__$Tuple_Tuple0_$Impl_$.nilToTuple = function(v) {
+	return thx_core_Nil.nil;
 };
-thx.core._Tuple.Tuple1_Impl_ = function() { };
-thx.core._Tuple.Tuple1_Impl_.__name__ = ["thx","core","_Tuple","Tuple1_Impl_"];
-thx.core._Tuple.Tuple1_Impl_._new = function(_0) {
+var thx_core__$Tuple_Tuple1_$Impl_$ = function() { };
+thx_core__$Tuple_Tuple1_$Impl_$.__name__ = ["thx","core","_Tuple","Tuple1_Impl_"];
+thx_core__$Tuple_Tuple1_$Impl_$._new = function(_0) {
 	return _0;
 };
-thx.core._Tuple.Tuple1_Impl_.get__0 = function(this1) {
+thx_core__$Tuple_Tuple1_$Impl_$.get__0 = function(this1) {
 	return this1;
 };
-thx.core._Tuple.Tuple1_Impl_.toTuple2 = function(this1,v) {
+thx_core__$Tuple_Tuple1_$Impl_$.toTuple2 = function(this1,v) {
 	return { _0 : this1, _1 : v};
 };
-thx.core._Tuple.Tuple1_Impl_.toString = function(this1) {
+thx_core__$Tuple_Tuple1_$Impl_$.toString = function(this1) {
 	return "Tuple1(" + Std.string(this1) + ")";
 };
-thx.core._Tuple.Tuple2_Impl_ = function() { };
-thx.core._Tuple.Tuple2_Impl_.__name__ = ["thx","core","_Tuple","Tuple2_Impl_"];
-thx.core._Tuple.Tuple2_Impl_._new = function(_0,_1) {
+var thx_core__$Tuple_Tuple2_$Impl_$ = function() { };
+thx_core__$Tuple_Tuple2_$Impl_$.__name__ = ["thx","core","_Tuple","Tuple2_Impl_"];
+thx_core__$Tuple_Tuple2_$Impl_$._new = function(_0,_1) {
 	return { _0 : _0, _1 : _1};
 };
-thx.core._Tuple.Tuple2_Impl_.get__0 = function(this1) {
+thx_core__$Tuple_Tuple2_$Impl_$.get__0 = function(this1) {
 	return this1._0;
 };
-thx.core._Tuple.Tuple2_Impl_.get__1 = function(this1) {
+thx_core__$Tuple_Tuple2_$Impl_$.get__1 = function(this1) {
 	return this1._1;
 };
-thx.core._Tuple.Tuple2_Impl_.toTuple3 = function(this1,v) {
+thx_core__$Tuple_Tuple2_$Impl_$.toTuple3 = function(this1,v) {
 	return { _0 : this1._0, _1 : this1._1, _2 : v};
 };
-thx.core._Tuple.Tuple2_Impl_.toString = function(this1) {
+thx_core__$Tuple_Tuple2_$Impl_$.toString = function(this1) {
 	return "Tuple2(" + Std.string(this1._0) + "," + Std.string(this1._1) + ")";
 };
-thx.core._Tuple.Tuple3_Impl_ = function() { };
-thx.core._Tuple.Tuple3_Impl_.__name__ = ["thx","core","_Tuple","Tuple3_Impl_"];
-thx.core._Tuple.Tuple3_Impl_._new = function(_0,_1,_2) {
+var thx_core__$Tuple_Tuple3_$Impl_$ = function() { };
+thx_core__$Tuple_Tuple3_$Impl_$.__name__ = ["thx","core","_Tuple","Tuple3_Impl_"];
+thx_core__$Tuple_Tuple3_$Impl_$._new = function(_0,_1,_2) {
 	return { _0 : _0, _1 : _1, _2 : _2};
 };
-thx.core._Tuple.Tuple3_Impl_.get__0 = function(this1) {
+thx_core__$Tuple_Tuple3_$Impl_$.get__0 = function(this1) {
 	return this1._0;
 };
-thx.core._Tuple.Tuple3_Impl_.get__1 = function(this1) {
+thx_core__$Tuple_Tuple3_$Impl_$.get__1 = function(this1) {
 	return this1._1;
 };
-thx.core._Tuple.Tuple3_Impl_.get__2 = function(this1) {
+thx_core__$Tuple_Tuple3_$Impl_$.get__2 = function(this1) {
 	return this1._2;
 };
-thx.core._Tuple.Tuple3_Impl_.toTuple4 = function(this1,v) {
+thx_core__$Tuple_Tuple3_$Impl_$.toTuple4 = function(this1,v) {
 	return { _0 : this1._0, _1 : this1._1, _2 : this1._2, _3 : v};
 };
-thx.core._Tuple.Tuple3_Impl_.toString = function(this1) {
+thx_core__$Tuple_Tuple3_$Impl_$.toString = function(this1) {
 	return "Tuple3(" + Std.string(this1._0) + "," + Std.string(this1._1) + "," + Std.string(this1._2) + ")";
 };
-thx.core._Tuple.Tuple4_Impl_ = function() { };
-thx.core._Tuple.Tuple4_Impl_.__name__ = ["thx","core","_Tuple","Tuple4_Impl_"];
-thx.core._Tuple.Tuple4_Impl_._new = function(_0,_1,_2,_3) {
+var thx_core__$Tuple_Tuple4_$Impl_$ = function() { };
+thx_core__$Tuple_Tuple4_$Impl_$.__name__ = ["thx","core","_Tuple","Tuple4_Impl_"];
+thx_core__$Tuple_Tuple4_$Impl_$._new = function(_0,_1,_2,_3) {
 	return { _0 : _0, _1 : _1, _2 : _2, _3 : _3};
 };
-thx.core._Tuple.Tuple4_Impl_.get__0 = function(this1) {
+thx_core__$Tuple_Tuple4_$Impl_$.get__0 = function(this1) {
 	return this1._0;
 };
-thx.core._Tuple.Tuple4_Impl_.get__1 = function(this1) {
+thx_core__$Tuple_Tuple4_$Impl_$.get__1 = function(this1) {
 	return this1._1;
 };
-thx.core._Tuple.Tuple4_Impl_.get__2 = function(this1) {
+thx_core__$Tuple_Tuple4_$Impl_$.get__2 = function(this1) {
 	return this1._2;
 };
-thx.core._Tuple.Tuple4_Impl_.get__3 = function(this1) {
+thx_core__$Tuple_Tuple4_$Impl_$.get__3 = function(this1) {
 	return this1._3;
 };
-thx.core._Tuple.Tuple4_Impl_.toTuple5 = function(this1,v) {
+thx_core__$Tuple_Tuple4_$Impl_$.toTuple5 = function(this1,v) {
 	return { _0 : this1._0, _1 : this1._1, _2 : this1._2, _3 : this1._3, _4 : v};
 };
-thx.core._Tuple.Tuple4_Impl_.toString = function(this1) {
+thx_core__$Tuple_Tuple4_$Impl_$.toString = function(this1) {
 	return "Tuple4(" + Std.string(this1._0) + "," + Std.string(this1._1) + "," + Std.string(this1._2) + "," + Std.string(this1._3) + ")";
 };
-thx.core._Tuple.Tuple5_Impl_ = function() { };
-thx.core._Tuple.Tuple5_Impl_.__name__ = ["thx","core","_Tuple","Tuple5_Impl_"];
-thx.core._Tuple.Tuple5_Impl_._new = function(_0,_1,_2,_3,_4) {
+var thx_core__$Tuple_Tuple5_$Impl_$ = function() { };
+thx_core__$Tuple_Tuple5_$Impl_$.__name__ = ["thx","core","_Tuple","Tuple5_Impl_"];
+thx_core__$Tuple_Tuple5_$Impl_$._new = function(_0,_1,_2,_3,_4) {
 	return { _0 : _0, _1 : _1, _2 : _2, _3 : _3, _4 : _4};
 };
-thx.core._Tuple.Tuple5_Impl_.get__0 = function(this1) {
+thx_core__$Tuple_Tuple5_$Impl_$.get__0 = function(this1) {
 	return this1._0;
 };
-thx.core._Tuple.Tuple5_Impl_.get__1 = function(this1) {
+thx_core__$Tuple_Tuple5_$Impl_$.get__1 = function(this1) {
 	return this1._1;
 };
-thx.core._Tuple.Tuple5_Impl_.get__2 = function(this1) {
+thx_core__$Tuple_Tuple5_$Impl_$.get__2 = function(this1) {
 	return this1._2;
 };
-thx.core._Tuple.Tuple5_Impl_.get__3 = function(this1) {
+thx_core__$Tuple_Tuple5_$Impl_$.get__3 = function(this1) {
 	return this1._3;
 };
-thx.core._Tuple.Tuple5_Impl_.get__4 = function(this1) {
+thx_core__$Tuple_Tuple5_$Impl_$.get__4 = function(this1) {
 	return this1._4;
 };
-thx.core._Tuple.Tuple5_Impl_.toTuple6 = function(this1,v) {
+thx_core__$Tuple_Tuple5_$Impl_$.toTuple6 = function(this1,v) {
 	return { _0 : this1._0, _1 : this1._1, _2 : this1._2, _3 : this1._3, _4 : this1._4, _5 : v};
 };
-thx.core._Tuple.Tuple5_Impl_.toString = function(this1) {
+thx_core__$Tuple_Tuple5_$Impl_$.toString = function(this1) {
 	return "Tuple5(" + Std.string(this1._0) + "," + Std.string(this1._1) + "," + Std.string(this1._2) + "," + Std.string(this1._3) + "," + Std.string(this1._4) + ")";
 };
-thx.core._Tuple.Tuple6_Impl_ = function() { };
-thx.core._Tuple.Tuple6_Impl_.__name__ = ["thx","core","_Tuple","Tuple6_Impl_"];
-thx.core._Tuple.Tuple6_Impl_._new = function(_0,_1,_2,_3,_4,_5) {
+var thx_core__$Tuple_Tuple6_$Impl_$ = function() { };
+thx_core__$Tuple_Tuple6_$Impl_$.__name__ = ["thx","core","_Tuple","Tuple6_Impl_"];
+thx_core__$Tuple_Tuple6_$Impl_$._new = function(_0,_1,_2,_3,_4,_5) {
 	return { _0 : _0, _1 : _1, _2 : _2, _3 : _3, _4 : _4, _5 : _5};
 };
-thx.core._Tuple.Tuple6_Impl_.get__0 = function(this1) {
+thx_core__$Tuple_Tuple6_$Impl_$.get__0 = function(this1) {
 	return this1._0;
 };
-thx.core._Tuple.Tuple6_Impl_.get__1 = function(this1) {
+thx_core__$Tuple_Tuple6_$Impl_$.get__1 = function(this1) {
 	return this1._1;
 };
-thx.core._Tuple.Tuple6_Impl_.get__2 = function(this1) {
+thx_core__$Tuple_Tuple6_$Impl_$.get__2 = function(this1) {
 	return this1._2;
 };
-thx.core._Tuple.Tuple6_Impl_.get__3 = function(this1) {
+thx_core__$Tuple_Tuple6_$Impl_$.get__3 = function(this1) {
 	return this1._3;
 };
-thx.core._Tuple.Tuple6_Impl_.get__4 = function(this1) {
+thx_core__$Tuple_Tuple6_$Impl_$.get__4 = function(this1) {
 	return this1._4;
 };
-thx.core._Tuple.Tuple6_Impl_.get__5 = function(this1) {
+thx_core__$Tuple_Tuple6_$Impl_$.get__5 = function(this1) {
 	return this1._5;
 };
-thx.core._Tuple.Tuple6_Impl_.toString = function(this1) {
+thx_core__$Tuple_Tuple6_$Impl_$.toString = function(this1) {
 	return "Tuple6(" + Std.string(this1._0) + "," + Std.string(this1._1) + "," + Std.string(this1._2) + "," + Std.string(this1._3) + "," + Std.string(this1._4) + "," + Std.string(this1._5) + ")";
 };
-thx.core.Types = function() { };
-thx.core.Types.__name__ = ["thx","core","Types"];
-thx.core.Types.isAnonymousObject = function(v) {
+var thx_core_Types = function() { };
+thx_core_Types.__name__ = ["thx","core","Types"];
+thx_core_Types.isAnonymousObject = function(v) {
 	return Reflect.isObject(v) && null == Type.getClass(v);
 };
-thx.core.Types.sameType = function(a,b) {
-	return thx.core.ValueTypes.toString(Type["typeof"](a)) == thx.core.ValueTypes.toString(Type["typeof"](b));
+thx_core_Types.sameType = function(a,b) {
+	return thx_core_ValueTypes.toString(Type["typeof"](a)) == thx_core_ValueTypes.toString(Type["typeof"](b));
 };
-thx.core.ClassTypes = function() { };
-thx.core.ClassTypes.__name__ = ["thx","core","ClassTypes"];
-thx.core.ClassTypes.toString = function(cls) {
+var thx_core_ClassTypes = function() { };
+thx_core_ClassTypes.__name__ = ["thx","core","ClassTypes"];
+thx_core_ClassTypes.toString = function(cls) {
 	return Type.getClassName(cls);
 };
-thx.core.ClassTypes["as"] = function(value,type) {
-	if(js.Boot.__instanceof(value,type)) return value; else return null;
+thx_core_ClassTypes["as"] = function(value,type) {
+	if(js_Boot.__instanceof(value,type)) return value; else return null;
 };
-thx.core.ValueTypes = function() { };
-thx.core.ValueTypes.__name__ = ["thx","core","ValueTypes"];
-thx.core.ValueTypes.typeAsString = function(value) {
-	return thx.core.ValueTypes.toString(Type["typeof"](value));
+var thx_core_ValueTypes = function() { };
+thx_core_ValueTypes.__name__ = ["thx","core","ValueTypes"];
+thx_core_ValueTypes.typeAsString = function(value) {
+	return thx_core_ValueTypes.toString(Type["typeof"](value));
 };
-thx.core.ValueTypes.toString = function(type) {
+thx_core_ValueTypes.toString = function(type) {
 	switch(type[1]) {
 	case 1:
 		return "Int";
@@ -5222,7 +5217,7 @@ thx.core.ValueTypes.toString = function(type) {
 		return null;
 	}
 };
-thx.core.ValueTypes.typeInheritance = function(type) {
+thx_core_ValueTypes.typeInheritance = function(type) {
 	switch(type[1]) {
 	case 1:
 		return ["Int"];
@@ -5249,15 +5244,15 @@ thx.core.ValueTypes.typeInheritance = function(type) {
 		return null;
 	}
 };
-thx.core.UUID = function() { };
-thx.core.UUID.__name__ = ["thx","core","UUID"];
-thx.core.UUID.random = function() {
+var thx_core_UUID = function() { };
+thx_core_UUID.__name__ = ["thx","core","UUID"];
+thx_core_UUID.random = function() {
 	return Math.floor(Math.random() * 16);
 };
-thx.core.UUID.srandom = function() {
+thx_core_UUID.srandom = function() {
 	return "" + Math.floor(Math.random() * 16);
 };
-thx.core.UUID.create = function() {
+thx_core_UUID.create = function() {
 	var s = [];
 	var _g = 0;
 	while(_g < 8) {
@@ -5292,21 +5287,20 @@ thx.core.UUID.create = function() {
 	}
 	return s.join("");
 };
-thx.promise = {};
-thx.promise.Deferred = function() {
-	this.promise = new thx.promise.Promise();
+var thx_promise_Deferred = function() {
+	this.promise = new thx_promise_Promise();
 };
-thx.promise.Deferred.__name__ = ["thx","promise","Deferred"];
-thx.promise.Deferred.prototype = {
+thx_promise_Deferred.__name__ = ["thx","promise","Deferred"];
+thx_promise_Deferred.prototype = {
 	promise: null
 	,rejectWith: function(error) {
-		return this.fulfill(thx.promise.PromiseValue.Failure(thx.core.Error.fromDynamic(error,{ fileName : "Deferred.hx", lineNumber : 13, className : "thx.promise.Deferred", methodName : "rejectWith"})));
+		return this.fulfill(thx_promise_PromiseValue.Failure(thx_core_Error.fromDynamic(error,{ fileName : "Deferred.hx", lineNumber : 13, className : "thx.promise.Deferred", methodName : "rejectWith"})));
 	}
 	,reject: function(error) {
-		return this.fulfill(thx.promise.PromiseValue.Failure(error));
+		return this.fulfill(thx_promise_PromiseValue.Failure(error));
 	}
 	,resolve: function(value) {
-		return this.fulfill(thx.promise.PromiseValue.Success(value));
+		return this.fulfill(thx_promise_PromiseValue.Success(value));
 	}
 	,fulfill: function(result) {
 		return this.promise.setState(result);
@@ -5314,25 +5308,25 @@ thx.promise.Deferred.prototype = {
 	,toString: function() {
 		return "Deferred";
 	}
-	,__class__: thx.promise.Deferred
+	,__class__: thx_promise_Deferred
 };
-thx.promise.Promise = function() {
+var thx_promise_Promise = function() {
 	this.handlers = [];
-	this.state = haxe.ds.Option.None;
+	this.state = haxe_ds_Option.None;
 };
-thx.promise.Promise.__name__ = ["thx","promise","Promise"];
-thx.promise.Promise.create = function(callback) {
-	var deferred = new thx.promise.Deferred();
+thx_promise_Promise.__name__ = ["thx","promise","Promise"];
+thx_promise_Promise.create = function(callback) {
+	var deferred = new thx_promise_Deferred();
 	callback($bind(deferred,deferred.resolve),$bind(deferred,deferred.reject));
 	return deferred.promise;
 };
-thx.promise.Promise.fulfilled = function(callback) {
-	var deferred = new thx.promise.Deferred();
+thx_promise_Promise.fulfilled = function(callback) {
+	var deferred = new thx_promise_Deferred();
 	callback($bind(deferred,deferred.fulfill));
 	return deferred.promise;
 };
-thx.promise.Promise.all = function(arr) {
-	return thx.promise.Promise.create(function(resolve,reject) {
+thx_promise_Promise.all = function(arr) {
+	return thx_promise_Promise.create(function(resolve,reject) {
 		var results = [];
 		var counter = 0;
 		var hasError = false;
@@ -5350,17 +5344,17 @@ thx.promise.Promise.all = function(arr) {
 		});
 	});
 };
-thx.promise.Promise.value = function(v) {
-	return thx.promise.Promise.create(function(resolve,_) {
+thx_promise_Promise.value = function(v) {
+	return thx_promise_Promise.create(function(resolve,_) {
 		resolve(v);
 	});
 };
-thx.promise.Promise.error = function(err) {
-	return thx.promise.Promise.create(function(_,reject) {
+thx_promise_Promise.error = function(err) {
+	return thx_promise_Promise.create(function(_,reject) {
 		reject(err);
 	});
 };
-thx.promise.Promise.prototype = {
+thx_promise_Promise.prototype = {
 	handlers: null
 	,state: null
 	,then: function(handler) {
@@ -5398,7 +5392,7 @@ thx.promise.Promise.prototype = {
 	}
 	,map: function(handler) {
 		var _g = this;
-		return thx.promise.Promise.fulfilled(function(fulfill) {
+		return thx_promise_Promise.fulfilled(function(fulfill) {
 			_g.then(function(result) {
 				handler(result).then(fulfill);
 			});
@@ -5418,12 +5412,12 @@ thx.promise.Promise.prototype = {
 	}
 	,mapSuccess: function(success) {
 		return this.mapEither(success,function(err) {
-			return thx.promise.Promise.error(err);
+			return thx_promise_Promise.error(err);
 		});
 	}
 	,mapFailure: function(failure) {
 		return this.mapEither(function(value) {
-			return thx.promise.Promise.value(value);
+			return thx_promise_Promise.value(value);
 		},failure);
 	}
 	,always: function(handler) {
@@ -5489,11 +5483,11 @@ thx.promise.Promise.prototype = {
 			var _g = this.state;
 			switch(_g[1]) {
 			case 1:
-				this.state = haxe.ds.Option.Some(newstate);
+				this.state = haxe_ds_Option.Some(newstate);
 				break;
 			case 0:
 				var r = _g[2];
-				throw new thx.core.Error("promise was already " + Std.string(r) + ", can't apply new state " + Std.string(newstate),null,{ fileName : "Promise.hx", lineNumber : 128, className : "thx.promise.Promise", methodName : "setState"});
+				throw new thx_core_Error("promise was already " + Std.string(r) + ", can't apply new state " + Std.string(newstate),null,{ fileName : "Promise.hx", lineNumber : 128, className : "thx.promise.Promise", methodName : "setState"});
 				break;
 			}
 		}
@@ -5514,28 +5508,28 @@ thx.promise.Promise.prototype = {
 			}
 		}
 	}
-	,__class__: thx.promise.Promise
+	,__class__: thx_promise_Promise
 };
-thx.promise.Promises = function() { };
-thx.promise.Promises.__name__ = ["thx","promise","Promises"];
-thx.promise.Promises.log = function(promise,prefix) {
+var thx_promise_Promises = function() { };
+thx_promise_Promises.__name__ = ["thx","promise","Promises"];
+thx_promise_Promises.log = function(promise,prefix) {
 	if(prefix == null) prefix = "";
 	return promise.either(function(r) {
-		haxe.Log.trace("" + prefix + " SUCCESS: " + Std.string(r),{ fileName : "Promise.hx", lineNumber : 148, className : "thx.promise.Promises", methodName : "log"});
+		haxe_Log.trace("" + prefix + " SUCCESS: " + Std.string(r),{ fileName : "Promise.hx", lineNumber : 148, className : "thx.promise.Promises", methodName : "log"});
 	},function(e) {
-		haxe.Log.trace("" + prefix + " ERROR: " + e.toString(),{ fileName : "Promise.hx", lineNumber : 149, className : "thx.promise.Promises", methodName : "log"});
+		haxe_Log.trace("" + prefix + " ERROR: " + e.toString(),{ fileName : "Promise.hx", lineNumber : 149, className : "thx.promise.Promises", methodName : "log"});
 	});
 };
-thx.promise.Promises.delay = function(p,interval) {
+thx_promise_Promises.delay = function(p,interval) {
 	return p.map(function(r) {
-		return thx.promise.Promise.fulfilled(null == interval?function(fulfill) {
-			thx.core.Timer.immediate((function(f,a1) {
+		return thx_promise_Promise.fulfilled(null == interval?function(fulfill) {
+			thx_core_Timer.immediate((function(f,a1) {
 				return function() {
 					return f(a1);
 				};
 			})(fulfill,r));
 		}:function(fulfill1) {
-			thx.core.Timer.delay((function(f1,a11) {
+			thx_core_Timer.delay((function(f1,a11) {
 				return function() {
 					return f1(a11);
 				};
@@ -5543,8 +5537,8 @@ thx.promise.Promises.delay = function(p,interval) {
 		});
 	});
 };
-thx.promise.Promises.join = function(p1,p2) {
-	return thx.promise.Promise.create(function(resolve,reject) {
+thx_promise_Promises.join = function(p1,p2) {
+	return thx_promise_Promise.create(function(resolve,reject) {
 		var hasError = false;
 		var counter = 0;
 		var v1 = null;
@@ -5572,24 +5566,24 @@ thx.promise.Promises.join = function(p1,p2) {
 		},handleError);
 	});
 };
-thx.promise.PromiseTuple6 = function() { };
-thx.promise.PromiseTuple6.__name__ = ["thx","promise","PromiseTuple6"];
-thx.promise.PromiseTuple6.mapTuple = function(promise,success) {
+var thx_promise_PromiseTuple6 = function() { };
+thx_promise_PromiseTuple6.__name__ = ["thx","promise","PromiseTuple6"];
+thx_promise_PromiseTuple6.mapTuple = function(promise,success) {
 	return promise.mapSuccess(function(t) {
 		return success(t._0,t._1,t._2,t._3,t._4,t._5);
 	});
 };
-thx.promise.PromiseTuple6.tuple = function(promise,success,failure) {
+thx_promise_PromiseTuple6.tuple = function(promise,success,failure) {
 	return promise.either(function(t) {
 		success(t._0,t._1,t._2,t._3,t._4,t._5);
 	},null == failure?function(_) {
 	}:failure);
 };
-thx.promise.PromiseTuple5 = function() { };
-thx.promise.PromiseTuple5.__name__ = ["thx","promise","PromiseTuple5"];
-thx.promise.PromiseTuple5.join = function(p1,p2) {
-	return thx.promise.Promise.create(function(resolve,reject) {
-		thx.promise.Promises.join(p1,p2).either(function(t) {
+var thx_promise_PromiseTuple5 = function() { };
+thx_promise_PromiseTuple5.__name__ = ["thx","promise","PromiseTuple5"];
+thx_promise_PromiseTuple5.join = function(p1,p2) {
+	return thx_promise_Promise.create(function(resolve,reject) {
+		thx_promise_Promises.join(p1,p2).either(function(t) {
 			resolve((function($this) {
 				var $r;
 				var this1 = t._0;
@@ -5601,22 +5595,22 @@ thx.promise.PromiseTuple5.join = function(p1,p2) {
 		});
 	});
 };
-thx.promise.PromiseTuple5.mapTuple = function(promise,success) {
+thx_promise_PromiseTuple5.mapTuple = function(promise,success) {
 	return promise.mapSuccess(function(t) {
 		return success(t._0,t._1,t._2,t._3,t._4);
 	});
 };
-thx.promise.PromiseTuple5.tuple = function(promise,success,failure) {
+thx_promise_PromiseTuple5.tuple = function(promise,success,failure) {
 	return promise.either(function(t) {
 		success(t._0,t._1,t._2,t._3,t._4);
 	},null == failure?function(_) {
 	}:failure);
 };
-thx.promise.PromiseTuple4 = function() { };
-thx.promise.PromiseTuple4.__name__ = ["thx","promise","PromiseTuple4"];
-thx.promise.PromiseTuple4.join = function(p1,p2) {
-	return thx.promise.Promise.create(function(resolve,reject) {
-		thx.promise.Promises.join(p1,p2).either(function(t) {
+var thx_promise_PromiseTuple4 = function() { };
+thx_promise_PromiseTuple4.__name__ = ["thx","promise","PromiseTuple4"];
+thx_promise_PromiseTuple4.join = function(p1,p2) {
+	return thx_promise_Promise.create(function(resolve,reject) {
+		thx_promise_Promises.join(p1,p2).either(function(t) {
 			resolve((function($this) {
 				var $r;
 				var this1 = t._0;
@@ -5628,22 +5622,22 @@ thx.promise.PromiseTuple4.join = function(p1,p2) {
 		});
 	});
 };
-thx.promise.PromiseTuple4.mapTuple = function(promise,success) {
+thx_promise_PromiseTuple4.mapTuple = function(promise,success) {
 	return promise.mapSuccess(function(t) {
 		return success(t._0,t._1,t._2,t._3);
 	});
 };
-thx.promise.PromiseTuple4.tuple = function(promise,success,failure) {
+thx_promise_PromiseTuple4.tuple = function(promise,success,failure) {
 	return promise.either(function(t) {
 		success(t._0,t._1,t._2,t._3);
 	},null == failure?function(_) {
 	}:failure);
 };
-thx.promise.PromiseTuple3 = function() { };
-thx.promise.PromiseTuple3.__name__ = ["thx","promise","PromiseTuple3"];
-thx.promise.PromiseTuple3.join = function(p1,p2) {
-	return thx.promise.Promise.create(function(resolve,reject) {
-		thx.promise.Promises.join(p1,p2).either(function(t) {
+var thx_promise_PromiseTuple3 = function() { };
+thx_promise_PromiseTuple3.__name__ = ["thx","promise","PromiseTuple3"];
+thx_promise_PromiseTuple3.join = function(p1,p2) {
+	return thx_promise_Promise.create(function(resolve,reject) {
+		thx_promise_Promises.join(p1,p2).either(function(t) {
 			resolve((function($this) {
 				var $r;
 				var this1 = t._0;
@@ -5655,22 +5649,22 @@ thx.promise.PromiseTuple3.join = function(p1,p2) {
 		});
 	});
 };
-thx.promise.PromiseTuple3.mapTuple = function(promise,success) {
+thx_promise_PromiseTuple3.mapTuple = function(promise,success) {
 	return promise.mapSuccess(function(t) {
 		return success(t._0,t._1,t._2);
 	});
 };
-thx.promise.PromiseTuple3.tuple = function(promise,success,failure) {
+thx_promise_PromiseTuple3.tuple = function(promise,success,failure) {
 	return promise.either(function(t) {
 		success(t._0,t._1,t._2);
 	},null == failure?function(_) {
 	}:failure);
 };
-thx.promise.PromiseTuple2 = function() { };
-thx.promise.PromiseTuple2.__name__ = ["thx","promise","PromiseTuple2"];
-thx.promise.PromiseTuple2.join = function(p1,p2) {
-	return thx.promise.Promise.create(function(resolve,reject) {
-		thx.promise.Promises.join(p1,p2).either(function(t) {
+var thx_promise_PromiseTuple2 = function() { };
+thx_promise_PromiseTuple2.__name__ = ["thx","promise","PromiseTuple2"];
+thx_promise_PromiseTuple2.join = function(p1,p2) {
+	return thx_promise_Promise.create(function(resolve,reject) {
+		thx_promise_Promises.join(p1,p2).either(function(t) {
 			resolve((function($this) {
 				var $r;
 				var this1 = t._0;
@@ -5682,45 +5676,45 @@ thx.promise.PromiseTuple2.join = function(p1,p2) {
 		});
 	});
 };
-thx.promise.PromiseTuple2.mapTuple = function(promise,success) {
+thx_promise_PromiseTuple2.mapTuple = function(promise,success) {
 	return promise.mapSuccess(function(t) {
 		return success(t._0,t._1);
 	});
 };
-thx.promise.PromiseTuple2.tuple = function(promise,success,failure) {
+thx_promise_PromiseTuple2.tuple = function(promise,success,failure) {
 	return promise.either(function(t) {
 		success(t._0,t._1);
 	},null == failure?function(_) {
 	}:failure);
 };
-thx.promise.PromiseNil = function() { };
-thx.promise.PromiseNil.__name__ = ["thx","promise","PromiseNil"];
-thx.promise.PromiseNil.join = function(p1,p2) {
-	return thx.promise.Promise.create(function(resolve,reject) {
-		thx.promise.Promises.join(p1,p2).either(function(t) {
+var thx_promise_PromiseNil = function() { };
+thx_promise_PromiseNil.__name__ = ["thx","promise","PromiseNil"];
+thx_promise_PromiseNil.join = function(p1,p2) {
+	return thx_promise_Promise.create(function(resolve,reject) {
+		thx_promise_Promises.join(p1,p2).either(function(t) {
 			resolve(t._1);
 		},function(e) {
 			reject(e);
 		});
 	});
 };
-thx.promise.PromiseValue = { __ename__ : ["thx","promise","PromiseValue"], __constructs__ : ["Failure","Success"] };
-thx.promise.PromiseValue.Failure = function(err) { var $x = ["Failure",0,err]; $x.__enum__ = thx.promise.PromiseValue; return $x; };
-thx.promise.PromiseValue.Success = function(value) { var $x = ["Success",1,value]; $x.__enum__ = thx.promise.PromiseValue; return $x; };
-thx.stream.Bus = function() {
+var thx_promise_PromiseValue = { __ename__ : ["thx","promise","PromiseValue"], __constructs__ : ["Failure","Success"] };
+thx_promise_PromiseValue.Failure = function(err) { var $x = ["Failure",0,err]; $x.__enum__ = thx_promise_PromiseValue; $x.toString = $estr; return $x; };
+thx_promise_PromiseValue.Success = function(value) { var $x = ["Success",1,value]; $x.__enum__ = thx_promise_PromiseValue; $x.toString = $estr; return $x; };
+var thx_stream_Bus = function() {
 	var _g = this;
 	this.downStreams = [];
 	this.upStreams = [];
-	thx.stream.Emitter.call(this,function(stream) {
+	thx_stream_Emitter.call(this,function(stream) {
 		_g.downStreams.push(stream);
 		stream.addCleanUp(function() {
 			HxOverrides.remove(_g.downStreams,stream);
 		});
 	});
 };
-thx.stream.Bus.__name__ = ["thx","stream","Bus"];
-thx.stream.Bus.__super__ = thx.stream.Emitter;
-thx.stream.Bus.prototype = $extend(thx.stream.Emitter.prototype,{
+thx_stream_Bus.__name__ = ["thx","stream","Bus"];
+thx_stream_Bus.__super__ = thx_stream_Emitter;
+thx_stream_Bus.prototype = $extend(thx_stream_Emitter.prototype,{
 	downStreams: null
 	,upStreams: null
 	,emit: function(value) {
@@ -5770,16 +5764,16 @@ thx.stream.Bus.prototype = $extend(thx.stream.Emitter.prototype,{
 		}
 	}
 	,pulse: function(value) {
-		this.emit(thx.stream.StreamValue.Pulse(value));
+		this.emit(thx_stream_StreamValue.Pulse(value));
 	}
 	,fail: function(error) {
-		this.emit(thx.stream.StreamValue.Failure(error));
+		this.emit(thx_stream_StreamValue.Failure(error));
 	}
 	,end: function() {
-		this.emit(thx.stream.StreamValue.End(false));
+		this.emit(thx_stream_StreamValue.End(false));
 	}
 	,cancel: function() {
-		this.emit(thx.stream.StreamValue.End(true));
+		this.emit(thx_stream_StreamValue.End(true));
 	}
 	,clearStreams: function() {
 		var _g = 0;
@@ -5803,41 +5797,41 @@ thx.stream.Bus.prototype = $extend(thx.stream.Emitter.prototype,{
 		this.clearEmitters();
 		this.clearStreams();
 	}
-	,__class__: thx.stream.Bus
+	,__class__: thx_stream_Bus
 });
-thx.stream.EmitterStrings = function() { };
-thx.stream.EmitterStrings.__name__ = ["thx","stream","EmitterStrings"];
-thx.stream.EmitterStrings.toBool = function(emitter) {
+var thx_stream_EmitterStrings = function() { };
+thx_stream_EmitterStrings.__name__ = ["thx","stream","EmitterStrings"];
+thx_stream_EmitterStrings.toBool = function(emitter) {
 	return emitter.mapValue(function(s) {
 		return s != null && s != "";
 	});
 };
-thx.stream.EmitterInts = function() { };
-thx.stream.EmitterInts.__name__ = ["thx","stream","EmitterInts"];
-thx.stream.EmitterInts.toBool = function(emitter) {
+var thx_stream_EmitterInts = function() { };
+thx_stream_EmitterInts.__name__ = ["thx","stream","EmitterInts"];
+thx_stream_EmitterInts.toBool = function(emitter) {
 	return emitter.mapValue(function(i) {
 		return i != 0;
 	});
 };
-thx.stream.Emitters = function() { };
-thx.stream.Emitters.__name__ = ["thx","stream","Emitters"];
-thx.stream.Emitters.skipNull = function(emitter) {
+var thx_stream_Emitters = function() { };
+thx_stream_Emitters.__name__ = ["thx","stream","Emitters"];
+thx_stream_Emitters.skipNull = function(emitter) {
 	return emitter.filterValue(function(value) {
 		return null != value;
 	});
 };
-thx.stream.EmitterBools = function() { };
-thx.stream.EmitterBools.__name__ = ["thx","stream","EmitterBools"];
-thx.stream.EmitterBools.negate = function(emitter) {
+var thx_stream_EmitterBools = function() { };
+thx_stream_EmitterBools.__name__ = ["thx","stream","EmitterBools"];
+thx_stream_EmitterBools.negate = function(emitter) {
 	return emitter.mapValue(function(v) {
 		return !v;
 	});
 };
-thx.stream.EmitterEmitters = function() { };
-thx.stream.EmitterEmitters.__name__ = ["thx","stream","EmitterEmitters"];
-thx.stream.EmitterEmitters.flatMap = function(emitter) {
-	return new thx.stream.Emitter(function(stream) {
-		emitter.init(new thx.stream.Stream(function(r) {
+var thx_stream_EmitterEmitters = function() { };
+thx_stream_EmitterEmitters.__name__ = ["thx","stream","EmitterEmitters"];
+thx_stream_EmitterEmitters.flatMap = function(emitter) {
+	return new thx_stream_Emitter(function(stream) {
+		emitter.init(new thx_stream_Stream(function(r) {
 			switch(r[1]) {
 			case 0:
 				var em = r[2];
@@ -5861,9 +5855,9 @@ thx.stream.EmitterEmitters.flatMap = function(emitter) {
 		}));
 	});
 };
-thx.stream.EmitterEmitters.flatten = function(emitter) {
-	return new thx.stream.Emitter(function(stream) {
-		emitter.init(new thx.stream.Stream(function(r) {
+thx_stream_EmitterEmitters.flatten = function(emitter) {
+	return new thx_stream_Emitter(function(stream) {
+		emitter.init(new thx_stream_Stream(function(r) {
 			switch(r[1]) {
 			case 0:
 				var arr = r[2];
@@ -5887,33 +5881,33 @@ thx.stream.EmitterEmitters.flatten = function(emitter) {
 		}));
 	});
 };
-thx.stream.EmitterValues = function() { };
-thx.stream.EmitterValues.__name__ = ["thx","stream","EmitterValues"];
-thx.stream.EmitterValues.left = function(emitter) {
+var thx_stream_EmitterValues = function() { };
+thx_stream_EmitterValues.__name__ = ["thx","stream","EmitterValues"];
+thx_stream_EmitterValues.left = function(emitter) {
 	return emitter.mapValue(function(v) {
 		return v._0;
 	});
 };
-thx.stream.EmitterValues.right = function(emitter) {
+thx_stream_EmitterValues.right = function(emitter) {
 	return emitter.mapValue(function(v) {
 		return v._1;
 	});
 };
-thx.stream.IStream = function() { };
-thx.stream.IStream.__name__ = ["thx","stream","IStream"];
-thx.stream.IStream.prototype = {
+var thx_stream_IStream = function() { };
+thx_stream_IStream.__name__ = ["thx","stream","IStream"];
+thx_stream_IStream.prototype = {
 	cancel: null
-	,__class__: thx.stream.IStream
+	,__class__: thx_stream_IStream
 };
-thx.stream.Stream = function(subscriber) {
+var thx_stream_Stream = function(subscriber) {
 	this.subscriber = subscriber;
 	this.cleanUps = [];
 	this.finalized = false;
 	this.canceled = false;
 };
-thx.stream.Stream.__name__ = ["thx","stream","Stream"];
-thx.stream.Stream.__interfaces__ = [thx.stream.IStream];
-thx.stream.Stream.prototype = {
+thx_stream_Stream.__name__ = ["thx","stream","Stream"];
+thx_stream_Stream.__interfaces__ = [thx_stream_IStream];
+thx_stream_Stream.prototype = {
 	subscriber: null
 	,cleanUps: null
 	,finalized: null
@@ -5922,17 +5916,17 @@ thx.stream.Stream.prototype = {
 		this.cleanUps.push(f);
 	}
 	,pulse: function(v) {
-		this.subscriber(thx.stream.StreamValue.Pulse(v));
+		this.subscriber(thx_stream_StreamValue.Pulse(v));
 	}
 	,end: function() {
-		this.finalize(thx.stream.StreamValue.End(false));
+		this.finalize(thx_stream_StreamValue.End(false));
 	}
 	,cancel: function() {
 		this.canceled = true;
-		this.finalize(thx.stream.StreamValue.End(true));
+		this.finalize(thx_stream_StreamValue.End(true));
 	}
 	,fail: function(error) {
-		this.finalize(thx.stream.StreamValue.Failure(error));
+		this.finalize(thx_stream_StreamValue.Failure(error));
 	}
 	,finalize: function(signal) {
 		if(this.finalized) return;
@@ -5942,27 +5936,26 @@ thx.stream.Stream.prototype = {
 		this.subscriber = function(_) {
 		};
 	}
-	,__class__: thx.stream.Stream
+	,__class__: thx_stream_Stream
 };
-thx.stream.StreamValue = { __ename__ : ["thx","stream","StreamValue"], __constructs__ : ["Pulse","End","Failure"] };
-thx.stream.StreamValue.Pulse = function(value) { var $x = ["Pulse",0,value]; $x.__enum__ = thx.stream.StreamValue; return $x; };
-thx.stream.StreamValue.End = function(cancel) { var $x = ["End",1,cancel]; $x.__enum__ = thx.stream.StreamValue; return $x; };
-thx.stream.StreamValue.Failure = function(err) { var $x = ["Failure",2,err]; $x.__enum__ = thx.stream.StreamValue; return $x; };
-udom.Query = function() { };
-udom.Query.__name__ = ["udom","Query"];
-udom.Query.first = function(selector,ctx) {
-	return (ctx != null?ctx:udom.Query.doc).querySelector(selector);
+var thx_stream_StreamValue = { __ename__ : ["thx","stream","StreamValue"], __constructs__ : ["Pulse","End","Failure"] };
+thx_stream_StreamValue.Pulse = function(value) { var $x = ["Pulse",0,value]; $x.__enum__ = thx_stream_StreamValue; $x.toString = $estr; return $x; };
+thx_stream_StreamValue.End = function(cancel) { var $x = ["End",1,cancel]; $x.__enum__ = thx_stream_StreamValue; $x.toString = $estr; return $x; };
+thx_stream_StreamValue.Failure = function(err) { var $x = ["Failure",2,err]; $x.__enum__ = thx_stream_StreamValue; $x.toString = $estr; return $x; };
+var udom_Query = function() { };
+udom_Query.__name__ = ["udom","Query"];
+udom_Query.first = function(selector,ctx) {
+	return (ctx != null?ctx:udom_Query.doc).querySelector(selector);
 };
-udom.Query.list = function(selector,ctx) {
-	return (ctx != null?ctx:udom.Query.doc).querySelectorAll(selector);
+udom_Query.list = function(selector,ctx) {
+	return (ctx != null?ctx:udom_Query.doc).querySelectorAll(selector);
 };
-udom.Query.all = function(selector,ctx) {
-	return udom._Dom.H.toArray(udom.Query.list(selector,ctx));
+udom_Query.all = function(selector,ctx) {
+	return udom__$Dom_H.toArray(udom_Query.list(selector,ctx));
 };
-udom._Dom = {};
-udom._Dom.H = function() { };
-udom._Dom.H.__name__ = ["udom","_Dom","H"];
-udom._Dom.H.toArray = function(list) {
+var udom__$Dom_H = function() { };
+udom__$Dom_H.__name__ = ["udom","_Dom","H"];
+udom__$Dom_H.toArray = function(list) {
 	return Array.prototype.slice.call(list,0);
 };
 function $iterator(o) { if( o instanceof Array ) return function() { return HxOverrides.iter(o); }; return typeof(o.iterator) == 'function' ? $bind(o,o.iterator) : o.iterator; }
@@ -5970,6 +5963,15 @@ var $_, $fid = 0;
 function $bind(o,m) { if( m == null ) return null; if( m.__id__ == null ) m.__id__ = $fid++; var f; if( o.hx__closures__ == null ) o.hx__closures__ = {}; else f = o.hx__closures__[m.__id__]; if( f == null ) { f = function(){ return f.method.apply(f.scope, arguments); }; f.scope = o; f.method = m; o.hx__closures__[m.__id__] = f; } return f; }
 if(Array.prototype.indexOf) HxOverrides.indexOf = function(a,o,i) {
 	return Array.prototype.indexOf.call(a,o,i);
+};
+Math.NaN = Number.NaN;
+Math.NEGATIVE_INFINITY = Number.NEGATIVE_INFINITY;
+Math.POSITIVE_INFINITY = Number.POSITIVE_INFINITY;
+Math.isFinite = function(i) {
+	return isFinite(i);
+};
+Math.isNaN = function(i1) {
+	return isNaN(i1);
 };
 String.prototype.__class__ = String;
 String.__name__ = ["String"];
@@ -6008,31 +6010,31 @@ if(Array.prototype.filter == null) Array.prototype.filter = function(f1) {
 var posToString = function(pos) {
 	return pos;
 };
-thx.Assert.results = { add : function(assertion) {
+thx_Assert.results = { add : function(assertion) {
 	switch(assertion[1]) {
 	case 1:
 		var pos1 = assertion[3];
 		var msg = assertion[2];
-		throw new thx.core.Error(msg,null,pos1);
+		throw new thx_core_Error(msg,null,pos1);
 		break;
 	case 2:
 		var stack = assertion[3];
 		var e = assertion[2];
-		throw new thx.core.Error(Std.string(e),stack,{ fileName : "Assert.hx", lineNumber : 675, className : "thx.Assert", methodName : "__init__"});
+		throw new thx_core_Error(Std.string(e),stack,{ fileName : "Assert.hx", lineNumber : 675, className : "thx.Assert", methodName : "__init__"});
 		break;
 	case 3:
 		var stack = assertion[3];
 		var e = assertion[2];
-		throw new thx.core.Error(Std.string(e),stack,{ fileName : "Assert.hx", lineNumber : 675, className : "thx.Assert", methodName : "__init__"});
+		throw new thx_core_Error(Std.string(e),stack,{ fileName : "Assert.hx", lineNumber : 675, className : "thx.Assert", methodName : "__init__"});
 		break;
 	case 4:
 		var stack = assertion[3];
 		var e = assertion[2];
-		throw new thx.core.Error(Std.string(e),stack,{ fileName : "Assert.hx", lineNumber : 675, className : "thx.Assert", methodName : "__init__"});
+		throw new thx_core_Error(Std.string(e),stack,{ fileName : "Assert.hx", lineNumber : 675, className : "thx.Assert", methodName : "__init__"});
 		break;
 	case 5:
 		var msg1 = assertion[2];
-		haxe.Log.trace(msg1,{ fileName : "Assert.hx", lineNumber : 677, className : "thx.Assert", methodName : "__init__"});
+		haxe_Log.trace(msg1,{ fileName : "Assert.hx", lineNumber : 677, className : "thx.Assert", methodName : "__init__"});
 		break;
 	case 0:
 		var pos2 = assertion[2];
@@ -6046,26 +6048,26 @@ if(!scope.setImmediate) scope.setImmediate = function(callback) {
 Config.icons = { add : "plus-circle", remove : "ban", dropdown : "reorder", checked : "dot-circle-o", unchecked : "circle-o", switchtype : "bolt", code : "bolt", value : "pencil", reference : "link"};
 Config.selectors = { app : ".card"};
 PropertyFeeder.classes = [{ display : "bold", name : "strong"},{ display : "italic", name : "emphasis"}];
-cards.model.Runtime.pattern = new EReg("\\$\\.(.+?)\\b","");
-cards.model.ref.EmptyParent.instance = new cards.model.ref.EmptyParent();
-cards.model.ref.Ref.reField = new EReg("^\\.?([^.\\[]+)","");
-cards.model.ref.Ref.reIndex = new EReg("^\\[(\\d+)\\]","");
-cards.types.CodeTransform.datePattern = new EReg("Date\\(-?\\d+(:?\\.\\d+)?(:?e-?\\d+)?\\)","");
-cards.types.CodeTransform.PATTERN = new EReg("^\\s*\\$\\.([a-z](:?(\\.|\\[\\d+\\])?[a-z0-9]*)*)\\s*$","");
-cards.ui.ContextField.tooltip = new cards.ui.widgets.Tooltip({ classes : "tooltip error"});
-haxe.ds.ObjectMap.count = 0;
-thx.core.Ints.pattern_parse = new EReg("^[+-]?(\\d+|0x[0-9A-F]+)$","i");
-thx.core.Strings._reSplitWC = new EReg("(\r\n|\n\r|\n|\r)","g");
-thx.core.Strings._reReduceWS = new EReg("\\s+","");
-thx.core.Strings._reStripTags = new EReg("(<[a-z]+[^>/]*/?>|</[a-z]+>)","i");
-thx.core.Strings._reCollapse = new EReg("\\s+","g");
-thx.core.Strings.__ucwordsPattern = new EReg("[^a-zA-Z]([a-z])","g");
-thx.core.Strings.__ucwordswsPattern = new EReg("\\s[a-z]","g");
-thx.core.Strings.__alphaNumPattern = new EReg("^[a-z0-9]+$","i");
-thx.core.Strings.__digitsPattern = new EReg("^[0-9]+$","");
-thx.core.UUID.itoh = "0123456789ABCDEF";
-thx.promise.Promise.nil = thx.promise.Promise.value(thx.core.Nil.nil);
-udom.Query.doc = document;
+cards_model_Runtime.pattern = new EReg("\\$\\.(.+?)\\b","");
+cards_model_ref_EmptyParent.instance = new cards_model_ref_EmptyParent();
+cards_model_ref_Ref.reField = new EReg("^\\.?([^.\\[]+)","");
+cards_model_ref_Ref.reIndex = new EReg("^\\[(\\d+)\\]","");
+cards_types_CodeTransform.datePattern = new EReg("Date\\(-?\\d+(:?\\.\\d+)?(:?e-?\\d+)?\\)","");
+cards_types_CodeTransform.PATTERN = new EReg("^\\s*\\$\\.([a-z](:?(\\.|\\[\\d+\\])?[a-z0-9]*)*)\\s*$","");
+cards_ui_ContextField.tooltip = new cards_ui_widgets_Tooltip({ classes : "tooltip error"});
+haxe_ds_ObjectMap.count = 0;
+thx_core_Ints.pattern_parse = new EReg("^[+-]?(\\d+|0x[0-9A-F]+)$","i");
+thx_core_Strings._reSplitWC = new EReg("(\r\n|\n\r|\n|\r)","g");
+thx_core_Strings._reReduceWS = new EReg("\\s+","");
+thx_core_Strings._reStripTags = new EReg("(<[a-z]+[^>/]*/?>|</[a-z]+>)","i");
+thx_core_Strings._reCollapse = new EReg("\\s+","g");
+thx_core_Strings.__ucwordsPattern = new EReg("[^a-zA-Z]([a-z])","g");
+thx_core_Strings.__ucwordswsPattern = new EReg("\\s[a-z]","g");
+thx_core_Strings.__alphaNumPattern = new EReg("^[a-z0-9]+$","i");
+thx_core_Strings.__digitsPattern = new EReg("^[0-9]+$","");
+thx_core_UUID.itoh = "0123456789ABCDEF";
+thx_promise_Promise.nil = thx_promise_Promise.value(thx_core_Nil.nil);
+udom_Query.doc = document;
 Main.main();
 })();
 
