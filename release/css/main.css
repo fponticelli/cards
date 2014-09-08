@@ -120,22 +120,17 @@ a img {
 .card .editor.bool {
   cursor: pointer;
   color: #333;
-  display: -webkit-inline-box;
-  display: -moz-inline-box;
-  display: -webkit-inline-flex;
-  display: -ms-inline-flexbox;
-  display: inline-box;
-  display: inline-flex;
   -webkit-border-radius: 0.5em;
   border-radius: 0.5em;
   text-align: center;
-  height: 1.38em;
+  line-height: 0em;
   position: relative;
+  background-color: transparent;
 }
 .card .editor.bool:before {
   font-size: 1.2em;
-  top: 0.15em;
-  left: calc(50% - 0.5em);
+  top: -0.15em;
+  left: calc(50% - 1em);
   position: absolute;
   display: block;
 }
@@ -157,6 +152,9 @@ a img {
 }
 .card .fields .value-container .editor.bool {
   min-width: 4em;
+}
+.card .fields .value-container .editor.text {
+  padding: 0.2em 0.4em;
 }
 .card .block {
   padding: 0.25em 0.5em;
@@ -439,11 +437,8 @@ a img {
   width: 70%;
   padding: 0.2em 0.4em 0.2em 0.3em;
 }
-.card .fields > div .field .value-container .value {
-  border-bottom: 1px solid #f6f6f6;
-}
 .card .fields > div .field.active {
-  background-color: rgba(0,0,0,0.1);
+  background-color: rgba(0,100,200,0.1);
 }
 .card .model {
   position: absolute;

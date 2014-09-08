@@ -14,15 +14,17 @@
   &.bool
     cursor pointer
     color #333
-    display inline-flex
+    //display inline-block
     border-radius 0.5em
     text-align center
-    height 1.38em
+    //height 1.4em
+    line-height 0em
     position relative
+    background-color transparent
     &:before
       font-size 1.2em
-      top 0.15em
-      left calc(50% - 0.5em)
+      top -0.15em
+      left calc(50% - 1em)
       position absolute
       display block
 
@@ -48,3 +50,5 @@
     .editor
       &.bool
         min-width 4em
+      &.text
+        padding 0.2em 0.4em

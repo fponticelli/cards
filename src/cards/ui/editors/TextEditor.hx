@@ -30,6 +30,7 @@ class TextEditor implements Editor<String> {
 
     component = new Component(options);
     component.el.classList.add('editor');
+    component.el.classList.add('text');
     component.el.setAttribute('tabindex', '1');
     component.el.setAttribute('contenteditable', 'true');
     component.el.setAttribute('placeholder', options.placeHolder);
