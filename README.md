@@ -1,4 +1,4 @@
 Cards
 =====
 
-Dynamic Documents
+Currently available [here](http://sb-cards.herokuapp.com/)
