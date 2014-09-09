@@ -14,6 +14,7 @@ class CodeEditor extends TextEditor {
     if(null == options.inputEvent)
       options.inputEvent = function(component : Component) return component.el.streamEvent('blur');
     super(options);
+    type = CodeType;
     component.el.classList.add('code');
   }
 }

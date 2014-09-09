@@ -35,6 +35,10 @@ class TextEditor implements Editor<String> {
     component.el.setAttribute('contenteditable', 'true');
     component.el.setAttribute('placeholder', options.placeHolder);
 
+    // PREVENT SELECTION DRAG AND DROP
+    component.el.addEventListener('dragstart', function(e) e.preventDefault(), false);
+    component.el.addEventListener('drop', function(e) e.preventDefault(), false);
+
     // TODO find out how to set the content of :before programmatically
     component.el.style.content = options.placeHolder;
 
@@ -67,6 +71,21 @@ class TextEditor implements Editor<String> {
       .merge(value.mapValue(function(t) return t == ''))
       .feed(empty);
     empty.subscribe(component.el.subscribeToggleClass('empty'));
+
+    // PASTE EVENT
+    component.el.streamEvent("paste")
+      .mapValue(function(ev) {
+        var e : Dynamic = ev;
+        e.preventDefault();
+        var data      = null == e.clipboardData ? "" : e.clipboardData.getData("text/plain"),
+            current   = value.get(),
+            selection = Browser.window.getSelection(),
+            start     = selection.anchorOffset,
+            end       = selection.extentOffset;
+        return current.substr(0, start) + data + current.substr(end);
+      })
+      .filterValue(function(v) return v.length > 0)
+      .feed(value);
   }
 
   public function destroy() {

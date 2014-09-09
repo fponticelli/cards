@@ -39,6 +39,7 @@ class ModelView {
       addField(guessFieldName(), StringType);
     });
 
+
     var buttonRemove = toolbar.right.addButton('', Config.icons.remove);
     buttonRemove.clicks.subscribe(function(_) {
       removeField(currentField);
@@ -59,6 +60,47 @@ class ModelView {
       this.currentField = field;
       buttonRemove.enabled.set(null != field);
     });
+
+    addButtonTypes();
+  }
+
+  function addButtonTypes() {
+/*
+    var buttonToText = toolbar.center.addButton('', Config.icons.text);
+    buttonToText.clicks.subscribe(function(_) {
+      trace("switch to text");
+    });
+    buttonToText.enabled.set(false);
+
+    var buttonToNumber = toolbar.center.addButton('', Config.icons.number);
+    buttonToNumber.clicks.subscribe(function(_) {
+      if(null == currentField) return;
+      currentField.setEditor(FloatType);
+    });
+    buttonToNumber.enabled.set(false);
+*/
+    var definitions = [
+      { type : StringType, icon : Config.icons.text },
+      { type : BoolType,   icon : Config.icons.bool },
+      { type : FloatType,  icon : Config.icons.number },
+      { type : DateType,   icon : Config.icons.date },
+    ];
+    for(def in definitions) {
+      var button = toolbar.center.addButton('', def.icon);
+      button.enabled.set(false);
+      button.clicks.subscribe(function(_) {
+        if(null == currentField) return;
+        currentField.setEditor(def.type);
+        var editor = currentField.editor;
+        thx.core.Timer.delay(function() editor.focus.set(true), 300);
+      });
+      fieldFocus.subscribe(function(field) {
+        if(null == field)
+          return button.enabled.set(false);
+        var type = field.type;
+        button.enabled.set(!Type.enumEq(type, def.type));
+      });
+    }
   }
 
   public function guessFieldName() {
@@ -91,7 +133,7 @@ class ModelView {
     var field = fields.get(path);
     if(null == field)
       field = addField(path, type);
-    field.value.value.set(TypeTransform.transform(type, field.value.type)(value));
+    field.value.set(TypeTransform.transform(type, field.type)(value));
   }
 
   public function addField(name : String, type : SchemaType) {
@@ -105,7 +147,7 @@ class ModelView {
     var oldname = null;
 
     function createSetValue() {
-      return SetValue(field.key.value.get(), field.value.value.get(), field.value.type);
+      return SetValue(field.key.value.get(), field.value.get(), field.type);
     }
 
     field.key.value
@@ -123,7 +165,7 @@ class ModelView {
         if(null == oldname) {
           // new field
           oldname = newname;
-          return AddField(newname, field.value.type);
+          return AddField(newname, field.type);
         } else {
           // rename field name in fields
           var v = fields.get(oldname);
@@ -141,7 +183,7 @@ class ModelView {
     // the debounce is not only practical to avoid too many calls
     // but also helps so that data events occur after schema
     // events (not the best synch mechanism ever)
-    field.value.value
+    field.value
       .mapValue(function(_ : String) {
         return createSetValue();
       })

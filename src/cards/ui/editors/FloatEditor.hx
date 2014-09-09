@@ -16,7 +16,7 @@ class FloatEditor implements Editor<Float> {
   public var type(default, null) : SchemaType;
   var cancel : Void -> Void;
   public function new(options : FloatEditorOptions) {
-    type = BoolType;
+    type = FloatType;
     if(null == options.defaultValue)
       options.defaultValue = 0.0;
     if(null == options.template)

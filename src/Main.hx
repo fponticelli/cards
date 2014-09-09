@@ -13,6 +13,7 @@ import udom.Dom;
 class Main {
   public static function main() {
     Dom.ready().success(function(_) {
+      // START
       var values    = new ValueProperties(),
           fragments = new FragmentProperties(),
           mapper    = new FragmentMapper(fragments, values);

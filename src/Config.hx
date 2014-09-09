@@ -9,6 +9,11 @@ class Config {
     code : 'bolt',
     value : 'pencil',
     reference : 'link',
+
+    bool : 'check-circle',
+    text : 'pencil',
+    number : 'superscript',
+    date : 'calendar',
   };
 
   public static var selectors(default, null) = {

@@ -155,6 +155,15 @@ a img {
 .card .fields .value-container .editor.text {
   padding: 0.2em 0.4em;
 }
+.card .fields .value-container input.editor {
+  border: none;
+  padding: 0.2em 0.4em;
+  width: 100%;
+}
+.card .fields .value-container input.editor[type="date"] {
+  margin: 0;
+  padding-bottom: 0;
+}
 .card .block {
   padding: 0.25em 0.5em;
   margin-bottom: 0.5em;
@@ -429,7 +438,6 @@ a img {
 }
 .card .fields > div .field .key-container .key {
   background-color: #f6f6f6;
-  border-bottom: 1px solid #f0f0f0;
   padding: 0.2em;
 }
 .card .fields > div .field .value-container {

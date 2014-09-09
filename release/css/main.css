@@ -108,13 +108,13 @@ a img {
   background-color: #f0f0f0;
 }
 .card .editor.active {
-  background-color: #09f9f9;
+  background-color: #f9f9f9;
 }
 .card .editor:focus {
   outline: none;
-  background-color: #fbfbfb;
-  -webkit-box-shadow: inset 1px 1px 1px rgba(255,255,255,0.9), 2px 2px 1px rgba(0,0,0,0.4);
-  box-shadow: inset 1px 1px 1px rgba(255,255,255,0.9), 2px 2px 1px rgba(0,0,0,0.4);
+  background-color: #f9f9f9;
+  -webkit-box-shadow: inset 1px 1px 1px #fff, 2px 2px 2px rgba(0,0,0,0.2);
+  box-shadow: inset 1px 1px 1px #fff, 2px 2px 2px rgba(0,0,0,0.2);
 }
 .card .editor:hover {
   background-color: #f9f9f9;
@@ -429,7 +429,6 @@ a img {
 }
 .card .fields > div .field .key-container .key {
   background-color: #f6f6f6;
-  border-bottom: 1px solid #f0f0f0;
   padding: 0.2em;
 }
 .card .fields > div .field .value-container {

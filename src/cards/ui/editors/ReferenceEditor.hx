@@ -14,6 +14,7 @@ class ReferenceEditor extends TextEditor {
     if(null == options.inputEvent)
       options.inputEvent = function(component : Component) return component.el.streamEvent('blur');
     super(options);
+    type = ReferenceType;
     component.el.classList.add('reference');
   }
 }

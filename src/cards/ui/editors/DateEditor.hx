@@ -16,7 +16,7 @@ class DateEditor implements Editor<Date> {
   public var type(default, null) : SchemaType;
   var cancel : Void -> Void;
   public function new(options : DateEditorOptions) {
-    type = BoolType;
+    type = DateType;
     if(null == options.defaultValue)
       options.defaultValue = Date.now();
     if(null == options.template)
