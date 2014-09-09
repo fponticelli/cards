@@ -50,10 +50,10 @@ class ContextView {
     el = Query.first('div', el);
 
     button = {
-      add : toolbar.left.addButton('add property', Config.icons.dropdown),
-      toValue : toolbar.right.addButton('', Config.icons.value),
-      toCode : toolbar.right.addButton('', Config.icons.code),
-      toReference : toolbar.right.addButton('', Config.icons.reference),
+      add : toolbar.left.addButton('', Config.icons.dropdown),
+      toValue : toolbar.center.addButton('', Config.icons.value),
+      toCode : toolbar.center.addButton('', Config.icons.code),
+      toReference : toolbar.center.addButton('', Config.icons.reference),
       remove : toolbar.right.addButton('', Config.icons.remove)
     };
     menu = {

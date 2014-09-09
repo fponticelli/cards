@@ -3144,7 +3144,7 @@ cards.ui.ContextView = function(document,model,modelView,mapper,options) {
 	this.el = udom.Html.parseList(StringTools.ltrim("<div class=\"fields\"><div></div></div>"))[0];
 	this.component.el.appendChild(this.el);
 	this.el = udom.Query.first("div",this.el);
-	this.button = { add : this.toolbar.left.addButton("add property",Config.icons.dropdown), toValue : this.toolbar.right.addButton("",Config.icons.value), toCode : this.toolbar.right.addButton("",Config.icons.code), toReference : this.toolbar.right.addButton("",Config.icons.reference), remove : this.toolbar.right.addButton("",Config.icons.remove)};
+	this.button = { add : this.toolbar.left.addButton("",Config.icons.dropdown), toValue : this.toolbar.center.addButton("",Config.icons.value), toCode : this.toolbar.center.addButton("",Config.icons.code), toReference : this.toolbar.center.addButton("",Config.icons.reference), remove : this.toolbar.right.addButton("",Config.icons.remove)};
 	this.menu = { add : new cards.ui.widgets.Menu({ parent : this.component})};
 	this.menu.add.anchorTo(this.button.add.component.el);
 	this.button.add.clicks.toTrue().feed(this.menu.add.visible.stream);
