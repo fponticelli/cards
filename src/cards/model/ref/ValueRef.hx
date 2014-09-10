@@ -28,4 +28,7 @@ class ValueRef extends BaseRef implements IRef {
     if(path != "") throw 'unable to resolve path "$path" on ValueRef';
     return this;
   }
+
+  public function toString()
+    return 'ValueRef: $value';
 }

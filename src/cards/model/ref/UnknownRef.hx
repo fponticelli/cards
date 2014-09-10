@@ -44,4 +44,7 @@ class UnknownRef extends BaseRef implements IRef implements IParentRef {
     ref = Ref.fromPath(path, this, terminal);
     return ref.resolve(path, terminal);
   }
+
+  public function toString()
+    return 'UnknownRef: $ref';
 }

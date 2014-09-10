@@ -14,6 +14,8 @@ class Config {
     text : 'pencil',
     number : 'superscript',
     date : 'calendar',
+    array : 'list',
+    object : 'table',
   };
 
   public static var selectors(default, null) = {

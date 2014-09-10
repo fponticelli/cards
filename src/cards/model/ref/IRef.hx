@@ -8,4 +8,6 @@ interface IRef {
   public function hasValue() : Bool;
   public function resolve(path : String, terminal : Bool = true) : IRef;
   public function getRoot() : IRef;
+
+  public function toString() : String;
 }

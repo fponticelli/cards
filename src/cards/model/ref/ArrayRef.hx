@@ -76,4 +76,7 @@ class ArrayRef extends BaseRef implements IRef implements IParentRef {
     }
     return ref.resolve(rest, terminal);
   }
+
+  public function toString()
+    return 'ArrayRef: $items';
 }

@@ -43,6 +43,7 @@ class Model {
           bus.pulse(newpath);
         case RetypeField(path, type):
           schema.retype(path, type);
+          data.remove(path);
           bus.pulse(path);
       }
     };

@@ -20,6 +20,7 @@ class Ref {
   public static var reField = ~/^\.?([^.\[]+)/;
   public static var reIndex = ~/^\[(\d+)\]/;
   public static function fromPath(path : String, ?parent : IParentRef, terminal : Bool = true) : IRef {
+    trace('$path with $parent $terminal');
     if(null == parent)
       parent = BaseRef.EmptyParent.instance;
     if(path == "") {
