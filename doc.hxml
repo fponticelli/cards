@@ -1,0 +1,2 @@
+-cmd haxe build_doc.hxml
+-cmd haxelib run dox -r / -o doc/pages -i doc/xml

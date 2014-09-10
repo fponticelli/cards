@@ -1,0 +1,10 @@
+--no-output
+-D doc-gen
+-js bin/fake.js
+-xml doc/xml/js.xml
+-cp src
+-main Main
+-lib thx.core
+-lib thx.promise
+-lib thx.stream
+-lib thx.stream.dom
