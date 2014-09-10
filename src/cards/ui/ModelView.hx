@@ -13,6 +13,14 @@ import udom.Dom;
 import thx.stream.Bus;
 
 class ModelView {
+  public static var typeDefinitions = [
+    { type : StringType, icon : Config.icons.text },
+    { type : BoolType,   icon : Config.icons.bool },
+    { type : FloatType,  icon : Config.icons.number },
+    { type : DateType,   icon : Config.icons.date },
+    { type : ArrayType(StringType),  icon : Config.icons.array },
+  ];
+
   public var component(default, null) : Component;
   public var schema(default, null) : Emitter<SchemaEvent>;
   public var data(default, null) : Emitter<DataEvent>;
@@ -79,17 +87,12 @@ class ModelView {
     });
     buttonToNumber.enabled.set(false);
 */
-    var definitions = [
-      { type : StringType, icon : Config.icons.text },
-      { type : BoolType,   icon : Config.icons.bool },
-      { type : FloatType,  icon : Config.icons.number },
-      { type : DateType,   icon : Config.icons.date },
-    ];
-    for(def in definitions) {
+    for(def in typeDefinitions) {
       var button = toolbar.center.addButton('', def.icon);
       button.enabled.set(false);
       button.clicks.subscribe(function(_) {
         if(null == currentField) return;
+        schemaBus.pulse(SchemaEvent.RetypeField(currentField.key.value.get(), def.type));
         currentField.setEditor(def.type);
         var editor = currentField.editor;
         thx.core.Timer.delay(function() editor.focus.set(true), 300);
