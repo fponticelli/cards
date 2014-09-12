@@ -61,36 +61,45 @@ HxOverrides.iter = function(a) {
 	}};
 };
 var Main = function(container) {
-	haxe.Log.trace(container,{ fileName : "Main.hx", lineNumber : 35, className : "Main", methodName : "new"});
 	this.container = container;
 };
 Main.__name__ = ["Main"];
 Main.main = function() {
 	thx.stream.dom.Dom.ready().success(function(_) {
 		var main = new Main(udom.Query.first(".container"));
-		main.addDemo("text editor").success(Main.toDo());
-		main.addDemo("float editor").success(Main.toDo());
-		main.addDemo("date editor").success(Main.toDo());
-		main.addDemo("date time editor").success(Main.toDo());
-		main.addDemo("bool editor").success(Main.toDo());
-		main.addDemo("array editor").success(Main.toDo());
-		main.addDemo("object editor").success(Main.toDo());
+		main.addDemo("text editor",function(el) {
+			return new cards.ui.input.TextEditor(el);
+		});
+		main.addDemo("float editor",Main.toDo());
+		main.addDemo("date editor",Main.toDo());
+		main.addDemo("date time editor",Main.toDo());
+		main.addDemo("bool editor",Main.toDo());
+		main.addDemo("array editor",Main.toDo());
+		main.addDemo("object editor",Main.toDo());
 	});
 };
 Main.toDo = function() {
 	return function(el) {
 		el.textContent = "TODO";
+		return null;
 	};
 };
 Main.prototype = {
-	addDemo: function(title) {
+	addDemo: function(title,handler) {
 		var heading = window.document.createElement("h2");
 		var el = window.document.createElement("div");
+		var output = window.document.createElement("div");
 		el.className = "sample";
+		output.className = "output";
 		heading.textContent = title;
 		this.container.appendChild(heading);
 		this.container.appendChild(el);
-		return thx.promise.Promise.value(el);
+		this.container.appendChild(output);
+		var editor = handler(el);
+		if(null == editor) return;
+		editor.stream.mapValue(function(v) {
+			return cards.ui.input._TypedValue.TypedValue_Impl_.toString(v);
+		}).subscribe(thx.stream.dom.Dom.subscribeText(output));
 	}
 	,__class__: Main
 };
@@ -134,6 +143,9 @@ StringTools.rtrim = function(s) {
 };
 StringTools.trim = function(s) {
 	return StringTools.ltrim(StringTools.rtrim(s));
+};
+StringTools.replace = function(s,sub,by) {
+	return s.split(sub).join(by);
 };
 var Type = function() { };
 Type.__name__ = ["Type"];
@@ -225,6 +237,22 @@ cards.components.Properties.prototype = {
 	}
 	,__class__: cards.components.Properties
 };
+cards.model = {};
+cards.model.SchemaType = { __ename__ : true, __constructs__ : ["ArrayType","BoolType","DateType","FloatType","ObjectType","StringType","CodeType","ReferenceType"] };
+cards.model.SchemaType.ArrayType = function(item) { var $x = ["ArrayType",0,item]; $x.__enum__ = cards.model.SchemaType; return $x; };
+cards.model.SchemaType.BoolType = ["BoolType",1];
+cards.model.SchemaType.BoolType.__enum__ = cards.model.SchemaType;
+cards.model.SchemaType.DateType = ["DateType",2];
+cards.model.SchemaType.DateType.__enum__ = cards.model.SchemaType;
+cards.model.SchemaType.FloatType = ["FloatType",3];
+cards.model.SchemaType.FloatType.__enum__ = cards.model.SchemaType;
+cards.model.SchemaType.ObjectType = function(fields) { var $x = ["ObjectType",4,fields]; $x.__enum__ = cards.model.SchemaType; return $x; };
+cards.model.SchemaType.StringType = ["StringType",5];
+cards.model.SchemaType.StringType.__enum__ = cards.model.SchemaType;
+cards.model.SchemaType.CodeType = ["CodeType",6];
+cards.model.SchemaType.CodeType.__enum__ = cards.model.SchemaType;
+cards.model.SchemaType.ReferenceType = ["ReferenceType",7];
+cards.model.SchemaType.ReferenceType.__enum__ = cards.model.SchemaType;
 cards.properties = {};
 cards.properties.Property = function(component,name) {
 	this.component = component;
@@ -260,6 +288,85 @@ cards.properties._PropertyName.PropertyName_Impl_._new = function(name) {
 };
 cards.properties._PropertyName.PropertyName_Impl_.toString = function(this1) {
 	return this1;
+};
+cards.ui = {};
+cards.ui.input = {};
+cards.ui.input.IEditor = function() { };
+cards.ui.input.IEditor.__name__ = ["cards","ui","input","IEditor"];
+cards.ui.input.IEditor.prototype = {
+	__class__: cards.ui.input.IEditor
+};
+cards.ui.input.Editor = function(type,options) {
+	this.stream = new thx.stream.Bus();
+	this.type = type;
+	this.focus = new thx.stream.Value(false);
+	this.component = new cards.components.Component(options);
+};
+cards.ui.input.Editor.__name__ = ["cards","ui","input","Editor"];
+cards.ui.input.Editor.__interfaces__ = [cards.ui.input.IEditor];
+cards.ui.input.Editor.prototype = {
+	__class__: cards.ui.input.Editor
+};
+cards.ui.input._Path = {};
+cards.ui.input._Path.Path_Impl_ = function() { };
+cards.ui.input._Path.Path_Impl_.__name__ = ["cards","ui","input","_Path","Path_Impl_"];
+cards.ui.input._Path.Path_Impl_._new = function(arr) {
+	return arr;
+};
+cards.ui.input._Path.Path_Impl_.fromString = function(path) {
+	return StringTools.replace(path,"[",".[").split(".").map(function(v) {
+		if(HxOverrides.substr(v,0,1) == "[") return cards.ui.input.PathItem.Index(Std.parseInt(HxOverrides.substr(v,1,v.length - 1))); else return cards.ui.input.PathItem.Field(v);
+	});
+};
+cards.ui.input._Path.Path_Impl_.toString = function(this1) {
+	return StringTools.replace(this1.map(function(item) {
+		switch(item[1]) {
+		case 0:
+			var name = item[2];
+			return StringTools.replace(name,".","\\.");
+		case 1:
+			var pos = item[2];
+			return "[" + pos + "]";
+		}
+	}).join("."),".[","[");
+};
+cards.ui.input.PathItem = { __ename__ : true, __constructs__ : ["Field","Index"] };
+cards.ui.input.PathItem.Field = function(name) { var $x = ["Field",0,name]; $x.__enum__ = cards.ui.input.PathItem; return $x; };
+cards.ui.input.PathItem.Index = function(pos) { var $x = ["Index",1,pos]; $x.__enum__ = cards.ui.input.PathItem; return $x; };
+cards.ui.input.TextEditor = function(container) {
+	var options = { template : "<span class=\"editor text\" contenteditable>text</span>", container : container};
+	cards.ui.input.Editor.call(this,cards.model.SchemaType.StringType,options);
+	var el = this.component.el;
+	el.style.content = "type text";
+	thx.stream.dom.Dom.streamEvent(el,"input").mapValue(function(_) {
+		var _1 = el.textContent;
+		return { _0 : cards.model.SchemaType.StringType, _1 : _1};
+	}).plug(this.stream);
+};
+cards.ui.input.TextEditor.__name__ = ["cards","ui","input","TextEditor"];
+cards.ui.input.TextEditor.__super__ = cards.ui.input.Editor;
+cards.ui.input.TextEditor.prototype = $extend(cards.ui.input.Editor.prototype,{
+	__class__: cards.ui.input.TextEditor
+});
+cards.ui.input._TypedValue = {};
+cards.ui.input._TypedValue.TypedValue_Impl_ = function() { };
+cards.ui.input._TypedValue.TypedValue_Impl_.__name__ = ["cards","ui","input","_TypedValue","TypedValue_Impl_"];
+cards.ui.input._TypedValue.TypedValue_Impl_._new = function(type,value) {
+	var _1 = value;
+	return { _0 : type, _1 : _1};
+};
+cards.ui.input._TypedValue.TypedValue_Impl_.toType = function(this1) {
+	return this1._0;
+};
+cards.ui.input._TypedValue.TypedValue_Impl_.fromString = function(s) {
+	var _1 = s;
+	return { _0 : cards.model.SchemaType.StringType, _1 : _1};
+};
+cards.ui.input._TypedValue.TypedValue_Impl_.asString = function(this1) {
+	return Std.string(this1._1);
+};
+cards.ui.input._TypedValue.TypedValue_Impl_.toString = function(this1) {
+	return Std.string(this1._1) + " : " + Std.string(this1._0);
 };
 var haxe = {};
 haxe.StackItem = { __ename__ : true, __constructs__ : ["CFunction","Module","FilePos","Method","LocalFunction"] };
