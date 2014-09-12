@@ -6,30 +6,43 @@ var gulp       = require('gulp'),
 
 var paths = {
   src : {
-    stylus : 'src/main.styl',
-    styluses : 'src/**/*.styl'
+    main : {
+      stylus : 'src/main.styl',
+      styluses : 'src/**/*.styl'
+    },
+    editors : {
+      stylus : 'editors/editors.styl',
+      styluses : 'editors/**/*.styl'
+    }
     // assets: './assets/**/*.*'
   },
   dst : {
-    stylus : 'bin/css/',
+    debug : {
+      stylus : 'bin/css/',
+    },
     release : {
       stylus : 'release/css/',
     }
   }
 }
 
-gulp.task('stylus', function() {
-    gulp.src(paths.src.stylus)
-        .pipe(changed(paths.dst.stylus))
+gulp.task('stylus-main', function() {
+    gulp.src(paths.src.main.stylus)
+        .pipe(changed(paths.dst.debug.stylus))
         .pipe(stylus({use: [nib()], errors: true}))
-        .pipe(gulp.dest(paths.dst.stylus));
+        .pipe(gulp.dest(paths.dst.debug.stylus));
 });
 
-
+gulp.task('stylus-editors', function() {
+    gulp.src(paths.src.editors.stylus)
+        .pipe(changed(paths.dst.debug.stylus))
+        .pipe(stylus({use: [nib()], errors: true}))
+        .pipe(gulp.dest(paths.dst.debug.stylus));
+});
 
 gulp.task('release', function() {
-    gulp.src(paths.src.stylus)
-        .pipe(changed(paths.dst.stylus))
+    gulp.src(paths.src.main.stylus)
+        .pipe(changed(paths.dst.release.stylus))
         .pipe(stylus({use: [nib()], errors: true}))
         .pipe(gulp.dest(paths.dst.release.stylus));
 });
@@ -43,9 +56,10 @@ gulp.task('assets', function() {
 
 gulp.task('watch', function() {
 //    gulp.watch(paths.src.assets, ['assets']);
-    gulp.watch(paths.src.styluses, ['stylus']);
+    gulp.watch(paths.src.main.styluses, ['stylus-main']);
+    gulp.watch(paths.src.editors.styluses, ['stylus-editors']);
     livereload.listen();
     gulp.watch('bin/**').on('change', livereload.changed);
 });
 
-gulp.task('default', [/*'assets', */'stylus', 'watch']);
+gulp.task('default', [/*'assets', */'stylus-main','stylus-editors', 'watch']);

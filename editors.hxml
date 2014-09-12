@@ -1,0 +1,10 @@
+-js bin/demo/editors.js
+-cp src
+-cp editors
+-main Main
+-lib thx.core
+-lib thx.promise
+-lib thx.stream
+-lib thx.stream.dom
+-debug
+-D source-map-content
