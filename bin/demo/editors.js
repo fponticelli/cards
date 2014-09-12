@@ -70,6 +70,8 @@ Main.main = function() {
 		main.addDemo("text editor",function(el) {
 			return new cards.ui.input.TextEditor(el);
 		});
+		main.addDemo("code editor",Main.toDo());
+		main.addDemo("reference editor",Main.toDo());
 		main.addDemo("float editor",Main.toDo());
 		main.addDemo("date editor",Main.toDo());
 		main.addDemo("date time editor",Main.toDo());
@@ -89,12 +91,15 @@ Main.prototype = {
 		var heading = window.document.createElement("h2");
 		var el = window.document.createElement("div");
 		var output = window.document.createElement("div");
-		el.className = "sample";
+		var sample = window.document.createElement("div");
+		sample.className = "sample";
+		el.className = "card";
 		output.className = "output";
 		heading.textContent = title;
-		this.container.appendChild(heading);
-		this.container.appendChild(el);
-		this.container.appendChild(output);
+		sample.appendChild(heading);
+		sample.appendChild(el);
+		sample.appendChild(output);
+		this.container.appendChild(sample);
 		var editor = handler(el);
 		if(null == editor) return;
 		editor.stream.mapValue(function(v) {
@@ -334,13 +339,15 @@ cards.ui.input.PathItem = { __ename__ : true, __constructs__ : ["Field","Index"]
 cards.ui.input.PathItem.Field = function(name) { var $x = ["Field",0,name]; $x.__enum__ = cards.ui.input.PathItem; return $x; };
 cards.ui.input.PathItem.Index = function(pos) { var $x = ["Index",1,pos]; $x.__enum__ = cards.ui.input.PathItem; return $x; };
 cards.ui.input.TextEditor = function(container) {
-	var options = { template : "<span class=\"editor text\" contenteditable>text</span>", container : container};
+	var options = { template : "<textarea class=\"editor text\"></textarea>", container : container};
 	cards.ui.input.Editor.call(this,cards.model.SchemaType.StringType,options);
 	var el = this.component.el;
 	el.style.content = "type text";
-	thx.stream.dom.Dom.streamEvent(el,"input").mapValue(function(_) {
-		var _1 = el.textContent;
-		return { _0 : cards.model.SchemaType.StringType, _1 : _1};
+	thx.stream.dom.Dom.streamEvent(el,"input").audit(function(_) {
+		if(el.scrollHeight > el.clientHeight && el.scrollHeight < 125) el.style.height = el.scrollHeight + "px";
+	}).mapValue(function(_1) {
+		var _11 = el.value;
+		return { _0 : cards.model.SchemaType.StringType, _1 : _11};
 	}).plug(this.stream);
 };
 cards.ui.input.TextEditor.__name__ = ["cards","ui","input","TextEditor"];

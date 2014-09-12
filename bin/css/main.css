@@ -164,6 +164,12 @@ a img {
   margin: 0;
   padding-bottom: 0;
 }
+.card textarea.text {
+  width: 100%;
+  border: none;
+  height: 1.4em;
+  padding: 0.2em;
+}
 .card .block {
   padding: 0.25em 0.5em;
   margin-bottom: 0.5em;

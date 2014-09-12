@@ -1,9 +1,13 @@
+* {
+  box-sizing: border-box;
+}
 .container {
   width: 768px;
   margin: 10px auto;
   font-family: sans-serif;
   background-color: #eee;
   padding: 1em;
+  position: relative;
 }
 .container h1 {
   font-size: 2em;
@@ -16,5 +20,9 @@
   color: #999;
 }
 .container .sample {
+  position: relative;
   background-color: #fff;
+}
+.container .sample .card {
+  position: relative;
 }

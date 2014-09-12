@@ -19,6 +19,8 @@ class Main {
       main.addDemo("text editor", function(el) {
         return new TextEditor(el);
       });
+      main.addDemo("code editor", toDo());
+      main.addDemo("reference editor", toDo());
       main.addDemo("float editor", toDo());
       main.addDemo("date editor", toDo());
       main.addDemo("date time editor", toDo());
@@ -42,14 +44,17 @@ class Main {
 
   public function addDemo(title : String, handler : Element -> IEditor) {
     var heading = Browser.document.createElement('h2'),
-        el = Browser.document.createElement('div'),
-        output = Browser.document.createElement('div');
-    el.className = "sample";
+        el      = Browser.document.createElement('div'),
+        output  = Browser.document.createElement('div'),
+        sample  = Browser.document.createElement('div');
+    sample.className = "sample";
+    el.className = "card";
     output.className = "output";
     heading.textContent = title;
-    container.appendChild(heading);
-    container.appendChild(el);
-    container.appendChild(output);
+    sample.appendChild(heading);
+    sample.appendChild(el);
+    sample.appendChild(output);
+    container.appendChild(sample);
     var editor = handler(el);
     if(null == editor)
       return;
