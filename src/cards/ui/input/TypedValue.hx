@@ -7,7 +7,7 @@ abstract TypedValue(Tuple2<SchemaType, Dynamic>) {
   public inline function new(type : SchemaType, value : Dynamic)
     this = new Tuple2(type, value);
 
-  @:to public inline function toType()
+  @:to public inline function asType()
     return this._0;
 
   @:from public static inline function fromString(s : String)
