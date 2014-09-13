@@ -171,6 +171,20 @@ a img {
   padding: 0.2em;
   resize: none;
 }
+.card .code .CodeMirror {
+  border: 1px solid #eee;
+  height: auto;
+}
+.card .code .CodeMirror-scroll {
+  overflow-y: hidden;
+  overflow-x: auto;
+}
+.card .array .toolbar {
+  position: relative;
+}
+.card .array > ul {
+  margin-left: 5px;
+}
 .card .block {
   padding: 0.25em 0.5em;
   margin-bottom: 0.5em;

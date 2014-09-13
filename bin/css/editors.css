@@ -10,24 +10,32 @@
   position: relative;
 }
 .container h1 {
-  font-size: 2em;
+  font-size: 1.5em;
   margin: 0.2em;
   color: #999;
 }
 .container h2 {
-  font-size: 1.4em;
+  font-size: 0.8em;
   padding: 0.2em 0;
   color: #999;
 }
 .container .sample {
-  position: relative;
+  display: inline-block;
+  width: 32%;
+  margin: 0 2px 1em;
+  vertical-align: top;
 }
 .container .sample .card {
   position: relative;
 }
-.container .sample .output {
+.container .output,
+.container .focus {
   white-space: pre;
   font-family: monospace;
   font-size: 0.8em;
   padding: 0.5em;
+  color: #aaa;
+}
+.container .focus {
+  color: #099;
 }
