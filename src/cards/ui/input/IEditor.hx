@@ -10,6 +10,8 @@ interface IEditor {
   public var type(default, null) : SchemaType;
   public var focus(default, null) : Value<Bool>;
   public var component(default, null) : Component;
+
+  public function toString() : String;
 //  public var parent(default, null) : IEditor;
 //  public var children(default, null) : Array<IEditor>;
 }

@@ -19,4 +19,7 @@ class Editor implements IEditor {
     this.focus     = new Value(false);
     this.component = new Component(options);
   }
+
+  public function toString()
+    return Type.getClassName(Type.getClass(this)).split('.').pop();
 }
