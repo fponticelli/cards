@@ -7,7 +7,6 @@ import js.html.TextAreaElement;
 import udom.Dom.Query;
 using thx.stream.dom.Dom;
 
-// TODO focus
 class TextEditor extends Editor {
   function resize() {
     var el = component.el;

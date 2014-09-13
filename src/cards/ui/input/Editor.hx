@@ -20,6 +20,12 @@ class Editor implements IEditor {
     this.component = new Component(options);
   }
 
+  public function dispose() {
+    stream.clear();
+    focus.clear();
+    component.destroy();
+  }
+
   public function toString()
     return Type.getClassName(Type.getClass(this)).split('.').pop();
 }

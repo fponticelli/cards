@@ -13,6 +13,7 @@ interface IEditor {
   public var component(default, null) : Component;
 
   public function toString() : String;
+  public function dispose() : Void;
 //  public var parent(default, null) : IEditor;
 //  public var children(default, null) : Array<IEditor>;
 }
