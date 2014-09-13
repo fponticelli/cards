@@ -169,6 +169,15 @@ a img {
   border: none;
   height: 1.4em;
   padding: 0.2em;
+  resize: none;
+}
+.card .code .CodeMirror {
+  border: 1px solid #eee;
+  height: auto;
+}
+.card .code .CodeMirror-scroll {
+  overflow-y: hidden;
+  overflow-x: auto;
 }
 .card .block {
   padding: 0.25em 0.5em;

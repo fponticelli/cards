@@ -70,7 +70,9 @@ Main.main = function() {
 		main.addDemo("text editor",function(el) {
 			return new cards.ui.input.TextEditor(el);
 		});
-		main.addDemo("code editor",Main.toDo());
+		main.addDemo("code editor",function(el1) {
+			return new cards.ui.input.CodeEditor(el1);
+		});
 		main.addDemo("reference editor",Main.toDo());
 		main.addDemo("float editor",Main.toDo());
 		main.addDemo("date editor",Main.toDo());
@@ -312,6 +314,26 @@ cards.ui.input.Editor.__interfaces__ = [cards.ui.input.IEditor];
 cards.ui.input.Editor.prototype = {
 	__class__: cards.ui.input.Editor
 };
+cards.ui.input.CodeEditor = function(container) {
+	var _g = this;
+	var options = { template : "<div class=\"editor code\"></div>", container : container};
+	cards.ui.input.Editor.call(this,cards.model.SchemaType.CodeType,options);
+	var editor = CodeMirror(this.component.el,{ mode : "javascript", tabSize : 2, lineNumbers : true, tabindex : 1});
+	editor.on("changes",function() {
+		var content = editor.doc.getValue();
+		_g.stream.emit(thx.stream.StreamValue.Pulse((function($this) {
+			var $r;
+			var _1 = content;
+			$r = { _0 : cards.model.SchemaType.CodeType, _1 : _1};
+			return $r;
+		}(this))));
+	});
+};
+cards.ui.input.CodeEditor.__name__ = ["cards","ui","input","CodeEditor"];
+cards.ui.input.CodeEditor.__super__ = cards.ui.input.Editor;
+cards.ui.input.CodeEditor.prototype = $extend(cards.ui.input.Editor.prototype,{
+	__class__: cards.ui.input.CodeEditor
+});
 cards.ui.input._Path = {};
 cards.ui.input._Path.Path_Impl_ = function() { };
 cards.ui.input._Path.Path_Impl_.__name__ = ["cards","ui","input","_Path","Path_Impl_"];
@@ -339,12 +361,13 @@ cards.ui.input.PathItem = { __ename__ : true, __constructs__ : ["Field","Index"]
 cards.ui.input.PathItem.Field = function(name) { var $x = ["Field",0,name]; $x.__enum__ = cards.ui.input.PathItem; return $x; };
 cards.ui.input.PathItem.Index = function(pos) { var $x = ["Index",1,pos]; $x.__enum__ = cards.ui.input.PathItem; return $x; };
 cards.ui.input.TextEditor = function(container) {
-	var options = { template : "<textarea class=\"editor text\"></textarea>", container : container};
+	var options = { template : "<textarea class=\"editor text\" placeholder=\"type text\"></textarea>", container : container};
 	cards.ui.input.Editor.call(this,cards.model.SchemaType.StringType,options);
 	var el = this.component.el;
 	el.style.content = "type text";
 	thx.stream.dom.Dom.streamEvent(el,"input").audit(function(_) {
-		if(el.scrollHeight > el.clientHeight && el.scrollHeight < 125) el.style.height = el.scrollHeight + "px";
+		el.style.height = "5px";
+		el.style.height = 1 + el.scrollHeight + "px";
 	}).mapValue(function(_1) {
 		var _11 = el.value;
 		return { _0 : cards.model.SchemaType.StringType, _1 : _11};

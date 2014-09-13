@@ -19,7 +19,9 @@ class Main {
       main.addDemo("text editor", function(el) {
         return new TextEditor(el);
       });
-      main.addDemo("code editor", toDo());
+      main.addDemo("code editor", function(el) {
+        return new CodeEditor(el);
+      });
       main.addDemo("reference editor", toDo());
       main.addDemo("float editor", toDo());
       main.addDemo("date editor", toDo());
