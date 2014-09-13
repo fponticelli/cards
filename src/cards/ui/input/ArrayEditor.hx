@@ -79,6 +79,6 @@ class ArrayEditor extends Editor implements IEditor {
       return;
     o.item.parentNode.removeChild(o.item);
     current.set(None);
-    trace('delete $o');
+    // TODO destroy editor
   }
 }

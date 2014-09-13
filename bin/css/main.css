@@ -112,9 +112,10 @@ a img {
 }
 .card .editor:focus {
   outline: none;
-  background-color: #f9f9f9;
-  -webkit-box-shadow: inset 1px 1px 1px #fff, 2px 2px 2px rgba(0,0,0,0.2);
-  box-shadow: inset 1px 1px 1px #fff, 2px 2px 2px rgba(0,0,0,0.2);
+  background-color: #fff;
+}
+.card .editor:focus:hover {
+  background-color: #fff;
 }
 .card .editor:hover {
   background-color: #f9f9f9;
@@ -171,6 +172,8 @@ a img {
   padding: 0.2em;
   resize: none;
   max-height: 10em;
+  background-color: #f3f3f3;
+  font-size: 1em;
 }
 .card .code .CodeMirror {
   border: 1px solid #eee;
