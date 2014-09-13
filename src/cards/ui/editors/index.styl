@@ -82,12 +82,14 @@ textarea.text
   .items
     max-height 10em
     overflow-y auto
-    > ul
+    > ol
       margin-left 1.3em
       position relative
+      counter-reset li -1
     li:before
       font-family Verdana
-      content attr(data-placeholder)
+      content counter(li)
+      counter-increment li
       color #000
       text-shadow none
       position absolute

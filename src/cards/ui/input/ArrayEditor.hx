@@ -9,16 +9,14 @@ import cards.ui.input.EditorFactory;
 import thx.stream.Value;
 using thx.stream.Emitter;
 import haxe.ds.Option;
-import js.html.UListElement;
+import js.html.OListElement;
 import udom.Dom;
 using thx.core.Options;
 // TODO
-//  * add item
-//  * remove item
 //  * drag and drop item
 //  * set using path
-class ArrayEditor extends Editor implements IEditor {
-  var list : UListElement;
+class ArrayEditor extends RouteEditor {
+  var list : OListElement;
   var innerType : SchemaType;
   var current : Value<Option<{ editor : IEditor, item : LIElement }>>;
   public function new(container : Element, innerType : SchemaType) {
@@ -42,7 +40,7 @@ class ArrayEditor extends Editor implements IEditor {
     items.className = "items";
     component.el.appendChild(items);
 
-    list = Browser.document.createUListElement();
+    list = Browser.document.createOListElement();
     items.appendChild(list);
 
     this.innerType = innerType;
@@ -53,7 +51,8 @@ class ArrayEditor extends Editor implements IEditor {
 
   var index = 0;
   public function addItem() {
-    addItemWithIndex(index++);
+    addItemWithIndex(index);
+    index++;
   }
 
   function addItemWithIndex(i : Int) {
