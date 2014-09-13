@@ -21,12 +21,19 @@ class CodeEditor extends Editor {
       mode : "javascript",
       tabSize : 2,
       lineNumbers : true,
-      tabindex : 1
+      tabindex : 1,
+      lineWrapping : true
 
     });
     editor.on("changes", function() {
       var content = editor.doc.getValue();
       stream.pulse(new TypedValue(CodeType, content));
+    });
+    editor.on("focus", function() {
+      focus.set(true);
+    });
+    editor.on("blur", function() {
+      focus.set(false);
     });
   }
 }
