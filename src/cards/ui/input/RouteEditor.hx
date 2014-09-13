@@ -5,7 +5,7 @@ import cards.model.SchemaType;
 import cards.components.ComponentOptions;
 
 class RouteEditor extends Editor implements IRouteEditor {
-  public var diff(default, null) : Bus<Diff>;
+  public var diff(default, null) : Bus<DiffAt>;
 
   public function new(type : SchemaType, options : ComponentOptions) {
     super(type, options);

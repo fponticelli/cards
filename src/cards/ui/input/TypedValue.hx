@@ -10,6 +10,9 @@ abstract TypedValue(Tuple2<SchemaType, Dynamic>) {
   @:to public inline function asType()
     return this._0;
 
+  public inline function asValue() : Dynamic
+    return this._1;
+
   @:from public static inline function fromString(s : String)
     return new TypedValue(StringType, s);
 

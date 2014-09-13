@@ -18,8 +18,14 @@ using thx.core.Options;
 class ArrayEditor extends RouteEditor {
   var list : OListElement;
   var innerType : SchemaType;
-  var current : Value<Option<{ editor : IEditor, item : LIElement }>>;
+  var current : Value<Option<{
+    editor : IEditor,
+    item : LIElement,
+    index : Int
+  }>>;
+  var value : Array<Null<Dynamic>>;
   public function new(container : Element, innerType : SchemaType) {
+    value = [];
     var options = {
       template  : '<div class="editor array"></div>',
       container : container
@@ -47,7 +53,27 @@ class ArrayEditor extends RouteEditor {
     current = new Value(None);
     current.toBool()
       .feed(buttonRemove.enabled);
+
+    diff.subscribe(function(d) {
+      switch [d.path.asArray(), d.diff] {
+        case [[Index(i)], RemoveItem]:
+          value.splice(i, 1);
+        case [[Index(i)], AddItem]:
+          value.insert(i, null);
+        case [[Index(i)], SetValue(v)] if(Type.enumEq(v.asType(), innerType)):
+          value[i] = v.asValue();
+        case _:
+          throw 'unable to assign $d to within ArrayEditor';
+  // ("", AddItem(i)):
+
+        //case [i], SetValue(v):
+      }
+      pulse();
+    });
   }
+
+  function pulse()
+    stream.pulse(new TypedValue(type, value.copy()));
 
   var index = 0;
   public function addItem() {
@@ -67,9 +93,15 @@ class ArrayEditor extends RouteEditor {
       .subscribe(function(_) {
         current.set(Some({
           editor : editor,
-          item : item
+          item   : item,
+          index  : index
         }));
       });
+    editor.stream
+      .mapValue(function(v) return new DiffAt('[$i]', SetValue(v)))
+      .plug(diff);
+
+    diff.pulse(new DiffAt('[$i]', AddItem));
   }
 
   public function removeSelectedItem() {
@@ -78,6 +110,7 @@ class ArrayEditor extends RouteEditor {
       return;
     o.item.parentNode.removeChild(o.item);
     current.set(None);
+    diff.pulse(new DiffAt('[${o.index}]', RemoveItem));
     // TODO destroy editor
   }
 }

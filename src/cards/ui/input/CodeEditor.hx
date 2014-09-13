@@ -10,6 +10,7 @@ using thx.stream.dom.Dom;
 
 // TODO focus
 class CodeEditor extends Editor {
+  var editor : Dynamic;
   public function new(container : Element) {
     var options = {
       template  : '<div class="editor code"></div>',
@@ -17,7 +18,7 @@ class CodeEditor extends Editor {
     };
     super(CodeType, options);
 
-    var editor : Dynamic = untyped __js__('CodeMirror')(component.el, {
+    editor = untyped __js__('CodeMirror')(component.el, {
       mode : "javascript",
       tabSize : 2,
       lineNumbers : true,
@@ -25,15 +26,24 @@ class CodeEditor extends Editor {
       lineWrapping : true
 
     });
-    editor.on("changes", function() {
-      var content = editor.doc.getValue();
-      stream.pulse(new TypedValue(CodeType, content));
-    });
-    editor.on("focus", function() {
-      focus.set(true);
-    });
-    editor.on("blur", function() {
-      focus.set(false);
-    });
+    editor.on("changes", changes);
+    editor.on("focus", setFocus);
+    editor.on("blur", blurFocus);
+  }
+
+  function changes() {
+    var content = editor.doc.getValue();
+    stream.pulse(new TypedValue(CodeType, content));
+  }
+
+  function setFocus() focus.set(true);
+  function blurFocus() focus.set(false);
+
+  override public function dispose() {
+    super.dispose();
+    editor.off("changes", changes);
+    editor.off("focus", setFocus);
+    editor.off("blur", blurFocus);
+    editor = null;
   }
 }

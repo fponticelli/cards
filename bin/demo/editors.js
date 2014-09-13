@@ -1,5 +1,4 @@
 (function () { "use strict";
-var $estr = function() { return js.Boot.__string_rec(this,''); };
 function $extend(from, fields) {
 	function Inherit() {} Inherit.prototype = from; var proto = new Inherit();
 	for (var name in fields) proto[name] = fields[name];
@@ -82,7 +81,7 @@ Main.main = function() {
 		main.addDemo("array editor with StringType",function(el) {
 			var editor = new cards.ui.input.ArrayEditor(el,cards.model.SchemaType.StringType);
 			var _g = 0;
-			while(_g < 12) {
+			while(_g < 3) {
 				var i = _g++;
 				editor.addItem();
 			}
@@ -187,6 +186,23 @@ Type.getClassName = function(c) {
 	var a = c.__name__;
 	return a.join(".");
 };
+Type.enumEq = function(a,b) {
+	if(a == b) return true;
+	try {
+		if(a[0] != b[0]) return false;
+		var _g1 = 2;
+		var _g = a.length;
+		while(_g1 < _g) {
+			var i = _g1++;
+			if(!Type.enumEq(a[i],b[i])) return false;
+		}
+		var e = a.__enum__;
+		if(e != b.__enum__ || e == null) return false;
+	} catch( e1 ) {
+		return false;
+	}
+	return true;
+};
 var cards = {};
 cards.components = {};
 cards.components.Component = function(options) {
@@ -269,25 +285,19 @@ cards.components.Properties.prototype = {
 };
 cards.model = {};
 cards.model.SchemaType = { __ename__ : true, __constructs__ : ["ArrayType","BoolType","DateType","FloatType","ObjectType","StringType","CodeType","ReferenceType"] };
-cards.model.SchemaType.ArrayType = function(item) { var $x = ["ArrayType",0,item]; $x.__enum__ = cards.model.SchemaType; $x.toString = $estr; return $x; };
+cards.model.SchemaType.ArrayType = function(item) { var $x = ["ArrayType",0,item]; $x.__enum__ = cards.model.SchemaType; return $x; };
 cards.model.SchemaType.BoolType = ["BoolType",1];
-cards.model.SchemaType.BoolType.toString = $estr;
 cards.model.SchemaType.BoolType.__enum__ = cards.model.SchemaType;
 cards.model.SchemaType.DateType = ["DateType",2];
-cards.model.SchemaType.DateType.toString = $estr;
 cards.model.SchemaType.DateType.__enum__ = cards.model.SchemaType;
 cards.model.SchemaType.FloatType = ["FloatType",3];
-cards.model.SchemaType.FloatType.toString = $estr;
 cards.model.SchemaType.FloatType.__enum__ = cards.model.SchemaType;
-cards.model.SchemaType.ObjectType = function(fields) { var $x = ["ObjectType",4,fields]; $x.__enum__ = cards.model.SchemaType; $x.toString = $estr; return $x; };
+cards.model.SchemaType.ObjectType = function(fields) { var $x = ["ObjectType",4,fields]; $x.__enum__ = cards.model.SchemaType; return $x; };
 cards.model.SchemaType.StringType = ["StringType",5];
-cards.model.SchemaType.StringType.toString = $estr;
 cards.model.SchemaType.StringType.__enum__ = cards.model.SchemaType;
 cards.model.SchemaType.CodeType = ["CodeType",6];
-cards.model.SchemaType.CodeType.toString = $estr;
 cards.model.SchemaType.CodeType.__enum__ = cards.model.SchemaType;
 cards.model.SchemaType.ReferenceType = ["ReferenceType",7];
-cards.model.SchemaType.ReferenceType.toString = $estr;
 cards.model.SchemaType.ReferenceType.__enum__ = cards.model.SchemaType;
 cards.properties = {};
 cards.properties.Property = function(component,name) {
@@ -341,16 +351,42 @@ cards.ui.input.Editor = function(type,options) {
 cards.ui.input.Editor.__name__ = ["cards","ui","input","Editor"];
 cards.ui.input.Editor.__interfaces__ = [cards.ui.input.IEditor];
 cards.ui.input.Editor.prototype = {
-	toString: function() {
+	dispose: function() {
+		this.stream.clear();
+		this.focus.clear();
+		this.component.destroy();
+	}
+	,toString: function() {
 		return Type.getClassName(Type.getClass(this)).split(".").pop();
 	}
 	,__class__: cards.ui.input.Editor
 };
+cards.ui.input.IRouteEditor = function() { };
+cards.ui.input.IRouteEditor.__name__ = ["cards","ui","input","IRouteEditor"];
+cards.ui.input.IRouteEditor.__interfaces__ = [cards.ui.input.IEditor];
+cards.ui.input.IRouteEditor.prototype = {
+	__class__: cards.ui.input.IRouteEditor
+};
+cards.ui.input.RouteEditor = function(type,options) {
+	cards.ui.input.Editor.call(this,type,options);
+	this.diff = new thx.stream.Bus();
+};
+cards.ui.input.RouteEditor.__name__ = ["cards","ui","input","RouteEditor"];
+cards.ui.input.RouteEditor.__interfaces__ = [cards.ui.input.IRouteEditor];
+cards.ui.input.RouteEditor.__super__ = cards.ui.input.Editor;
+cards.ui.input.RouteEditor.prototype = $extend(cards.ui.input.Editor.prototype,{
+	dispose: function() {
+		cards.ui.input.Editor.prototype.dispose.call(this);
+		this.diff.clear();
+	}
+	,__class__: cards.ui.input.RouteEditor
+});
 cards.ui.input.ArrayEditor = function(container,innerType) {
 	this.index = 0;
 	var _g = this;
+	this.value = [];
 	var options = { template : "<div class=\"editor array\"></div>", container : container};
-	cards.ui.input.Editor.call(this,cards.model.SchemaType.ArrayType(innerType),options);
+	cards.ui.input.RouteEditor.call(this,cards.model.SchemaType.ArrayType(innerType),options);
 	var toolbar = new cards.ui.widgets.Toolbar({ parent : this.component, container : this.component.el});
 	var buttonAdd = toolbar.left.addButton("",Config.icons.add);
 	buttonAdd.clicks.subscribe(function(_) {
@@ -366,18 +402,68 @@ cards.ui.input.ArrayEditor = function(container,innerType) {
 	items.className = "items";
 	this.component.el.appendChild(items);
 	var _this1 = window.document;
-	this.list = _this1.createElement("ul");
+	this.list = _this1.createElement("ol");
 	items.appendChild(this.list);
 	this.innerType = innerType;
 	this.current = new thx.stream.Value(haxe.ds.Option.None);
 	thx.stream.EmitterOptions.toBool(this.current).feed(buttonRemove.enabled);
+	this.diff.subscribe(function(d) {
+		{
+			var _g1 = d._0;
+			var _g11 = d._1;
+			switch(_g1.length) {
+			case 1:
+				switch(_g1[0][1]) {
+				case 1:
+					switch(_g11[1]) {
+					case 0:
+						var i = _g1[0][2];
+						_g.value.splice(i,1);
+						break;
+					case 1:
+						var i1 = _g1[0][2];
+						var x = null;
+						_g.value.splice(i1,0,x);
+						break;
+					case 2:
+						var i2 = _g1[0][2];
+						var v = _g11[2];
+						if(Type.enumEq(v._0,innerType)) _g.value[i2] = v._1; else throw "unable to assign " + cards.ui.input._DiffAt.DiffAt_Impl_.toString(d) + " to within ArrayEditor";
+						break;
+					default:
+						throw "unable to assign " + cards.ui.input._DiffAt.DiffAt_Impl_.toString(d) + " to within ArrayEditor";
+					}
+					break;
+				default:
+					throw "unable to assign " + cards.ui.input._DiffAt.DiffAt_Impl_.toString(d) + " to within ArrayEditor";
+				}
+				break;
+			default:
+				throw "unable to assign " + cards.ui.input._DiffAt.DiffAt_Impl_.toString(d) + " to within ArrayEditor";
+			}
+		}
+		_g.pulse();
+	});
 };
 cards.ui.input.ArrayEditor.__name__ = ["cards","ui","input","ArrayEditor"];
-cards.ui.input.ArrayEditor.__interfaces__ = [cards.ui.input.IEditor];
-cards.ui.input.ArrayEditor.__super__ = cards.ui.input.Editor;
-cards.ui.input.ArrayEditor.prototype = $extend(cards.ui.input.Editor.prototype,{
-	addItem: function() {
-		this.addItemWithIndex(this.index++);
+cards.ui.input.ArrayEditor.__super__ = cards.ui.input.RouteEditor;
+cards.ui.input.ArrayEditor.prototype = $extend(cards.ui.input.RouteEditor.prototype,{
+	pulse: function() {
+		this.stream.pulse((function($this) {
+			var $r;
+			var value = $this.value.slice();
+			$r = (function($this) {
+				var $r;
+				var _1 = value;
+				$r = { _0 : $this.type, _1 : _1};
+				return $r;
+			}($this));
+			return $r;
+		}(this)));
+	}
+	,addItem: function() {
+		this.addItemWithIndex(this.index);
+		this.index++;
 	}
 	,addItemWithIndex: function(i) {
 		var _g = this;
@@ -389,44 +475,90 @@ cards.ui.input.ArrayEditor.prototype = $extend(cards.ui.input.Editor.prototype,{
 		var editor = cards.ui.input.EditorFactory.create(this.innerType,item,this.component);
 		editor.focus.feed(this.focus);
 		editor.focus.withValue(true).subscribe(function(_) {
-			_g.current.set(haxe.ds.Option.Some({ editor : editor, item : item}));
+			_g.current.set(haxe.ds.Option.Some({ editor : editor, item : item, index : _g.index}));
 		});
+		editor.stream.mapValue(function(v) {
+			var path = cards.ui.input._Path.Path_Impl_.fromString("[" + i + "]");
+			var diff = cards.ui.input.Diff.SetValue(v);
+			return { _0 : path, _1 : diff};
+		}).plug(this.diff);
+		this.diff.pulse((function($this) {
+			var $r;
+			var path1 = cards.ui.input._Path.Path_Impl_.fromString("[" + i + "]");
+			$r = { _0 : path1, _1 : cards.ui.input.Diff.AddItem};
+			return $r;
+		}(this)));
 	}
 	,removeSelectedItem: function() {
 		var o = thx.core.Options.toValue(this.current.get());
 		if(null == o) return;
 		o.item.parentNode.removeChild(o.item);
 		this.current.set(haxe.ds.Option.None);
-		haxe.Log.trace("delete " + Std.string(o),{ fileName : "ArrayEditor.hx", lineNumber : 82, className : "cards.ui.input.ArrayEditor", methodName : "removeSelectedItem"});
+		this.diff.pulse((function($this) {
+			var $r;
+			var path = cards.ui.input._Path.Path_Impl_.fromString("[" + o.index + "]");
+			$r = { _0 : path, _1 : cards.ui.input.Diff.RemoveItem};
+			return $r;
+		}(this)));
 	}
 	,__class__: cards.ui.input.ArrayEditor
 });
 cards.ui.input.CodeEditor = function(container) {
-	var _g = this;
 	var options = { template : "<div class=\"editor code\"></div>", container : container};
 	cards.ui.input.Editor.call(this,cards.model.SchemaType.CodeType,options);
-	var editor = CodeMirror(this.component.el,{ mode : "javascript", tabSize : 2, lineNumbers : true, tabindex : 1, lineWrapping : true});
-	editor.on("changes",function() {
-		var content = editor.doc.getValue();
-		_g.stream.emit(thx.stream.StreamValue.Pulse((function($this) {
+	this.editor = CodeMirror(this.component.el,{ mode : "javascript", tabSize : 2, lineNumbers : true, tabindex : 1, lineWrapping : true});
+	this.editor.on("changes",$bind(this,this.changes));
+	this.editor.on("focus",$bind(this,this.setFocus));
+	this.editor.on("blur",$bind(this,this.blurFocus));
+};
+cards.ui.input.CodeEditor.__name__ = ["cards","ui","input","CodeEditor"];
+cards.ui.input.CodeEditor.__super__ = cards.ui.input.Editor;
+cards.ui.input.CodeEditor.prototype = $extend(cards.ui.input.Editor.prototype,{
+	changes: function() {
+		var content = this.editor.doc.getValue();
+		this.stream.emit(thx.stream.StreamValue.Pulse((function($this) {
 			var $r;
 			var _1 = content;
 			$r = { _0 : cards.model.SchemaType.CodeType, _1 : _1};
 			return $r;
 		}(this))));
-	});
-	editor.on("focus",function() {
-		_g.focus.set(true);
-	});
-	editor.on("blur",function() {
-		_g.focus.set(false);
-	});
-};
-cards.ui.input.CodeEditor.__name__ = ["cards","ui","input","CodeEditor"];
-cards.ui.input.CodeEditor.__super__ = cards.ui.input.Editor;
-cards.ui.input.CodeEditor.prototype = $extend(cards.ui.input.Editor.prototype,{
-	__class__: cards.ui.input.CodeEditor
+	}
+	,setFocus: function() {
+		this.focus.set(true);
+	}
+	,blurFocus: function() {
+		this.focus.set(false);
+	}
+	,dispose: function() {
+		cards.ui.input.Editor.prototype.dispose.call(this);
+		this.editor.off("changes",$bind(this,this.changes));
+		this.editor.off("focus",$bind(this,this.setFocus));
+		this.editor.off("blur",$bind(this,this.blurFocus));
+		this.editor = null;
+	}
+	,__class__: cards.ui.input.CodeEditor
 });
+cards.ui.input.Diff = { __ename__ : true, __constructs__ : ["RemoveItem","AddItem","SetValue"] };
+cards.ui.input.Diff.RemoveItem = ["RemoveItem",0];
+cards.ui.input.Diff.RemoveItem.__enum__ = cards.ui.input.Diff;
+cards.ui.input.Diff.AddItem = ["AddItem",1];
+cards.ui.input.Diff.AddItem.__enum__ = cards.ui.input.Diff;
+cards.ui.input.Diff.SetValue = function(value) { var $x = ["SetValue",2,value]; $x.__enum__ = cards.ui.input.Diff; return $x; };
+cards.ui.input._DiffAt = {};
+cards.ui.input._DiffAt.DiffAt_Impl_ = function() { };
+cards.ui.input._DiffAt.DiffAt_Impl_.__name__ = ["cards","ui","input","_DiffAt","DiffAt_Impl_"];
+cards.ui.input._DiffAt.DiffAt_Impl_._new = function(path,diff) {
+	return { _0 : path, _1 : diff};
+};
+cards.ui.input._DiffAt.DiffAt_Impl_.get_path = function(this1) {
+	return this1._0;
+};
+cards.ui.input._DiffAt.DiffAt_Impl_.get_diff = function(this1) {
+	return this1._1;
+};
+cards.ui.input._DiffAt.DiffAt_Impl_.toString = function(this1) {
+	return cards.ui.input._Path.Path_Impl_.toString(this1._0) + ":" + Std.string(this1._1);
+};
 cards.ui.input.EditorFactory = function() { };
 cards.ui.input.EditorFactory.__name__ = ["cards","ui","input","EditorFactory"];
 cards.ui.input.EditorFactory.create = function(type,container,parent) {
@@ -449,9 +581,14 @@ cards.ui.input._Path.Path_Impl_._new = function(arr) {
 	return arr;
 };
 cards.ui.input._Path.Path_Impl_.fromString = function(path) {
-	return StringTools.replace(path,"[",".[").split(".").map(function(v) {
+	return StringTools.replace(path,"[",".[").split(".").filter(function(s) {
+		return s.length > 0;
+	}).map(function(v) {
 		if(HxOverrides.substr(v,0,1) == "[") return cards.ui.input.PathItem.Index(Std.parseInt(HxOverrides.substr(v,1,v.length - 1))); else return cards.ui.input.PathItem.Field(v);
 	});
+};
+cards.ui.input._Path.Path_Impl_.asArray = function(this1) {
+	return this1;
 };
 cards.ui.input._Path.Path_Impl_.toString = function(this1) {
 	return StringTools.replace(this1.map(function(item) {
@@ -465,9 +602,20 @@ cards.ui.input._Path.Path_Impl_.toString = function(this1) {
 		}
 	}).join("."),".[","[");
 };
+cards.ui.input._Path.Path_Impl_.equal = function(this1,other) {
+	var other1 = other;
+	if(this1.length != other1.length) return false;
+	var _g1 = 0;
+	var _g = this1.length;
+	while(_g1 < _g) {
+		var i = _g1++;
+		if(!Type.enumEq(this1[i],other1[i])) return false;
+	}
+	return true;
+};
 cards.ui.input.PathItem = { __ename__ : true, __constructs__ : ["Field","Index"] };
-cards.ui.input.PathItem.Field = function(name) { var $x = ["Field",0,name]; $x.__enum__ = cards.ui.input.PathItem; $x.toString = $estr; return $x; };
-cards.ui.input.PathItem.Index = function(pos) { var $x = ["Index",1,pos]; $x.__enum__ = cards.ui.input.PathItem; $x.toString = $estr; return $x; };
+cards.ui.input.PathItem.Field = function(name) { var $x = ["Field",0,name]; $x.__enum__ = cards.ui.input.PathItem; return $x; };
+cards.ui.input.PathItem.Index = function(pos) { var $x = ["Index",1,pos]; $x.__enum__ = cards.ui.input.PathItem; return $x; };
 cards.ui.input.TextEditor = function(container) {
 	var _g = this;
 	var options = { template : "<textarea class=\"editor text\" placeholder=\"type text\"></textarea>", container : container};
@@ -501,6 +649,9 @@ cards.ui.input._TypedValue.TypedValue_Impl_._new = function(type,value) {
 };
 cards.ui.input._TypedValue.TypedValue_Impl_.asType = function(this1) {
 	return this1._0;
+};
+cards.ui.input._TypedValue.TypedValue_Impl_.asValue = function(this1) {
+	return this1._1;
 };
 cards.ui.input._TypedValue.TypedValue_Impl_.fromString = function(s) {
 	var _1 = s;
@@ -557,12 +708,11 @@ cards.ui.widgets.ToolbarGroup.prototype = {
 var haxe = {};
 haxe.StackItem = { __ename__ : true, __constructs__ : ["CFunction","Module","FilePos","Method","LocalFunction"] };
 haxe.StackItem.CFunction = ["CFunction",0];
-haxe.StackItem.CFunction.toString = $estr;
 haxe.StackItem.CFunction.__enum__ = haxe.StackItem;
-haxe.StackItem.Module = function(m) { var $x = ["Module",1,m]; $x.__enum__ = haxe.StackItem; $x.toString = $estr; return $x; };
-haxe.StackItem.FilePos = function(s,file,line) { var $x = ["FilePos",2,s,file,line]; $x.__enum__ = haxe.StackItem; $x.toString = $estr; return $x; };
-haxe.StackItem.Method = function(classname,method) { var $x = ["Method",3,classname,method]; $x.__enum__ = haxe.StackItem; $x.toString = $estr; return $x; };
-haxe.StackItem.LocalFunction = function(v) { var $x = ["LocalFunction",4,v]; $x.__enum__ = haxe.StackItem; $x.toString = $estr; return $x; };
+haxe.StackItem.Module = function(m) { var $x = ["Module",1,m]; $x.__enum__ = haxe.StackItem; return $x; };
+haxe.StackItem.FilePos = function(s,file,line) { var $x = ["FilePos",2,s,file,line]; $x.__enum__ = haxe.StackItem; return $x; };
+haxe.StackItem.Method = function(classname,method) { var $x = ["Method",3,classname,method]; $x.__enum__ = haxe.StackItem; return $x; };
+haxe.StackItem.LocalFunction = function(v) { var $x = ["LocalFunction",4,v]; $x.__enum__ = haxe.StackItem; return $x; };
 haxe.CallStack = function() { };
 haxe.CallStack.__name__ = ["haxe","CallStack"];
 haxe.CallStack.callStack = function() {
@@ -615,9 +765,8 @@ haxe.Log.trace = function(v,infos) {
 };
 haxe.ds = {};
 haxe.ds.Option = { __ename__ : true, __constructs__ : ["Some","None"] };
-haxe.ds.Option.Some = function(v) { var $x = ["Some",0,v]; $x.__enum__ = haxe.ds.Option; $x.toString = $estr; return $x; };
+haxe.ds.Option.Some = function(v) { var $x = ["Some",0,v]; $x.__enum__ = haxe.ds.Option; return $x; };
 haxe.ds.Option.None = ["None",1];
-haxe.ds.Option.None.toString = $estr;
 haxe.ds.Option.None.__enum__ = haxe.ds.Option;
 haxe.ds.StringMap = function() {
 	this.h = { };
@@ -1008,7 +1157,6 @@ thx.core.Ints.range = function(start,stop,step) {
 };
 thx.core.Nil = { __ename__ : true, __constructs__ : ["nil"] };
 thx.core.Nil.nil = ["nil",0];
-thx.core.Nil.nil.toString = $estr;
 thx.core.Nil.nil.__enum__ = thx.core.Nil;
 thx.core.Options = function() { };
 thx.core.Options.__name__ = ["thx","core","Options"];
@@ -1628,8 +1776,8 @@ thx.promise.PromiseNil.join = function(p1,p2) {
 	});
 };
 thx.promise.PromiseValue = { __ename__ : true, __constructs__ : ["Failure","Success"] };
-thx.promise.PromiseValue.Failure = function(err) { var $x = ["Failure",0,err]; $x.__enum__ = thx.promise.PromiseValue; $x.toString = $estr; return $x; };
-thx.promise.PromiseValue.Success = function(value) { var $x = ["Success",1,value]; $x.__enum__ = thx.promise.PromiseValue; $x.toString = $estr; return $x; };
+thx.promise.PromiseValue.Failure = function(err) { var $x = ["Failure",0,err]; $x.__enum__ = thx.promise.PromiseValue; return $x; };
+thx.promise.PromiseValue.Success = function(value) { var $x = ["Success",1,value]; $x.__enum__ = thx.promise.PromiseValue; return $x; };
 thx.stream = {};
 thx.stream.Emitter = function(init) {
 	this.init = init;
@@ -2541,9 +2689,9 @@ thx.stream.Stream.prototype = {
 	,__class__: thx.stream.Stream
 };
 thx.stream.StreamValue = { __ename__ : true, __constructs__ : ["Pulse","End","Failure"] };
-thx.stream.StreamValue.Pulse = function(value) { var $x = ["Pulse",0,value]; $x.__enum__ = thx.stream.StreamValue; $x.toString = $estr; return $x; };
-thx.stream.StreamValue.End = function(cancel) { var $x = ["End",1,cancel]; $x.__enum__ = thx.stream.StreamValue; $x.toString = $estr; return $x; };
-thx.stream.StreamValue.Failure = function(err) { var $x = ["Failure",2,err]; $x.__enum__ = thx.stream.StreamValue; $x.toString = $estr; return $x; };
+thx.stream.StreamValue.Pulse = function(value) { var $x = ["Pulse",0,value]; $x.__enum__ = thx.stream.StreamValue; return $x; };
+thx.stream.StreamValue.End = function(cancel) { var $x = ["End",1,cancel]; $x.__enum__ = thx.stream.StreamValue; return $x; };
+thx.stream.StreamValue.Failure = function(err) { var $x = ["Failure",2,err]; $x.__enum__ = thx.stream.StreamValue; return $x; };
 thx.stream.Value = function(value) {
 	var _g = this;
 	this.value = value;
@@ -2759,6 +2907,17 @@ if(Array.prototype.map == null) Array.prototype.map = function(f) {
 		a[i] = f(this[i]);
 	}
 	return a;
+};
+if(Array.prototype.filter == null) Array.prototype.filter = function(f1) {
+	var a1 = [];
+	var _g11 = 0;
+	var _g2 = this.length;
+	while(_g11 < _g2) {
+		var i1 = _g11++;
+		var e = this[i1];
+		if(f1(e)) a1.push(e);
+	}
+	return a1;
 };
 var scope = ("undefined" !== typeof window && window) || ("undefined" !== typeof global && global) || this;
 if(!scope.setImmediate) scope.setImmediate = function(callback) {

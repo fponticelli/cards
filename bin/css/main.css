@@ -190,13 +190,15 @@ a img {
   max-height: 10em;
   overflow-y: auto;
 }
-.card .array .items > ul {
+.card .array .items > ol {
   margin-left: 1.3em;
   position: relative;
+  counter-reset: li -1;
 }
 .card .array .items li:before {
   font-family: Verdana;
-  content: attr(data-placeholder);
+  content: counter(li);
+  counter-increment: li;
   color: #000;
   text-shadow: none;
   position: absolute;

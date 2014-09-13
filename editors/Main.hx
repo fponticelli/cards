@@ -19,7 +19,7 @@ class Main {
       var main = new Main(Query.first(".container"));
       main.addDemo("array editor with StringType", function(el) {
         var editor = new ArrayEditor(el, StringType);
-        for(i in 0...12)
+        for(i in 0...3)
           editor.addItem();
         return editor;
       });
