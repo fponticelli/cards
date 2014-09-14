@@ -20,7 +20,9 @@ class DateEditor extends Editor {
 
     var el : InputElement = cast component.el;
     el.streamEvent('input')
-      .mapValue(function(_) return (ISO8601.parseDateTime(el.value) : TypedValue))
+      .mapValue(function(_) return try (ISO8601.parseDateTime(el.value) : TypedValue) catch(e : Dynamic) null)
+      .withValue()
+      .filterValue(function(v) return Math.isNaN(v.asValue().getTime()))
       .plug(stream);
     el.streamFocus().feed(focus);
 

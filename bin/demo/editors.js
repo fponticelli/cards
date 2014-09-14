@@ -985,14 +985,21 @@ cards.ui.input.DateEditor = function(container,useTime) {
 	cards.ui.input.Editor.call(this,cards.model.SchemaType.DateType,options);
 	var el = this.component.el;
 	thx.stream.dom.Dom.streamEvent(el,"input").mapValue(function(_) {
-		var d = thx.date.ISO8601.parseDateTime(el.value);
-		var _1 = d;
-		return { _0 : cards.model.SchemaType.DateType, _1 : _1};
+		try {
+			var d = thx.date.ISO8601.parseDateTime(el.value);
+			var _1 = d;
+			return { _0 : cards.model.SchemaType.DateType, _1 : _1};
+		} catch( e ) {
+			return null;
+		}
+	}).withValue().filterValue(function(v) {
+		var f = v._1.getTime();
+		return isNaN(f);
 	}).plug(this.stream);
 	thx.stream.dom.Dom.streamFocus(el).feed(this.focus);
 	this.stream.subscribe(function(num) {
-		var v = num._1;
-		var s = DateTools.format(v,_g.format);
+		var v1 = num._1;
+		var s = DateTools.format(v1,_g.format);
 		if(el.value != s) el.value = s;
 	});
 	this.focus.subscribe(thx.stream.dom.Dom.subscribeFocus(el));
