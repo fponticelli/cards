@@ -169,6 +169,8 @@ a img {
   font-family: FontAwesome;
   display: inline-block;
   cursor: pointer;
+  width: 100%;
+  font-size: 1.2em;
 }
 .card input.bool[type=checkbox]:before {
   content: "\f204";
@@ -235,9 +237,12 @@ a img {
   border-bottom: 1px solid #ccc;
 }
 .card .table th {
-  color: #666;
-  background-color: #e6e6e6;
-  padding: 0.2em 0.2em;
+  padding: 0.45em;
+  font-family: Verdana;
+  color: #000;
+  text-shadow: none;
+  font-size: 0.6em;
+  background-color: #ddd;
 }
 .card .table th.primitive {
   border: 1px solid #ccc;
@@ -255,9 +260,10 @@ a img {
 }
 .card .table td.composite {
   border: 1px solid #ccc;
-  border-top: 1px solid #e6e6e6;
+  border-top: none;
   border-bottom: none;
   padding-left: 0.5em;
+  background-color: #ddd;
 }
 .card .block {
   padding: 0.25em 0.5em;

@@ -169,6 +169,8 @@ a img {
   font-family: FontAwesome;
   display: inline-block;
   cursor: pointer;
+  width: 100%;
+  font-size: 1.2em;
 }
 .card input.bool[type=checkbox]:before {
   content: "\f204";
@@ -198,7 +200,7 @@ a img {
   position: relative;
 }
 .card .array .items {
-  max-height: 10em;
+  max-height: 16em;
   overflow-y: auto;
 }
 .card .array .items > ol {
@@ -227,6 +229,41 @@ a img {
 }
 .card .array .items li:nth-child(n+9999):before {
   display: none;
+}
+.card .table header.toolbar {
+  position: relative;
+}
+.card .table > table {
+  border-bottom: 1px solid #ccc;
+}
+.card .table th {
+  padding: 0.45em;
+  font-family: Verdana;
+  color: #000;
+  text-shadow: none;
+  font-size: 0.6em;
+  background-color: #ddd;
+}
+.card .table th.primitive {
+  border: 1px solid #ccc;
+  border-right: none;
+  border-bottom: none;
+}
+.card .table td.primitive {
+  border: 1px solid #ccc;
+  border-left: 1px solid #e6e6e6;
+  border-bottom: none;
+}
+.card .table th.composite {
+  border: 1px solid #ccc;
+  border-bottom: none;
+}
+.card .table td.composite {
+  border: 1px solid #ccc;
+  border-top: none;
+  border-bottom: none;
+  padding-left: 0.5em;
+  background-color: #ddd;
 }
 .card .block {
   padding: 0.25em 0.5em;
@@ -345,7 +382,6 @@ a img {
   background-color: #f6f6f6;
   width: 100%;
   display: table;
-  padding: 2px;
   height: 22px;
   z-index: 10;
   position: absolute;
@@ -361,6 +397,7 @@ a img {
 }
 .card .toolbar > div > div {
   display: table-cell;
+  padding: 2px;
 }
 .card .toolbar .center {
   text-align: center;

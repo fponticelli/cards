@@ -225,8 +225,11 @@ Main.__name__ = ["Main"];
 Main.main = function() {
 	thx.stream.dom.Dom.ready().success(function(_) {
 		var main = new Main(udom.Query.first(".container"));
-		main.addDemo("array editor with StringType",function(el) {
-			var editor = new cards.ui.input.ArrayEditor(el,cards.model.SchemaType.StringType);
+		main.addDemo("object editor",function(el) {
+			return new cards.ui.input.ObjectEditor(el,[{ name : "name", type : cards.model.SchemaType.StringType, optional : false},{ name : "age", type : cards.model.SchemaType.FloatType, optional : true},{ name : "contacts", type : cards.model.SchemaType.ArrayType(cards.model.SchemaType.ObjectType([{ name : "type", type : cards.model.SchemaType.StringType, optional : false},{ name : "value", type : cards.model.SchemaType.StringType, optional : false},{ name : "primary", type : cards.model.SchemaType.BoolType, optional : false}])), optional : false},{ name : "address", type : cards.model.SchemaType.ObjectType([{ name : "line 1", type : cards.model.SchemaType.StringType, optional : false},{ name : "line 2", type : cards.model.SchemaType.StringType, optional : true},{ name : "post code", type : cards.model.SchemaType.FloatType, optional : false},{ name : "city", type : cards.model.SchemaType.StringType, optional : false},{ name : "state", type : cards.model.SchemaType.StringType, optional : false}]), optional : false}]);
+		});
+		main.addDemo("array editor with StringType",function(el1) {
+			var editor = new cards.ui.input.ArrayEditor(el1,cards.model.SchemaType.StringType);
 			var _g = 0;
 			while(_g < 3) {
 				var i = _g++;
@@ -249,32 +252,29 @@ Main.main = function() {
 			}
 			return editor;
 		});
-		main.addDemo("array editor with ArrayType<CodeType>",function(el1) {
-			return new cards.ui.input.ArrayEditor(el1,cards.model.SchemaType.ArrayType(cards.model.SchemaType.CodeType));
+		main.addDemo("array editor with ArrayType<CodeType>",function(el2) {
+			return new cards.ui.input.ArrayEditor(el2,cards.model.SchemaType.ArrayType(cards.model.SchemaType.CodeType));
 		});
-		main.addDemo("text editor",function(el2) {
-			return new cards.ui.input.TextEditor(el2);
+		main.addDemo("text editor",function(el3) {
+			return new cards.ui.input.TextEditor(el3);
 		});
-		main.addDemo("code editor",function(el3) {
-			return new cards.ui.input.CodeEditor(el3);
+		main.addDemo("code editor",function(el4) {
+			return new cards.ui.input.CodeEditor(el4);
 		});
-		main.addDemo("reference editor",function(el4) {
-			return new cards.ui.input.ReferenceEditor(el4);
+		main.addDemo("reference editor",function(el5) {
+			return new cards.ui.input.ReferenceEditor(el5);
 		});
-		main.addDemo("float editor",function(el5) {
-			return new cards.ui.input.NumberEditor(el5);
+		main.addDemo("float editor",function(el6) {
+			return new cards.ui.input.NumberEditor(el6);
 		});
-		main.addDemo("date editor",function(el6) {
-			return new cards.ui.input.DateEditor(el6,false);
+		main.addDemo("date editor",function(el7) {
+			return new cards.ui.input.DateEditor(el7,false);
 		});
-		main.addDemo("date time editor",function(el7) {
-			return new cards.ui.input.DateEditor(el7);
+		main.addDemo("date time editor",function(el8) {
+			return new cards.ui.input.DateEditor(el8);
 		});
-		main.addDemo("bool editor",function(el8) {
-			return new cards.ui.input.BoolEditor(el8);
-		});
-		main.addDemo("object editor",function(el9) {
-			return new cards.ui.input.ObjectEditor(el9,[{ name : "name", type : cards.model.SchemaType.StringType, optional : false},{ name : "age", type : cards.model.SchemaType.FloatType, optional : true},{ name : "contacts", type : cards.model.SchemaType.ArrayType(cards.model.SchemaType.ObjectType([{ name : "type", type : cards.model.SchemaType.StringType, optional : false},{ name : "value", type : cards.model.SchemaType.StringType, optional : false},{ name : "primary", type : cards.model.SchemaType.BoolType, optional : false}])), optional : false},{ name : "address", type : cards.model.SchemaType.ObjectType([{ name : "line 1", type : cards.model.SchemaType.StringType, optional : false},{ name : "line 2", type : cards.model.SchemaType.StringType, optional : true},{ name : "post code", type : cards.model.SchemaType.FloatType, optional : false},{ name : "city", type : cards.model.SchemaType.StringType, optional : false},{ name : "state", type : cards.model.SchemaType.StringType, optional : false}]), optional : false}]);
+		main.addDemo("bool editor",function(el9) {
+			return new cards.ui.input.BoolEditor(el9);
 		});
 	});
 };
@@ -926,8 +926,12 @@ cards.ui.input.ArrayEditor.prototype = $extend(cards.ui.input.RouteEditor.protot
 		this.stream.pulse((function($this) {
 			var $r;
 			var value = $this.values.slice();
-			var _1 = value;
-			$r = { _0 : $this.type, _1 : _1};
+			$r = (function($this) {
+				var $r;
+				var _1 = value;
+				$r = { _0 : $this.type, _1 : _1};
+				return $r;
+			}($this));
 			return $r;
 		}(this)));
 	}
@@ -1004,7 +1008,7 @@ cards.ui.input.DateEditor = function(container,useTime) {
 	var options = { template : "<input class=\"editor date\" placeholder=\"type date\" type=\"" + (useTime?"datetime-local":"date") + "\" />", container : container};
 	cards.ui.input.Editor.call(this,cards.model.SchemaType.DateType,options);
 	var el = this.component.el;
-	thx.stream.dom.Dom.streamEvent(el,"input").mapValue(function(_) {
+	thx.stream.dom.Dom.streamEvent(el,"change").mapValue(function(_) {
 		try {
 			var d = thx.date.ISO8601.parseDateTime(el.value);
 			var _1 = d;
@@ -1013,8 +1017,12 @@ cards.ui.input.DateEditor = function(container,useTime) {
 			return null;
 		}
 	}).withValue().filterValue(function(v) {
-		var f = v._1.getTime();
-		return isNaN(f);
+		return !(function($this) {
+			var $r;
+			var f = v._1.getTime();
+			$r = isNaN(f);
+			return $r;
+		}(this));
 	}).plug(this.stream);
 	thx.stream.dom.Dom.streamFocus(el).feed(this.focus);
 	this.stream.subscribe(function(num) {
@@ -1469,6 +1477,14 @@ haxe.ds.StringMap.prototype = {
 		if(this.h.hasOwnProperty(key)) a.push(key.substr(1));
 		}
 		return HxOverrides.iter(a);
+	}
+	,iterator: function() {
+		return { ref : this.h, it : this.keys(), hasNext : function() {
+			return this.it.hasNext();
+		}, next : function() {
+			var i = this.it.next();
+			return this.ref["$" + i];
+		}};
 	}
 	,__class__: haxe.ds.StringMap
 };
@@ -1974,6 +1990,15 @@ thx.core.Iterables.__name__ = ["thx","core","Iterables"];
 thx.core.Iterables.map = function(it,f) {
 	return thx.core.Iterators.map($iterator(it)(),f);
 };
+thx.core.Iterables.mapi = function(it,f) {
+	return thx.core.Iterators.mapi($iterator(it)(),f);
+};
+thx.core.Iterables.first = function(it,f) {
+	return thx.core.Iterators.first($iterator(it)(),f);
+};
+thx.core.Iterables.find = function(it,f) {
+	return thx.core.Iterators.find($iterator(it)(),f);
+};
 thx.core.Iterables.eachPair = function(it,handler) {
 	return thx.core.Iterators.eachPair($iterator(it)(),handler);
 };
@@ -2019,6 +2044,21 @@ thx.core.Iterators.mapi = function(it,f) {
 		acc.push(f(v,i++));
 	}
 	return acc;
+};
+thx.core.Iterators.first = function(it,f) {
+	while( it.hasNext() ) {
+		var item = it.next();
+		if(f(item)) return item;
+	}
+	return null;
+};
+thx.core.Iterators.find = function(it,f) {
+	var out = [];
+	while( it.hasNext() ) {
+		var item = it.next();
+		if(f(item)) out.push(item);
+	}
+	return out;
 };
 thx.core.Iterators.eachPair = function(it,handler) {
 	thx.core.Arrays.eachPair(thx.core.Iterators.toArray(it),handler);
