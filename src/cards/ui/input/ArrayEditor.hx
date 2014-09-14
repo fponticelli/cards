@@ -16,7 +16,6 @@ import cards.ui.input.Diff;
 
 // TODO
 //  * drag and drop item
-//  * move focus to next sibling after deletion
 class ArrayEditor extends RouteEditor {
   var list : OListElement;
   var editors : Array<IEditor>;
@@ -155,6 +154,15 @@ class ArrayEditor extends RouteEditor {
     editor.dispose();
     editors.splice(index, 1);
     currentIndex.set(None);
+
+    // set focus after removal
+    thx.core.Timer.delay(function() {
+      if(editors.length == 0)
+        return;
+      if(index == editors.length)
+        index--;
+      editors[index].focus.set(true);
+    }, 10);
   }
 
   function pulse()

@@ -743,12 +743,18 @@ cards.ui.input.ArrayEditor.prototype = $extend(cards.ui.input.RouteEditor.protot
 		this.editors[index].stream.emit(thx.stream.StreamValue.Pulse(value));
 	}
 	,removeEditor: function(index) {
+		var _g = this;
 		var item = udom.Query.childOf(udom.Query.first("li:nth-child(" + (index + 1) + ")",this.list),this.list);
 		var editor = this.editors[index];
 		this.list.removeChild(item);
 		editor.dispose();
 		this.editors.splice(index,1);
 		this.currentIndex.set(haxe.ds.Option.None);
+		setTimeout(function() {
+			if(_g.editors.length == 0) return;
+			if(index == _g.editors.length) index--;
+			_g.editors[index].focus.set(true);
+		},10);
 	}
 	,pulse: function() {
 		this.stream.pulse((function($this) {
