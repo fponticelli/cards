@@ -658,11 +658,13 @@ cards.ui.input.ArrayEditor = function(container,innerType) {
 		_g2.pulse();
 	});
 	thx.stream.EmitterOptions.filterOption(this.currentIndex.audit(function(_) {
-		var prev = udom.Query.first("li.active",_g2.list);
+		var prev = udom.Query.childOf(udom.Query.first("li.active",_g2.list),_g2.list);
 		if(null == prev) return;
 		prev.classList.remove("active");
 	})).subscribe(function(index1) {
-		udom.Query.first("li:nth-child(" + (index1 + 1) + ")",_g2.list).classList.add("active");
+		var el = udom.Query.childOf(udom.Query.first("li:nth-child(" + (index1 + 1) + ")",_g2.list),_g2.list);
+		if(null == el) return;
+		el.classList.add("active");
 	});
 	buttonAdd.clicks.subscribe(function(_1) {
 		var index2;
@@ -716,7 +718,7 @@ cards.ui.input.ArrayEditor.prototype = $extend(cards.ui.input.RouteEditor.protot
 		var item;
 		var _this = window.document;
 		item = _this.createElement("li");
-		var ref = udom.Query.first("li:nth-child(" + (index + 1) + ")",this.list);
+		var ref = udom.Query.childOf(udom.Query.first("li:nth-child(" + (index + 1) + ")",this.list),this.list);
 		if(null == ref) this.list.appendChild(item); else this.list.insertBefore(item,ref);
 		var editor = cards.ui.input.EditorFactory.create(this.innerType,item,this.component);
 		this.editors.splice(index,0,editor);
@@ -740,7 +742,7 @@ cards.ui.input.ArrayEditor.prototype = $extend(cards.ui.input.RouteEditor.protot
 		this.editors[index].stream.emit(thx.stream.StreamValue.Pulse(value));
 	}
 	,removeEditor: function(index) {
-		var item = udom.Query.first("li:nth-child(" + (index + 1) + ")",this.list);
+		var item = udom.Query.childOf(udom.Query.first("li:nth-child(" + (index + 1) + ")",this.list),this.list);
 		var editor = this.editors[index];
 		this.list.removeChild(item);
 		editor.dispose();
@@ -3507,6 +3509,14 @@ udom.Query.getElementIndex = function(el) {
 	var index = 0;
 	while(null != (el = el.previousElementSibling)) index++;
 	return index;
+};
+udom.Query.childOf = function(child,parent) {
+	if(null != child && child.parentElement == parent) return child; else return null;
+};
+udom.Query.childrenOf = function(children,parent) {
+	return children.filter(function(child) {
+		return child.parentElement == parent;
+	});
 };
 udom._Dom = {};
 udom._Dom.H = function() { };

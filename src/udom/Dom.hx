@@ -43,6 +43,12 @@ class Query {
       index++;
     return index;
   }
+
+  public static function childOf(child : Element, parent : Element)
+    return null != child && child.parentElement == parent ? child : null;
+
+  public static function childrenOf(children : Array<Element>, parent : Element) : Array<Element>
+    return children.filter(function(child) return child.parentElement == parent);
 }
 
 private class H {

@@ -81,13 +81,15 @@ class ArrayEditor extends RouteEditor {
 
     currentIndex
       .audit(function(_) {
-        var prev = Query.first('li.active', list);
+        var prev = Query.first('li.active', list).childOf(list);
         if(null == prev) return;
         prev.classList.remove('active');
       })
       .filterOption()
       .subscribe(function(index) {
-        Query.first('li:nth-child(${index+1})', list).classList.add('active');
+        var el = Query.first('li:nth-child(${index+1})', list).childOf(list);
+        if(null == el) return;
+        el.classList.add('active');
       });
 
     buttonAdd.clicks
@@ -115,7 +117,7 @@ class ArrayEditor extends RouteEditor {
 
   function createEditor(index : Int) {
     var item = Browser.document.createLIElement(),
-        ref  = Query.first('li:nth-child(${index+1})', list);
+        ref  = Query.first('li:nth-child(${index+1})', list).childOf(list);
     if(null == ref)
       list.appendChild(item);
     else
@@ -147,7 +149,7 @@ class ArrayEditor extends RouteEditor {
   }
 
   function removeEditor(index : Int) {
-    var item = Query.first('li:nth-child(${index+1})', list),
+    var item = Query.first('li:nth-child(${index+1})', list).childOf(list),
         editor = editors[index];
     list.removeChild(item);
     editor.dispose();
