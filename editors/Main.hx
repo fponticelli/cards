@@ -46,15 +46,25 @@ class Main {
       main.addDemo("bool editor", function(el) {
         return new BoolEditor(el);
       });
-      main.addDemo("object editor", toDo());
+      main.addDemo("object editor", function(el) {
+        return new ObjectEditor(el, [
+          { name : "name", type : StringType, optional : false },
+          { name : "age",  type : FloatType, optional : true },
+          { name : "contacts", type : ArrayType(ObjectType([
+              { name : "type",  type : StringType, optional : false },
+              { name : "value", type : StringType, optional : false },
+              { name : "primary", type : BoolType, optional : false }
+            ])), optional : false },
+          { name : "address", type : ObjectType([
+              { name : "line 1", type : StringType, optional : false },
+              { name : "line 2", type : StringType, optional : true },
+              { name : "post code", type : FloatType, optional : false },
+              { name : "city", type : StringType, optional : false },
+              { name : "state", type : StringType, optional : false }
+            ]), optional : false}
+        ]);
+      });
     });
-  }
-
-  static function toDo() {
-    return function(el) {
-      el.textContent = "TODO";
-      return null;
-    };
   }
 
   var container : Element;

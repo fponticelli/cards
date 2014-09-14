@@ -5,8 +5,14 @@ enum SchemaType {
   BoolType;
   DateType;
   FloatType;
-  ObjectType(fields : Iterable<{ name : String, type : SchemaType }>);
+  ObjectType(fields : Array<FieldInfo>);
   StringType;
   CodeType;
   ReferenceType;
+}
+
+typedef FieldInfo = {
+  name : String,
+  type : SchemaType,
+  optional : Bool
 }

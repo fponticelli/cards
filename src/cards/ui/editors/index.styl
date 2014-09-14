@@ -58,6 +58,7 @@ input.bool[type=checkbox]:before
   visibility visible
   font-family FontAwesome
   display inline-block
+  cursor pointer
   //margin 0.6em 0 0 0.6em
 
 input.bool[type=checkbox]:before
@@ -89,7 +90,7 @@ textarea.text
   .toolbar
     position relative
   .items
-    max-height 10em
+    max-height 16em
     overflow-y auto
     > ol
       margin-left 1.3em
@@ -113,3 +114,32 @@ textarea.text
       font-size 0.3em
     li:nth-child(n+9999):before
       display none
+
+.table
+  header.toolbar
+    position relative
+
+  > table
+    border-bottom 1px solid #ccc
+
+  th
+    color #666
+    background-color #e6e6e6
+    padding 0.2em 0.2em
+
+  th.primitive
+    border 1px solid #ccc
+    border-right none
+    border-bottom none
+  td.primitive
+    border 1px solid #ccc
+    border-left 1px solid #e6e6e6
+    border-bottom none
+  th.composite
+    border 1px solid #ccc
+    border-bottom none
+  td.composite
+    border 1px solid #ccc
+    border-top 1px solid #e6e6e6
+    border-bottom none
+    padding-left 0.5em

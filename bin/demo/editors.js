@@ -273,14 +273,10 @@ Main.main = function() {
 		main.addDemo("bool editor",function(el8) {
 			return new cards.ui.input.BoolEditor(el8);
 		});
-		main.addDemo("object editor",Main.toDo());
+		main.addDemo("object editor",function(el9) {
+			return new cards.ui.input.ObjectEditor(el9,[{ name : "name", type : cards.model.SchemaType.StringType, optional : false},{ name : "age", type : cards.model.SchemaType.FloatType, optional : true},{ name : "contacts", type : cards.model.SchemaType.ArrayType(cards.model.SchemaType.ObjectType([{ name : "type", type : cards.model.SchemaType.StringType, optional : false},{ name : "value", type : cards.model.SchemaType.StringType, optional : false},{ name : "primary", type : cards.model.SchemaType.BoolType, optional : false}])), optional : false},{ name : "address", type : cards.model.SchemaType.ObjectType([{ name : "line 1", type : cards.model.SchemaType.StringType, optional : false},{ name : "line 2", type : cards.model.SchemaType.StringType, optional : true},{ name : "post code", type : cards.model.SchemaType.FloatType, optional : false},{ name : "city", type : cards.model.SchemaType.StringType, optional : false},{ name : "state", type : cards.model.SchemaType.StringType, optional : false}]), optional : false}]);
+		});
 	});
-};
-Main.toDo = function() {
-	return function(el) {
-		el.textContent = "TODO";
-		return null;
-	};
 };
 Main.prototype = {
 	container: null
@@ -1064,15 +1060,24 @@ cards.ui.input.EditorFactory = function() { };
 cards.ui.input.EditorFactory.__name__ = ["cards","ui","input","EditorFactory"];
 cards.ui.input.EditorFactory.create = function(type,container,parent) {
 	switch(type[1]) {
-	case 6:
-		return new cards.ui.input.CodeEditor(container);
-	case 5:
-		return new cards.ui.input.TextEditor(container);
 	case 0:
 		var t = type[2];
 		return new cards.ui.input.ArrayEditor(container,t);
-	default:
-		throw "Editor for " + Std.string(type) + " has not been implemented yet";
+	case 1:
+		return new cards.ui.input.BoolEditor(container);
+	case 6:
+		return new cards.ui.input.CodeEditor(container);
+	case 2:
+		return new cards.ui.input.DateEditor(container,true);
+	case 3:
+		return new cards.ui.input.NumberEditor(container);
+	case 4:
+		var fields = type[2];
+		return new cards.ui.input.ObjectEditor(container,fields);
+	case 7:
+		return new cards.ui.input.ReferenceEditor(container);
+	case 5:
+		return new cards.ui.input.TextEditor(container);
 	}
 };
 cards.ui.input.NumberEditor = function(container) {
@@ -1094,6 +1099,98 @@ cards.ui.input.NumberEditor.__name__ = ["cards","ui","input","NumberEditor"];
 cards.ui.input.NumberEditor.__super__ = cards.ui.input.Editor;
 cards.ui.input.NumberEditor.prototype = $extend(cards.ui.input.Editor.prototype,{
 	__class__: cards.ui.input.NumberEditor
+});
+cards.ui.input.ObjectEditor = function(container,fields) {
+	this.object = { };
+	this.fieldMap = new haxe.ds.StringMap();
+	var options = { template : "<div class=\"editor table\"></div>", container : container};
+	cards.ui.input.RouteEditor.call(this,cards.model.SchemaType.ObjectType([]),options);
+	this.fields = [];
+	var toolbar = new cards.ui.widgets.Toolbar({ parent : this.component, container : this.component.el});
+	var buttonAdd = toolbar.left.addButton("",Config.icons.addMenu);
+	var buttonRemove = toolbar.right.addButton("",Config.icons.remove);
+	buttonAdd.enabled.set(false);
+	buttonRemove.enabled.set(false);
+	var _this = window.document;
+	this.table = _this.createElement("table");
+	this.component.el.appendChild(this.table);
+	this.diff.subscribe(function(d) {
+		haxe.Log.trace("TODO " + cards.ui.input._DiffAt.DiffAt_Impl_.toString(d),{ fileName : "ObjectEditor.hx", lineNumber : 41, className : "cards.ui.input.ObjectEditor", methodName : "new"});
+	});
+	var _g = 0;
+	while(_g < fields.length) {
+		var field = fields[_g];
+		++_g;
+		this.addFieldDefinition(field);
+	}
+};
+cards.ui.input.ObjectEditor.__name__ = ["cards","ui","input","ObjectEditor"];
+cards.ui.input.ObjectEditor.__super__ = cards.ui.input.RouteEditor;
+cards.ui.input.ObjectEditor.prototype = $extend(cards.ui.input.RouteEditor.prototype,{
+	fields: null
+	,object: null
+	,fieldMap: null
+	,table: null
+	,addFieldDefinition: function(field) {
+		this.checkUnique(field.name);
+		this.fields.push(field);
+		this.type = cards.model.SchemaType.ObjectType(this.fields);
+		if(!field.optional) this.realizeField(field.name);
+	}
+	,realizeField: function(name) {
+		var def = thx.core.Arrays.first(this.fields,function(field) {
+			return field.name == name;
+		});
+		if(null == def) throw "unable to realize " + name + " because it is not defined in ObjectType";
+		{
+			var _g = def.type;
+			switch(_g[1]) {
+			case 4:case 0:
+				var rowh;
+				var _this = window.document;
+				rowh = _this.createElement("tr");
+				var rowd;
+				var _this1 = window.document;
+				rowd = _this1.createElement("tr");
+				var th = window.document.createElement("th");
+				var td = window.document.createElement("td");
+				th.colSpan = 2;
+				th.textContent = name;
+				th.className = "composite";
+				td.colSpan = 2;
+				td.className = "composite";
+				var editor = cards.ui.input.EditorFactory.create(def.type,td,this.component);
+				rowh.appendChild(th);
+				rowd.appendChild(td);
+				this.table.appendChild(rowh);
+				this.table.appendChild(rowd);
+				break;
+			default:
+				var row;
+				var _this2 = window.document;
+				row = _this2.createElement("tr");
+				var th1 = window.document.createElement("th");
+				var td1 = window.document.createElement("td");
+				th1.textContent = name;
+				th1.className = "primitive";
+				td1.className = "primitive";
+				var editor1 = cards.ui.input.EditorFactory.create(def.type,td1,this.component);
+				row.appendChild(th1);
+				row.appendChild(td1);
+				this.table.appendChild(row);
+			}
+		}
+	}
+	,checkUnique: function(name) {
+		var _g = 0;
+		var _g1 = this.fields;
+		while(_g < _g1.length) {
+			var field = _g1[_g];
+			++_g;
+			if(name == field.name) throw "" + name + " field already exists in this ObjectType";
+		}
+	}
+	,__class__: cards.ui.input.ObjectEditor
 });
 cards.ui.input._Path = {};
 cards.ui.input._Path.Path_Impl_ = function() { };
@@ -1373,14 +1470,6 @@ haxe.ds.StringMap.prototype = {
 		}
 		return HxOverrides.iter(a);
 	}
-	,iterator: function() {
-		return { ref : this.h, it : this.keys(), hasNext : function() {
-			return this.it.hasNext();
-		}, next : function() {
-			var i = this.it.next();
-			return this.ref["$" + i];
-		}};
-	}
 	,__class__: haxe.ds.StringMap
 };
 var js = {};
@@ -1591,6 +1680,25 @@ thx.core.Arrays.eachPair = function(arr,handler) {
 };
 thx.core.Arrays.mapi = function(arr,handler) {
 	return arr.map(handler);
+};
+thx.core.Arrays.first = function(arr,f) {
+	var _g = 0;
+	while(_g < arr.length) {
+		var item = arr[_g];
+		++_g;
+		if(f(item)) return item;
+	}
+	return null;
+};
+thx.core.Arrays.find = function(arr,f) {
+	var out = [];
+	var _g = 0;
+	while(_g < arr.length) {
+		var item = arr[_g];
+		++_g;
+		if(f(item)) out.push(item);
+	}
+	return out;
 };
 thx.core.Arrays.flatMap = function(arr,callback) {
 	return thx.core.Arrays.flatten(arr.map(callback));
@@ -4074,7 +4182,7 @@ var scope = ("undefined" !== typeof window && window) || ("undefined" !== typeof
 if(!scope.setImmediate) scope.setImmediate = function(callback) {
 	scope.setTimeout(callback,0);
 };
-Config.icons = { add : "plus-circle", remove : "ban", dropdown : "reorder", checked : "toggle-on", unchecked : "toggle-off", switchtype : "bolt", code : "bolt", value : "pencil", reference : "link", bool : "check-circle", text : "pencil", number : "superscript", date : "calendar", array : "list", object : "table"};
+Config.icons = { add : "plus-circle", addMenu : "plus-square", remove : "ban", dropdown : "reorder", checked : "toggle-on", unchecked : "toggle-off", switchtype : "bolt", code : "bolt", value : "pencil", reference : "link", bool : "check-circle", text : "pencil", number : "superscript", date : "calendar", array : "list", object : "table"};
 Config.selectors = { app : ".card"};
 thx.core.Ints.pattern_parse = new EReg("^[+-]?(\\d+|0x[0-9A-F]+)$","i");
 thx.core.Strings._reSplitWC = new EReg("(\r\n|\n\r|\n|\r)","g");

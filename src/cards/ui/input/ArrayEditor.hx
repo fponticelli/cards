@@ -16,6 +16,8 @@ import cards.ui.input.Diff;
 
 // TODO
 //  * drag and drop item
+//  * set value at once
+//  * change SchemaType dynamically
 class ArrayEditor extends RouteEditor {
   var list : OListElement;
   var editors : Array<IEditor>;

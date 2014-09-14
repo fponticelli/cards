@@ -1,6 +1,7 @@
 class Config {
   public static var icons(default, null) = {
     add : 'plus-circle',
+    addMenu : 'plus-square',
     remove : 'ban',
     dropdown : 'reorder',
     checked : 'toggle-on',
