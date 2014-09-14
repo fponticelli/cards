@@ -258,18 +258,20 @@ Main.main = function() {
 		main.addDemo("code editor",function(el3) {
 			return new cards.ui.input.CodeEditor(el3);
 		});
-		main.addDemo("reference editor",Main.toDo());
-		main.addDemo("float editor",function(el4) {
-			return new cards.ui.input.NumberEditor(el4);
+		main.addDemo("reference editor",function(el4) {
+			return new cards.ui.input.ReferenceEditor(el4);
 		});
-		main.addDemo("date editor",function(el5) {
-			return new cards.ui.input.DateEditor(el5,false);
+		main.addDemo("float editor",function(el5) {
+			return new cards.ui.input.NumberEditor(el5);
 		});
-		main.addDemo("date time editor",function(el6) {
-			return new cards.ui.input.DateEditor(el6);
+		main.addDemo("date editor",function(el6) {
+			return new cards.ui.input.DateEditor(el6,false);
 		});
-		main.addDemo("bool editor",function(el7) {
-			return new cards.ui.input.BoolEditor(el7);
+		main.addDemo("date time editor",function(el7) {
+			return new cards.ui.input.DateEditor(el7);
+		});
+		main.addDemo("bool editor",function(el8) {
+			return new cards.ui.input.BoolEditor(el8);
 		});
 		main.addDemo("object editor",Main.toDo());
 	});
@@ -1139,6 +1141,26 @@ cards.ui.input._Path.Path_Impl_.equal = function(this1,other) {
 cards.ui.input.PathItem = { __ename__ : ["cards","ui","input","PathItem"], __constructs__ : ["Field","Index"] };
 cards.ui.input.PathItem.Field = function(name) { var $x = ["Field",0,name]; $x.__enum__ = cards.ui.input.PathItem; $x.toString = $estr; return $x; };
 cards.ui.input.PathItem.Index = function(pos) { var $x = ["Index",1,pos]; $x.__enum__ = cards.ui.input.PathItem; $x.toString = $estr; return $x; };
+cards.ui.input.ReferenceEditor = function(container) {
+	var options = { template : "<input class=\"editor reference\" placeholder=\"type a reference\"/>", container : container};
+	cards.ui.input.Editor.call(this,cards.model.SchemaType.ReferenceType,options);
+	var el = this.component.el;
+	thx.stream.dom.Dom.streamEvent(el,"input").mapValue(function(_) {
+		var _1 = el.value;
+		return { _0 : cards.model.SchemaType.ReferenceType, _1 : _1};
+	}).plug(this.stream);
+	thx.stream.dom.Dom.streamFocus(el).feed(this.focus);
+	this.stream.subscribe(function(text) {
+		var v = text._1;
+		if(el.value != v) el.value = v;
+	});
+	this.focus.subscribe(thx.stream.dom.Dom.subscribeFocus(el));
+};
+cards.ui.input.ReferenceEditor.__name__ = ["cards","ui","input","ReferenceEditor"];
+cards.ui.input.ReferenceEditor.__super__ = cards.ui.input.Editor;
+cards.ui.input.ReferenceEditor.prototype = $extend(cards.ui.input.Editor.prototype,{
+	__class__: cards.ui.input.ReferenceEditor
+});
 cards.ui.input.TextEditor = function(container) {
 	var _g = this;
 	var options = { template : "<textarea class=\"editor text\" placeholder=\"type text\"></textarea>", container : container};
@@ -1350,6 +1372,14 @@ haxe.ds.StringMap.prototype = {
 		if(this.h.hasOwnProperty(key)) a.push(key.substr(1));
 		}
 		return HxOverrides.iter(a);
+	}
+	,iterator: function() {
+		return { ref : this.h, it : this.keys(), hasNext : function() {
+			return this.it.hasNext();
+		}, next : function() {
+			var i = this.it.next();
+			return this.ref["$" + i];
+		}};
 	}
 	,__class__: haxe.ds.StringMap
 };

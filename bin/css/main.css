@@ -123,14 +123,14 @@ a img {
 .card .editor:hover {
   background-color: #f9f9f9;
 }
-.card.code,
-.card.reference {
+.card .editor.code,
+.card .editor.reference {
   font-family: monospace;
 }
-.card.reference {
+.card .editor.reference {
   background-color: #efe;
 }
-.card.empty:before {
+.card .editor.empty:before {
   content: attr(placeholder);
   color: #aaa;
   text-shadow: none;
@@ -153,6 +153,7 @@ a img {
 }
 .card input.number,
 .card input.date,
+.card input.reference,
 .card textarea.text {
   width: 100%;
   border: none;

@@ -31,7 +31,9 @@ class Main {
       main.addDemo("code editor", function(el) {
         return new CodeEditor(el);
       });
-      main.addDemo("reference editor", toDo());
+      main.addDemo("reference editor", function(el) {
+        return new ReferenceEditor(el);
+      });
       main.addDemo("float editor", function(el) {
         return new NumberEditor(el);
       });
