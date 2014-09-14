@@ -168,10 +168,16 @@ a img {
   margin: 0;
   padding-bottom: 0;
 }
+.card input.number,
 .card textarea.text {
   width: 100%;
   border: none;
   height: 1.7em;
+}
+.card input.number {
+  text-align: right;
+}
+.card textarea.text {
   padding: 0.2em;
   resize: none;
   max-height: 10em;

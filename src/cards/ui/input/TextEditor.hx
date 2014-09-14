@@ -22,7 +22,6 @@ class TextEditor extends Editor {
     super(StringType, options);
 
     var el : TextAreaElement = cast component.el;
-    el.style.content = 'type text';
     el.streamEvent('input')
       .audit(function(_) resize())
       .mapValue(function(_) return (el.value : TypedValue))
@@ -36,8 +35,5 @@ class TextEditor extends Editor {
     });
 
     focus.subscribe(el.subscribeFocus());
-
-    // TODO, this considerably slow downs the creation of many items (like in array)
-    //resize();
   }
 }

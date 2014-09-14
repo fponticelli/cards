@@ -17,6 +17,12 @@ abstract TypedValue(Tuple2<SchemaType, Dynamic>) {
   @:from public static inline function fromString(s : String)
     return new TypedValue(StringType, s);
 
+  @:from public static inline function fromFloat(f : Float)
+    return new TypedValue(FloatType, f);
+
+  @:from public static inline function fromDate(d : Date)
+    return new TypedValue(DateType, d);
+
   @:to public function asString()
     return Std.string(this._1); // TODO use type transform here
 

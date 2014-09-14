@@ -8,6 +8,82 @@ function $extend(from, fields) {
 }
 var Config = function() { };
 Config.__name__ = ["Config"];
+var DateTools = function() { };
+DateTools.__name__ = ["DateTools"];
+DateTools.__format_get = function(d,e) {
+	switch(e) {
+	case "%":
+		return "%";
+	case "C":
+		return StringTools.lpad(Std.string(Std["int"](d.getFullYear() / 100)),"0",2);
+	case "d":
+		return StringTools.lpad(Std.string(d.getDate()),"0",2);
+	case "D":
+		return DateTools.__format(d,"%m/%d/%y");
+	case "e":
+		return Std.string(d.getDate());
+	case "H":case "k":
+		return StringTools.lpad(Std.string(d.getHours()),e == "H"?"0":" ",2);
+	case "I":case "l":
+		var hour = d.getHours() % 12;
+		return StringTools.lpad(Std.string(hour == 0?12:hour),e == "I"?"0":" ",2);
+	case "m":
+		return StringTools.lpad(Std.string(d.getMonth() + 1),"0",2);
+	case "M":
+		return StringTools.lpad(Std.string(d.getMinutes()),"0",2);
+	case "n":
+		return "\n";
+	case "p":
+		if(d.getHours() > 11) return "PM"; else return "AM";
+		break;
+	case "r":
+		return DateTools.__format(d,"%I:%M:%S %p");
+	case "R":
+		return DateTools.__format(d,"%H:%M");
+	case "s":
+		return Std.string(Std["int"](d.getTime() / 1000));
+	case "S":
+		return StringTools.lpad(Std.string(d.getSeconds()),"0",2);
+	case "t":
+		return "\t";
+	case "T":
+		return DateTools.__format(d,"%H:%M:%S");
+	case "u":
+		var t = d.getDay();
+		if(t == 0) return "7"; else if(t == null) return "null"; else return "" + t;
+		break;
+	case "w":
+		return Std.string(d.getDay());
+	case "y":
+		return StringTools.lpad(Std.string(d.getFullYear() % 100),"0",2);
+	case "Y":
+		return Std.string(d.getFullYear());
+	default:
+		throw "Date.format %" + e + "- not implemented yet.";
+	}
+};
+DateTools.__format = function(d,f) {
+	var r = new StringBuf();
+	var p = 0;
+	while(true) {
+		var np = f.indexOf("%",p);
+		if(np < 0) break;
+		r.addSub(f,p,np - p);
+		r.add(DateTools.__format_get(d,HxOverrides.substr(f,np + 1,1)));
+		p = np + 2;
+	}
+	r.addSub(f,p,f.length - p);
+	return r.b;
+};
+DateTools.format = function(d,f) {
+	return DateTools.__format(d,f);
+};
+DateTools.delta = function(d,t) {
+	var t1 = d.getTime() + t;
+	var d1 = new Date();
+	d1.setTime(t1);
+	return d1;
+};
 var EReg = function(r,opt) {
 	opt = opt.split("u").join("");
 	this.r = new RegExp(r,opt);
@@ -20,6 +96,65 @@ EReg.prototype = {
 		this.r.m = this.r.exec(s);
 		this.r.s = s;
 		return this.r.m != null;
+	}
+	,matched: function(n) {
+		if(this.r.m != null && n >= 0 && n < this.r.m.length) return this.r.m[n]; else throw "EReg::matched";
+	}
+	,matchedLeft: function() {
+		if(this.r.m == null) throw "No string matched";
+		return this.r.s.substr(0,this.r.m.index);
+	}
+	,matchedRight: function() {
+		if(this.r.m == null) throw "No string matched";
+		var sz = this.r.m.index + this.r.m[0].length;
+		return this.r.s.substr(sz,this.r.s.length - sz);
+	}
+	,matchedPos: function() {
+		if(this.r.m == null) throw "No string matched";
+		return { pos : this.r.m.index, len : this.r.m[0].length};
+	}
+	,matchSub: function(s,pos,len) {
+		if(len == null) len = -1;
+		if(this.r.global) {
+			this.r.lastIndex = pos;
+			this.r.m = this.r.exec(len < 0?s:HxOverrides.substr(s,0,pos + len));
+			var b = this.r.m != null;
+			if(b) this.r.s = s;
+			return b;
+		} else {
+			var b1 = this.match(len < 0?HxOverrides.substr(s,pos,null):HxOverrides.substr(s,pos,len));
+			if(b1) {
+				this.r.s = s;
+				this.r.m.index += pos;
+			}
+			return b1;
+		}
+	}
+	,split: function(s) {
+		var d = "#__delim__#";
+		return s.replace(this.r,d).split(d);
+	}
+	,replace: function(s,by) {
+		return s.replace(this.r,by);
+	}
+	,map: function(s,f) {
+		var offset = 0;
+		var buf = new StringBuf();
+		do {
+			if(offset >= s.length) break; else if(!this.matchSub(s,offset)) {
+				buf.add(HxOverrides.substr(s,offset,null));
+				break;
+			}
+			var p = this.matchedPos();
+			buf.add(HxOverrides.substr(s,offset,p.pos - offset));
+			buf.add(f(this));
+			if(p.len == 0) {
+				buf.add(HxOverrides.substr(s,p.pos,1));
+				offset = p.pos + 1;
+			} else offset = p.pos + p.len;
+		} while(this.r.global);
+		if(!this.r.global && offset > 0 && offset < s.length) buf.add(HxOverrides.substr(s,offset,null));
+		return buf.b;
 	}
 	,__class__: EReg
 };
@@ -124,9 +259,15 @@ Main.main = function() {
 			return new cards.ui.input.CodeEditor(el3);
 		});
 		main.addDemo("reference editor",Main.toDo());
-		main.addDemo("float editor",Main.toDo());
-		main.addDemo("date editor",Main.toDo());
-		main.addDemo("date time editor",Main.toDo());
+		main.addDemo("float editor",function(el4) {
+			return new cards.ui.input.NumberEditor(el4);
+		});
+		main.addDemo("date editor",function(el5) {
+			return new cards.ui.input.DateEditor(el5,false);
+		});
+		main.addDemo("date time editor",function(el6) {
+			return new cards.ui.input.DateEditor(el6);
+		});
 		main.addDemo("bool editor",Main.toDo());
 		main.addDemo("object editor",Main.toDo());
 	});
@@ -212,14 +353,34 @@ Std.__name__ = ["Std"];
 Std.string = function(s) {
 	return js.Boot.__string_rec(s,"");
 };
+Std["int"] = function(x) {
+	return x | 0;
+};
 Std.parseInt = function(x) {
 	var v = parseInt(x,10);
 	if(v == 0 && (HxOverrides.cca(x,1) == 120 || HxOverrides.cca(x,1) == 88)) v = parseInt(x);
 	if(isNaN(v)) return null;
 	return v;
 };
+Std.parseFloat = function(x) {
+	return parseFloat(x);
+};
 Std.random = function(x) {
 	if(x <= 0) return 0; else return Math.floor(Math.random() * x);
+};
+var StringBuf = function() {
+	this.b = "";
+};
+StringBuf.__name__ = ["StringBuf"];
+StringBuf.prototype = {
+	b: null
+	,add: function(x) {
+		this.b += Std.string(x);
+	}
+	,addSub: function(s,pos,len) {
+		if(len == null) this.b += HxOverrides.substr(s,pos,null); else this.b += HxOverrides.substr(s,pos,len);
+	}
+	,__class__: StringBuf
 };
 var StringTools = function() { };
 StringTools.__name__ = ["StringTools"];
@@ -244,6 +405,11 @@ StringTools.rtrim = function(s) {
 };
 StringTools.trim = function(s) {
 	return StringTools.ltrim(StringTools.rtrim(s));
+};
+StringTools.lpad = function(s,c,l) {
+	if(c.length <= 0) return s;
+	while(s.length < l) s = c + s;
+	return s;
 };
 StringTools.replace = function(s,sub,by) {
 	return s.split(sub).join(by);
@@ -760,12 +926,8 @@ cards.ui.input.ArrayEditor.prototype = $extend(cards.ui.input.RouteEditor.protot
 		this.stream.pulse((function($this) {
 			var $r;
 			var value = $this.values.slice();
-			$r = (function($this) {
-				var $r;
-				var _1 = value;
-				$r = { _0 : $this.type, _1 : _1};
-				return $r;
-			}($this));
+			var _1 = value;
+			$r = { _0 : $this.type, _1 : _1};
 			return $r;
 		}(this)));
 	}
@@ -815,6 +977,32 @@ cards.ui.input.CodeEditor.prototype = $extend(cards.ui.input.Editor.prototype,{
 	}
 	,__class__: cards.ui.input.CodeEditor
 });
+cards.ui.input.DateEditor = function(container,useTime) {
+	if(useTime == null) useTime = true;
+	var _g = this;
+	if(useTime) this.format = "%Y-%m-%dT%H:%M"; else this.format = "%Y-%m-%d";
+	var options = { template : "<input class=\"editor date\" placeholder=\"type date\" type=\"" + (useTime?"datetime-local":"date") + "\" />", container : container};
+	cards.ui.input.Editor.call(this,cards.model.SchemaType.DateType,options);
+	var el = this.component.el;
+	thx.stream.dom.Dom.streamEvent(el,"input").mapValue(function(_) {
+		var d = thx.date.ISO8601.parseDateTime(el.value);
+		var _1 = d;
+		return { _0 : cards.model.SchemaType.DateType, _1 : _1};
+	}).plug(this.stream);
+	thx.stream.dom.Dom.streamFocus(el).feed(this.focus);
+	this.stream.subscribe(function(num) {
+		var v = num._1;
+		var s = DateTools.format(v,_g.format);
+		if(el.value != s) el.value = s;
+	});
+	this.focus.subscribe(thx.stream.dom.Dom.subscribeFocus(el));
+};
+cards.ui.input.DateEditor.__name__ = ["cards","ui","input","DateEditor"];
+cards.ui.input.DateEditor.__super__ = cards.ui.input.Editor;
+cards.ui.input.DateEditor.prototype = $extend(cards.ui.input.Editor.prototype,{
+	format: null
+	,__class__: cards.ui.input.DateEditor
+});
 cards.ui.input.Diff = { __ename__ : ["cards","ui","input","Diff"], __constructs__ : ["RemoveItem","AddItem","SetValue"] };
 cards.ui.input.Diff.RemoveItem = ["RemoveItem",0];
 cards.ui.input.Diff.RemoveItem.toString = $estr;
@@ -856,6 +1044,26 @@ cards.ui.input.EditorFactory.create = function(type,container,parent) {
 		throw "Editor for " + Std.string(type) + " has not been implemented yet";
 	}
 };
+cards.ui.input.NumberEditor = function(container) {
+	var options = { template : "<input class=\"editor number\" placeholder=\"type number\" type=\"number\" />", container : container};
+	cards.ui.input.Editor.call(this,cards.model.SchemaType.FloatType,options);
+	var el = this.component.el;
+	thx.stream.dom.Dom.streamEvent(el,"input").mapValue(function(_) {
+		var _1 = el.valueAsNumber;
+		return { _0 : cards.model.SchemaType.FloatType, _1 : _1};
+	}).plug(this.stream);
+	thx.stream.dom.Dom.streamFocus(el).feed(this.focus);
+	this.stream.subscribe(function(num) {
+		var v = num._1;
+		if(el.value != v) el.value = v;
+	});
+	this.focus.subscribe(thx.stream.dom.Dom.subscribeFocus(el));
+};
+cards.ui.input.NumberEditor.__name__ = ["cards","ui","input","NumberEditor"];
+cards.ui.input.NumberEditor.__super__ = cards.ui.input.Editor;
+cards.ui.input.NumberEditor.prototype = $extend(cards.ui.input.Editor.prototype,{
+	__class__: cards.ui.input.NumberEditor
+});
 cards.ui.input._Path = {};
 cards.ui.input._Path.Path_Impl_ = function() { };
 cards.ui.input._Path.Path_Impl_.__name__ = ["cards","ui","input","_Path","Path_Impl_"];
@@ -907,7 +1115,6 @@ cards.ui.input.TextEditor = function(container) {
 	var options = { template : "<textarea class=\"editor text\" placeholder=\"type text\"></textarea>", container : container};
 	cards.ui.input.Editor.call(this,cards.model.SchemaType.StringType,options);
 	var el = this.component.el;
-	el.style.content = "type text";
 	thx.stream.dom.Dom.streamEvent(el,"input").audit(function(_) {
 		_g.resize();
 	}).mapValue(function(_1) {
@@ -947,6 +1154,14 @@ cards.ui.input._TypedValue.TypedValue_Impl_.asValue = function(this1) {
 cards.ui.input._TypedValue.TypedValue_Impl_.fromString = function(s) {
 	var _1 = s;
 	return { _0 : cards.model.SchemaType.StringType, _1 : _1};
+};
+cards.ui.input._TypedValue.TypedValue_Impl_.fromFloat = function(f) {
+	var _1 = f;
+	return { _0 : cards.model.SchemaType.FloatType, _1 : _1};
+};
+cards.ui.input._TypedValue.TypedValue_Impl_.fromDate = function(d) {
+	var _1 = d;
+	return { _0 : cards.model.SchemaType.DateType, _1 : _1};
 };
 cards.ui.input._TypedValue.TypedValue_Impl_.asString = function(this1) {
 	return Std.string(this1._1);
@@ -1739,6 +1954,147 @@ thx.core.Options.equals = function(a,b,eq) {
 thx.core.Options.equalsValue = function(a,b,eq) {
 	return thx.core.Options.equals(a,thx.core.Options.toOption(b),eq);
 };
+thx.core.Strings = function() { };
+thx.core.Strings.__name__ = ["thx","core","Strings"];
+thx.core.Strings.upTo = function(value,searchFor) {
+	var pos = value.indexOf(searchFor);
+	if(pos < 0) return value; else return HxOverrides.substr(value,0,pos);
+};
+thx.core.Strings.startFrom = function(value,searchFor) {
+	var pos = value.indexOf(searchFor);
+	if(pos < 0) return value; else return HxOverrides.substr(value,pos + searchFor.length,null);
+};
+thx.core.Strings.rtrim = function(value,charlist) {
+	var len = value.length;
+	while(len > 0) {
+		var c = HxOverrides.substr(value,len - 1,1);
+		if(charlist.indexOf(c) < 0) break;
+		len--;
+	}
+	return HxOverrides.substr(value,0,len);
+};
+thx.core.Strings.ltrim = function(value,charlist) {
+	var start = 0;
+	while(start < value.length) {
+		var c = HxOverrides.substr(value,start,1);
+		if(charlist.indexOf(c) < 0) break;
+		start++;
+	}
+	return HxOverrides.substr(value,start,null);
+};
+thx.core.Strings.trim = function(value,charlist) {
+	return thx.core.Strings.rtrim(thx.core.Strings.ltrim(value,charlist),charlist);
+};
+thx.core.Strings.collapse = function(value) {
+	return thx.core.Strings._reCollapse.replace(StringTools.trim(value)," ");
+};
+thx.core.Strings.ucfirst = function(value) {
+	if(value == null) return null; else return value.charAt(0).toUpperCase() + HxOverrides.substr(value,1,null);
+};
+thx.core.Strings.lcfirst = function(value) {
+	if(value == null) return null; else return value.charAt(0).toLowerCase() + HxOverrides.substr(value,1,null);
+};
+thx.core.Strings.empty = function(value) {
+	return value == null || value == "";
+};
+thx.core.Strings.isAlphaNum = function(value) {
+	if(value == null) return false; else return thx.core.Strings.__alphaNumPattern.match(value);
+};
+thx.core.Strings.digitsOnly = function(value) {
+	if(value == null) return false; else return thx.core.Strings.__digitsPattern.match(value);
+};
+thx.core.Strings.ucwords = function(value) {
+	return thx.core.Strings.__ucwordsPattern.map(value == null?null:value.charAt(0).toUpperCase() + HxOverrides.substr(value,1,null),thx.core.Strings.__upperMatch);
+};
+thx.core.Strings.ucwordsws = function(value) {
+	return thx.core.Strings.__ucwordswsPattern.map(value == null?null:value.charAt(0).toUpperCase() + HxOverrides.substr(value,1,null),thx.core.Strings.__upperMatch);
+};
+thx.core.Strings.__upperMatch = function(re) {
+	return re.matched(0).toUpperCase();
+};
+thx.core.Strings.humanize = function(s) {
+	return StringTools.replace(thx.core.Strings.underscore(s),"_"," ");
+};
+thx.core.Strings.capitalize = function(s) {
+	return HxOverrides.substr(s,0,1).toUpperCase() + HxOverrides.substr(s,1,null);
+};
+thx.core.Strings.succ = function(s) {
+	return HxOverrides.substr(s,0,-1) + String.fromCharCode((function($this) {
+		var $r;
+		var _this = HxOverrides.substr(s,-1,null);
+		$r = HxOverrides.cca(_this,0);
+		return $r;
+	}(this)) + 1);
+};
+thx.core.Strings.underscore = function(s) {
+	s = new EReg("::","g").replace(s,"/");
+	s = new EReg("([A-Z]+)([A-Z][a-z])","g").replace(s,"$1_$2");
+	s = new EReg("([a-z\\d])([A-Z])","g").replace(s,"$1_$2");
+	s = new EReg("-","g").replace(s,"_");
+	return s.toLowerCase();
+};
+thx.core.Strings.dasherize = function(s) {
+	return StringTools.replace(s,"_","-");
+};
+thx.core.Strings.repeat = function(s,times) {
+	var b = [];
+	var _g = 0;
+	while(_g < times) {
+		var i = _g++;
+		b.push(s);
+	}
+	return b.join("");
+};
+thx.core.Strings.wrapColumns = function(s,columns,indent,newline) {
+	if(newline == null) newline = "\n";
+	if(indent == null) indent = "";
+	if(columns == null) columns = 78;
+	var parts = thx.core.Strings._reSplitWC.split(s);
+	var result = [];
+	var _g = 0;
+	while(_g < parts.length) {
+		var part = parts[_g];
+		++_g;
+		result.push(thx.core.Strings._wrapColumns(StringTools.trim(thx.core.Strings._reReduceWS.replace(part," ")),columns,indent,newline));
+	}
+	return result.join(newline);
+};
+thx.core.Strings._wrapColumns = function(s,columns,indent,newline) {
+	var parts = [];
+	var pos = 0;
+	var len = s.length;
+	var ilen = indent.length;
+	columns -= ilen;
+	while(true) {
+		if(pos + columns >= len - ilen) {
+			parts.push(HxOverrides.substr(s,pos,null));
+			break;
+		}
+		var i = 0;
+		while(!StringTools.isSpace(s,pos + columns - i) && i < columns) i++;
+		if(i == columns) {
+			i = 0;
+			while(!StringTools.isSpace(s,pos + columns + i) && pos + columns + i < len) i++;
+			parts.push(HxOverrides.substr(s,pos,columns + i));
+			pos += columns + i + 1;
+		} else {
+			parts.push(HxOverrides.substr(s,pos,columns - i));
+			pos += columns - i + 1;
+		}
+	}
+	return indent + parts.join(newline + indent);
+};
+thx.core.Strings.stripTags = function(s) {
+	return thx.core.Strings._reStripTags.replace(s,"");
+};
+thx.core.Strings.ellipsis = function(s,maxlen,symbol) {
+	if(symbol == null) symbol = "...";
+	if(maxlen == null) maxlen = 20;
+	if(s.length > maxlen) return HxOverrides.substr(s,0,symbol.length > maxlen - symbol.length?symbol.length:maxlen - symbol.length) + symbol; else return s;
+};
+thx.core.Strings.compare = function(a,b) {
+	if(a < b) return -1; else if(a > b) return 1; else return 0;
+};
 thx.core.Timer = function() { };
 thx.core.Timer.__name__ = ["thx","core","Timer"];
 thx.core.Timer.repeat = function(callback,ms) {
@@ -1966,6 +2322,90 @@ thx.core.ValueTypes.typeInheritance = function(type) {
 	default:
 		return null;
 	}
+};
+thx.date = {};
+thx.date.ISO8601TimeZone = { __ename__ : ["thx","date","ISO8601TimeZone"], __constructs__ : ["LocalTime","UTC","UTCOffset"] };
+thx.date.ISO8601TimeZone.LocalTime = ["LocalTime",0];
+thx.date.ISO8601TimeZone.LocalTime.toString = $estr;
+thx.date.ISO8601TimeZone.LocalTime.__enum__ = thx.date.ISO8601TimeZone;
+thx.date.ISO8601TimeZone.UTC = ["UTC",1];
+thx.date.ISO8601TimeZone.UTC.toString = $estr;
+thx.date.ISO8601TimeZone.UTC.__enum__ = thx.date.ISO8601TimeZone;
+thx.date.ISO8601TimeZone.UTCOffset = function(offset) { var $x = ["UTCOffset",2,offset]; $x.__enum__ = thx.date.ISO8601TimeZone; $x.toString = $estr; return $x; };
+thx.date.ISO8601 = function() { };
+thx.date.ISO8601.__name__ = ["thx","date","ISO8601"];
+thx.date.ISO8601.mInt = function(e,index) {
+	return Std.parseInt(e.matched(index));
+};
+thx.date.ISO8601.parseDate = function(date) {
+	var _g = 0;
+	var _g1 = thx.date.ISO8601.dateParsers;
+	while(_g < _g1.length) {
+		var parser = _g1[_g];
+		++_g;
+		if(parser.pattern.match(date)) return parser.extract(parser.pattern);
+	}
+	throw "invalid ISO8601 date: " + date;
+};
+thx.date.ISO8601.parseOffset = function(t) {
+	if(t.length == 5) return { hour : Std.parseInt(HxOverrides.substr(t,0,2)), minute : Std.parseInt(HxOverrides.substr(t,3,null))}; else if(t.length == 4) return { hour : Std.parseInt(HxOverrides.substr(t,0,2)), minute : Std.parseInt(HxOverrides.substr(t,2,null))}; else if(t.length == 2) return { hour : Std.parseInt(t)}; else throw "invalid time zone offset: " + t;
+};
+thx.date.ISO8601.parseTime = function(timeString) {
+	var time = null;
+	var timeZone = thx.date.ISO8601TimeZone.LocalTime;
+	var millis = 0;
+	if(HxOverrides.substr(timeString,-1,null) == "Z") {
+		timeString = HxOverrides.substr(timeString,0,timeString.length - 1);
+		timeZone = thx.date.ISO8601TimeZone.UTC;
+	} else if(thx.date.ISO8601.timeZoneSign.match(timeString)) {
+		var sign = thx.date.ISO8601.timeZoneSign.matched(1);
+		timeString = thx.date.ISO8601.timeZoneSign.matchedLeft();
+		var offset = thx.date.ISO8601.parseOffset(thx.date.ISO8601.timeZoneSign.matchedRight());
+		if(sign == "-") offset.hour = -offset.hour;
+		timeZone = thx.date.ISO8601TimeZone.UTCOffset(offset);
+	}
+	timeString = StringTools.replace(timeString,",",".");
+	var parts = timeString.split(".");
+	if(parts.length == 2) {
+		timeString = parts[0];
+		millis = Math.round(Std.parseFloat("0." + parts[1]) * 1000);
+	}
+	var _g = 0;
+	var _g1 = thx.date.ISO8601.timeParsers;
+	while(_g < _g1.length) {
+		var parser = _g1[_g];
+		++_g;
+		if(parser.pattern.match(timeString)) {
+			time = parser.extract(parser.pattern);
+			break;
+		}
+	}
+	if(null != time) {
+		time.timeZone = timeZone;
+		return time;
+	}
+	time.millis = millis;
+	throw "invalid ISO8601 time: " + timeString;
+};
+thx.date.ISO8601.parseDateTime = function(dateString) {
+	var parts = dateString.split("T");
+	var date = thx.date.ISO8601.parseDate(parts[0]);
+	if(parts.length == 1) return date; else return thx.date.ISO8601.addTimeSpan(date,thx.date.ISO8601.parseTime(parts[1]));
+};
+thx.date.ISO8601.addTimeSpan = function(date,span) {
+	return DateTools.delta(date,1000 * ((null == span.second?0:span.second) + (null == span.minute?0:span.minute) * 60 + span.hour * 60 * 60));
+};
+thx.date.ISO8601.createDate = function(year,month,day,hour,minute,second) {
+	if(second == null) second = 0;
+	if(minute == null) minute = 0;
+	if(hour == null) hour = 0;
+	if(day == null) day = 0;
+	if(month == null) month = 1;
+	return new Date(year,month - 1,day,hour,minute,second);
+};
+thx.date.ISO8601.createTime = function(hour,minute,second,millis,timeZone) {
+	if(null == timeZone) timeZone = thx.date.ISO8601TimeZone.LocalTime;
+	if(null == minute) return { hour : hour, timeZone : timeZone}; else if(null == second) return { hour : hour, minute : minute, timeZone : timeZone}; else if(null == millis) return { hour : hour, minute : minute, second : second, timeZone : timeZone}; else return { hour : hour, minute : minute, second : second, millis : millis, timeZone : timeZone};
 };
 thx.promise = {};
 thx.promise.Deferred = function() {
@@ -3582,6 +4022,35 @@ if(!scope.setImmediate) scope.setImmediate = function(callback) {
 Config.icons = { add : "plus-circle", remove : "ban", dropdown : "reorder", checked : "toggle-on", unchecked : "toggle-off", switchtype : "bolt", code : "bolt", value : "pencil", reference : "link", bool : "check-circle", text : "pencil", number : "superscript", date : "calendar", array : "list", object : "table"};
 Config.selectors = { app : ".card"};
 thx.core.Ints.pattern_parse = new EReg("^[+-]?(\\d+|0x[0-9A-F]+)$","i");
+thx.core.Strings._reSplitWC = new EReg("(\r\n|\n\r|\n|\r)","g");
+thx.core.Strings._reReduceWS = new EReg("\\s+","");
+thx.core.Strings._reStripTags = new EReg("(<[a-z]+[^>/]*/?>|</[a-z]+>)","i");
+thx.core.Strings._reCollapse = new EReg("\\s+","g");
+thx.core.Strings.__ucwordsPattern = new EReg("[^a-zA-Z]([a-z])","g");
+thx.core.Strings.__ucwordswsPattern = new EReg("\\s[a-z]","g");
+thx.core.Strings.__alphaNumPattern = new EReg("^[a-z0-9]+$","i");
+thx.core.Strings.__digitsPattern = new EReg("^[0-9]+$","");
+thx.date.ISO8601.dateParsers = [{ pattern : new EReg("^\\d{4}$",""), extract : function(e) {
+	return thx.date.ISO8601.createDate(thx.date.ISO8601.mInt(e,0));
+}},{ pattern : new EReg("^(\\d{4})-(\\d{2})$",""), extract : function(e1) {
+	return thx.date.ISO8601.createDate(thx.date.ISO8601.mInt(e1,1),thx.date.ISO8601.mInt(e1,2));
+}},{ pattern : new EReg("^(\\d{4})-(\\d{2})-(\\d{2})$",""), extract : function(e2) {
+	return thx.date.ISO8601.createDate(thx.date.ISO8601.mInt(e2,1),thx.date.ISO8601.mInt(e2,2),thx.date.ISO8601.mInt(e2,3));
+}},{ pattern : new EReg("^(\\d{4})(\\d{2})(\\d{2})$",""), extract : function(e3) {
+	return thx.date.ISO8601.createDate(thx.date.ISO8601.mInt(e3,1),thx.date.ISO8601.mInt(e3,2),thx.date.ISO8601.mInt(e3,3));
+}}];
+thx.date.ISO8601.timeZoneSign = new EReg("([+-])","");
+thx.date.ISO8601.timeParsers = [{ pattern : new EReg("^(\\d{2}):(\\d{2}):(\\d{2})$",""), extract : function(e) {
+	return thx.date.ISO8601.createTime(thx.date.ISO8601.mInt(e,1),thx.date.ISO8601.mInt(e,2),thx.date.ISO8601.mInt(e,3));
+}},{ pattern : new EReg("^(\\d{2})(\\d{2})(\\d{2})$",""), extract : function(e1) {
+	return thx.date.ISO8601.createTime(thx.date.ISO8601.mInt(e1,1),thx.date.ISO8601.mInt(e1,2),thx.date.ISO8601.mInt(e1,3));
+}},{ pattern : new EReg("^(\\d{2}):(\\d{2})$",""), extract : function(e2) {
+	return thx.date.ISO8601.createTime(thx.date.ISO8601.mInt(e2,1),thx.date.ISO8601.mInt(e2,2));
+}},{ pattern : new EReg("^(\\d{2})(\\d{2})$",""), extract : function(e3) {
+	return thx.date.ISO8601.createTime(thx.date.ISO8601.mInt(e3,1),thx.date.ISO8601.mInt(e3,2));
+}},{ pattern : new EReg("^\\d{2}$",""), extract : function(e4) {
+	return thx.date.ISO8601.createTime(thx.date.ISO8601.mInt(e4,0));
+}}];
 thx.promise.Promise.nil = thx.promise.Promise.value(thx.core.Nil.nil);
 udom.Query.doc = document;
 Main.main();

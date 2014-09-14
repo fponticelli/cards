@@ -1,8 +1,6 @@
 import cards.components.Component;
 import cards.ui.input.*;
-import cards.ui.input.ArrayEditor;
 import cards.ui.input.Path;
-import cards.ui.input.TextEditor;
 import js.Browser;
 import js.html.Element;
 import thx.promise.Promise;
@@ -34,9 +32,15 @@ class Main {
         return new CodeEditor(el);
       });
       main.addDemo("reference editor", toDo());
-      main.addDemo("float editor", toDo());
-      main.addDemo("date editor", toDo());
-      main.addDemo("date time editor", toDo());
+      main.addDemo("float editor", function(el) {
+        return new NumberEditor(el);
+      });
+      main.addDemo("date editor", function(el) {
+        return new DateEditor(el, false);
+      });
+      main.addDemo("date time editor", function(el) {
+        return new DateEditor(el);
+      });
       main.addDemo("bool editor", toDo());
       main.addDemo("object editor", toDo());
     });
