@@ -268,7 +268,9 @@ Main.main = function() {
 		main.addDemo("date time editor",function(el6) {
 			return new cards.ui.input.DateEditor(el6);
 		});
-		main.addDemo("bool editor",Main.toDo());
+		main.addDemo("bool editor",function(el7) {
+			return new cards.ui.input.BoolEditor(el7);
+		});
 		main.addDemo("object editor",Main.toDo());
 	});
 };
@@ -933,6 +935,26 @@ cards.ui.input.ArrayEditor.prototype = $extend(cards.ui.input.RouteEditor.protot
 	}
 	,__class__: cards.ui.input.ArrayEditor
 });
+cards.ui.input.BoolEditor = function(container) {
+	var options = { template : "<input class=\"editor bool\" placeholder=\"type bool\" type=\"checkbox\" />", container : container};
+	cards.ui.input.Editor.call(this,cards.model.SchemaType.BoolType,options);
+	var el = this.component.el;
+	thx.stream.dom.Dom.streamEvent(el,"change").mapValue(function(_) {
+		var _1 = el.checked;
+		return { _0 : cards.model.SchemaType.BoolType, _1 : _1};
+	}).plug(this.stream);
+	thx.stream.dom.Dom.streamFocus(el).feed(this.focus);
+	this.stream.subscribe(function(num) {
+		var v = num._1;
+		if(el.value != v) el.value = v;
+	});
+	this.focus.subscribe(thx.stream.dom.Dom.subscribeFocus(el));
+};
+cards.ui.input.BoolEditor.__name__ = ["cards","ui","input","BoolEditor"];
+cards.ui.input.BoolEditor.__super__ = cards.ui.input.Editor;
+cards.ui.input.BoolEditor.prototype = $extend(cards.ui.input.Editor.prototype,{
+	__class__: cards.ui.input.BoolEditor
+});
 cards.ui.input.CodeEditor = function(container) {
 	var _g = this;
 	var options = { template : "<div class=\"editor code\"></div>", container : container};
@@ -1170,6 +1192,10 @@ cards.ui.input._TypedValue.TypedValue_Impl_.fromDate = function(d) {
 	var _1 = d;
 	return { _0 : cards.model.SchemaType.DateType, _1 : _1};
 };
+cards.ui.input._TypedValue.TypedValue_Impl_.fromBool = function(b) {
+	var _1 = b;
+	return { _0 : cards.model.SchemaType.BoolType, _1 : _1};
+};
 cards.ui.input._TypedValue.TypedValue_Impl_.asString = function(this1) {
 	return Std.string(this1._1);
 };
@@ -1324,14 +1350,6 @@ haxe.ds.StringMap.prototype = {
 		if(this.h.hasOwnProperty(key)) a.push(key.substr(1));
 		}
 		return HxOverrides.iter(a);
-	}
-	,iterator: function() {
-		return { ref : this.h, it : this.keys(), hasNext : function() {
-			return this.it.hasNext();
-		}, next : function() {
-			var i = this.it.next();
-			return this.ref["$" + i];
-		}};
 	}
 	,__class__: haxe.ds.StringMap
 };

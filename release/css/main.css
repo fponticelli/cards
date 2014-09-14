@@ -169,6 +169,7 @@ a img {
   padding-bottom: 0;
 }
 .card input.number,
+.card input.date,
 .card textarea.text {
   width: 100%;
   border: none;

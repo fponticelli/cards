@@ -23,6 +23,9 @@ abstract TypedValue(Tuple2<SchemaType, Dynamic>) {
   @:from public static inline function fromDate(d : Date)
     return new TypedValue(DateType, d);
 
+  @:from public static inline function fromBool(b : Bool)
+    return new TypedValue(BoolType, b);
+
   @:to public function asString()
     return Std.string(this._1); // TODO use type transform here
 

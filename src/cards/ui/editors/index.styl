@@ -14,7 +14,7 @@
       background-color #ffffff
   &:hover
     background-color #f9f9f9
-
+/*
   &.bool
     cursor pointer
     color #333
@@ -31,7 +31,7 @@
       left calc(50% - 1em)
       position absolute
       display block
-
+*/
   &.code
   &.reference
     font-family monospace
@@ -66,6 +66,22 @@ textarea.text
   width 100%
   border none
   height 1.7em
+
+input.bool[type=checkbox]
+  width 100%
+  text-align center
+  visibility hidden // to hide the checkbox itself
+input.bool[type=checkbox]:before
+  visibility visible
+  font-family FontAwesome
+  display inline-block
+  //margin 0.6em 0 0 0.6em
+
+input.bool[type=checkbox]:before
+  content "\f204" // unchecked icon
+
+input.bool[type=checkbox]:checked:before
+  content "\f205" // checked icon
 
 input.number
   text-align right

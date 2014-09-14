@@ -41,7 +41,9 @@ class Main {
       main.addDemo("date time editor", function(el) {
         return new DateEditor(el);
       });
-      main.addDemo("bool editor", toDo());
+      main.addDemo("bool editor", function(el) {
+        return new BoolEditor(el);
+      });
       main.addDemo("object editor", toDo());
     });
   }
