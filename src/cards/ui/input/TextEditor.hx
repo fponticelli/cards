@@ -29,6 +29,12 @@ class TextEditor extends Editor {
       .plug(stream);
     el.streamFocus().feed(focus);
 
+    stream.subscribe(function(text) {
+      var v = text.asValue();
+      if(el.value != v)
+        el.value = v;
+    });
+
     // TODO, this considerably slow downs the creation of many items (like in array)
     //resize();
   }

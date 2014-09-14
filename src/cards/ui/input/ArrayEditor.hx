@@ -10,107 +10,151 @@ import thx.stream.Value;
 using thx.stream.Emitter;
 import haxe.ds.Option;
 import js.html.OListElement;
-import udom.Dom;
+using udom.Dom;
 using thx.core.Options;
+import cards.ui.input.Diff;
+
 // TODO
 //  * drag and drop item
-//  * set using path
+//  * move focus to newly created item
+//  * move focus to next sibling after deletion
 class ArrayEditor extends RouteEditor {
   var list : OListElement;
+  var editors : Array<IEditor>;
   var innerType : SchemaType;
-  var current : Value<Option<{
-    editor : IEditor,
-    item : LIElement,
-    index : Int
-  }>>;
-  var value : Array<Null<Dynamic>>;
+  var currentIndex : Value<Option<Int>>;
+  var values : Array<Null<Dynamic>>;
   public function new(container : Element, innerType : SchemaType) {
-    value = [];
+    values = [];
+    editors = [];
+    currentIndex = Value.createOption();
     var options = {
       template  : '<div class="editor array"></div>',
       container : container
     };
     super(ArrayType(innerType), options);
+    this.innerType = innerType;
+
     var toolbar = new Toolbar({
       parent : component,
       container : component.el
     });
 
-    var buttonAdd = toolbar.left.addButton('', Config.icons.add);
-    buttonAdd.clicks.subscribe(function(_) addItem());
-
-    var buttonRemove = toolbar.right.addButton('', Config.icons.remove);
-    buttonRemove.clicks.subscribe(function(_) removeSelectedItem());
-
+    // create DOM containers
+    list = Browser.document.createOListElement();
     var items = Browser.document.createDivElement();
     items.className = "items";
     component.el.appendChild(items);
-
-    list = Browser.document.createOListElement();
     items.appendChild(list);
 
-    this.innerType = innerType;
-    current = new Value(None);
-    current.toBool()
+    var buttonAdd = toolbar.left.addButton('', Config.icons.add),
+        buttonRemove = toolbar.right.addButton('', Config.icons.remove);
+
+    currentIndex
+      .toBool()
       .feed(buttonRemove.enabled);
 
     diff.subscribe(function(d) {
       switch [d.path.asArray(), d.diff] {
         case [[Index(i)], RemoveItem]:
-          value.splice(i, 1);
+          values.splice(i, 1);
+          removeEditor(i);
         case [[Index(i)], AddItem]:
-          value.insert(i, null);
-        case [[Index(i)], SetValue(v)] if(Type.enumEq(v.asType(), innerType)):
-          value[i] = v.asValue();
+          values.insert(i, null);
+          createEditor(i);
+        case [[Index(i)], SetValue(tv)] if(Type.enumEq(tv.asType(), innerType)):
+          values[i] = tv.asValue();
+          setEditor(i, tv);
+        case [path, diff] if(path.length > 0):
+          var first = path.shift();
+          switch first {
+            case Index(index) if(Std.is(editors[index], IRouteEditor)):
+              (cast editors[index] : IRouteEditor).diff.pulse(new DiffAt(path, diff));
+            case _:
+              throw 'unable to assign $d within ArrayEditor';
+          }
         case _:
-          throw 'unable to assign $d to within ArrayEditor';
-  // ("", AddItem(i)):
-
-        //case [i], SetValue(v):
+          throw 'unable to assign $d within ArrayEditor';
       }
       pulse();
     });
+
+    currentIndex
+      .audit(function(_) {
+        var prev = Query.first('li.active', list);
+        if(null == prev) return;
+        prev.classList.remove('active');
+      })
+      .filterOption()
+      .subscribe(function(index) {
+        Query.first('li:nth-child(${index+1})', list).classList.add('active');
+      });
+
+    buttonAdd.clicks
+      .subscribe(function(_) {
+        var index = currentIndex.get().toBool() ? currentIndex.get().toValue() + 1 : values.length;
+        diff.pulse(new DiffAt(index, AddItem));
+      });
+    buttonRemove.clicks
+      .subscribe(function(_) {
+        if(!currentIndex.get().toBool())
+          return;
+        var index = currentIndex.get().toValue();
+        diff.pulse(new DiffAt(index, RemoveItem));
+      });
+  }
+
+  public function pushItem(?value : TypedValue)
+    insertItem(values.length, value);
+
+  public function insertItem(index : Int, ?value : TypedValue) {
+    diff.pulse(new DiffAt(index, AddItem));
+    if(null != value)
+      diff.pulse(new DiffAt(index, SetValue(value)));
+  }
+
+  function createEditor(index : Int) {
+    var item = Browser.document.createLIElement(),
+        ref  = Query.first('li:nth-child(${index+1})', list);
+    if(null == ref)
+      list.appendChild(item);
+    else
+      list.insertBefore(item, ref);
+    var editor = EditorFactory.create(innerType, item, component);
+    editors.insert(index, editor);
+
+    editor.focus
+      .feed(focus);
+
+    editor.focus
+      .withValue(true)
+      .mapValue(function(_) return editor.component.el.parentElement)
+      .mapValue(function(el) return el.getElementIndex())
+      .toOption()
+      .feed(currentIndex);
+
+    editor.stream
+      .filterValue(function(v) return currentIndex.get().toBool())
+      .mapValue(function(v) return new DiffAt(currentIndex.get().toValue(), SetValue(v)))
+      .distinct(DiffAt.equal)
+      // don't use plug or the stream will be killed when killing the editor
+      .subscribe(function(v) diff.pulse(v));
+
+  }
+
+  function setEditor(index : Int, value : TypedValue) {
+    editors[index].stream.pulse(value);
+  }
+
+  function removeEditor(index : Int) {
+    var item = Query.first('li:nth-child(${index+1})', list),
+        editor = editors[index];
+    list.removeChild(item);
+    editor.dispose();
+    editors.splice(index, 1);
+    currentIndex.set(None);
   }
 
   function pulse()
-    stream.pulse(new TypedValue(type, value.copy()));
-
-  var index = 0;
-  public function addItem() {
-    addItemWithIndex(index);
-    index++;
-  }
-
-  function addItemWithIndex(i : Int) {
-    var item = Browser.document.createLIElement();
-    item.setAttribute('data-placeholder', '$index');
-    list.appendChild(item);
-    var editor = EditorFactory.create(innerType, item, component);
-    editor.focus
-      .feed(focus);
-    editor.focus
-      .withValue(true)
-      .subscribe(function(_) {
-        current.set(Some({
-          editor : editor,
-          item   : item,
-          index  : index
-        }));
-      });
-    editor.stream
-      .mapValue(function(v) return new DiffAt('[$i]', SetValue(v)))
-      .plug(diff);
-
-    diff.pulse(new DiffAt('[$i]', AddItem));
-  }
-
-  public function removeSelectedItem() {
-    var o = current.get().toValue();
-    if(null == o)
-      return;
-    o.item.parentNode.removeChild(o.item);
-    current.set(None);
-    diff.pulse(new DiffAt('[${o.index}]', RemoveItem));
-    // TODO destroy editor
-  }
+    stream.pulse(new TypedValue(type, values.copy()));
 }

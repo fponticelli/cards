@@ -20,7 +20,9 @@ class Main {
       main.addDemo("array editor with StringType", function(el) {
         var editor = new ArrayEditor(el, StringType);
         for(i in 0...3)
-          editor.addItem();
+          editor.pushItem('f $i');
+        for(i in 0...3)
+          editor.insertItem(i*2, 's $i');
         return editor;
       });
       main.addDemo("array editor with ArrayType<CodeType>", function(el) {

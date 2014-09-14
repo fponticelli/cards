@@ -103,6 +103,9 @@ a img {
   font-size: 10pt;
   font-family: "Helvetica Neue", Verdana, Arial, Sans-serif;
 }
+.card .active .editor {
+  background-color: #f9f9f9;
+}
 .card .editor {
   text-shadow: -0.5px -0.5px 1px rgba(255,255,255,0.7), 0.5px 0.5px 1px rgba(0,0,0,0.2);
   background-color: #f0f0f0;
@@ -342,8 +345,8 @@ a img {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-  -webkit-box-shadow: inset 1px 1px 1px rgba(255,255,255,0.8), 0px 0px 1px rgba(0,0,0,0.1), 0px 1px 2px rgba(0,0,0,0.1);
-  box-shadow: inset 1px 1px 1px rgba(255,255,255,0.8), 0px 0px 1px rgba(0,0,0,0.1), 0px 1px 2px rgba(0,0,0,0.1);
+  -webkit-box-shadow: 0px 0px 1px rgba(0,0,0,0.1), 0px 1px 2px rgba(0,0,0,0.1);
+  box-shadow: 0px 0px 1px rgba(0,0,0,0.1), 0px 1px 2px rgba(0,0,0,0.1);
 }
 .card .toolbar > div {
   display: table-row;

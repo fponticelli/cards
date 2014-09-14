@@ -14,7 +14,7 @@ class Editor implements IEditor {
   public var component(default, null) : Component;
 
   public function new(type : SchemaType, options : ComponentOptions) {
-    this.stream    = new Bus();
+    this.stream    = new Bus(true, TypedValue.equal);
     this.type      = type;
     this.focus     = new Value(false);
     this.component = new Component(options);

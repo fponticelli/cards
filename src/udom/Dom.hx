@@ -36,6 +36,13 @@ class Query {
   public inline static function all(selector : String, ?ctx : js.html.Element) : Array<Element> {
     return H.toArray(list(selector, ctx));
   }
+
+  public static function getElementIndex(el : Element) {
+    var index = 0;
+    while(null != (el = el.previousElementSibling))
+      index++;
+    return index;
+  }
 }
 
 private class H {

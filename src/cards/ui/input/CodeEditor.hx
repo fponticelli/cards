@@ -29,6 +29,13 @@ class CodeEditor extends Editor {
     editor.on("changes", changes);
     editor.on("focus", setFocus);
     editor.on("blur", blurFocus);
+
+    stream.subscribe(function(text) {
+      var v = text.asValue();
+      if(editor.doc.getValue() != v) {
+        editor.doc.setValue(v);
+      }
+    });
   }
 
   function changes() {

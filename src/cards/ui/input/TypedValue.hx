@@ -2,6 +2,7 @@ package cards.ui.input;
 
 import cards.model.SchemaType;
 import thx.core.Tuple;
+import thx.core.Dynamics;
 
 abstract TypedValue(Tuple2<SchemaType, Dynamic>) {
   public inline function new(type : SchemaType, value : Dynamic)
@@ -18,6 +19,15 @@ abstract TypedValue(Tuple2<SchemaType, Dynamic>) {
 
   @:to public function asString()
     return Std.string(this._1); // TODO use type transform here
+
+  @:op(A==B) public static function equal(a : TypedValue, b : TypedValue) {
+    if(null == a && null == b)
+      return true;
+    else if(null == a || null == b)
+      return false;
+    else
+      return Dynamics.same(a.asValue(), b.asValue()) && Dynamics.same(a.asType(), b.asType());
+  }
 
   public function toString()
     return Std.string(this._1) + ' : ' + Std.string(this._0);
