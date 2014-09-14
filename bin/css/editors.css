@@ -15,9 +15,13 @@
   color: #999;
 }
 .container h2 {
+  font-family: monospace;
+  white-space: pre;
   font-size: 0.8em;
   padding: 0.2em 0;
   color: #999;
+  overflow: auto;
+  max-height: 10em;
 }
 .container .sample {
   display: inline-block;

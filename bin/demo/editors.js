@@ -225,10 +225,10 @@ Main.__name__ = ["Main"];
 Main.main = function() {
 	thx.stream.dom.Dom.ready().success(function(_) {
 		var main = new Main(udom.Query.first(".container"));
-		main.addDemo("object editor",function(el) {
+		main.addDemo(function(el) {
 			return new cards.ui.input.ObjectEditor(el,[{ name : "name", type : cards.model.SchemaType.StringType, optional : false},{ name : "age", type : cards.model.SchemaType.FloatType, optional : true},{ name : "contacts", type : cards.model.SchemaType.ArrayType(cards.model.SchemaType.ObjectType([{ name : "type", type : cards.model.SchemaType.StringType, optional : false},{ name : "value", type : cards.model.SchemaType.StringType, optional : false},{ name : "primary", type : cards.model.SchemaType.BoolType, optional : false}])), optional : false},{ name : "address", type : cards.model.SchemaType.ObjectType([{ name : "line 1", type : cards.model.SchemaType.StringType, optional : false},{ name : "line 2", type : cards.model.SchemaType.StringType, optional : true},{ name : "post code", type : cards.model.SchemaType.FloatType, optional : false},{ name : "city", type : cards.model.SchemaType.StringType, optional : false},{ name : "state", type : cards.model.SchemaType.StringType, optional : false}]), optional : false}]);
 		});
-		main.addDemo("array editor with StringType",function(el1) {
+		main.addDemo(function(el1) {
 			var editor = new cards.ui.input.ArrayEditor(el1,cards.model.SchemaType.StringType);
 			var _g = 0;
 			while(_g < 3) {
@@ -252,28 +252,28 @@ Main.main = function() {
 			}
 			return editor;
 		});
-		main.addDemo("array editor with ArrayType<CodeType>",function(el2) {
+		main.addDemo(function(el2) {
 			return new cards.ui.input.ArrayEditor(el2,cards.model.SchemaType.ArrayType(cards.model.SchemaType.CodeType));
 		});
-		main.addDemo("text editor",function(el3) {
+		main.addDemo(function(el3) {
 			return new cards.ui.input.TextEditor(el3);
 		});
-		main.addDemo("code editor",function(el4) {
+		main.addDemo(function(el4) {
 			return new cards.ui.input.CodeEditor(el4);
 		});
-		main.addDemo("reference editor",function(el5) {
+		main.addDemo(function(el5) {
 			return new cards.ui.input.ReferenceEditor(el5);
 		});
-		main.addDemo("float editor",function(el6) {
+		main.addDemo(function(el6) {
 			return new cards.ui.input.NumberEditor(el6);
 		});
-		main.addDemo("date editor",function(el7) {
+		main.addDemo(function(el7) {
 			return new cards.ui.input.DateEditor(el7,false);
 		});
-		main.addDemo("date time editor",function(el8) {
+		main.addDemo(function(el8) {
 			return new cards.ui.input.DateEditor(el8);
 		});
-		main.addDemo("bool editor",function(el9) {
+		main.addDemo(function(el9) {
 			return new cards.ui.input.BoolEditor(el9);
 		});
 	});
@@ -283,15 +283,14 @@ Main.prototype = {
 	,demos: null
 	,output: null
 	,focus: null
-	,addDemo: function(title,handler) {
-		var heading = window.document.createElement("h2");
+	,addDemo: function(handler) {
+		var footer = window.document.createElement("h2");
 		var el = window.document.createElement("div");
 		var sample = window.document.createElement("div");
 		sample.className = "sample";
 		el.className = "card";
-		heading.textContent = title;
-		sample.appendChild(heading);
 		sample.appendChild(el);
+		sample.appendChild(footer);
 		this.demos.appendChild(sample);
 		var editor = handler(el);
 		if(null == editor) return;
@@ -301,6 +300,7 @@ Main.prototype = {
 		editor.focus.withValue(true).mapValue(function(_) {
 			return "focus: " + editor.toString() + ", " + Std.string(editor.type);
 		}).subscribe(thx.stream.dom.Dom.subscribeText(this.focus));
+		footer.textContent = "editor: " + editor.toString() + "\ntype: " + StringTools.replace(Std.string(editor.type),"\t"," ");
 	}
 	,__class__: Main
 };
@@ -1336,7 +1336,11 @@ cards.ui.widgets = {};
 cards.ui.widgets.Button = function(text,icon) {
 	if(text == null) text = "";
 	this.component = new cards.components.Component({ template : null == icon?"<button>" + text + "</button>":"<button class=\"fa fa-" + icon + "\">" + text + "</button>"});
-	this.clicks = thx.stream.dom.Dom.streamEvent(this.component.el,"click",false);
+	this.clicks = thx.stream.dom.Dom.streamEvent(this.component.el,"click",false).audit(function(_) {
+		cards.ui.widgets.Button.sound.volume = 0.5;
+		cards.ui.widgets.Button.sound.load();
+		cards.ui.widgets.Button.sound.play();
+	});
 	this.enabled = new thx.stream.Value(true);
 	thx.stream.EmitterBools.negate(this.enabled).subscribe(thx.stream.dom.Dom.subscribeToggleAttribute(this.component.el,"disabled","disabled"));
 };
@@ -4224,6 +4228,11 @@ if(!scope.setImmediate) scope.setImmediate = function(callback) {
 };
 Config.icons = { add : "plus-circle", addMenu : "plus-square", remove : "ban", dropdown : "reorder", checked : "toggle-on", unchecked : "toggle-off", switchtype : "bolt", code : "bolt", value : "pencil", reference : "link", bool : "check-circle", text : "pencil", number : "superscript", date : "calendar", array : "list", object : "table"};
 Config.selectors = { app : ".card"};
+cards.ui.widgets.Button.sound = (function() {
+	var audio = new Audio();
+	audio.src = "sound/click.mp3";
+	return audio;
+})();
 thx.core.Ints.pattern_parse = new EReg("^[+-]?(\\d+|0x[0-9A-F]+)$","i");
 thx.core.Strings._reSplitWC = new EReg("(\r\n|\n\r|\n|\r)","g");
 thx.core.Strings._reReduceWS = new EReg("\\s+","");

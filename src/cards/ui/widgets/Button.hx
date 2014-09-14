@@ -1,5 +1,6 @@
 package cards.ui.widgets;
 
+import js.html.Audio;
 import js.html.MouseEvent;
 using thx.stream.Emitter;
 import thx.stream.Value;
@@ -7,6 +8,11 @@ import cards.components.Component;
 using thx.stream.dom.Dom;
 
 class Button {
+  public static var sound(default, null) : Audio = (function() {
+      var audio = new Audio();
+      audio.src = 'sound/click.mp3';
+      return audio;
+    })();
   public var component(default, null) : Component;
   public var clicks(default, null) : Emitter<MouseEvent>;
   public var enabled(default, null) : Value<Bool>;
@@ -17,7 +23,12 @@ class Button {
         ? '<button>$text</button>'
         : '<button class="fa fa-$icon">$text</button>'
     });
-    clicks = component.el.streamClick();
+    clicks = component.el.streamClick()
+      .audit(function(_) {
+        sound.volume = 0.5;
+        sound.load();
+        sound.play();
+      });
 
     enabled = new Value(true);
     enabled.negate().subscribe(

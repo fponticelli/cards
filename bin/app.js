@@ -2930,8 +2930,11 @@ thx.stream.Emitter.prototype = {
 	}
 	,__class__: thx.stream.Emitter
 };
-thx.stream.Value = function(value) {
+thx.stream.Value = function(value,equal) {
 	var _g = this;
+	if(null == equal) this.equal = function(a,b) {
+		return a == b;
+	}; else this.equal = equal;
 	this.value = value;
 	this.downStreams = [];
 	this.upStreams = [];
@@ -2944,16 +2947,26 @@ thx.stream.Value = function(value) {
 	});
 };
 thx.stream.Value.__name__ = ["thx","stream","Value"];
+thx.stream.Value.createOption = function(value,equal) {
+	var def;
+	if(null == value) def = haxe.ds.Option.None; else def = haxe.ds.Option.Some(value);
+	return new thx.stream.Value(def,(function(f,eq) {
+		return function(a,b) {
+			return f(a,b,eq);
+		};
+	})(thx.core.Options.equals,equal));
+};
 thx.stream.Value.__super__ = thx.stream.Emitter;
 thx.stream.Value.prototype = $extend(thx.stream.Emitter.prototype,{
 	value: null
 	,downStreams: null
 	,upStreams: null
+	,equal: null
 	,get: function() {
 		return this.value;
 	}
 	,set: function(value) {
-		if(this.value == value) return;
+		if(this.equal(this.value,value)) return;
 		this.value = value;
 		this.update();
 	}
@@ -3080,7 +3093,7 @@ thx.core.Options.equals = function(a,b,eq) {
 	}
 };
 thx.core.Options.equalsValue = function(a,b,eq) {
-	return thx.core.Options.equals(a,thx.core.Options.toOption(b));
+	return thx.core.Options.equals(a,thx.core.Options.toOption(b),eq);
 };
 cards.ui.ContextField = function(options) {
 	var _g = this;
@@ -4081,7 +4094,11 @@ cards.ui.widgets.AnchorPoint.BottomRight.__enum__ = cards.ui.widgets.AnchorPoint
 cards.ui.widgets.Button = function(text,icon) {
 	if(text == null) text = "";
 	this.component = new cards.components.Component({ template : null == icon?"<button>" + text + "</button>":"<button class=\"fa fa-" + icon + "\">" + text + "</button>"});
-	this.clicks = thx.stream.dom.Dom.streamEvent(this.component.el,"click",false);
+	this.clicks = thx.stream.dom.Dom.streamEvent(this.component.el,"click",false).audit(function(_) {
+		cards.ui.widgets.Button.sound.volume = 0.5;
+		cards.ui.widgets.Button.sound.load();
+		cards.ui.widgets.Button.sound.play();
+	});
 	this.enabled = new thx.stream.Value(true);
 	thx.stream.EmitterBools.negate(this.enabled).subscribe(thx.stream.dom.Dom.subscribeToggleAttribute(this.component.el,"disabled","disabled"));
 };
@@ -4881,6 +4898,25 @@ thx.core.Arrays.eachPair = function(arr,handler) {
 thx.core.Arrays.mapi = function(arr,handler) {
 	return arr.map(handler);
 };
+thx.core.Arrays.first = function(arr,f) {
+	var _g = 0;
+	while(_g < arr.length) {
+		var item = arr[_g];
+		++_g;
+		if(f(item)) return item;
+	}
+	return null;
+};
+thx.core.Arrays.find = function(arr,f) {
+	var out = [];
+	var _g = 0;
+	while(_g < arr.length) {
+		var item = arr[_g];
+		++_g;
+		if(f(item)) out.push(item);
+	}
+	return out;
+};
 thx.core.Arrays.flatMap = function(arr,callback) {
 	return thx.core.Arrays.flatten(arr.map(callback));
 };
@@ -5015,6 +5051,15 @@ thx.core.Iterables.__name__ = ["thx","core","Iterables"];
 thx.core.Iterables.map = function(it,f) {
 	return thx.core.Iterators.map($iterator(it)(),f);
 };
+thx.core.Iterables.mapi = function(it,f) {
+	return thx.core.Iterators.mapi($iterator(it)(),f);
+};
+thx.core.Iterables.first = function(it,f) {
+	return thx.core.Iterators.first($iterator(it)(),f);
+};
+thx.core.Iterables.find = function(it,f) {
+	return thx.core.Iterators.find($iterator(it)(),f);
+};
 thx.core.Iterables.eachPair = function(it,handler) {
 	return thx.core.Iterators.eachPair($iterator(it)(),handler);
 };
@@ -5036,6 +5081,12 @@ thx.core.Iterables.isEmpty = function(it) {
 thx.core.Iterables.filter = function(it,predicate) {
 	return thx.core.Iterators.filter($iterator(it)(),predicate);
 };
+thx.core.Iterables.isIterable = function(v) {
+	var fields;
+	if(Reflect.isObject(v) && null == Type.getClass(v)) fields = Reflect.fields(v); else fields = Type.getInstanceFields(Type.getClass(v));
+	if(!Lambda.has(fields,"iterator")) return false;
+	return Reflect.isFunction(Reflect.field(v,"iterator"));
+};
 thx.core.Iterators = function() { };
 thx.core.Iterators.__name__ = ["thx","core","Iterators"];
 thx.core.Iterators.map = function(it,f) {
@@ -5054,6 +5105,21 @@ thx.core.Iterators.mapi = function(it,f) {
 		acc.push(f(v,i++));
 	}
 	return acc;
+};
+thx.core.Iterators.first = function(it,f) {
+	while( it.hasNext() ) {
+		var item = it.next();
+		if(f(item)) return item;
+	}
+	return null;
+};
+thx.core.Iterators.find = function(it,f) {
+	var out = [];
+	while( it.hasNext() ) {
+		var item = it.next();
+		if(f(item)) out.push(item);
+	}
+	return out;
 };
 thx.core.Iterators.eachPair = function(it,handler) {
 	thx.core.Arrays.eachPair(thx.core.Iterators.toArray(it),handler);
@@ -5091,6 +5157,12 @@ thx.core.Iterators.filter = function(it,predicate) {
 		if(predicate(item)) acc.push(item);
 		return acc;
 	},[]);
+};
+thx.core.Iterators.isIterator = function(v) {
+	var fields;
+	if(Reflect.isObject(v) && null == Type.getClass(v)) fields = Reflect.fields(v); else fields = Type.getInstanceFields(Type.getClass(v));
+	if(!Lambda.has(fields,"next") || !Lambda.has(fields,"hasNext")) return false;
+	return Reflect.isFunction(Reflect.field(v,"next")) && Reflect.isFunction(Reflect.field(v,"hasNext"));
 };
 thx.core.Nil = { __ename__ : ["thx","core","Nil"], __constructs__ : ["nil"] };
 thx.core.Nil.nil = ["nil",0];
@@ -5977,8 +6049,13 @@ thx.promise.PromiseNil.join = function(p1,p2) {
 thx.promise.PromiseValue = { __ename__ : ["thx","promise","PromiseValue"], __constructs__ : ["Failure","Success"] };
 thx.promise.PromiseValue.Failure = function(err) { var $x = ["Failure",0,err]; $x.__enum__ = thx.promise.PromiseValue; $x.toString = $estr; return $x; };
 thx.promise.PromiseValue.Success = function(value) { var $x = ["Success",1,value]; $x.__enum__ = thx.promise.PromiseValue; $x.toString = $estr; return $x; };
-thx.stream.Bus = function() {
+thx.stream.Bus = function(unique,equal) {
+	if(unique == null) unique = false;
 	var _g = this;
+	this.unique = unique;
+	if(null == equal) this.equal = function(a,b) {
+		return a == b;
+	}; else this.equal = equal;
 	this.downStreams = [];
 	this.upStreams = [];
 	thx.stream.Emitter.call(this,function(stream) {
@@ -5993,10 +6070,17 @@ thx.stream.Bus.__super__ = thx.stream.Emitter;
 thx.stream.Bus.prototype = $extend(thx.stream.Emitter.prototype,{
 	downStreams: null
 	,upStreams: null
+	,unique: null
+	,equal: null
+	,value: null
 	,emit: function(value) {
 		switch(value[1]) {
 		case 0:
 			var v = value[2];
+			if(this.unique) {
+				if(this.equal(v,this.value)) return;
+				this.value = v;
+			}
 			var _g = 0;
 			var _g1 = this.downStreams.slice();
 			while(_g < _g1.length) {
@@ -6229,6 +6313,19 @@ udom.Query.list = function(selector,ctx) {
 udom.Query.all = function(selector,ctx) {
 	return udom._Dom.H.toArray(udom.Query.list(selector,ctx));
 };
+udom.Query.getElementIndex = function(el) {
+	var index = 0;
+	while(null != (el = el.previousElementSibling)) index++;
+	return index;
+};
+udom.Query.childOf = function(child,parent) {
+	if(null != child && child.parentElement == parent) return child; else return null;
+};
+udom.Query.childrenOf = function(children,parent) {
+	return children.filter(function(child) {
+		return child.parentElement == parent;
+	});
+};
 udom._Dom = {};
 udom._Dom.H = function() { };
 udom._Dom.H.__name__ = ["udom","_Dom","H"];
@@ -6313,7 +6410,7 @@ var scope = ("undefined" !== typeof window && window) || ("undefined" !== typeof
 if(!scope.setImmediate) scope.setImmediate = function(callback) {
 	scope.setTimeout(callback,0);
 };
-Config.icons = { add : "plus-circle", remove : "ban", dropdown : "reorder", checked : "toggle-on", unchecked : "toggle-off", switchtype : "bolt", code : "bolt", value : "pencil", reference : "link", bool : "check-circle", text : "pencil", number : "superscript", date : "calendar", array : "list", object : "table"};
+Config.icons = { add : "plus-circle", addMenu : "plus-square", remove : "ban", dropdown : "reorder", checked : "toggle-on", unchecked : "toggle-off", switchtype : "bolt", code : "bolt", value : "pencil", reference : "link", bool : "check-circle", text : "pencil", number : "superscript", date : "calendar", array : "list", object : "table"};
 Config.selectors = { app : ".card"};
 PropertyFeeder.classes = [{ display : "bold", name : "strong"},{ display : "italic", name : "emphasis"}];
 cards.model.Runtime.pattern = new EReg("\\$\\.(.+?)\\b","");
@@ -6324,6 +6421,11 @@ cards.types.CodeTransform.datePattern = new EReg("Date\\(-?\\d+(:?\\.\\d+)?(:?e-
 cards.types.CodeTransform.PATTERN = new EReg("^\\s*\\$\\.([a-z](:?(\\.|\\[\\d+\\])?[a-z0-9]*)*)\\s*$","");
 cards.ui.ContextField.tooltip = new cards.ui.widgets.Tooltip({ classes : "tooltip error"});
 cards.ui.ModelView.typeDefinitions = [{ type : cards.model.SchemaType.StringType, icon : Config.icons.text},{ type : cards.model.SchemaType.BoolType, icon : Config.icons.bool},{ type : cards.model.SchemaType.FloatType, icon : Config.icons.number},{ type : cards.model.SchemaType.DateType, icon : Config.icons.date},{ type : cards.model.SchemaType.ArrayType(cards.model.SchemaType.StringType), icon : Config.icons.array}];
+cards.ui.widgets.Button.sound = (function() {
+	var audio = new Audio();
+	audio.src = "sound/click.mp3";
+	return audio;
+})();
 haxe.ds.ObjectMap.count = 0;
 thx.core.Ints.pattern_parse = new EReg("^[+-]?(\\d+|0x[0-9A-F]+)$","i");
 thx.core.Strings._reSplitWC = new EReg("(\r\n|\n\r|\n|\r)","g");

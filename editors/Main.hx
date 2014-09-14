@@ -7,6 +7,7 @@ import thx.promise.Promise;
 using thx.stream.Bus;
 using thx.stream.dom.Dom;
 using udom.Dom.Query;
+using StringTools;
 
 class Main {
   public static function main() {
@@ -14,7 +15,7 @@ class Main {
 
     Dom.ready().success(function(_) {
       var main = new Main(Query.first(".container"));
-      main.addDemo("object editor", function(el) {
+      main.addDemo(function(el) {
         return new ObjectEditor(el, [
           { name : "name", type : StringType, optional : false },
           { name : "age",  type : FloatType, optional : true },
@@ -32,7 +33,7 @@ class Main {
             ]), optional : false}
         ]);
       });
-      main.addDemo("array editor with StringType", function(el) {
+      main.addDemo(function(el) {
         var editor = new ArrayEditor(el, StringType);
         for(i in 0...3)
           editor.pushItem('f $i');
@@ -40,28 +41,28 @@ class Main {
           editor.insertItem(i*2, 's $i');
         return editor;
       });
-      main.addDemo("array editor with ArrayType<CodeType>", function(el) {
+      main.addDemo(function(el) {
         return new ArrayEditor(el, ArrayType(CodeType));
       });
-      main.addDemo("text editor", function(el) {
+      main.addDemo(function(el) {
         return new TextEditor(el);
       });
-      main.addDemo("code editor", function(el) {
+      main.addDemo(function(el) {
         return new CodeEditor(el);
       });
-      main.addDemo("reference editor", function(el) {
+      main.addDemo(function(el) {
         return new ReferenceEditor(el);
       });
-      main.addDemo("float editor", function(el) {
+      main.addDemo(function(el) {
         return new NumberEditor(el);
       });
-      main.addDemo("date editor", function(el) {
+      main.addDemo(function(el) {
         return new DateEditor(el, false);
       });
-      main.addDemo("date time editor", function(el) {
+      main.addDemo(function(el) {
         return new DateEditor(el);
       });
-      main.addDemo("bool editor", function(el) {
+      main.addDemo(function(el) {
         return new BoolEditor(el);
       });
     });
@@ -84,15 +85,14 @@ class Main {
     container.appendChild(output);
   }
 
-  public function addDemo(title : String, handler : Element -> IEditor) {
-    var heading = Browser.document.createElement('h2'),
+  public function addDemo(handler : Element -> IEditor) {
+    var footer  = Browser.document.createElement('h2'),
         el      = Browser.document.createElement('div'),
         sample  = Browser.document.createElement('div');
     sample.className = "sample";
     el.className = "card";
-    heading.textContent = title;
-    sample.appendChild(heading);
     sample.appendChild(el);
+    sample.appendChild(footer);
     demos.appendChild(sample);
     var editor = handler(el);
     if(null == editor)
@@ -104,5 +104,6 @@ class Main {
       .withValue(true)
       .mapValue(function(_) return "focus: " + editor.toString() + ", " + editor.type)
       .subscribe(focus.subscribeText());
+    footer.textContent = 'editor: ' + editor.toString() + '\ntype: ' + Std.string(editor.type).replace('\t', ' ');
   }
 }

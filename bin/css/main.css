@@ -213,7 +213,6 @@ a img {
   content: counter(li);
   counter-increment: li;
   color: #000;
-  text-shadow: none;
   position: absolute;
   text-align: right;
   right: calc(100% + 0.2em);
@@ -237,10 +236,9 @@ a img {
   border-bottom: 1px solid #ccc;
 }
 .card .table th {
-  padding: 0.45em;
+  padding: 0.4em;
   font-family: Verdana;
   color: #000;
-  text-shadow: none;
   font-size: 0.6em;
   background-color: #ddd;
 }
