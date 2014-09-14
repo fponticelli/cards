@@ -49,11 +49,12 @@ textarea.text
   width 100%
   border none
   height 1.7em
+  font-size 1em
 
 input.bool[type=checkbox]
   width 100%
   text-align center
-  visibility hidden // to hide the checkbox itself
+  transform scale(0.01)
 input.bool[type=checkbox]:before
   visibility visible
   font-family FontAwesome
@@ -61,6 +62,7 @@ input.bool[type=checkbox]:before
   cursor pointer
   width 100%
   font-size 1.2em
+  transform scale(100)
   //margin 0.6em 0 0 0.6em
 
 input.bool[type=checkbox]:before
@@ -77,7 +79,7 @@ textarea.text
   resize none
   max-height 10em
   background-color #f3f3f3
-  font-size 1em
+  font-family inherit
 
 .code
   .CodeMirror

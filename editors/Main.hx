@@ -65,6 +65,12 @@ class Main {
       main.addDemo(function(el) {
         return new BoolEditor(el);
       });
+      main.addDemo(function(el) {
+        return new ColorEditor(el);
+      });
+      main.addDemo(function(el) {
+        return new RangeEditor(el);
+      });
     });
   }
 

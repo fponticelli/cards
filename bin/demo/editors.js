@@ -276,6 +276,12 @@ Main.main = function() {
 		main.addDemo(function(el9) {
 			return new cards.ui.input.BoolEditor(el9);
 		});
+		main.addDemo(function(el10) {
+			return new cards.ui.input.ColorEditor(el10);
+		});
+		main.addDemo(function(el11) {
+			return new cards.ui.input.RangeEditor(el11);
+		});
 	});
 };
 Main.prototype = {
@@ -1001,6 +1007,42 @@ cards.ui.input.CodeEditor.prototype = $extend(cards.ui.input.Editor.prototype,{
 	}
 	,__class__: cards.ui.input.CodeEditor
 });
+cards.ui.input.InputBasedEditor = function(container,valueType,name,type,event,extract,assign) {
+	if(event == null) event = "change";
+	if(null == type) type = name;
+	if(null == extract) extract = function(input) {
+		var _1 = input.value;
+		return { _0 : cards.model.SchemaType.StringType, _1 : _1};
+	};
+	if(null == assign) assign = function(input1,value) {
+		input1.value = value._1;
+	};
+	var options = { template : "<input class=\"editor " + name + "\" placeholder=\"select " + name + "\" type=\"" + type + "\" />", container : container};
+	cards.ui.input.Editor.call(this,valueType,options);
+	var el = this.component.el;
+	thx.stream.dom.Dom.streamEvent(el,event).mapValue(function(_) {
+		return extract(el);
+	}).plug(this.stream);
+	thx.stream.dom.Dom.streamFocus(el).feed(this.focus);
+	this.stream.subscribe(function(value1) {
+		var v = value1._1;
+		if(extract(el) != v) assign(el,value1);
+	});
+	this.focus.subscribe(thx.stream.dom.Dom.subscribeFocus(el));
+};
+cards.ui.input.InputBasedEditor.__name__ = ["cards","ui","input","InputBasedEditor"];
+cards.ui.input.InputBasedEditor.__super__ = cards.ui.input.Editor;
+cards.ui.input.InputBasedEditor.prototype = $extend(cards.ui.input.Editor.prototype,{
+	__class__: cards.ui.input.InputBasedEditor
+});
+cards.ui.input.ColorEditor = function(container) {
+	cards.ui.input.InputBasedEditor.call(this,container,cards.model.SchemaType.StringType,"color");
+};
+cards.ui.input.ColorEditor.__name__ = ["cards","ui","input","ColorEditor"];
+cards.ui.input.ColorEditor.__super__ = cards.ui.input.InputBasedEditor;
+cards.ui.input.ColorEditor.prototype = $extend(cards.ui.input.InputBasedEditor.prototype,{
+	__class__: cards.ui.input.ColorEditor
+});
 cards.ui.input.DateEditor = function(container,useTime) {
 	if(useTime == null) useTime = true;
 	var _g = this;
@@ -1089,23 +1131,14 @@ cards.ui.input.EditorFactory.create = function(type,container,parent) {
 	}
 };
 cards.ui.input.NumberEditor = function(container) {
-	var options = { template : "<input class=\"editor number\" placeholder=\"type number\" type=\"number\" />", container : container};
-	cards.ui.input.Editor.call(this,cards.model.SchemaType.FloatType,options);
-	var el = this.component.el;
-	thx.stream.dom.Dom.streamEvent(el,"input").mapValue(function(_) {
+	cards.ui.input.InputBasedEditor.call(this,container,cards.model.SchemaType.FloatType,"number","number","input",function(el) {
 		var _1 = el.valueAsNumber;
 		return { _0 : cards.model.SchemaType.FloatType, _1 : _1};
-	}).plug(this.stream);
-	thx.stream.dom.Dom.streamFocus(el).feed(this.focus);
-	this.stream.subscribe(function(num) {
-		var v = num._1;
-		if(el.value != v) el.value = v;
 	});
-	this.focus.subscribe(thx.stream.dom.Dom.subscribeFocus(el));
 };
 cards.ui.input.NumberEditor.__name__ = ["cards","ui","input","NumberEditor"];
-cards.ui.input.NumberEditor.__super__ = cards.ui.input.Editor;
-cards.ui.input.NumberEditor.prototype = $extend(cards.ui.input.Editor.prototype,{
+cards.ui.input.NumberEditor.__super__ = cards.ui.input.InputBasedEditor;
+cards.ui.input.NumberEditor.prototype = $extend(cards.ui.input.InputBasedEditor.prototype,{
 	__class__: cards.ui.input.NumberEditor
 });
 cards.ui.input.ObjectEditor = function(container,fields) {
@@ -1246,24 +1279,26 @@ cards.ui.input._Path.Path_Impl_.equal = function(this1,other) {
 cards.ui.input.PathItem = { __ename__ : ["cards","ui","input","PathItem"], __constructs__ : ["Field","Index"] };
 cards.ui.input.PathItem.Field = function(name) { var $x = ["Field",0,name]; $x.__enum__ = cards.ui.input.PathItem; $x.toString = $estr; return $x; };
 cards.ui.input.PathItem.Index = function(pos) { var $x = ["Index",1,pos]; $x.__enum__ = cards.ui.input.PathItem; $x.toString = $estr; return $x; };
+cards.ui.input.RangeEditor = function(container) {
+	cards.ui.input.InputBasedEditor.call(this,container,cards.model.SchemaType.FloatType,"range","range","input",function(el) {
+		var _1 = el.valueAsNumber;
+		return { _0 : cards.model.SchemaType.FloatType, _1 : _1};
+	});
+};
+cards.ui.input.RangeEditor.__name__ = ["cards","ui","input","RangeEditor"];
+cards.ui.input.RangeEditor.__super__ = cards.ui.input.InputBasedEditor;
+cards.ui.input.RangeEditor.prototype = $extend(cards.ui.input.InputBasedEditor.prototype,{
+	__class__: cards.ui.input.RangeEditor
+});
 cards.ui.input.ReferenceEditor = function(container) {
-	var options = { template : "<input class=\"editor reference\" placeholder=\"type a reference\"/>", container : container};
-	cards.ui.input.Editor.call(this,cards.model.SchemaType.ReferenceType,options);
-	var el = this.component.el;
-	thx.stream.dom.Dom.streamEvent(el,"input").mapValue(function(_) {
+	cards.ui.input.InputBasedEditor.call(this,container,cards.model.SchemaType.ReferenceType,"reference","text","input",function(el) {
 		var _1 = el.value;
 		return { _0 : cards.model.SchemaType.ReferenceType, _1 : _1};
-	}).plug(this.stream);
-	thx.stream.dom.Dom.streamFocus(el).feed(this.focus);
-	this.stream.subscribe(function(text) {
-		var v = text._1;
-		if(el.value != v) el.value = v;
 	});
-	this.focus.subscribe(thx.stream.dom.Dom.subscribeFocus(el));
 };
 cards.ui.input.ReferenceEditor.__name__ = ["cards","ui","input","ReferenceEditor"];
-cards.ui.input.ReferenceEditor.__super__ = cards.ui.input.Editor;
-cards.ui.input.ReferenceEditor.prototype = $extend(cards.ui.input.Editor.prototype,{
+cards.ui.input.ReferenceEditor.__super__ = cards.ui.input.InputBasedEditor;
+cards.ui.input.ReferenceEditor.prototype = $extend(cards.ui.input.InputBasedEditor.prototype,{
 	__class__: cards.ui.input.ReferenceEditor
 });
 cards.ui.input.TextEditor = function(container) {

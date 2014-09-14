@@ -158,11 +158,16 @@ a img {
   width: 100%;
   border: none;
   height: 1.7em;
+  font-size: 1em;
 }
 .card input.bool[type=checkbox] {
   width: 100%;
   text-align: center;
-  visibility: hidden;
+  -webkit-transform: scale(0.01);
+  -moz-transform: scale(0.01);
+  -o-transform: scale(0.01);
+  -ms-transform: scale(0.01);
+  transform: scale(0.01);
 }
 .card input.bool[type=checkbox]:before {
   visibility: visible;
@@ -171,6 +176,11 @@ a img {
   cursor: pointer;
   width: 100%;
   font-size: 1.2em;
+  -webkit-transform: scale(100);
+  -moz-transform: scale(100);
+  -o-transform: scale(100);
+  -ms-transform: scale(100);
+  transform: scale(100);
 }
 .card input.bool[type=checkbox]:before {
   content: "\f204";
@@ -186,7 +196,7 @@ a img {
   resize: none;
   max-height: 10em;
   background-color: #f3f3f3;
-  font-size: 1em;
+  font-family: inherit;
 }
 .card .code .CodeMirror {
   border: 1px solid #eee;
