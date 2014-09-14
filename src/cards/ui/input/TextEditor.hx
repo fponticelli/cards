@@ -35,6 +35,8 @@ class TextEditor extends Editor {
         el.value = v;
     });
 
+    focus.subscribe(el.subscribeFocus());
+
     // TODO, this considerably slow downs the creation of many items (like in array)
     //resize();
   }

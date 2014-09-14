@@ -36,6 +36,8 @@ class CodeEditor extends Editor {
         editor.doc.setValue(v);
       }
     });
+
+    focus.subscribe(function(_) editor.focus());
   }
 
   function changes() {

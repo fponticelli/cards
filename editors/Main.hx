@@ -1,15 +1,14 @@
 import cards.components.Component;
+import cards.ui.input.*;
 import cards.ui.input.ArrayEditor;
+import cards.ui.input.Path;
 import cards.ui.input.TextEditor;
 import js.Browser;
-import thx.promise.Promise;
 import js.html.Element;
-using udom.Dom.Query;
+import thx.promise.Promise;
 using thx.stream.Bus;
 using thx.stream.dom.Dom;
-
-import cards.ui.input.*;
-import cards.ui.input.Path;
+using udom.Dom.Query;
 
 class Main {
   public static function main() {
@@ -85,7 +84,7 @@ class Main {
       .subscribe(output.subscribeText());
     editor.focus
       .withValue(true)
-      .mapValue(function(_) return "focus: " + editor.toString())
+      .mapValue(function(_) return "focus: " + editor.toString() + ", " + editor.type)
       .subscribe(focus.subscribeText());
   }
 }

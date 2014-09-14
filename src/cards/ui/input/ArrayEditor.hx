@@ -16,7 +16,6 @@ import cards.ui.input.Diff;
 
 // TODO
 //  * drag and drop item
-//  * move focus to newly created item
 //  * move focus to next sibling after deletion
 class ArrayEditor extends RouteEditor {
   var list : OListElement;
@@ -142,6 +141,7 @@ class ArrayEditor extends RouteEditor {
       // don't use plug or the stream will be killed when killing the editor
       .subscribe(function(v) diff.pulse(v));
 
+    editor.focus.set(true);
   }
 
   function setEditor(index : Int, value : TypedValue) {

@@ -158,7 +158,7 @@ Main.prototype = {
 			return "content: " + cards.ui.input._TypedValue.TypedValue_Impl_.toString(v);
 		}).subscribe(thx.stream.dom.Dom.subscribeText(this.output));
 		editor.focus.withValue(true).mapValue(function(_) {
-			return "focus: " + editor.toString();
+			return "focus: " + editor.toString() + ", " + Std.string(editor.type);
 		}).subscribe(thx.stream.dom.Dom.subscribeText(this.focus));
 	}
 	,__class__: Main
@@ -737,6 +737,7 @@ cards.ui.input.ArrayEditor.prototype = $extend(cards.ui.input.RouteEditor.protot
 		}).distinct(cards.ui.input._DiffAt.DiffAt_Impl_.equal).subscribe(function(v2) {
 			_g.diff.emit(thx.stream.StreamValue.Pulse(v2));
 		});
+		editor.focus.set(true);
 	}
 	,setEditor: function(index,value) {
 		this.editors[index].stream.emit(thx.stream.StreamValue.Pulse(value));
@@ -775,6 +776,9 @@ cards.ui.input.CodeEditor = function(container) {
 	this.stream.subscribe(function(text) {
 		var v = text._1;
 		if(_g.editor.doc.getValue() != v) _g.editor.doc.setValue(v);
+	});
+	this.focus.subscribe(function(_) {
+		_g.editor.focus();
 	});
 };
 cards.ui.input.CodeEditor.__name__ = ["cards","ui","input","CodeEditor"];
@@ -909,6 +913,7 @@ cards.ui.input.TextEditor = function(container) {
 		var v = text._1;
 		if(el.value != v) el.value = v;
 	});
+	this.focus.subscribe(thx.stream.dom.Dom.subscribeFocus(el));
 };
 cards.ui.input.TextEditor.__name__ = ["cards","ui","input","TextEditor"];
 cards.ui.input.TextEditor.__super__ = cards.ui.input.Editor;
