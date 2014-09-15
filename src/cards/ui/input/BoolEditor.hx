@@ -10,7 +10,7 @@ using thx.stream.dom.Dom;
 class BoolEditor extends Editor {
   public function new(container : Element) {
     var options = {
-      template  : '<input class="editor bool" placeholder="type bool" type="checkbox" />',
+      template  : '<input class="editor bool" placeholder="on/off" type="checkbox" />',
       container : container
     };
     super(BoolType, options);

@@ -163,11 +163,11 @@ a img {
 .card input.bool[type=checkbox] {
   width: 100%;
   text-align: center;
-  -webkit-transform: scale(0.01);
-  -moz-transform: scale(0.01);
-  -o-transform: scale(0.01);
-  -ms-transform: scale(0.01);
-  transform: scale(0.01);
+  -webkit-transform: scale(0.001);
+  -moz-transform: scale(0.001);
+  -o-transform: scale(0.001);
+  -ms-transform: scale(0.001);
+  transform: scale(0.001);
 }
 .card input.bool[type=checkbox]:before {
   visibility: visible;
@@ -176,11 +176,11 @@ a img {
   cursor: pointer;
   width: 100%;
   font-size: 1.2em;
-  -webkit-transform: scale(100);
-  -moz-transform: scale(100);
-  -o-transform: scale(100);
-  -ms-transform: scale(100);
-  transform: scale(100);
+  -webkit-transform: scale(1000);
+  -moz-transform: scale(1000);
+  -o-transform: scale(1000);
+  -ms-transform: scale(1000);
+  transform: scale(1000);
 }
 .card input.bool[type=checkbox]:before {
   content: "\f204";
@@ -212,6 +212,7 @@ a img {
 .card .array .items {
   max-height: 16em;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 .card .array .items > ol {
   margin-left: 1.3em;
@@ -243,7 +244,7 @@ a img {
   position: relative;
 }
 .card .table > table {
-  border-bottom: 1px solid #ccc;
+  width: 100%;
 }
 .card .table th {
   padding: 0.4em;
@@ -252,26 +253,47 @@ a img {
   font-size: 0.6em;
   background-color: #ddd;
 }
+.card .table th,
+.card .table td {
+  overflow: hidden;
+}
 .card .table th.primitive {
-  border: 1px solid #ccc;
-  border-right: none;
-  border-bottom: none;
+  border-top: 1px solid #ccc;
+  border-left: 1px solid #ccc;
 }
 .card .table td.primitive {
-  border: 1px solid #ccc;
-  border-left: 1px solid #e6e6e6;
-  border-bottom: none;
+  border-top: 1px solid #ccc;
+  border-left: 1px solid #e0e0e0;
 }
 .card .table th.composite {
-  border: 1px solid #ccc;
-  border-bottom: none;
+  border-top: 1px solid #ccc;
+  border-left: 1px solid #ccc;
 }
 .card .table td.composite {
-  border: 1px solid #ccc;
   border-top: none;
-  border-bottom: none;
+  border-left: 1px solid #ccc;
   padding-left: 0.5em;
   background-color: #ddd;
+}
+.card .table tr:first-child td,
+.card .table tr:first-child th {
+  border-top: none;
+}
+.card .table table {
+  border-bottom: 1px solid #ccc;
+}
+.card .table table table {
+  border-bottom: none;
+}
+.card .table tr td.primitive,
+.card .table tr th.composite,
+.card .table tr td.composite {
+  border-right: 1px solid #ccc;
+}
+.card .table tr tr td.primitive,
+.card .table tr tr th.composite,
+.card .table tr tr td.composite {
+  border-right: none;
 }
 .card .block {
   padding: 0.25em 0.5em;

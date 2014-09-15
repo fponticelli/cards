@@ -10,6 +10,7 @@ using thx.stream.dom.Dom;
 class Button {
   public static var sound(default, null) : Audio = (function() {
       var audio = new Audio();
+      audio.volume = 0.5;
       audio.src = 'sound/click.mp3';
       return audio;
     })();
@@ -24,16 +25,17 @@ class Button {
         : '<button class="fa fa-$icon">$text</button>'
     });
     clicks = component.el.streamClick()
-      .audit(function(_) {
-        sound.volume = 0.5;
-        sound.load();
-        sound.play();
-      });
+      .audit(playSound);
 
     enabled = new Value(true);
     enabled.negate().subscribe(
       component.el.subscribeToggleAttribute("disabled", "disabled")
     );
+  }
+
+  function playSound(_) {
+    sound.load();
+    sound.play();
   }
 
   public function destroy() {

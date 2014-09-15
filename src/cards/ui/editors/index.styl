@@ -54,7 +54,7 @@ textarea.text
 input.bool[type=checkbox]
   width 100%
   text-align center
-  transform scale(0.01)
+  transform scale(0.001)
 input.bool[type=checkbox]:before
   visibility visible
   font-family FontAwesome
@@ -62,7 +62,7 @@ input.bool[type=checkbox]:before
   cursor pointer
   width 100%
   font-size 1.2em
-  transform scale(100)
+  transform scale(1000)
   //margin 0.6em 0 0 0.6em
 
 input.bool[type=checkbox]:before
@@ -96,6 +96,7 @@ textarea.text
   .items
     max-height 16em
     overflow-y auto
+    overflow-x hidden
     > ol
       margin-left 1.3em
       position relative
@@ -124,7 +125,7 @@ textarea.text
     position relative
 
   > table
-    border-bottom 1px solid #ccc
+    width 100%
 
   th
     padding 0.4em
@@ -133,20 +134,36 @@ textarea.text
     font-size 0.6em
     background-color #ddd
 
+  th, td
+    overflow hidden
+
   th.primitive
-    border 1px solid #ccc
-    border-right none
-    border-bottom none
+    border-top 1px solid #ccc
+    border-left 1px solid #ccc
   td.primitive
-    border 1px solid #ccc
-    border-left 1px solid #e6e6e6
-    border-bottom none
+    border-top 1px solid #ccc
+    border-left 1px solid #e0e0e0
   th.composite
-    border 1px solid #ccc
-    border-bottom none
+    border-top 1px solid #ccc
+    border-left 1px solid #ccc
   td.composite
-    border 1px solid #ccc
     border-top none
-    border-bottom none
+    border-left 1px solid #ccc
     padding-left 0.5em
     background-color #ddd
+
+  tr:first-child
+    td, th
+      border-top none
+
+  table
+    border-bottom 1px solid #ccc
+    table
+      border-bottom none
+
+  tr
+    td.primitive, th.composite, td.composite
+      border-right 1px solid #ccc
+    tr
+      td.primitive, th.composite, td.composite
+        border-right none

@@ -16,7 +16,7 @@ class TextEditor extends Editor {
 
   public function new(container : Element) {
     var options = {
-      template  : '<textarea class="editor text" placeholder="type text"></textarea>',
+      template  : '<textarea class="editor text" placeholder="text"></textarea>',
       container : container
     };
     super(StringType, options);

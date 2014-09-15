@@ -13,7 +13,7 @@ class DateEditor extends Editor {
   public function new(container : Element, useTime = true) {
     format = useTime ? '%Y-%m-%dT%H:%M' : '%Y-%m-%d';
     var options = {
-      template  : '<input class="editor date" placeholder="type date" type="${useTime?"datetime-local":"date"}" />',
+      template  : '<input class="editor date" placeholder="insert date" type="${useTime?"datetime-local":"date"}" />',
       container : container
     };
     super(DateType, options);

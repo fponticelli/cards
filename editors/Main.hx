@@ -20,9 +20,9 @@ class Main {
           { name : "name", type : StringType, optional : false },
           { name : "age",  type : FloatType, optional : true },
           { name : "contacts", type : ArrayType(ObjectType([
-              { name : "type",  type : StringType, optional : false },
+              { name : "type",  type : StringType, optional : true },
               { name : "value", type : StringType, optional : false },
-              { name : "primary", type : BoolType, optional : false }
+              { name : "primary", type : BoolType, optional : true }
             ])), optional : false },
           { name : "address", type : ObjectType([
               { name : "line 1", type : StringType, optional : false },

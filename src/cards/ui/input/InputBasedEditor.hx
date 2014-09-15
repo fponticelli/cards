@@ -16,7 +16,7 @@ class InputBasedEditor extends Editor {
     if(null == assign)
       assign = function(input, value) input.value = value.asValue();
     var options = {
-      template  : '<input class="editor $name" placeholder="select $name" type="$type" />',
+      template  : '<input class="editor $name" placeholder="$name" type="$type" />',
       container : container
     };
     super(valueType, options);
