@@ -8,6 +8,8 @@ using thx.stream.Bus;
 using thx.stream.dom.Dom;
 using udom.Dom.Query;
 using StringTools;
+import cards.ui.input.Diff;
+import cards.ui.input.DiffAt;
 
 class Main {
   public static function main() {
@@ -16,7 +18,7 @@ class Main {
     Dom.ready().success(function(_) {
       var main = new Main(Query.first(".container"));
       main.addDemo(function(el) {
-        return new ObjectEditor(el, null, [
+        var editor = new ObjectEditor(el, null, [
           { name : "name", type : StringType, optional : false },
           { name : "age",  type : FloatType, optional : true },
           { name : "contacts", type : ArrayType(ObjectType([
@@ -32,13 +34,22 @@ class Main {
               { name : "state", type : StringType, optional : false }
             ]), optional : false}
         ]);
+        editor.diff.pulse(new DiffAt('name', Set('Franco')));
+        editor.diff.pulse(new DiffAt('contacts[0]', Add));
+        editor.diff.pulse(new DiffAt('contacts[0].type', Set('email')));
+        editor.diff.pulse(new DiffAt('contacts[0].value', Set('franco.ponticelli@gmail.com')));
+        return editor;
       });
       main.addDemo(function(el) {
         var editor = new ArrayEditor(el, null, StringType);
-        for(i in 0...3)
-          editor.pushItem('f $i');
-        for(i in 0...3)
-          editor.insertItem(i*2, 's $i');
+        for(i in 0...3) {
+          editor.diff.pulse(new DiffAt(i, Add));
+          editor.diff.pulse(new DiffAt(i, Set('f $i')));
+        }
+        for(i in 0...3) {
+          editor.diff.pulse(new DiffAt(i*2, Add));
+          editor.diff.pulse(new DiffAt(i*2, Set('s $i')));
+        }
         return editor;
       });
       main.addDemo(function(el) {
