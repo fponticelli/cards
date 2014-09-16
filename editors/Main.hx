@@ -18,6 +18,9 @@ class Main {
     Dom.ready().success(function(_) {
       var main = new Main(Query.first(".container"));
       main.addDemo(function(el) {
+        return new AnonymousObjectEditor(el, null);
+      });
+      main.addDemo(function(el) {
         var editor = new ObjectEditor(el, null, [
           { name : "name", type : StringType, optional : false },
           { name : "age",  type : FloatType, optional : true },

@@ -266,7 +266,10 @@ Main.main = function() {
 	thx.stream.dom.Dom.ready().success(function(_) {
 		var main = new Main(udom.Query.first(".container"));
 		main.addDemo(function(el) {
-			var editor = new cards.ui.input.ObjectEditor(el,null,[{ name : "name", type : cards.model.SchemaType.StringType, optional : false},{ name : "age", type : cards.model.SchemaType.FloatType, optional : true},{ name : "contacts", type : cards.model.SchemaType.ArrayType(cards.model.SchemaType.ObjectType([{ name : "type", type : cards.model.SchemaType.StringType, optional : true},{ name : "value", type : cards.model.SchemaType.StringType, optional : false},{ name : "primary", type : cards.model.SchemaType.BoolType, optional : true}])), optional : false},{ name : "address", type : cards.model.SchemaType.ObjectType([{ name : "line 1", type : cards.model.SchemaType.StringType, optional : false},{ name : "line 2", type : cards.model.SchemaType.StringType, optional : true},{ name : "post code", type : cards.model.SchemaType.FloatType, optional : false},{ name : "city", type : cards.model.SchemaType.StringType, optional : false},{ name : "state", type : cards.model.SchemaType.StringType, optional : false}]), optional : false}]);
+			return new cards.ui.input.AnonymousObjectEditor(el,null);
+		});
+		main.addDemo(function(el1) {
+			var editor = new cards.ui.input.ObjectEditor(el1,null,[{ name : "name", type : cards.model.SchemaType.StringType, optional : false},{ name : "age", type : cards.model.SchemaType.FloatType, optional : true},{ name : "contacts", type : cards.model.SchemaType.ArrayType(cards.model.SchemaType.ObjectType([{ name : "type", type : cards.model.SchemaType.StringType, optional : true},{ name : "value", type : cards.model.SchemaType.StringType, optional : false},{ name : "primary", type : cards.model.SchemaType.BoolType, optional : true}])), optional : false},{ name : "address", type : cards.model.SchemaType.ObjectType([{ name : "line 1", type : cards.model.SchemaType.StringType, optional : false},{ name : "line 2", type : cards.model.SchemaType.StringType, optional : true},{ name : "post code", type : cards.model.SchemaType.FloatType, optional : false},{ name : "city", type : cards.model.SchemaType.StringType, optional : false},{ name : "state", type : cards.model.SchemaType.StringType, optional : false}]), optional : false}]);
 			editor.diff.pulse((function($this) {
 				var $r;
 				var path = cards.ui.input._Path.Path_Impl_.stringAsPath("name");
@@ -311,8 +314,8 @@ Main.main = function() {
 			}(this)));
 			return editor;
 		});
-		main.addDemo(function(el1) {
-			var editor1 = new cards.ui.input.ArrayEditor(el1,null,cards.model.SchemaType.StringType);
+		main.addDemo(function(el2) {
+			var editor1 = new cards.ui.input.ArrayEditor(el2,null,cards.model.SchemaType.StringType);
 			var _g = 0;
 			while(_g < 3) {
 				var i = _g++;
@@ -359,35 +362,35 @@ Main.main = function() {
 			}
 			return editor1;
 		});
-		main.addDemo(function(el2) {
-			return new cards.ui.input.ArrayEditor(el2,null,cards.model.SchemaType.ArrayType(cards.model.SchemaType.CodeType));
-		});
 		main.addDemo(function(el3) {
-			return new cards.ui.input.TextEditor(el3,null);
+			return new cards.ui.input.ArrayEditor(el3,null,cards.model.SchemaType.ArrayType(cards.model.SchemaType.CodeType));
 		});
 		main.addDemo(function(el4) {
-			return new cards.ui.input.CodeEditor(el4,null);
+			return new cards.ui.input.TextEditor(el4,null);
 		});
 		main.addDemo(function(el5) {
-			return new cards.ui.input.ReferenceEditor(el5,null);
+			return new cards.ui.input.CodeEditor(el5,null);
 		});
 		main.addDemo(function(el6) {
-			return new cards.ui.input.NumberEditor(el6,null);
+			return new cards.ui.input.ReferenceEditor(el6,null);
 		});
 		main.addDemo(function(el7) {
-			return new cards.ui.input.DateEditor(el7,null,false);
+			return new cards.ui.input.NumberEditor(el7,null);
 		});
 		main.addDemo(function(el8) {
-			return new cards.ui.input.DateEditor(el8,null);
+			return new cards.ui.input.DateEditor(el8,null,false);
 		});
 		main.addDemo(function(el9) {
-			return new cards.ui.input.BoolEditor(el9,null);
+			return new cards.ui.input.DateEditor(el9,null);
 		});
 		main.addDemo(function(el10) {
-			return new cards.ui.input.ColorEditor(el10,null);
+			return new cards.ui.input.BoolEditor(el10,null);
 		});
 		main.addDemo(function(el11) {
-			return new cards.ui.input.RangeEditor(el11,null);
+			return new cards.ui.input.ColorEditor(el11,null);
+		});
+		main.addDemo(function(el12) {
+			return new cards.ui.input.RangeEditor(el12,null);
 		});
 	});
 };
@@ -1781,6 +1784,473 @@ cards.ui.input.RouteEditor.prototype = $extend(cards.ui.input.Editor.prototype,{
 	}
 	,__class__: cards.ui.input.RouteEditor
 });
+cards.ui.input.BaseObjectEditor = function(container,parent,fields) {
+	var _g2 = this;
+	this.object = { };
+	this.editors = new haxe.ds.StringMap();
+	this.defMap = new haxe.ds.StringMap();
+	this.currentField = thx.stream.Value.createOption();
+	var options = { template : "<div class=\"editor table\"></div>", container : container, parent : parent};
+	cards.ui.input.RouteEditor.call(this,cards.model.SchemaType.ObjectType([]),options);
+	this.fields = [];
+	this.toolbar = new cards.ui.widgets.Toolbar({ parent : this.component, container : this.component.el});
+	var _this = window.document;
+	this.table = _this.createElement("table");
+	this.component.el.appendChild(this.table);
+	this.diff.subscribe(function(d) {
+		{
+			var _g = d._0;
+			var _g1 = d._1;
+			var path = _g;
+			switch(_g.length) {
+			case 1:
+				switch(_g[0][1]) {
+				case 0:
+					var diff = _g1;
+					switch(_g1[1]) {
+					case 0:
+						var name = _g[0][2];
+						if(_g2.editors.exists(name)) _g2.removeField(name);
+						break;
+					case 1:
+						var name1 = _g[0][2];
+						_g2.ensureField(name1);
+						break;
+					case 2:
+						var name2 = _g[0][2];
+						var tv = _g1[2];
+						if(Type.enumEq(tv._0,_g2.defMap.get(name2).field.type)) _g2.ensureField(name2).stream.emit(thx.stream.StreamValue.Pulse(tv)); else if(path.length > 0) {
+							var first = path.shift();
+							switch(first[1]) {
+							case 0:
+								var name3 = first[2];
+								if((function($this) {
+									var $r;
+									var _g3 = _g2.defMap.get(name3).field.type;
+									$r = (function($this) {
+										var $r;
+										switch(_g3[1]) {
+										case 4:case 0:
+											$r = true;
+											break;
+										default:
+											$r = false;
+										}
+										return $r;
+									}($this));
+									return $r;
+								}(this))) _g2.ensureField(name3).diff.emit(thx.stream.StreamValue.Pulse({ _0 : path, _1 : diff})); else throw "unable to forward " + cards.ui.input._DiffAt.DiffAt_Impl_.toString(d) + " within ObjectEditor";
+								break;
+							default:
+								throw "unable to forward " + cards.ui.input._DiffAt.DiffAt_Impl_.toString(d) + " within ObjectEditor";
+							}
+						} else {
+							haxe.Log.trace(cards.ui.input._Path.Path_Impl_.toString(d._0),{ fileName : "BaseObjectEditor.hx", lineNumber : 69, className : "cards.ui.input.BaseObjectEditor", methodName : "new"});
+							haxe.Log.trace((function($this) {
+								var $r;
+								var _g21 = d._1;
+								$r = (function($this) {
+									var $r;
+									switch(_g21[1]) {
+									case 2:
+										$r = (function($this) {
+											var $r;
+											var d1 = _g21[2];
+											$r = cards.ui.input._TypedValue.TypedValue_Impl_.toString(d1);
+											return $r;
+										}($this));
+										break;
+									default:
+										$r = Std.string(d._1);
+									}
+									return $r;
+								}($this));
+								return $r;
+							}(this)),{ fileName : "BaseObjectEditor.hx", lineNumber : 70, className : "cards.ui.input.BaseObjectEditor", methodName : "new"});
+							throw "unable to assign " + cards.ui.input._DiffAt.DiffAt_Impl_.toString(d) + " within ObjectEditor";
+						}
+						break;
+					default:
+						if(path.length > 0) {
+							var first = path.shift();
+							switch(first[1]) {
+							case 0:
+								var name3 = first[2];
+								if((function($this) {
+									var $r;
+									var _g3 = _g2.defMap.get(name3).field.type;
+									$r = (function($this) {
+										var $r;
+										switch(_g3[1]) {
+										case 4:case 0:
+											$r = true;
+											break;
+										default:
+											$r = false;
+										}
+										return $r;
+									}($this));
+									return $r;
+								}(this))) _g2.ensureField(name3).diff.emit(thx.stream.StreamValue.Pulse({ _0 : path, _1 : diff})); else throw "unable to forward " + cards.ui.input._DiffAt.DiffAt_Impl_.toString(d) + " within ObjectEditor";
+								break;
+							default:
+								throw "unable to forward " + cards.ui.input._DiffAt.DiffAt_Impl_.toString(d) + " within ObjectEditor";
+							}
+						} else {
+							haxe.Log.trace(cards.ui.input._Path.Path_Impl_.toString(d._0),{ fileName : "BaseObjectEditor.hx", lineNumber : 69, className : "cards.ui.input.BaseObjectEditor", methodName : "new"});
+							haxe.Log.trace((function($this) {
+								var $r;
+								var _g21 = d._1;
+								$r = (function($this) {
+									var $r;
+									switch(_g21[1]) {
+									case 2:
+										$r = (function($this) {
+											var $r;
+											var d1 = _g21[2];
+											$r = cards.ui.input._TypedValue.TypedValue_Impl_.toString(d1);
+											return $r;
+										}($this));
+										break;
+									default:
+										$r = Std.string(d._1);
+									}
+									return $r;
+								}($this));
+								return $r;
+							}(this)),{ fileName : "BaseObjectEditor.hx", lineNumber : 70, className : "cards.ui.input.BaseObjectEditor", methodName : "new"});
+							throw "unable to assign " + cards.ui.input._DiffAt.DiffAt_Impl_.toString(d) + " within ObjectEditor";
+						}
+					}
+					break;
+				default:
+					var diff = _g1;
+					if(path.length > 0) {
+						var first = path.shift();
+						switch(first[1]) {
+						case 0:
+							var name3 = first[2];
+							if((function($this) {
+								var $r;
+								var _g3 = _g2.defMap.get(name3).field.type;
+								$r = (function($this) {
+									var $r;
+									switch(_g3[1]) {
+									case 4:case 0:
+										$r = true;
+										break;
+									default:
+										$r = false;
+									}
+									return $r;
+								}($this));
+								return $r;
+							}(this))) _g2.ensureField(name3).diff.emit(thx.stream.StreamValue.Pulse({ _0 : path, _1 : diff})); else throw "unable to forward " + cards.ui.input._DiffAt.DiffAt_Impl_.toString(d) + " within ObjectEditor";
+							break;
+						default:
+							throw "unable to forward " + cards.ui.input._DiffAt.DiffAt_Impl_.toString(d) + " within ObjectEditor";
+						}
+					} else {
+						haxe.Log.trace(cards.ui.input._Path.Path_Impl_.toString(d._0),{ fileName : "BaseObjectEditor.hx", lineNumber : 69, className : "cards.ui.input.BaseObjectEditor", methodName : "new"});
+						haxe.Log.trace((function($this) {
+							var $r;
+							var _g21 = d._1;
+							$r = (function($this) {
+								var $r;
+								switch(_g21[1]) {
+								case 2:
+									$r = (function($this) {
+										var $r;
+										var d1 = _g21[2];
+										$r = cards.ui.input._TypedValue.TypedValue_Impl_.toString(d1);
+										return $r;
+									}($this));
+									break;
+								default:
+									$r = Std.string(d._1);
+								}
+								return $r;
+							}($this));
+							return $r;
+						}(this)),{ fileName : "BaseObjectEditor.hx", lineNumber : 70, className : "cards.ui.input.BaseObjectEditor", methodName : "new"});
+						throw "unable to assign " + cards.ui.input._DiffAt.DiffAt_Impl_.toString(d) + " within ObjectEditor";
+					}
+				}
+				break;
+			case 0:
+				var diff = _g1;
+				if(path.length > 0) {
+					var first = path.shift();
+					switch(first[1]) {
+					case 0:
+						var name3 = first[2];
+						if((function($this) {
+							var $r;
+							var _g3 = _g2.defMap.get(name3).field.type;
+							$r = (function($this) {
+								var $r;
+								switch(_g3[1]) {
+								case 4:case 0:
+									$r = true;
+									break;
+								default:
+									$r = false;
+								}
+								return $r;
+							}($this));
+							return $r;
+						}(this))) _g2.ensureField(name3).diff.emit(thx.stream.StreamValue.Pulse({ _0 : path, _1 : diff})); else throw "unable to forward " + cards.ui.input._DiffAt.DiffAt_Impl_.toString(d) + " within ObjectEditor";
+						break;
+					default:
+						throw "unable to forward " + cards.ui.input._DiffAt.DiffAt_Impl_.toString(d) + " within ObjectEditor";
+					}
+				} else switch(_g1[1]) {
+				case 2:
+					var tv1 = _g1[2];
+					if(Type.enumEq(_g2.type,tv1._0)) {
+					} else {
+						haxe.Log.trace(cards.ui.input._Path.Path_Impl_.toString(d._0),{ fileName : "BaseObjectEditor.hx", lineNumber : 69, className : "cards.ui.input.BaseObjectEditor", methodName : "new"});
+						haxe.Log.trace((function($this) {
+							var $r;
+							var _g21 = d._1;
+							$r = (function($this) {
+								var $r;
+								switch(_g21[1]) {
+								case 2:
+									$r = (function($this) {
+										var $r;
+										var d1 = _g21[2];
+										$r = cards.ui.input._TypedValue.TypedValue_Impl_.toString(d1);
+										return $r;
+									}($this));
+									break;
+								default:
+									$r = Std.string(d._1);
+								}
+								return $r;
+							}($this));
+							return $r;
+						}(this)),{ fileName : "BaseObjectEditor.hx", lineNumber : 70, className : "cards.ui.input.BaseObjectEditor", methodName : "new"});
+						throw "unable to assign " + cards.ui.input._DiffAt.DiffAt_Impl_.toString(d) + " within ObjectEditor";
+					}
+					break;
+				default:
+					haxe.Log.trace(cards.ui.input._Path.Path_Impl_.toString(d._0),{ fileName : "BaseObjectEditor.hx", lineNumber : 69, className : "cards.ui.input.BaseObjectEditor", methodName : "new"});
+					haxe.Log.trace((function($this) {
+						var $r;
+						var _g21 = d._1;
+						$r = (function($this) {
+							var $r;
+							switch(_g21[1]) {
+							case 2:
+								$r = (function($this) {
+									var $r;
+									var d1 = _g21[2];
+									$r = cards.ui.input._TypedValue.TypedValue_Impl_.toString(d1);
+									return $r;
+								}($this));
+								break;
+							default:
+								$r = Std.string(d._1);
+							}
+							return $r;
+						}($this));
+						return $r;
+					}(this)),{ fileName : "BaseObjectEditor.hx", lineNumber : 70, className : "cards.ui.input.BaseObjectEditor", methodName : "new"});
+					throw "unable to assign " + cards.ui.input._DiffAt.DiffAt_Impl_.toString(d) + " within ObjectEditor";
+				}
+				break;
+			default:
+				var diff = _g1;
+				if(path.length > 0) {
+					var first = path.shift();
+					switch(first[1]) {
+					case 0:
+						var name3 = first[2];
+						if((function($this) {
+							var $r;
+							var _g3 = _g2.defMap.get(name3).field.type;
+							$r = (function($this) {
+								var $r;
+								switch(_g3[1]) {
+								case 4:case 0:
+									$r = true;
+									break;
+								default:
+									$r = false;
+								}
+								return $r;
+							}($this));
+							return $r;
+						}(this))) _g2.ensureField(name3).diff.emit(thx.stream.StreamValue.Pulse({ _0 : path, _1 : diff})); else throw "unable to forward " + cards.ui.input._DiffAt.DiffAt_Impl_.toString(d) + " within ObjectEditor";
+						break;
+					default:
+						throw "unable to forward " + cards.ui.input._DiffAt.DiffAt_Impl_.toString(d) + " within ObjectEditor";
+					}
+				} else {
+					haxe.Log.trace(cards.ui.input._Path.Path_Impl_.toString(d._0),{ fileName : "BaseObjectEditor.hx", lineNumber : 69, className : "cards.ui.input.BaseObjectEditor", methodName : "new"});
+					haxe.Log.trace((function($this) {
+						var $r;
+						var _g21 = d._1;
+						$r = (function($this) {
+							var $r;
+							switch(_g21[1]) {
+							case 2:
+								$r = (function($this) {
+									var $r;
+									var d1 = _g21[2];
+									$r = cards.ui.input._TypedValue.TypedValue_Impl_.toString(d1);
+									return $r;
+								}($this));
+								break;
+							default:
+								$r = Std.string(d._1);
+							}
+							return $r;
+						}($this));
+						return $r;
+					}(this)),{ fileName : "BaseObjectEditor.hx", lineNumber : 70, className : "cards.ui.input.BaseObjectEditor", methodName : "new"});
+					throw "unable to assign " + cards.ui.input._DiffAt.DiffAt_Impl_.toString(d) + " within ObjectEditor";
+				}
+			}
+		}
+		_g2.pulse();
+	});
+	fields.map(function(field,i) {
+		_g2.defMap.set(field.name,{ field : field, index : i});
+		_g2.addFieldDefinition(field);
+	});
+	thx.stream.EmitterOptions.toBool(this.currentField).feed(this.focus);
+};
+cards.ui.input.BaseObjectEditor.__name__ = ["cards","ui","input","BaseObjectEditor"];
+cards.ui.input.BaseObjectEditor.findRef = function(table,index) {
+	var trs = udom.Query.childrenOf(udom._Dom.H.toArray(udom.Query.list("tr",table)),table);
+	var _g = 0;
+	while(_g < trs.length) {
+		var tr = trs[_g];
+		++_g;
+		var ref = tr.getAttribute("data-index");
+		if(ref > index) return tr;
+	}
+	return null;
+};
+cards.ui.input.BaseObjectEditor.__super__ = cards.ui.input.RouteEditor;
+cards.ui.input.BaseObjectEditor.prototype = $extend(cards.ui.input.RouteEditor.prototype,{
+	fields: null
+	,object: null
+	,editors: null
+	,defMap: null
+	,table: null
+	,currentField: null
+	,toolbar: null
+	,ensureField: function(name) {
+		if(!this.editors.exists(name)) this.realizeField(name);
+		return this.editors.get(name);
+	}
+	,addFieldDefinition: function(field) {
+		this.checkUnique(field.name);
+		this.fields.push(field);
+		this.type = cards.model.SchemaType.ObjectType(this.fields);
+		if(!field.optional) this.realizeField(field.name);
+	}
+	,realizeField: function(name) {
+		if(this.editors.exists(name)) throw "field " + name + " already realized";
+		var def = thx.core.Arrays.first(this.fields,function(field) {
+			return field.name == name;
+		});
+		if(null == def) throw "unable to realize " + name + " because it is not defined in ObjectType";
+		var editor;
+		{
+			var _g = def.type;
+			switch(_g[1]) {
+			case 4:case 0:
+				var rowh;
+				var _this = window.document;
+				rowh = _this.createElement("tr");
+				var rowd;
+				var _this1 = window.document;
+				rowd = _this1.createElement("tr");
+				var th = window.document.createElement("th");
+				var td = window.document.createElement("td");
+				var index = this.defMap.get(name).index;
+				rowh.setAttribute("data-index",index);
+				rowd.setAttribute("data-index",index);
+				th.colSpan = 2;
+				th.textContent = name;
+				th.className = "composite";
+				td.colSpan = 2;
+				td.className = "composite";
+				var editor1 = cards.ui.input.EditorFactory.create(def.type,td,this.component);
+				rowh.appendChild(th);
+				rowd.appendChild(td);
+				var ref = cards.ui.input.BaseObjectEditor.findRef(this.table,index);
+				if(null != ref) this.table.insertBefore(rowd,ref); else this.table.appendChild(rowd);
+				this.table.insertBefore(rowh,rowd);
+				editor = editor1;
+				break;
+			default:
+				var row;
+				var _this2 = window.document;
+				row = _this2.createElement("tr");
+				var th1 = window.document.createElement("th");
+				var td1 = window.document.createElement("td");
+				var index1 = this.defMap.get(name).index;
+				row.setAttribute("data-index",index1);
+				th1.textContent = name;
+				th1.className = "primitive";
+				td1.className = "primitive";
+				var editor2 = cards.ui.input.EditorFactory.create(def.type,td1,this.component);
+				row.appendChild(th1);
+				row.appendChild(td1);
+				var ref1 = cards.ui.input.BaseObjectEditor.findRef(this.table,index1);
+				if(null != ref1) this.table.insertBefore(row,ref1); else this.table.appendChild(row);
+				editor = editor2;
+			}
+		}
+		this.editors.set(name,editor);
+		editor.focus.withValue(true).mapValue(function(_) {
+			return name;
+		}).toOption().feed(this.currentField);
+		editor.focus.set(true);
+	}
+	,removeField: function(name) {
+		var _g = this;
+		var editor = this.editors.get(name);
+		var def = this.defMap.get(name);
+		editor.dispose();
+		this.editors.remove(name);
+		var rows = udom.Query.childrenOf(udom._Dom.H.toArray(udom.Query.list("tr[data-index=\"" + def.index + "\"]",this.table)),this.table);
+		rows.map(function(row) {
+			_g.table.removeChild(row);
+		});
+	}
+	,checkUnique: function(name) {
+		var _g = 0;
+		var _g1 = this.fields;
+		while(_g < _g1.length) {
+			var field = _g1[_g];
+			++_g;
+			if(name == field.name) throw "" + name + " field already exists in this ObjectType";
+		}
+	}
+	,pulse: function() {
+		this.stream.emit(thx.stream.StreamValue.Pulse((function($this) {
+			var $r;
+			var _1 = $this.object;
+			$r = { _0 : $this.type, _1 : _1};
+			return $r;
+		}(this))));
+	}
+	,__class__: cards.ui.input.BaseObjectEditor
+});
+cards.ui.input.AnonymousObjectEditor = function(container,parent) {
+	cards.ui.input.BaseObjectEditor.call(this,container,parent,[]);
+};
+cards.ui.input.AnonymousObjectEditor.__name__ = ["cards","ui","input","AnonymousObjectEditor"];
+cards.ui.input.AnonymousObjectEditor.__super__ = cards.ui.input.BaseObjectEditor;
+cards.ui.input.AnonymousObjectEditor.prototype = $extend(cards.ui.input.BaseObjectEditor.prototype,{
+	__class__: cards.ui.input.AnonymousObjectEditor
+});
 cards.ui.input.ArrayEditor = function(container,parent,innerType) {
 	var _g2 = this;
 	this.values = [];
@@ -2217,473 +2687,52 @@ cards.ui.input.NumberEditor.prototype = $extend(cards.ui.input.InputBasedEditor.
 	__class__: cards.ui.input.NumberEditor
 });
 cards.ui.input.ObjectEditor = function(container,parent,fields) {
-	var _g2 = this;
-	this.object = { };
-	this.editors = new haxe.ds.StringMap();
-	this.defMap = new haxe.ds.StringMap();
-	this.currentField = thx.stream.Value.createOption();
-	var options = { template : "<div class=\"editor table\"></div>", container : container, parent : parent};
-	cards.ui.input.RouteEditor.call(this,cards.model.SchemaType.ObjectType([]),options);
-	this.fields = [];
-	var toolbar = new cards.ui.widgets.Toolbar({ parent : this.component, container : this.component.el});
-	this.buttonAdd = toolbar.left.addButton("",Config.icons.addMenu);
-	var buttonRemove = toolbar.right.addButton("",Config.icons.remove);
+	this.inited = false;
+	var _g = this;
+	cards.ui.input.BaseObjectEditor.call(this,container,parent,fields);
+	this.buttonAdd = this.toolbar.left.addButton("",Config.icons.addMenu);
+	var buttonRemove = this.toolbar.right.addButton("",Config.icons.remove);
 	this.buttonAdd.enabled.set(false);
 	buttonRemove.enabled.set(false);
-	var _this = window.document;
-	this.table = _this.createElement("table");
-	this.component.el.appendChild(this.table);
-	this.diff.subscribe(function(d) {
-		{
-			var _g = d._0;
-			var _g1 = d._1;
-			var path = _g;
-			switch(_g.length) {
-			case 1:
-				switch(_g[0][1]) {
-				case 0:
-					var diff = _g1;
-					switch(_g1[1]) {
-					case 0:
-						var name = _g[0][2];
-						if(_g2.editors.exists(name)) _g2.removeField(name);
-						break;
-					case 1:
-						var name1 = _g[0][2];
-						_g2.ensureField(name1);
-						break;
-					case 2:
-						var name2 = _g[0][2];
-						var tv = _g1[2];
-						if(Type.enumEq(tv._0,_g2.defMap.get(name2).field.type)) _g2.ensureField(name2).stream.emit(thx.stream.StreamValue.Pulse(tv)); else if(path.length > 0) {
-							var first = path.shift();
-							switch(first[1]) {
-							case 0:
-								var name3 = first[2];
-								if((function($this) {
-									var $r;
-									var _g3 = _g2.defMap.get(name3).field.type;
-									$r = (function($this) {
-										var $r;
-										switch(_g3[1]) {
-										case 4:case 0:
-											$r = true;
-											break;
-										default:
-											$r = false;
-										}
-										return $r;
-									}($this));
-									return $r;
-								}(this))) _g2.ensureField(name3).diff.emit(thx.stream.StreamValue.Pulse({ _0 : path, _1 : diff})); else throw "unable to forward " + cards.ui.input._DiffAt.DiffAt_Impl_.toString(d) + " within ObjectEditor";
-								break;
-							default:
-								throw "unable to forward " + cards.ui.input._DiffAt.DiffAt_Impl_.toString(d) + " within ObjectEditor";
-							}
-						} else {
-							haxe.Log.trace(cards.ui.input._Path.Path_Impl_.toString(d._0),{ fileName : "ObjectEditor.hx", lineNumber : 79, className : "cards.ui.input.ObjectEditor", methodName : "new"});
-							haxe.Log.trace((function($this) {
-								var $r;
-								var _g21 = d._1;
-								$r = (function($this) {
-									var $r;
-									switch(_g21[1]) {
-									case 2:
-										$r = (function($this) {
-											var $r;
-											var d1 = _g21[2];
-											$r = cards.ui.input._TypedValue.TypedValue_Impl_.toString(d1);
-											return $r;
-										}($this));
-										break;
-									default:
-										$r = Std.string(d._1);
-									}
-									return $r;
-								}($this));
-								return $r;
-							}(this)),{ fileName : "ObjectEditor.hx", lineNumber : 80, className : "cards.ui.input.ObjectEditor", methodName : "new"});
-							throw "unable to assign " + cards.ui.input._DiffAt.DiffAt_Impl_.toString(d) + " within ObjectEditor";
-						}
-						break;
-					default:
-						if(path.length > 0) {
-							var first = path.shift();
-							switch(first[1]) {
-							case 0:
-								var name3 = first[2];
-								if((function($this) {
-									var $r;
-									var _g3 = _g2.defMap.get(name3).field.type;
-									$r = (function($this) {
-										var $r;
-										switch(_g3[1]) {
-										case 4:case 0:
-											$r = true;
-											break;
-										default:
-											$r = false;
-										}
-										return $r;
-									}($this));
-									return $r;
-								}(this))) _g2.ensureField(name3).diff.emit(thx.stream.StreamValue.Pulse({ _0 : path, _1 : diff})); else throw "unable to forward " + cards.ui.input._DiffAt.DiffAt_Impl_.toString(d) + " within ObjectEditor";
-								break;
-							default:
-								throw "unable to forward " + cards.ui.input._DiffAt.DiffAt_Impl_.toString(d) + " within ObjectEditor";
-							}
-						} else {
-							haxe.Log.trace(cards.ui.input._Path.Path_Impl_.toString(d._0),{ fileName : "ObjectEditor.hx", lineNumber : 79, className : "cards.ui.input.ObjectEditor", methodName : "new"});
-							haxe.Log.trace((function($this) {
-								var $r;
-								var _g21 = d._1;
-								$r = (function($this) {
-									var $r;
-									switch(_g21[1]) {
-									case 2:
-										$r = (function($this) {
-											var $r;
-											var d1 = _g21[2];
-											$r = cards.ui.input._TypedValue.TypedValue_Impl_.toString(d1);
-											return $r;
-										}($this));
-										break;
-									default:
-										$r = Std.string(d._1);
-									}
-									return $r;
-								}($this));
-								return $r;
-							}(this)),{ fileName : "ObjectEditor.hx", lineNumber : 80, className : "cards.ui.input.ObjectEditor", methodName : "new"});
-							throw "unable to assign " + cards.ui.input._DiffAt.DiffAt_Impl_.toString(d) + " within ObjectEditor";
-						}
-					}
-					break;
-				default:
-					var diff = _g1;
-					if(path.length > 0) {
-						var first = path.shift();
-						switch(first[1]) {
-						case 0:
-							var name3 = first[2];
-							if((function($this) {
-								var $r;
-								var _g3 = _g2.defMap.get(name3).field.type;
-								$r = (function($this) {
-									var $r;
-									switch(_g3[1]) {
-									case 4:case 0:
-										$r = true;
-										break;
-									default:
-										$r = false;
-									}
-									return $r;
-								}($this));
-								return $r;
-							}(this))) _g2.ensureField(name3).diff.emit(thx.stream.StreamValue.Pulse({ _0 : path, _1 : diff})); else throw "unable to forward " + cards.ui.input._DiffAt.DiffAt_Impl_.toString(d) + " within ObjectEditor";
-							break;
-						default:
-							throw "unable to forward " + cards.ui.input._DiffAt.DiffAt_Impl_.toString(d) + " within ObjectEditor";
-						}
-					} else {
-						haxe.Log.trace(cards.ui.input._Path.Path_Impl_.toString(d._0),{ fileName : "ObjectEditor.hx", lineNumber : 79, className : "cards.ui.input.ObjectEditor", methodName : "new"});
-						haxe.Log.trace((function($this) {
-							var $r;
-							var _g21 = d._1;
-							$r = (function($this) {
-								var $r;
-								switch(_g21[1]) {
-								case 2:
-									$r = (function($this) {
-										var $r;
-										var d1 = _g21[2];
-										$r = cards.ui.input._TypedValue.TypedValue_Impl_.toString(d1);
-										return $r;
-									}($this));
-									break;
-								default:
-									$r = Std.string(d._1);
-								}
-								return $r;
-							}($this));
-							return $r;
-						}(this)),{ fileName : "ObjectEditor.hx", lineNumber : 80, className : "cards.ui.input.ObjectEditor", methodName : "new"});
-						throw "unable to assign " + cards.ui.input._DiffAt.DiffAt_Impl_.toString(d) + " within ObjectEditor";
-					}
-				}
-				break;
-			case 0:
-				var diff = _g1;
-				if(path.length > 0) {
-					var first = path.shift();
-					switch(first[1]) {
-					case 0:
-						var name3 = first[2];
-						if((function($this) {
-							var $r;
-							var _g3 = _g2.defMap.get(name3).field.type;
-							$r = (function($this) {
-								var $r;
-								switch(_g3[1]) {
-								case 4:case 0:
-									$r = true;
-									break;
-								default:
-									$r = false;
-								}
-								return $r;
-							}($this));
-							return $r;
-						}(this))) _g2.ensureField(name3).diff.emit(thx.stream.StreamValue.Pulse({ _0 : path, _1 : diff})); else throw "unable to forward " + cards.ui.input._DiffAt.DiffAt_Impl_.toString(d) + " within ObjectEditor";
-						break;
-					default:
-						throw "unable to forward " + cards.ui.input._DiffAt.DiffAt_Impl_.toString(d) + " within ObjectEditor";
-					}
-				} else switch(_g1[1]) {
-				case 2:
-					var tv1 = _g1[2];
-					if(Type.enumEq(_g2.type,tv1._0)) {
-					} else {
-						haxe.Log.trace(cards.ui.input._Path.Path_Impl_.toString(d._0),{ fileName : "ObjectEditor.hx", lineNumber : 79, className : "cards.ui.input.ObjectEditor", methodName : "new"});
-						haxe.Log.trace((function($this) {
-							var $r;
-							var _g21 = d._1;
-							$r = (function($this) {
-								var $r;
-								switch(_g21[1]) {
-								case 2:
-									$r = (function($this) {
-										var $r;
-										var d1 = _g21[2];
-										$r = cards.ui.input._TypedValue.TypedValue_Impl_.toString(d1);
-										return $r;
-									}($this));
-									break;
-								default:
-									$r = Std.string(d._1);
-								}
-								return $r;
-							}($this));
-							return $r;
-						}(this)),{ fileName : "ObjectEditor.hx", lineNumber : 80, className : "cards.ui.input.ObjectEditor", methodName : "new"});
-						throw "unable to assign " + cards.ui.input._DiffAt.DiffAt_Impl_.toString(d) + " within ObjectEditor";
-					}
-					break;
-				default:
-					haxe.Log.trace(cards.ui.input._Path.Path_Impl_.toString(d._0),{ fileName : "ObjectEditor.hx", lineNumber : 79, className : "cards.ui.input.ObjectEditor", methodName : "new"});
-					haxe.Log.trace((function($this) {
-						var $r;
-						var _g21 = d._1;
-						$r = (function($this) {
-							var $r;
-							switch(_g21[1]) {
-							case 2:
-								$r = (function($this) {
-									var $r;
-									var d1 = _g21[2];
-									$r = cards.ui.input._TypedValue.TypedValue_Impl_.toString(d1);
-									return $r;
-								}($this));
-								break;
-							default:
-								$r = Std.string(d._1);
-							}
-							return $r;
-						}($this));
-						return $r;
-					}(this)),{ fileName : "ObjectEditor.hx", lineNumber : 80, className : "cards.ui.input.ObjectEditor", methodName : "new"});
-					throw "unable to assign " + cards.ui.input._DiffAt.DiffAt_Impl_.toString(d) + " within ObjectEditor";
-				}
-				break;
-			default:
-				var diff = _g1;
-				if(path.length > 0) {
-					var first = path.shift();
-					switch(first[1]) {
-					case 0:
-						var name3 = first[2];
-						if((function($this) {
-							var $r;
-							var _g3 = _g2.defMap.get(name3).field.type;
-							$r = (function($this) {
-								var $r;
-								switch(_g3[1]) {
-								case 4:case 0:
-									$r = true;
-									break;
-								default:
-									$r = false;
-								}
-								return $r;
-							}($this));
-							return $r;
-						}(this))) _g2.ensureField(name3).diff.emit(thx.stream.StreamValue.Pulse({ _0 : path, _1 : diff})); else throw "unable to forward " + cards.ui.input._DiffAt.DiffAt_Impl_.toString(d) + " within ObjectEditor";
-						break;
-					default:
-						throw "unable to forward " + cards.ui.input._DiffAt.DiffAt_Impl_.toString(d) + " within ObjectEditor";
-					}
-				} else {
-					haxe.Log.trace(cards.ui.input._Path.Path_Impl_.toString(d._0),{ fileName : "ObjectEditor.hx", lineNumber : 79, className : "cards.ui.input.ObjectEditor", methodName : "new"});
-					haxe.Log.trace((function($this) {
-						var $r;
-						var _g21 = d._1;
-						$r = (function($this) {
-							var $r;
-							switch(_g21[1]) {
-							case 2:
-								$r = (function($this) {
-									var $r;
-									var d1 = _g21[2];
-									$r = cards.ui.input._TypedValue.TypedValue_Impl_.toString(d1);
-									return $r;
-								}($this));
-								break;
-							default:
-								$r = Std.string(d._1);
-							}
-							return $r;
-						}($this));
-						return $r;
-					}(this)),{ fileName : "ObjectEditor.hx", lineNumber : 80, className : "cards.ui.input.ObjectEditor", methodName : "new"});
-					throw "unable to assign " + cards.ui.input._DiffAt.DiffAt_Impl_.toString(d) + " within ObjectEditor";
-				}
-			}
-		}
-		_g2.pulse();
-	});
-	fields.map(function(field,i) {
-		_g2.defMap.set(field.name,{ field : field, index : i});
-		_g2.addFieldDefinition(field);
-	});
 	this.currentField.mapValue(function(cur) {
 		switch(cur[1]) {
 		case 1:
 			return false;
 		case 0:
-			var name4 = cur[2];
-			return _g2.defMap.get(name4).field.optional;
+			var name = cur[2];
+			return _g.defMap.get(name).field.optional;
 		}
 	}).feed(buttonRemove.enabled);
-	thx.stream.EmitterOptions.toBool(this.currentField).feed(this.focus);
 	this.buttonAdd.clicks.subscribe(function(_) {
-		_g2.menuAdd.anchorTo(_g2.buttonAdd.component.el);
-		_g2.menuAdd.visible.stream.set(true);
+		_g.menuAdd.anchorTo(_g.buttonAdd.component.el);
+		_g.menuAdd.visible.stream.set(true);
 	});
 	buttonRemove.clicks.subscribe(function(_1) {
-		var name5 = thx.core.Options.toValue(_g2.currentField.get());
-		if(null == name5) return;
-		_g2.removeField(name5);
+		var name1 = thx.core.Options.toValue(_g.currentField.get());
+		if(null == name1) return;
+		_g.removeField(name1);
 	});
 	this.menuAdd = new cards.ui.widgets.Menu({ });
+	this.inited = true;
 	this.setAddState();
 };
 cards.ui.input.ObjectEditor.__name__ = ["cards","ui","input","ObjectEditor"];
-cards.ui.input.ObjectEditor.findRef = function(table,index) {
-	var trs = udom.Query.childrenOf(udom._Dom.H.toArray(udom.Query.list("tr",table)),table);
-	var _g = 0;
-	while(_g < trs.length) {
-		var tr = trs[_g];
-		++_g;
-		var ref = tr.getAttribute("data-index");
-		if(ref > index) return tr;
-	}
-	return null;
-};
-cards.ui.input.ObjectEditor.__super__ = cards.ui.input.RouteEditor;
-cards.ui.input.ObjectEditor.prototype = $extend(cards.ui.input.RouteEditor.prototype,{
-	fields: null
-	,object: null
-	,editors: null
-	,defMap: null
-	,table: null
-	,currentField: null
-	,menuAdd: null
+cards.ui.input.ObjectEditor.__super__ = cards.ui.input.BaseObjectEditor;
+cards.ui.input.ObjectEditor.prototype = $extend(cards.ui.input.BaseObjectEditor.prototype,{
+	menuAdd: null
 	,buttonAdd: null
-	,ensureField: function(name) {
-		if(!this.editors.exists(name)) this.realizeField(name);
-		return this.editors.get(name);
-	}
-	,addFieldDefinition: function(field) {
-		this.checkUnique(field.name);
-		this.fields.push(field);
-		this.type = cards.model.SchemaType.ObjectType(this.fields);
-		if(!field.optional) this.realizeField(field.name);
+	,inited: null
+	,removeField: function(name) {
+		cards.ui.input.BaseObjectEditor.prototype.removeField.call(this,name);
+		this.setAddState();
 	}
 	,realizeField: function(name) {
-		if(this.editors.exists(name)) throw "field " + name + " already realized";
-		var def = thx.core.Arrays.first(this.fields,function(field) {
-			return field.name == name;
-		});
-		if(null == def) throw "unable to realize " + name + " because it is not defined in ObjectType";
-		var editor;
-		{
-			var _g = def.type;
-			switch(_g[1]) {
-			case 4:case 0:
-				var rowh;
-				var _this = window.document;
-				rowh = _this.createElement("tr");
-				var rowd;
-				var _this1 = window.document;
-				rowd = _this1.createElement("tr");
-				var th = window.document.createElement("th");
-				var td = window.document.createElement("td");
-				var index = this.defMap.get(name).index;
-				rowh.setAttribute("data-index",index);
-				rowd.setAttribute("data-index",index);
-				th.colSpan = 2;
-				th.textContent = name;
-				th.className = "composite";
-				td.colSpan = 2;
-				td.className = "composite";
-				var editor1 = cards.ui.input.EditorFactory.create(def.type,td,this.component);
-				rowh.appendChild(th);
-				rowd.appendChild(td);
-				var ref = cards.ui.input.ObjectEditor.findRef(this.table,index);
-				if(null != ref) this.table.insertBefore(rowd,ref); else this.table.appendChild(rowd);
-				this.table.insertBefore(rowh,rowd);
-				editor = editor1;
-				break;
-			default:
-				var row;
-				var _this2 = window.document;
-				row = _this2.createElement("tr");
-				var th1 = window.document.createElement("th");
-				var td1 = window.document.createElement("td");
-				var index1 = this.defMap.get(name).index;
-				row.setAttribute("data-index",index1);
-				th1.textContent = name;
-				th1.className = "primitive";
-				td1.className = "primitive";
-				var editor2 = cards.ui.input.EditorFactory.create(def.type,td1,this.component);
-				row.appendChild(th1);
-				row.appendChild(td1);
-				var ref1 = cards.ui.input.ObjectEditor.findRef(this.table,index1);
-				if(null != ref1) this.table.insertBefore(row,ref1); else this.table.appendChild(row);
-				editor = editor2;
-			}
-		}
-		this.editors.set(name,editor);
-		editor.focus.withValue(true).mapValue(function(_) {
-			return name;
-		}).toOption().feed(this.currentField);
-		editor.focus.set(true);
-	}
-	,removeField: function(name) {
-		var _g = this;
-		var editor = this.editors.get(name);
-		var def = this.defMap.get(name);
-		editor.dispose();
-		this.editors.remove(name);
-		var rows = udom.Query.childrenOf(udom._Dom.H.toArray(udom.Query.list("tr[data-index=\"" + def.index + "\"]",this.table)),this.table);
-		rows.map(function(row) {
-			_g.table.removeChild(row);
-		});
+		cards.ui.input.BaseObjectEditor.prototype.realizeField.call(this,name);
 		this.setAddState();
 	}
 	,setAddState: function() {
 		var _g = this;
+		if(!this.inited) return;
 		var fields = this.fields.slice().filter(function(field) {
 			return !_g.editors.exists(field.name);
 		});
@@ -2700,23 +2749,6 @@ cards.ui.input.ObjectEditor.prototype = $extend(cards.ui.input.RouteEditor.proto
 				_g.menuAdd.addItem(button.component);
 			});
 		}
-	}
-	,checkUnique: function(name) {
-		var _g = 0;
-		var _g1 = this.fields;
-		while(_g < _g1.length) {
-			var field = _g1[_g];
-			++_g;
-			if(name == field.name) throw "" + name + " field already exists in this ObjectType";
-		}
-	}
-	,pulse: function() {
-		this.stream.emit(thx.stream.StreamValue.Pulse((function($this) {
-			var $r;
-			var _1 = $this.object;
-			$r = { _0 : $this.type, _1 : _1};
-			return $r;
-		}(this))));
 	}
 	,__class__: cards.ui.input.ObjectEditor
 });
