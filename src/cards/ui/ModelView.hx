@@ -108,8 +108,8 @@ class ModelView {
 
   public function guessFieldName() {
     var id = 0,
-      prefix = 'field',
-      t;
+        prefix = 'field',
+        t;
     function assemble(id)
       return id > 0 ? [prefix, '$id'].join('_') : prefix;
     while(fields.exists(t = assemble(id))) id++;

@@ -5,7 +5,6 @@ import cards.model.SchemaType;
 import cards.ui.widgets.Button;
 import cards.ui.widgets.Menu;
 import js.html.Element;
-using thx.core.Options;
 
 class ObjectEditor extends BaseObjectEditor {
   var menuAdd : Menu;
@@ -15,30 +14,12 @@ class ObjectEditor extends BaseObjectEditor {
     super(container, parent, fields);
 
     buttonAdd = toolbar.left.addButton('', Config.icons.addMenu);
-    var buttonRemove = toolbar.right.addButton('', Config.icons.remove);
-
     buttonAdd.enabled.set(false);
-    buttonRemove.enabled.set(false);
-
-    currentField
-      .mapValue(function(cur) return switch cur {
-        case None: false;
-        case Some(name): defMap.get(name).field.optional;
-      })
-      .feed(buttonRemove.enabled);
 
     buttonAdd.clicks
       .subscribe(function(_) {
         menuAdd.anchorTo(buttonAdd.component.el);
         menuAdd.visible.stream.set(true);
-      });
-
-    buttonRemove.clicks
-      .subscribe(function(_) {
-        var name = currentField.get().toValue();
-        if(null == name)
-          return;
-        removeField(name);
       });
 
     menuAdd = new Menu({});

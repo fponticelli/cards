@@ -9,6 +9,7 @@ import js.html.TableCellElement;
 import js.html.TableElement;
 import haxe.ds.Option;
 using thx.core.Arrays;
+using thx.core.Options;
 using thx.stream.Emitter;
 import thx.stream.Value;
 using udom.Dom;
@@ -38,6 +39,24 @@ class BaseObjectEditor extends RouteEditor {
       parent : component,
       container : component.el
     });
+
+    var buttonRemove = toolbar.right.addButton('', Config.icons.remove);
+    buttonRemove.enabled.set(false);
+
+    currentField
+      .mapValue(function(cur) return switch cur {
+        case None: false;
+        case Some(name): defMap.get(name).field.optional;
+      })
+      .feed(buttonRemove.enabled);
+
+    buttonRemove.clicks
+      .subscribe(function(_) {
+        var name = currentField.get().toValue();
+        if(null == name)
+          return;
+        removeField(name);
+      });
 
     table = Browser.document.createTableElement();
     component.el.appendChild(table);
@@ -77,8 +96,7 @@ class BaseObjectEditor extends RouteEditor {
     });
 
     fields.mapi(function(field, i) {
-      defMap.set(field.name, { field : field, index : i });
-      addFieldDefinition(field);
+      addFieldDefinition(field, i);
     });
 
     currentField
@@ -92,8 +110,11 @@ class BaseObjectEditor extends RouteEditor {
     return editors.get(name);
   }
 
-  public function addFieldDefinition(field : FieldInfo) {
+  public function addFieldDefinition(field : FieldInfo, ?index : Int) {
     checkUnique(field.name);
+    if(null == index)
+      index = fields.length;
+    defMap.set(field.name, { field : field, index : index });
     fields.push(field);
     this.type = ObjectType(fields);
     if(!field.optional)
@@ -181,6 +202,7 @@ class BaseObjectEditor extends RouteEditor {
     rows.map(function(row) {
       table.removeChild(row);
     });
+    currentField.set(None);
   }
 
   function checkUnique(name : String)
