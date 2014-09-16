@@ -16,7 +16,7 @@ class Main {
     Dom.ready().success(function(_) {
       var main = new Main(Query.first(".container"));
       main.addDemo(function(el) {
-        return new ObjectEditor(el, [
+        return new ObjectEditor(el, null, [
           { name : "name", type : StringType, optional : false },
           { name : "age",  type : FloatType, optional : true },
           { name : "contacts", type : ArrayType(ObjectType([
@@ -34,7 +34,7 @@ class Main {
         ]);
       });
       main.addDemo(function(el) {
-        var editor = new ArrayEditor(el, StringType);
+        var editor = new ArrayEditor(el, null, StringType);
         for(i in 0...3)
           editor.pushItem('f $i');
         for(i in 0...3)
@@ -42,34 +42,34 @@ class Main {
         return editor;
       });
       main.addDemo(function(el) {
-        return new ArrayEditor(el, ArrayType(CodeType));
+        return new ArrayEditor(el, null, ArrayType(CodeType));
       });
       main.addDemo(function(el) {
-        return new TextEditor(el);
+        return new TextEditor(el, null);
       });
       main.addDemo(function(el) {
-        return new CodeEditor(el);
+        return new CodeEditor(el, null);
       });
       main.addDemo(function(el) {
-        return new ReferenceEditor(el);
+        return new ReferenceEditor(el, null);
       });
       main.addDemo(function(el) {
-        return new NumberEditor(el);
+        return new NumberEditor(el, null);
       });
       main.addDemo(function(el) {
-        return new DateEditor(el, false);
+        return new DateEditor(el, null, false);
       });
       main.addDemo(function(el) {
-        return new DateEditor(el);
+        return new DateEditor(el, null);
       });
       main.addDemo(function(el) {
-        return new BoolEditor(el);
+        return new BoolEditor(el, null);
       });
       main.addDemo(function(el) {
-        return new ColorEditor(el);
+        return new ColorEditor(el, null);
       });
       main.addDemo(function(el) {
-        return new RangeEditor(el);
+        return new RangeEditor(el, null);
       });
     });
   }

@@ -14,6 +14,7 @@ using thx.core.Options;
 using thx.stream.Emitter;
 using udom.Dom;
 import thx.stream.Value;
+import cards.components.Component;
 
 class ObjectEditor extends RouteEditor {
   var fields : Array<FieldInfo>;
@@ -24,14 +25,15 @@ class ObjectEditor extends RouteEditor {
   var currentField : Value<Option<String>>;
   var menuAdd : Menu;
   var buttonAdd : Button;
-  public function new(container : Element, fields : Array<FieldInfo>) {
+  public function new(container : Element, parent : Component, fields : Array<FieldInfo>) {
     this.object = {};
     fieldMap = new Map();
     defMap = new Map();
     currentField = Value.createOption();
     var options = {
       template  : '<div class="editor table"></div>',
-      container : container
+      container : container,
+      parent : parent
     };
     super(ObjectType([]), options);
     this.fields = [];

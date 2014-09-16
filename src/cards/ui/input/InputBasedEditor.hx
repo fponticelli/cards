@@ -6,9 +6,10 @@ import js.html.Element;
 import js.html.InputElement;
 import udom.Dom.Query;
 using thx.stream.dom.Dom;
+import cards.components.Component;
 
 class InputBasedEditor extends Editor {
-  public function new(container : Element, valueType : SchemaType, name : String, ?type : String, ?event : String = 'change', ?extract : InputElement -> TypedValue, ?assign : InputElement -> TypedValue -> Void) {
+  public function new(container : Element, parent : Component, valueType : SchemaType, name : String, ?type : String, ?event : String = 'change', ?extract : InputElement -> TypedValue, ?assign : InputElement -> TypedValue -> Void) {
     if(null == type)
       type = name;
     if(null == extract)
@@ -17,7 +18,8 @@ class InputBasedEditor extends Editor {
       assign = function(input, value) input.value = value.asValue();
     var options = {
       template  : '<input class="editor $name" placeholder="$name" type="$type" />',
-      container : container
+      container : container,
+      parent : parent
     };
     super(valueType, options);
 

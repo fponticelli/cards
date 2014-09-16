@@ -6,6 +6,7 @@ import js.html.Element;
 import js.html.TextAreaElement;
 import udom.Dom.Query;
 using thx.stream.dom.Dom;
+import cards.components.Component;
 
 class TextEditor extends Editor {
   function resize() {
@@ -14,10 +15,11 @@ class TextEditor extends Editor {
     el.style.height = (1+el.scrollHeight) + "px";
   }
 
-  public function new(container : Element) {
+  public function new(container : Element, parent : Component) {
     var options = {
       template  : '<textarea class="editor text" placeholder="text"></textarea>',
-      container : container
+      container : container,
+      parent : parent
     };
     super(StringType, options);
 

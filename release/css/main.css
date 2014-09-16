@@ -226,8 +226,8 @@ a img {
   color: #000;
   position: absolute;
   text-align: right;
-  right: calc(100% + 0.2em);
-  padding: 2px 3px 1px 2px;
+  right: calc(100% + 2px);
+  padding: 2px 2px 1px 2px;
   margin-top: 7px;
   font-size: 0.4em;
   background-color: #ddd;
@@ -258,20 +258,20 @@ a img {
   overflow: hidden;
 }
 .card .table th.primitive {
-  border-top: 1px solid #ccc;
-  border-left: 1px solid #ccc;
+  border-top: 1px solid #d3d3d3;
+  border-left: 1px solid #d3d3d3;
 }
 .card .table td.primitive {
-  border-top: 1px solid #ccc;
+  border-top: 1px solid #e6e6e6;
   border-left: 1px solid #e0e0e0;
 }
 .card .table th.composite {
-  border-top: 1px solid #ccc;
-  border-left: 1px solid #ccc;
+  border-top: 1px solid #d3d3d3;
+  border-left: 1px solid #d3d3d3;
 }
 .card .table td.composite {
   border-top: none;
-  border-left: 1px solid #ccc;
+  border-left: 1px solid #d3d3d3;
   padding-left: 0.5em;
   background-color: #ddd;
 }
@@ -280,7 +280,7 @@ a img {
   border-top: none;
 }
 .card .table table {
-  border-bottom: 1px solid #ccc;
+  border-bottom: 1px solid #d3d3d3;
 }
 .card .table table table {
   border-bottom: none;
@@ -288,7 +288,7 @@ a img {
 .card .table tr td.primitive,
 .card .table tr th.composite,
 .card .table tr td.composite {
-  border-right: 1px solid #ccc;
+  border-right: 1px solid #d3d3d3;
 }
 .card .table tr tr td.primitive,
 .card .table tr tr th.composite,

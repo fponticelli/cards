@@ -7,14 +7,16 @@ import js.html.InputElement;
 import udom.Dom.Query;
 using thx.stream.dom.Dom;
 import thx.date.ISO8601;
+import cards.components.Component;
 
 class DateEditor extends Editor {
   var format : String;
-  public function new(container : Element, useTime = true) {
+  public function new(container : Element, parent : Component, useTime = true) {
     format = useTime ? '%Y-%m-%dT%H:%M' : '%Y-%m-%d';
     var options = {
       template  : '<input class="editor date" placeholder="insert date" type="${useTime?"datetime-local":"date"}" />',
-      container : container
+      container : container,
+      parent : parent
     };
     super(DateType, options);
 

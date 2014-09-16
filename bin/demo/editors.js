@@ -266,10 +266,10 @@ Main.main = function() {
 	thx.stream.dom.Dom.ready().success(function(_) {
 		var main = new Main(udom.Query.first(".container"));
 		main.addDemo(function(el) {
-			return new cards.ui.input.ObjectEditor(el,[{ name : "name", type : cards.model.SchemaType.StringType, optional : false},{ name : "age", type : cards.model.SchemaType.FloatType, optional : true},{ name : "contacts", type : cards.model.SchemaType.ArrayType(cards.model.SchemaType.ObjectType([{ name : "type", type : cards.model.SchemaType.StringType, optional : true},{ name : "value", type : cards.model.SchemaType.StringType, optional : false},{ name : "primary", type : cards.model.SchemaType.BoolType, optional : true}])), optional : false},{ name : "address", type : cards.model.SchemaType.ObjectType([{ name : "line 1", type : cards.model.SchemaType.StringType, optional : false},{ name : "line 2", type : cards.model.SchemaType.StringType, optional : true},{ name : "post code", type : cards.model.SchemaType.FloatType, optional : false},{ name : "city", type : cards.model.SchemaType.StringType, optional : false},{ name : "state", type : cards.model.SchemaType.StringType, optional : false}]), optional : false}]);
+			return new cards.ui.input.ObjectEditor(el,null,[{ name : "name", type : cards.model.SchemaType.StringType, optional : false},{ name : "age", type : cards.model.SchemaType.FloatType, optional : true},{ name : "contacts", type : cards.model.SchemaType.ArrayType(cards.model.SchemaType.ObjectType([{ name : "type", type : cards.model.SchemaType.StringType, optional : true},{ name : "value", type : cards.model.SchemaType.StringType, optional : false},{ name : "primary", type : cards.model.SchemaType.BoolType, optional : true}])), optional : false},{ name : "address", type : cards.model.SchemaType.ObjectType([{ name : "line 1", type : cards.model.SchemaType.StringType, optional : false},{ name : "line 2", type : cards.model.SchemaType.StringType, optional : true},{ name : "post code", type : cards.model.SchemaType.FloatType, optional : false},{ name : "city", type : cards.model.SchemaType.StringType, optional : false},{ name : "state", type : cards.model.SchemaType.StringType, optional : false}]), optional : false}]);
 		});
 		main.addDemo(function(el1) {
-			var editor = new cards.ui.input.ArrayEditor(el1,cards.model.SchemaType.StringType);
+			var editor = new cards.ui.input.ArrayEditor(el1,null,cards.model.SchemaType.StringType);
 			var _g = 0;
 			while(_g < 3) {
 				var i = _g++;
@@ -293,34 +293,34 @@ Main.main = function() {
 			return editor;
 		});
 		main.addDemo(function(el2) {
-			return new cards.ui.input.ArrayEditor(el2,cards.model.SchemaType.ArrayType(cards.model.SchemaType.CodeType));
+			return new cards.ui.input.ArrayEditor(el2,null,cards.model.SchemaType.ArrayType(cards.model.SchemaType.CodeType));
 		});
 		main.addDemo(function(el3) {
-			return new cards.ui.input.TextEditor(el3);
+			return new cards.ui.input.TextEditor(el3,null);
 		});
 		main.addDemo(function(el4) {
-			return new cards.ui.input.CodeEditor(el4);
+			return new cards.ui.input.CodeEditor(el4,null);
 		});
 		main.addDemo(function(el5) {
-			return new cards.ui.input.ReferenceEditor(el5);
+			return new cards.ui.input.ReferenceEditor(el5,null);
 		});
 		main.addDemo(function(el6) {
-			return new cards.ui.input.NumberEditor(el6);
+			return new cards.ui.input.NumberEditor(el6,null);
 		});
 		main.addDemo(function(el7) {
-			return new cards.ui.input.DateEditor(el7,false);
+			return new cards.ui.input.DateEditor(el7,null,false);
 		});
 		main.addDemo(function(el8) {
-			return new cards.ui.input.DateEditor(el8);
+			return new cards.ui.input.DateEditor(el8,null);
 		});
 		main.addDemo(function(el9) {
-			return new cards.ui.input.BoolEditor(el9);
+			return new cards.ui.input.BoolEditor(el9,null);
 		});
 		main.addDemo(function(el10) {
-			return new cards.ui.input.ColorEditor(el10);
+			return new cards.ui.input.ColorEditor(el10,null);
 		});
 		main.addDemo(function(el11) {
-			return new cards.ui.input.RangeEditor(el11);
+			return new cards.ui.input.RangeEditor(el11,null);
 		});
 	});
 };
@@ -1714,12 +1714,12 @@ cards.ui.input.RouteEditor.prototype = $extend(cards.ui.input.Editor.prototype,{
 	}
 	,__class__: cards.ui.input.RouteEditor
 });
-cards.ui.input.ArrayEditor = function(container,innerType) {
+cards.ui.input.ArrayEditor = function(container,parent,innerType) {
 	var _g2 = this;
 	this.values = [];
 	this.editors = [];
 	this.currentIndex = thx.stream.Value.createOption();
-	var options = { template : "<div class=\"editor array\"></div>", container : container};
+	var options = { template : "<div class=\"editor array\"></div>", container : container, parent : parent};
 	cards.ui.input.RouteEditor.call(this,cards.model.SchemaType.ArrayType(innerType),options);
 	this.innerType = innerType;
 	var toolbar = new cards.ui.widgets.Toolbar({ parent : this.component, container : this.component.el});
@@ -1923,19 +1923,15 @@ cards.ui.input.ArrayEditor.prototype = $extend(cards.ui.input.RouteEditor.protot
 		this.stream.pulse((function($this) {
 			var $r;
 			var value = $this.values.slice();
-			$r = (function($this) {
-				var $r;
-				var _1 = value;
-				$r = { _0 : $this.type, _1 : _1};
-				return $r;
-			}($this));
+			var _1 = value;
+			$r = { _0 : $this.type, _1 : _1};
 			return $r;
 		}(this)));
 	}
 	,__class__: cards.ui.input.ArrayEditor
 });
-cards.ui.input.BoolEditor = function(container) {
-	var options = { template : "<input class=\"editor bool\" placeholder=\"on/off\" type=\"checkbox\" />", container : container};
+cards.ui.input.BoolEditor = function(container,parent) {
+	var options = { template : "<input class=\"editor bool\" placeholder=\"on/off\" type=\"checkbox\" />", container : container, parent : parent};
 	cards.ui.input.Editor.call(this,cards.model.SchemaType.BoolType,options);
 	var el = this.component.el;
 	thx.stream.dom.Dom.streamEvent(el,"change").mapValue(function(_) {
@@ -1954,9 +1950,9 @@ cards.ui.input.BoolEditor.__super__ = cards.ui.input.Editor;
 cards.ui.input.BoolEditor.prototype = $extend(cards.ui.input.Editor.prototype,{
 	__class__: cards.ui.input.BoolEditor
 });
-cards.ui.input.CodeEditor = function(container) {
+cards.ui.input.CodeEditor = function(container,parent) {
 	var _g = this;
-	var options = { template : "<div class=\"editor code\"></div>", container : container};
+	var options = { template : "<div class=\"editor code\"></div>", container : container, parent : parent};
 	cards.ui.input.Editor.call(this,cards.model.SchemaType.CodeType,options);
 	this.editor = CodeMirror(this.component.el,{ mode : "javascript", tabSize : 2, lineNumbers : true, tabindex : 1, lineWrapping : true});
 	this.editor.on("changes",$bind(this,this.changes));
@@ -1998,7 +1994,7 @@ cards.ui.input.CodeEditor.prototype = $extend(cards.ui.input.Editor.prototype,{
 	}
 	,__class__: cards.ui.input.CodeEditor
 });
-cards.ui.input.InputBasedEditor = function(container,valueType,name,type,event,extract,assign) {
+cards.ui.input.InputBasedEditor = function(container,parent,valueType,name,type,event,extract,assign) {
 	if(event == null) event = "change";
 	if(null == type) type = name;
 	if(null == extract) extract = function(input) {
@@ -2008,7 +2004,7 @@ cards.ui.input.InputBasedEditor = function(container,valueType,name,type,event,e
 	if(null == assign) assign = function(input1,value) {
 		input1.value = value._1;
 	};
-	var options = { template : "<input class=\"editor " + name + "\" placeholder=\"" + name + "\" type=\"" + type + "\" />", container : container};
+	var options = { template : "<input class=\"editor " + name + "\" placeholder=\"" + name + "\" type=\"" + type + "\" />", container : container, parent : parent};
 	cards.ui.input.Editor.call(this,valueType,options);
 	var el = this.component.el;
 	thx.stream.dom.Dom.streamEvent(el,event).mapValue(function(_) {
@@ -2026,19 +2022,19 @@ cards.ui.input.InputBasedEditor.__super__ = cards.ui.input.Editor;
 cards.ui.input.InputBasedEditor.prototype = $extend(cards.ui.input.Editor.prototype,{
 	__class__: cards.ui.input.InputBasedEditor
 });
-cards.ui.input.ColorEditor = function(container) {
-	cards.ui.input.InputBasedEditor.call(this,container,cards.model.SchemaType.StringType,"color");
+cards.ui.input.ColorEditor = function(container,parent) {
+	cards.ui.input.InputBasedEditor.call(this,container,parent,cards.model.SchemaType.StringType,"color");
 };
 cards.ui.input.ColorEditor.__name__ = ["cards","ui","input","ColorEditor"];
 cards.ui.input.ColorEditor.__super__ = cards.ui.input.InputBasedEditor;
 cards.ui.input.ColorEditor.prototype = $extend(cards.ui.input.InputBasedEditor.prototype,{
 	__class__: cards.ui.input.ColorEditor
 });
-cards.ui.input.DateEditor = function(container,useTime) {
+cards.ui.input.DateEditor = function(container,parent,useTime) {
 	if(useTime == null) useTime = true;
 	var _g = this;
 	if(useTime) this.format = "%Y-%m-%dT%H:%M"; else this.format = "%Y-%m-%d";
-	var options = { template : "<input class=\"editor date\" placeholder=\"insert date\" type=\"" + (useTime?"datetime-local":"date") + "\" />", container : container};
+	var options = { template : "<input class=\"editor date\" placeholder=\"insert date\" type=\"" + (useTime?"datetime-local":"date") + "\" />", container : container, parent : parent};
 	cards.ui.input.Editor.call(this,cards.model.SchemaType.DateType,options);
 	var el = this.component.el;
 	thx.stream.dom.Dom.streamEvent(el,"change").mapValue(function(_) {
@@ -2103,26 +2099,26 @@ cards.ui.input.EditorFactory.create = function(type,container,parent) {
 	switch(type[1]) {
 	case 0:
 		var t = type[2];
-		return new cards.ui.input.ArrayEditor(container,t);
+		return new cards.ui.input.ArrayEditor(container,parent,t);
 	case 1:
-		return new cards.ui.input.BoolEditor(container);
+		return new cards.ui.input.BoolEditor(container,parent);
 	case 6:
-		return new cards.ui.input.CodeEditor(container);
+		return new cards.ui.input.CodeEditor(container,parent);
 	case 2:
-		return new cards.ui.input.DateEditor(container,true);
+		return new cards.ui.input.DateEditor(container,parent,true);
 	case 3:
-		return new cards.ui.input.NumberEditor(container);
+		return new cards.ui.input.NumberEditor(container,parent);
 	case 4:
 		var fields = type[2];
-		return new cards.ui.input.ObjectEditor(container,fields);
+		return new cards.ui.input.ObjectEditor(container,parent,fields);
 	case 7:
-		return new cards.ui.input.ReferenceEditor(container);
+		return new cards.ui.input.ReferenceEditor(container,parent);
 	case 5:
-		return new cards.ui.input.TextEditor(container);
+		return new cards.ui.input.TextEditor(container,parent);
 	}
 };
-cards.ui.input.NumberEditor = function(container) {
-	cards.ui.input.InputBasedEditor.call(this,container,cards.model.SchemaType.FloatType,"number","number","input",function(el) {
+cards.ui.input.NumberEditor = function(container,parent) {
+	cards.ui.input.InputBasedEditor.call(this,container,parent,cards.model.SchemaType.FloatType,"number","number","input",function(el) {
 		var _1 = el.valueAsNumber;
 		return { _0 : cards.model.SchemaType.FloatType, _1 : _1};
 	});
@@ -2132,13 +2128,13 @@ cards.ui.input.NumberEditor.__super__ = cards.ui.input.InputBasedEditor;
 cards.ui.input.NumberEditor.prototype = $extend(cards.ui.input.InputBasedEditor.prototype,{
 	__class__: cards.ui.input.NumberEditor
 });
-cards.ui.input.ObjectEditor = function(container,fields) {
+cards.ui.input.ObjectEditor = function(container,parent,fields) {
 	var _g = this;
 	this.object = { };
 	this.fieldMap = new haxe.ds.StringMap();
 	this.defMap = new haxe.ds.StringMap();
 	this.currentField = thx.stream.Value.createOption();
-	var options = { template : "<div class=\"editor table\"></div>", container : container};
+	var options = { template : "<div class=\"editor table\"></div>", container : container, parent : parent};
 	cards.ui.input.RouteEditor.call(this,cards.model.SchemaType.ObjectType([]),options);
 	this.fields = [];
 	var toolbar = new cards.ui.widgets.Toolbar({ parent : this.component, container : this.component.el});
@@ -2150,7 +2146,7 @@ cards.ui.input.ObjectEditor = function(container,fields) {
 	this.table = _this.createElement("table");
 	this.component.el.appendChild(this.table);
 	this.diff.subscribe(function(d) {
-		haxe.Log.trace("TODO " + cards.ui.input._DiffAt.DiffAt_Impl_.toString(d),{ fileName : "ObjectEditor.hx", lineNumber : 54, className : "cards.ui.input.ObjectEditor", methodName : "new"});
+		haxe.Log.trace("TODO " + cards.ui.input._DiffAt.DiffAt_Impl_.toString(d),{ fileName : "ObjectEditor.hx", lineNumber : 56, className : "cards.ui.input.ObjectEditor", methodName : "new"});
 	});
 	fields.map(function(field,i) {
 		_g.defMap.set(field.name,{ field : field, index : i});
@@ -2354,8 +2350,8 @@ cards.ui.input._Path.Path_Impl_.equal = function(this1,other) {
 cards.ui.input.PathItem = { __ename__ : ["cards","ui","input","PathItem"], __constructs__ : ["Field","Index"] };
 cards.ui.input.PathItem.Field = function(name) { var $x = ["Field",0,name]; $x.__enum__ = cards.ui.input.PathItem; $x.toString = $estr; return $x; };
 cards.ui.input.PathItem.Index = function(pos) { var $x = ["Index",1,pos]; $x.__enum__ = cards.ui.input.PathItem; $x.toString = $estr; return $x; };
-cards.ui.input.RangeEditor = function(container) {
-	cards.ui.input.InputBasedEditor.call(this,container,cards.model.SchemaType.FloatType,"range","range","input",function(el) {
+cards.ui.input.RangeEditor = function(container,parent) {
+	cards.ui.input.InputBasedEditor.call(this,container,parent,cards.model.SchemaType.FloatType,"range","range","input",function(el) {
 		var _1 = el.valueAsNumber;
 		return { _0 : cards.model.SchemaType.FloatType, _1 : _1};
 	});
@@ -2365,8 +2361,8 @@ cards.ui.input.RangeEditor.__super__ = cards.ui.input.InputBasedEditor;
 cards.ui.input.RangeEditor.prototype = $extend(cards.ui.input.InputBasedEditor.prototype,{
 	__class__: cards.ui.input.RangeEditor
 });
-cards.ui.input.ReferenceEditor = function(container) {
-	cards.ui.input.InputBasedEditor.call(this,container,cards.model.SchemaType.ReferenceType,"reference","text","input",function(el) {
+cards.ui.input.ReferenceEditor = function(container,parent) {
+	cards.ui.input.InputBasedEditor.call(this,container,parent,cards.model.SchemaType.ReferenceType,"reference","text","input",function(el) {
 		var _1 = el.value;
 		return { _0 : cards.model.SchemaType.ReferenceType, _1 : _1};
 	});
@@ -2376,9 +2372,9 @@ cards.ui.input.ReferenceEditor.__super__ = cards.ui.input.InputBasedEditor;
 cards.ui.input.ReferenceEditor.prototype = $extend(cards.ui.input.InputBasedEditor.prototype,{
 	__class__: cards.ui.input.ReferenceEditor
 });
-cards.ui.input.TextEditor = function(container) {
+cards.ui.input.TextEditor = function(container,parent) {
 	var _g = this;
-	var options = { template : "<textarea class=\"editor text\" placeholder=\"text\"></textarea>", container : container};
+	var options = { template : "<textarea class=\"editor text\" placeholder=\"text\"></textarea>", container : container, parent : parent};
 	cards.ui.input.Editor.call(this,cards.model.SchemaType.StringType,options);
 	var el = this.component.el;
 	thx.stream.dom.Dom.streamEvent(el,"input").audit(function(_) {

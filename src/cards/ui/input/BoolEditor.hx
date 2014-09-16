@@ -6,12 +6,14 @@ import js.html.Element;
 import js.html.InputElement;
 import udom.Dom.Query;
 using thx.stream.dom.Dom;
+import cards.components.Component;
 
 class BoolEditor extends Editor {
-  public function new(container : Element) {
+  public function new(container : Element,parent : Component) {
     var options = {
       template  : '<input class="editor bool" placeholder="on/off" type="checkbox" />',
-      container : container
+      container : container,
+      parent : parent
     };
     super(BoolType, options);
 

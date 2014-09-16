@@ -7,14 +7,16 @@ import js.html.Element;
 import js.html.TextAreaElement;
 import udom.Dom.Query;
 using thx.stream.dom.Dom;
+import cards.components.Component;
 
 // TODO focus
 class CodeEditor extends Editor {
   var editor : Dynamic;
-  public function new(container : Element) {
+  public function new(container : Element, parent : Component) {
     var options = {
       template  : '<div class="editor code"></div>',
-      container : container
+      container : container,
+      parent : parent
     };
     super(CodeType, options);
 

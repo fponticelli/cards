@@ -13,6 +13,7 @@ import js.html.OListElement;
 using udom.Dom;
 using thx.core.Options;
 import cards.ui.input.Diff;
+import cards.components.Component;
 
 // TODO
 //  * drag and drop item
@@ -24,13 +25,14 @@ class ArrayEditor extends RouteEditor {
   var innerType : SchemaType;
   var currentIndex : Value<Option<Int>>;
   var values : Array<Null<Dynamic>>;
-  public function new(container : Element, innerType : SchemaType) {
+  public function new(container : Element, parent : Component, innerType : SchemaType) {
     values = [];
     editors = [];
     currentIndex = Value.createOption();
     var options = {
       template  : '<div class="editor array"></div>',
-      container : container
+      container : container,
+      parent : parent
     };
     super(ArrayType(innerType), options);
     this.innerType = innerType;
