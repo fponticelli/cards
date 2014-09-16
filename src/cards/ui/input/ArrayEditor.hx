@@ -58,13 +58,13 @@ class ArrayEditor extends RouteEditor {
 
     diff.subscribe(function(d) {
       switch [d.path.asArray(), d.diff] {
-        case [[Index(i)], RemoveItem]:
+        case [[Index(i)], Remove]:
           values.splice(i, 1);
           removeEditor(i);
-        case [[Index(i)], AddItem]:
+        case [[Index(i)], Add]:
           values.insert(i, null);
           createEditor(i);
-        case [[Index(i)], SetValue(tv)] if(Type.enumEq(tv.asType(), innerType)):
+        case [[Index(i)], Set(tv)] if(Type.enumEq(tv.asType(), innerType)):
           values[i] = tv.asValue();
           setEditor(i, tv);
         case [path, diff] if(path.length > 0):
@@ -73,8 +73,10 @@ class ArrayEditor extends RouteEditor {
             case Index(index) if(Std.is(editors[index], IRouteEditor)):
               (cast editors[index] : IRouteEditor).diff.pulse(new DiffAt(path, diff));
             case _:
-              throw 'unable to assign $d within ArrayEditor';
+              throw 'unable to forward $d within ArrayEditor';
           }
+        case [[], Set(tv)] if(Type.enumEq(type, tv.asType())):
+          // TODO set value?
         case _:
           throw 'unable to assign $d within ArrayEditor';
       }
@@ -97,14 +99,14 @@ class ArrayEditor extends RouteEditor {
     buttonAdd.clicks
       .subscribe(function(_) {
         var index = currentIndex.get().toBool() ? currentIndex.get().toValue() + 1 : values.length;
-        diff.pulse(new DiffAt(index, AddItem));
+        diff.pulse(new DiffAt(index, Add));
       });
     buttonRemove.clicks
       .subscribe(function(_) {
         if(!currentIndex.get().toBool())
           return;
         var index = currentIndex.get().toValue();
-        diff.pulse(new DiffAt(index, RemoveItem));
+        diff.pulse(new DiffAt(index, Remove));
       });
   }
 
@@ -112,9 +114,9 @@ class ArrayEditor extends RouteEditor {
     insertItem(values.length, value);
 
   public function insertItem(index : Int, ?value : TypedValue) {
-    diff.pulse(new DiffAt(index, AddItem));
+    diff.pulse(new DiffAt(index, Add));
     if(null != value)
-      diff.pulse(new DiffAt(index, SetValue(value)));
+      diff.pulse(new DiffAt(index, Set(value)));
   }
 
   function createEditor(index : Int) {
@@ -139,7 +141,7 @@ class ArrayEditor extends RouteEditor {
 
     editor.stream
       .filterValue(function(v) return currentIndex.get().toBool())
-      .mapValue(function(v) return new DiffAt(currentIndex.get().toValue(), SetValue(v)))
+      .mapValue(function(v) return new DiffAt(currentIndex.get().toValue(), Set(v)))
       .distinct(DiffAt.equal)
       // don't use plug or the stream will be killed when killing the editor
       .subscribe(function(v) diff.pulse(v));
@@ -169,6 +171,7 @@ class ArrayEditor extends RouteEditor {
     }, 10);
   }
 
+  // TODO pulse passes original object and bad things can happen if it is modified elsewhere
   function pulse()
-    stream.pulse(new TypedValue(type, values.copy()));
+    stream.pulse(new TypedValue(type, values));
 }

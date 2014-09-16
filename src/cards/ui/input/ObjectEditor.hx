@@ -19,7 +19,7 @@ import cards.components.Component;
 class ObjectEditor extends RouteEditor {
   var fields : Array<FieldInfo>;
   var object : {};
-  var fieldMap : Map<String, IEditor>;
+  var editors : Map<String, IEditor>;
   var defMap : Map<String, { field : FieldInfo, index : Int }>;
   var table : TableElement;
   var currentField : Value<Option<String>>;
@@ -27,7 +27,7 @@ class ObjectEditor extends RouteEditor {
   var buttonAdd : Button;
   public function new(container : Element, parent : Component, fields : Array<FieldInfo>) {
     this.object = {};
-    fieldMap = new Map();
+    editors = new Map();
     defMap = new Map();
     currentField = Value.createOption();
     var options = {
@@ -53,7 +53,37 @@ class ObjectEditor extends RouteEditor {
     component.el.appendChild(table);
 
     diff.subscribe(function(d) {
-      trace("TODO " + d);
+      switch [d.path.asArray(), d.diff] {
+        case [[Field(name)], Remove]:
+          if(editors.exists(name))
+            removeField(name);
+        case [[Field(name)], Add]:
+          ensureField(name);
+        case [[Field(name)], Set(tv)] if(Type.enumEq(tv.asType(), defMap.get(name).field.type)):
+          ensureField(name).stream.pulse(tv);
+        case [path, diff] if(path.length > 0):
+          var first = path.shift();
+          switch first {
+            case Field(name) if(switch defMap.get(name).field.type {
+                case ObjectType(_), ArrayType(_): true;
+                case _: false;
+              }):
+              (cast ensureField(name) : IRouteEditor)
+                .diff.pulse(new DiffAt(path, diff));
+            case _:
+              throw 'unable to forward $d within ObjectEditor';
+          }
+        case [[], Set(tv)] if(Type.enumEq(type, tv.asType())):
+          // TODO set value?
+        case _:
+          trace(d.path.toString());
+          trace(switch d.diff {
+            case Set(d): Std.string(d);
+            case _: Std.string(d.diff);
+          });
+          throw 'unable to assign $d within ObjectEditor';
+      }
+      pulse();
     });
 
     fields.mapi(function(field, i) {
@@ -91,6 +121,12 @@ class ObjectEditor extends RouteEditor {
     setAddState();
   }
 
+  function ensureField(name : String) {
+    if(!editors.exists(name))
+      realizeField(name);
+    return editors.get(name);
+  }
+
   public function addFieldDefinition(field : FieldInfo) {
     checkUnique(field.name);
     fields.push(field);
@@ -100,7 +136,7 @@ class ObjectEditor extends RouteEditor {
   }
 
   public function realizeField(name : String) {
-    if(fieldMap.exists(name))
+    if(editors.exists(name))
       throw 'field $name already realized';
     var def = fields.first(function(field) return field.name == name);
     if(null == def) throw 'unable to realize $name because it is not defined in ObjectType';
@@ -150,7 +186,7 @@ class ObjectEditor extends RouteEditor {
         }
         editor;
     }
-    fieldMap.set(name, editor);
+    editors.set(name, editor);
 
     editor.focus
       .withValue(true)
@@ -172,10 +208,10 @@ class ObjectEditor extends RouteEditor {
   }
 
   public function removeField(name : String) {
-    var editor = fieldMap.get(name),
+    var editor = editors.get(name),
         def    = defMap.get(name);
     editor.dispose();
-    fieldMap.remove(name);
+    editors.remove(name);
     var rows = Query.all('tr[data-index="${def.index}"]', table).childrenOf(table);
     rows.map(function(row) {
       table.removeChild(row);
@@ -185,7 +221,7 @@ class ObjectEditor extends RouteEditor {
 
   function setAddState() {
     var fields = this.fields.copy().filter(function(field) {
-      return !fieldMap.exists(field.name);
+      return !editors.exists(field.name);
     });
     var enabled = fields.length > 0;
     buttonAdd.enabled.set(enabled);
@@ -207,4 +243,8 @@ class ObjectEditor extends RouteEditor {
     for(field in fields)
       if(name == field.name)
         throw '$name field already exists in this ObjectType';
+
+  // TODO pulse passes original object and bad things can happen if it is modified elsewhere
+  function pulse()
+    stream.pulse(new TypedValue(type, object));
 }
