@@ -10,18 +10,17 @@ using thx.stream.Emitter;
 class Card {
   public static function create(model : Model, container : Element, mapper : FragmentMapper) {
     var card = new Component({
-        template : '<div class="card"><div class="doc"></div><aside><div class="context"></div><div class="model"></div></aside></div>'
-      }),
-      context = Query.first('.context', card.el),
-      modelView = new ModelView(),
-      document = new Document({ el : Query.first('.doc', card.el) }),
-      context = new ContextView(
-        document,
-        model,
-        modelView,
-        mapper,
-        { el : Query.first('.context', card.el) }
-      );
+          template : '<div class="card"><div class="doc"></div><aside><div class="context"></div><div class="model"></div></aside></div>'
+        }),
+        modelView = new ModelView(),
+        document = new Document({ el : Query.first('.doc', card.el) }),
+        context = new ContextView(
+          document,
+          model,
+          modelView,
+          mapper,
+          { el : Query.first('.context', card.el) }
+        );
 
     modelView.component.appendTo(Query.first('.model', card.el));
 
@@ -31,5 +30,12 @@ class Card {
     card.appendTo(container);
 
     document.article.addBlock();
+
+    return {
+      card : card,
+      modelView : modelView,
+      document : document,
+      context : context
+    };
   }
 }

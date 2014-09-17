@@ -7,11 +7,13 @@ import cards.properties.ValueProperties;
 import cards.ui.Card;
 import cards.ui.fragments.FragmentMapper;
 import cards.ui.fragments.FragmentProperties;
+import cards.util.MacroVersion;
 import thx.stream.dom.Dom;
 import udom.Dom;
 
 class Main {
   public static function main() {
+    var version = MacroVersion.next();
     Dom.ready().success(function(_) {
       // START
       var values    = new ValueProperties(),
@@ -26,7 +28,8 @@ class Main {
           model     = new Model(data);
 
       // Card
-      Card.create(model, container, mapper);
+      var items = Card.create(model, container, mapper);
+      items.document.statusbar.right.component.el.innerHTML = version.toString();
     });
   }
 }

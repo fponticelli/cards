@@ -6,3 +6,23 @@
   toolbar-from-bottom()
   bar-shadow-top()
   user-select none
+  display table
+  > div
+    display table-row
+    > div
+      display table-cell
+      padding 2px
+  .center
+    text-align center
+  .right
+    text-align right
+  .btn-group
+    > *
+      margin-right 0
+      border-radius 0
+    :first-child
+      border-top-left-radius radius
+      border-bottom-left-radius radius
+    :last-child
+      border-top-right-radius radius
+      border-bottom-right-radius radius

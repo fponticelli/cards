@@ -32,7 +32,7 @@ class Document {
         case None:
           return 'no fragment selected';
       })
-      .subscribe(statusbar.component.el.subscribeHTML());
+      .subscribe(statusbar.left.component.el.subscribeHTML());
 
     toolbar.left.addButton('block', Config.icons.add)
       .clicks.subscribe(function(_) article.addBlock());

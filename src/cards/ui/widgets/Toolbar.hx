@@ -21,17 +21,15 @@ class Toolbar {
 }
 
 class ToolbarGroup {
-  public var el(default, null) : Element;
-  var component : Component;
+  public var component(default, null) : Component;
 
-  public function new(el : Element, component : Component) {
-    this.el = el;
-    this.component = component;
+  public function new(el : Element, parent : Component) {
+    this.component =  new Component({ el : el, parent : parent});
   }
 
   public function addButton(text = '', ?icon : String) {
     var button = new Button(text, icon);
-    button.component.appendTo(el);
+    button.component.appendTo(component.el);
     component.add(button.component);
     return button;
   }
