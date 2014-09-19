@@ -121,6 +121,9 @@ class BaseObjectEditor extends RouteEditor {
       realizeField(field.name);
   }
 
+  function createFieldLabel(parent : Component, container : Element, name : String)
+    container.textContent = name;
+
   public function realizeField(name : String) {
     if(editors.exists(name))
       throw 'field $name already realized';
@@ -137,7 +140,7 @@ class BaseObjectEditor extends RouteEditor {
         rowh.setAttribute('data-index', cast index);
         rowd.setAttribute('data-index', cast index);
         th.colSpan = 2;
-        th.textContent = name;
+        createFieldLabel(component, th, name);
         th.className = "composite";
         td.colSpan = 2;
         td.className = "composite";
@@ -158,7 +161,7 @@ class BaseObjectEditor extends RouteEditor {
             td  = Browser.document.createElement('td');
         var index = defMap.get(name).index;
         row.setAttribute('data-index', cast index);
-        th.textContent = name;
+        createFieldLabel(component, th, name);
         th.className = "primitive";
         td.className = "primitive";
         var editor = EditorFactory.create(def.type, td, component);
@@ -176,7 +179,7 @@ class BaseObjectEditor extends RouteEditor {
 
     editor.focus
       .withValue(true)
-      .mapValue(function(_) return name)
+      .mapValue(function(_) return def.name)
       .toOption()
       .feed(currentField);
 
