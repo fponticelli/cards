@@ -26,7 +26,6 @@ class MacroVersion {
     return saveAndReturn(getVersion().nextBuild());
 #end
 
-
   macro public static function nextBuild()
     return saveAndReturn(getVersion().nextBuild());
 
