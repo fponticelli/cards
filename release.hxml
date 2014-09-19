@@ -5,6 +5,7 @@
 -lib thx.promise
 -lib thx.stream
 -lib thx.stream.dom
+-lib thx.semver
 -D js-flatten
 -D release
 -dce full
