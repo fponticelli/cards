@@ -154,6 +154,7 @@ a img {
 .card input.number,
 .card input.date,
 .card input.reference,
+.card input.fieldname,
 .card textarea.text {
   width: 100%;
   border: none;

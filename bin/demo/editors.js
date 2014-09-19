@@ -2170,6 +2170,9 @@ cards.ui.input.BaseObjectEditor.prototype = $extend(cards.ui.input.RouteEditor.p
 		this.type = cards.model.SchemaType.ObjectType(this.fields);
 		if(!field.optional) this.realizeField(field.name);
 	}
+	,createFieldLabel: function(parent,container,name) {
+		container.textContent = name;
+	}
 	,realizeField: function(name) {
 		if(this.editors.exists(name)) throw "field " + name + " already realized";
 		var def = thx.core.Arrays.first(this.fields,function(field) {
@@ -2193,7 +2196,7 @@ cards.ui.input.BaseObjectEditor.prototype = $extend(cards.ui.input.RouteEditor.p
 				rowh.setAttribute("data-index",index);
 				rowd.setAttribute("data-index",index);
 				th.colSpan = 2;
-				th.textContent = name;
+				this.createFieldLabel(this.component,th,name);
 				th.className = "composite";
 				td.colSpan = 2;
 				td.className = "composite";
@@ -2213,7 +2216,7 @@ cards.ui.input.BaseObjectEditor.prototype = $extend(cards.ui.input.RouteEditor.p
 				var td1 = window.document.createElement("td");
 				var index1 = this.defMap.get(name).index;
 				row.setAttribute("data-index",index1);
-				th1.textContent = name;
+				this.createFieldLabel(this.component,th1,name);
 				th1.className = "primitive";
 				td1.className = "primitive";
 				var editor2 = cards.ui.input.EditorFactory.create(def.type,td1,this.component);
@@ -2226,7 +2229,7 @@ cards.ui.input.BaseObjectEditor.prototype = $extend(cards.ui.input.RouteEditor.p
 		}
 		this.editors.set(name,editor);
 		editor.focus.withValue(true).mapValue(function(_) {
-			return name;
+			return def.name;
 		}).toOption().feed(this.currentField);
 		editor.focus.set(true);
 	}
@@ -2284,9 +2287,56 @@ cards.ui.input.AnonymousObjectEditor.prototype = $extend(cards.ui.input.BaseObje
 		this.type = cards.model.SchemaType.ObjectType(this.fields);
 		this.defMap.remove(name);
 	}
-	,guessFieldName: function() {
+	,createFieldLabel: function(parent,container,name) {
+		var _g = this;
+		var editor = new cards.ui.input.FieldNameEditor(container,parent);
+		editor.stream.mapValue(function(v) {
+			return v._1;
+		}).debounce(10).window(2,false).subscribe(function(names) {
+			switch(names.length) {
+			case 2:
+				var n = names[1];
+				var o = names[0];
+				if(_g.editors.exists(n)) editor.stream.pulse((function($this) {
+					var $r;
+					var s = _g.guessFieldName(n);
+					$r = (function($this) {
+						var $r;
+						var _1 = s;
+						$r = { _0 : cards.model.SchemaType.StringType, _1 : _1};
+						return $r;
+					}($this));
+					return $r;
+				}(this))); else {
+					var n1 = names[1];
+					var o1 = names[0];
+					var def = _g.defMap.get(o1);
+					_g.defMap.remove(o1);
+					def.field.name = n1;
+					_g.defMap.set(n1,def);
+					_g.editors.remove(o1);
+					_g.editors.set(n1,editor);
+					_g.type = cards.model.SchemaType.ObjectType(thx.core.Iterators.order(_g.defMap.iterator(),function(a,b) {
+						return a.index - b.index;
+					}).map(function(v1) {
+						return v1.field;
+					}));
+				}
+				break;
+			default:
+				throw "createFieldLabel should never reach this point";
+			}
+		});
+		editor.stream.emit(thx.stream.StreamValue.Pulse((function($this) {
+			var $r;
+			var _11 = name;
+			$r = { _0 : cards.model.SchemaType.StringType, _1 : _11};
+			return $r;
+		}(this))));
+	}
+	,guessFieldName: function(prefix) {
+		if(prefix == null) prefix = "field";
 		var id = 0;
-		var prefix = "field";
 		var t;
 		var assemble = function(id1) {
 			if(id1 > 0) return [prefix,"" + id1].join("_"); else return prefix;
@@ -2725,6 +2775,14 @@ cards.ui.input.EditorFactory.create = function(type,container,parent) {
 		return new cards.ui.input.TextEditor(container,parent);
 	}
 };
+cards.ui.input.FieldNameEditor = function(container,parent) {
+	cards.ui.input.InputBasedEditor.call(this,container,parent,cards.model.SchemaType.FloatType,"fieldname","text","change");
+};
+cards.ui.input.FieldNameEditor.__name__ = ["cards","ui","input","FieldNameEditor"];
+cards.ui.input.FieldNameEditor.__super__ = cards.ui.input.InputBasedEditor;
+cards.ui.input.FieldNameEditor.prototype = $extend(cards.ui.input.InputBasedEditor.prototype,{
+	__class__: cards.ui.input.FieldNameEditor
+});
 cards.ui.input.NumberEditor = function(container,parent) {
 	cards.ui.input.InputBasedEditor.call(this,container,parent,cards.model.SchemaType.FloatType,"number","number","input",function(el) {
 		var _1 = el.valueAsNumber;
@@ -3120,18 +3178,16 @@ cards.ui.widgets.Toolbar.prototype = {
 	,right: null
 	,__class__: cards.ui.widgets.Toolbar
 };
-cards.ui.widgets.ToolbarGroup = function(el,component) {
-	this.el = el;
-	this.component = component;
+cards.ui.widgets.ToolbarGroup = function(el,parent) {
+	this.component = new cards.components.Component({ el : el, parent : parent});
 };
 cards.ui.widgets.ToolbarGroup.__name__ = ["cards","ui","widgets","ToolbarGroup"];
 cards.ui.widgets.ToolbarGroup.prototype = {
-	el: null
-	,component: null
+	component: null
 	,addButton: function(text,icon) {
 		if(text == null) text = "";
 		var button = new cards.ui.widgets.Button(text,icon);
-		button.component.appendTo(this.el);
+		button.component.appendTo(this.component.el);
 		this.component.add(button.component);
 		return button;
 	}
