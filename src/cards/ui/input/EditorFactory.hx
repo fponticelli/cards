@@ -14,11 +14,13 @@ class EditorFactory {
       case CodeType:
         new CodeEditor(container, parent);
       case DateType:
-        new DateEditor(container, parent, true);
+        new DateEditor(container, parent, false);
       case FloatType:
         new NumberEditor(container, parent);
       case ObjectType(fields):
-        new ObjectEditor(container, parent, fields);
+        fields.length == 0
+          ? new AnonymousObjectEditor(container, parent)
+          : new ObjectEditor(container, parent, fields);
       case ReferenceType:
         new ReferenceEditor(container, parent);
       case StringType:
