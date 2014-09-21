@@ -15,33 +15,41 @@ class MacroVersion {
 
   macro public static function next()
 #if major
-    return saveAndReturn(getVersion().nextMajor());
+    return nextMajor();
 #elseif minor
-    return saveAndReturn(getVersion().nextMinor());
+    return nextMinor();
 #elseif (patch || release)
-    return saveAndReturn(getVersion().nextPatch());
+    return nextPatch();
 #elseif pre
-    return saveAndReturn(getVersion().nextPre());
+    return nextPre();
 #else
-    return saveAndReturn(getVersion().nextBuild());
+    return nextBuild();
 #end
 
-  macro public static function nextBuild()
+  #if !macro macro #end public static function nextBuild()
     return saveAndReturn(getVersion().nextBuild());
 
-  macro public static function nextPre()
-    return saveAndReturn(getVersion().nextPre());
+  #if !macro macro #end public static function nextPre() {
+    var v = getVersion();
+    return saveAndReturn(v.nextPre().withBuild(v.build).nextBuild());
+  }
 
-  macro public static function nextPatch()
-    return saveAndReturn(getVersion().nextPatch());
+  #if !macro macro #end public static function nextPatch() {
+    var v = getVersion();
+    return saveAndReturn(v.nextPatch().withBuild(v.build).nextBuild());
+  }
 
-  macro public static function nextMinor()
-    return saveAndReturn(getVersion().nextMinor());
+  #if !macro macro #end public static function nextMinor() {
+    var v = getVersion();
+    return saveAndReturn(v.nextMinor().withBuild(v.build).nextBuild());
+  }
 
-  macro public static function nextMajor()
-    return saveAndReturn(getVersion().nextMajor());
+  #if !macro macro #end public static function nextMajor() {
+    var v = getVersion();
+    return saveAndReturn(v.nextMajor().withBuild(v.build).nextBuild());
+  }
 
-  macro public static function setVersionFile(file : String) {
+  #if !macro macro #end public static function setVersionFile(file : String) {
     VERSION_FILE = file;
     return null;
   }
