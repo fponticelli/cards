@@ -1,6 +1,7 @@
 package cards.ui;
 
 import cards.types.TypeTransform;
+import cards.ui.input.Path;
 import js.html.Element;
 using thx.stream.Emitter;
 import cards.components.Component;
@@ -13,7 +14,7 @@ import udom.Dom;
 import thx.stream.Bus;
 
 class ModelView {
-  public static var typeDefinitions = [
+  static var typeDefinitions = [
     { type : StringType, icon : Config.icons.text },
     { type : BoolType,   icon : Config.icons.bool },
     { type : FloatType,  icon : Config.icons.number },
@@ -24,9 +25,9 @@ class ModelView {
   public var component(default, null) : Component;
   public var schema(default, null) : Emitter<SchemaEvent>;
   public var data(default, null) : Emitter<DataEvent>;
-  public var toolbar(default, null) : Toolbar;
-  public var currentField(default, null) : Null<ModelViewField>;
 
+  var currentField(default, null) : Null<ModelViewField>;
+  var toolbar : Toolbar;
   var pairs : Element;
 
   var schemaBus : Bus<SchemaEvent>;
@@ -73,20 +74,6 @@ class ModelView {
   }
 
   function addButtonTypes() {
-/*
-    var buttonToText = toolbar.center.addButton('', Config.icons.text);
-    buttonToText.clicks.subscribe(function(_) {
-      trace("switch to text");
-    });
-    buttonToText.enabled.set(false);
-
-    var buttonToNumber = toolbar.center.addButton('', Config.icons.number);
-    buttonToNumber.clicks.subscribe(function(_) {
-      if(null == currentField) return;
-      currentField.setEditor(FloatType);
-    });
-    buttonToNumber.enabled.set(false);
-*/
     for(def in typeDefinitions) {
       var button = toolbar.center.addButton('', def.icon);
       button.enabled.set(false);
@@ -106,7 +93,7 @@ class ModelView {
     }
   }
 
-  public function guessFieldName() {
+  function guessFieldName() {
     var id = 0,
         prefix = 'field',
         t;
@@ -116,12 +103,12 @@ class ModelView {
     return t;
   }
 
-  public function removeFieldByName(name : String) {
+  function removeFieldByName(name : String) {
     var field = fields.get(name);
     removeField(field);
   }
 
-  public function removeField(field : ModelViewField) {
+  function removeField(field : ModelViewField) {
     Assert.notNull(field, 'when removing a field it should not be null');
     var name = field.key.value.get();
     field.destroy();
@@ -130,7 +117,7 @@ class ModelView {
     }
   }
 
-  public function setField(path : String, value : Dynamic, type : SchemaType) {
+  public function setField(path : Path, value : Dynamic, type : SchemaType) {
     if(path == "" || path == null)
       return;
     var field = fields.get(path);
@@ -139,7 +126,7 @@ class ModelView {
     field.value.set(TypeTransform.transform(type, field.type)(value));
   }
 
-  public function addField(name : String, type : SchemaType) {
+  function addField(name : String, type : SchemaType) {
     var field = new ModelViewField({
       container : pairs,
       parent : component,
