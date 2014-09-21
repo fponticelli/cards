@@ -19,21 +19,54 @@ import thx.stream.Value;
 import cards.components.Component;
 
 class AnonymousObjectEditor extends BaseObjectEditor {
-  public function new(container : Element, parent : Component) {
+  public static var defaultTypes(default, null) : Array<{ type : SchemaType, description : String }> = (function() {
+      var types = [
+          { type : StringType,     description : "text" },
+          { type : FloatType,      description : "number" },
+          { type : DateType,       description : "date" },
+          { type : CodeType,       description : "code" },
+          { type : BoolType,       description : "yes/no" },
+          { type : ObjectType([]), description : "object" }
+        ];
+      types = types
+        .concat(types.map(function(o) return {
+          type : ArrayType(o.type),
+          description : 'list of ${o.description}'
+        }))
+        .concat(types.map(function(o) return {
+          type : ArrayType(ArrayType(o.type)),
+          description : 'list of list of ${o.description}'
+        }));
+      return types;
+    })();
+  var menuAdd : Menu;
+  var allowedTypes : Array<{ type : SchemaType, description : String }>;
+  public function new(container : Element, parent : Component, ?allowedTypes : Array<{ type : SchemaType, description : String }>) {
     super(container, parent, []);
+    this.allowedTypes = null == allowedTypes ? defaultTypes : allowedTypes;
+    menuAdd = new Menu({ parent : component });
+    initMenu();
 
-    var buttonAdd = toolbar.left.addButton('', Config.icons.add);
+    var buttonAdd = toolbar.left.addButton('', Config.icons.addMenu);
 
     buttonAdd.clicks
       .subscribe(function(_) {
-        realizeField(guessFieldName());
+        menuAdd.anchorTo(buttonAdd.component.el);
+        menuAdd.visible.stream.set(true);
       });
   }
 
-  override public function realizeField(name : String) {
-    addFieldDefinition({ name : name, type : StringType, optional : true });
-    super.realizeField(name);
-  }
+  function initMenu()
+    allowedTypes.map(function(item) {
+      var button = new Button('add <b>${item.description}</b>');
+      button.clicks
+        .subscribe(function(_) {
+          var name = guessFieldName();
+          addFieldDefinition({ name : name, type : item.type, optional : true });
+          realizeField(name);
+        });
+      menuAdd.addItem(button.component);
+    });
 
   override public function removeField(name : String) {
     super.removeField(name);

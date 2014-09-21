@@ -2264,20 +2264,34 @@ cards.ui.input.BaseObjectEditor.prototype = $extend(cards.ui.input.RouteEditor.p
 	}
 	,__class__: cards.ui.input.BaseObjectEditor
 });
-cards.ui.input.AnonymousObjectEditor = function(container,parent) {
+cards.ui.input.AnonymousObjectEditor = function(container,parent,allowedTypes) {
 	var _g = this;
 	cards.ui.input.BaseObjectEditor.call(this,container,parent,[]);
-	var buttonAdd = this.toolbar.left.addButton("",Config.icons.add);
+	if(null == allowedTypes) this.allowedTypes = cards.ui.input.AnonymousObjectEditor.defaultTypes; else this.allowedTypes = allowedTypes;
+	this.menuAdd = new cards.ui.widgets.Menu({ parent : this.component});
+	this.initMenu();
+	var buttonAdd = this.toolbar.left.addButton("",Config.icons.addMenu);
 	buttonAdd.clicks.subscribe(function(_) {
-		_g.realizeField(_g.guessFieldName());
+		_g.menuAdd.anchorTo(buttonAdd.component.el);
+		_g.menuAdd.visible.stream.set(true);
 	});
 };
 cards.ui.input.AnonymousObjectEditor.__name__ = ["cards","ui","input","AnonymousObjectEditor"];
 cards.ui.input.AnonymousObjectEditor.__super__ = cards.ui.input.BaseObjectEditor;
 cards.ui.input.AnonymousObjectEditor.prototype = $extend(cards.ui.input.BaseObjectEditor.prototype,{
-	realizeField: function(name) {
-		this.addFieldDefinition({ name : name, type : cards.model.SchemaType.StringType, optional : true});
-		cards.ui.input.BaseObjectEditor.prototype.realizeField.call(this,name);
+	menuAdd: null
+	,allowedTypes: null
+	,initMenu: function() {
+		var _g = this;
+		this.allowedTypes.map(function(item) {
+			var button = new cards.ui.widgets.Button("add <b>" + item.description + "</b>");
+			button.clicks.subscribe(function(_) {
+				var name = _g.guessFieldName();
+				_g.addFieldDefinition({ name : name, type : item.type, optional : true});
+				_g.realizeField(name);
+			});
+			_g.menuAdd.addItem(button.component);
+		});
 	}
 	,removeField: function(name) {
 		cards.ui.input.BaseObjectEditor.prototype.removeField.call(this,name);
@@ -2763,12 +2777,13 @@ cards.ui.input.EditorFactory.create = function(type,container,parent) {
 	case 6:
 		return new cards.ui.input.CodeEditor(container,parent);
 	case 2:
-		return new cards.ui.input.DateEditor(container,parent,true);
+		return new cards.ui.input.DateEditor(container,parent,false);
 	case 3:
 		return new cards.ui.input.NumberEditor(container,parent);
 	case 4:
 		var fields = type[2];
-		return new cards.ui.input.ObjectEditor(container,parent,fields);
+		if(fields.length == 0) return new cards.ui.input.AnonymousObjectEditor(container,parent); else return new cards.ui.input.ObjectEditor(container,parent,fields);
+		break;
 	case 7:
 		return new cards.ui.input.ReferenceEditor(container,parent);
 	case 5:
@@ -2777,6 +2792,8 @@ cards.ui.input.EditorFactory.create = function(type,container,parent) {
 };
 cards.ui.input.FieldNameEditor = function(container,parent) {
 	cards.ui.input.InputBasedEditor.call(this,container,parent,cards.model.SchemaType.FloatType,"fieldname","text","change");
+	this.component.el.addEventListener("keyup",function(e) {
+	},false);
 };
 cards.ui.input.FieldNameEditor.__name__ = ["cards","ui","input","FieldNameEditor"];
 cards.ui.input.FieldNameEditor.__super__ = cards.ui.input.InputBasedEditor;
@@ -2804,7 +2821,7 @@ cards.ui.input.ObjectEditor = function(container,parent,fields) {
 		_g.menuAdd.anchorTo(_g.buttonAdd.component.el);
 		_g.menuAdd.visible.stream.set(true);
 	});
-	this.menuAdd = new cards.ui.widgets.Menu({ });
+	this.menuAdd = new cards.ui.widgets.Menu({ parent : this.component});
 	this.inited = true;
 	this.setAddState();
 };
@@ -6721,6 +6738,15 @@ cards.model.Runtime.pattern = new EReg("\\$\\.(.+?)\\b","");
 cards.model.ref.EmptyParent.instance = new cards.model.ref.EmptyParent();
 cards.model.ref.Ref.reField = new EReg("^\\.?([^.\\[]+)","");
 cards.model.ref.Ref.reIndex = new EReg("^\\[(\\d+)\\]","");
+cards.ui.input.AnonymousObjectEditor.defaultTypes = (function() {
+	var types = [{ type : cards.model.SchemaType.StringType, description : "text"},{ type : cards.model.SchemaType.FloatType, description : "number"},{ type : cards.model.SchemaType.DateType, description : "date"},{ type : cards.model.SchemaType.CodeType, description : "code"},{ type : cards.model.SchemaType.BoolType, description : "yes/no"},{ type : cards.model.SchemaType.ObjectType([]), description : "object"}];
+	types = types.concat(types.map(function(o) {
+		return { type : cards.model.SchemaType.ArrayType(o.type), description : "list of " + o.description};
+	})).concat(types.map(function(o1) {
+		return { type : cards.model.SchemaType.ArrayType(cards.model.SchemaType.ArrayType(o1.type)), description : "list of list of " + o1.description};
+	}));
+	return types;
+})();
 cards.ui.widgets.Button.sound = (function() {
 	var audio = new Audio();
 	audio.volume = 0.5;
