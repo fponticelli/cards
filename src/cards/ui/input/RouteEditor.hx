@@ -1,5 +1,6 @@
 package cards.ui.input;
 
+import cards.ui.input.Path;
 import thx.stream.Bus;
 import cards.model.SchemaType;
 import cards.components.ComponentOptions;
@@ -15,5 +16,9 @@ class RouteEditor extends Editor implements IRouteEditor {
   override public function dispose() {
     super.dispose();
     diff.clear();
+  }
+
+  public function typeAt(path : Path) : SchemaType {
+    return throw 'abstract method';
   }
 }

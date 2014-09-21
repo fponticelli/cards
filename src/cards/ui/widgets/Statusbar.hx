@@ -17,6 +17,5 @@ class Statusbar {
     left   = new ToolbarGroup(Query.first('.left',   component.el), component);
     center = new ToolbarGroup(Query.first('.center', component.el), component);
     right  = new ToolbarGroup(Query.first('.right',  component.el), component);
-    trace(right);
   }
 }

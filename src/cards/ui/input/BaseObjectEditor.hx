@@ -186,6 +186,13 @@ class BaseObjectEditor extends RouteEditor {
       .mapValue(function(_) return def.name)
       .toOption()
       .feed(currentField);
+
+    editor.stream
+      .mapValue(function(v)
+        return new DiffAt(name, Set(v)))
+      .plug(diff);
+
+    diff.pulse(new DiffAt(name, Add));
   }
 
   static function findRef(table : TableElement, index : Int) {
@@ -196,6 +203,26 @@ class BaseObjectEditor extends RouteEditor {
         return tr;
     }
     return null;
+  }
+
+  override public function typeAt(path : Path) {
+    return switch path.asArray() {
+      case [Field(name)]:
+        editors.get(name).type;
+      case [Index(_)]:
+        throw 'invalid path $path';
+      case []:
+        type;
+      case arr:
+        arr = arr.copy();
+        var first = arr.pop();
+        switch first {
+          case Field(name) if(Std.is(editors.get(name), IRouteEditor)):
+            Std.instance(editors.get(name), IRouteEditor).typeAt(arr);
+          case _:
+            throw 'invalid path $arr';
+        }
+    }
   }
 
   public function removeField(name : String) {

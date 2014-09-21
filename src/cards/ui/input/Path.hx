@@ -22,14 +22,19 @@ abstract Path(Array<PathItem>) from Array<PathItem> to Array<PathItem> {
   @:to public inline function asArray() : Array<PathItem>
     return this;
 
-  @:to public function toString()
+  @:to public function toString() {
+    if(null == this)
+      return '';
     return this.map(function(item) return switch item {
         case Field(name): name.replace('.', '\\.');
         case Index(pos): '[$pos]';
       }).join('.').replace('.[', '[');
+  }
 
   @:op(A==B) public function equal(other : Path) {
     var other : Array<PathItem> = other;
+    if(this == null || other == null)
+      return false;
     if(this.length != other.length)
       return false;
     for(i in 0...this.length) {

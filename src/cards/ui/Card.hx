@@ -24,7 +24,7 @@ class Card {
 
     modelView.component.appendTo(Query.first('.model', card.el));
 
-    modelView.schema.subscribe(model.schemaEventSubscriber);
+    //modelView.schema.subscribe(model.schemaEventSubscriber);
     modelView.data.subscribe(model.dataEventSubscriber);
 
     card.appendTo(container);

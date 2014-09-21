@@ -120,6 +120,24 @@ class ArrayEditor extends RouteEditor {
       diff.pulse(new DiffAt(index, Set(value)));
   }
 
+  override public function typeAt(path : Path) {
+    return switch path.asArray() {
+      case [Index(_)]:
+        innerType;
+      case []:
+        type;
+      case arr:
+        arr = arr.copy();
+        var first = arr.pop();
+        switch first {
+          case Index(i) if(Std.is(editors[i], IRouteEditor)):
+            Std.instance(editors[i], IRouteEditor).typeAt(arr);
+          case _:
+            throw 'invalid path $arr';
+        }
+    }
+  }
+
   function createEditor(index : Int) {
     var item = Browser.document.createLIElement(),
         ref  = Query.first('li:nth-child(${index+1})', list).childOf(list);

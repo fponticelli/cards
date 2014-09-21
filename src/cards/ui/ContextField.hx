@@ -91,7 +91,7 @@ class ContextField {
             wireRuntime(editor, function(value : String) return Runtime.toRuntime(ReferenceTransform.toCode(value), options.model));
             // TODO break loop!
             bus.subscribe(function(value : Dynamic) {
-              var path = editor.value.get();
+              var path = (editor.value.get() : String);
               options.modelView.setField(path, value, options.type);
             });
             options.value.stream.plug(bus);

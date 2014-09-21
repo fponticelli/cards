@@ -59,15 +59,12 @@ class ObjectRef extends BaseRef implements IRef implements IParentRef {
   }
 
   public function resolve(path : String, terminal : Bool = false) : IRef {
-    trace('resolve obj $path');
     if(path == "") return this;
     if(!Ref.reField.match(path))
       throw 'unable to resolve "$path" for ObjectRef';
     var field = Ref.reField.matched(1),
         rest  = Ref.reField.matchedRight(),
         ref   = fields.get(field);
-    trace('field: "$field" + $rest,  ${null == ref} ?');
-    trace(ref);
     if(null == ref) {
       fields.set(field, ref = Ref.fromPath(rest, this, terminal));
       inverse.set(ref, field);
