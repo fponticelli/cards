@@ -32,8 +32,8 @@ class ObjectEditor extends BaseObjectEditor {
     setAddState();
   }
 
-  override public function realizeField(name : String) {
-    super.realizeField(name);
+  override public function realizeField(name : String, ?type : SchemaType) {
+    super.realizeField(name, type);
     setAddState();
   }
 
@@ -52,6 +52,7 @@ class ObjectEditor extends BaseObjectEditor {
           .subscribe(function(_) {
             realizeField(field.name);
             setAddState();
+            editors.get(field.name).focus.set(true);
           });
         menuAdd.addItem(button.component);
       });

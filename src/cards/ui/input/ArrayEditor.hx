@@ -100,6 +100,7 @@ class ArrayEditor extends RouteEditor {
       .subscribe(function(_) {
         var index = currentIndex.get().toBool() ? currentIndex.get().toValue() + 1 : values.length;
         diff.pulse(new DiffAt(index, Add));
+        editors[index].focus.set(true);
       });
     buttonRemove.clicks
       .subscribe(function(_) {
@@ -145,8 +146,6 @@ class ArrayEditor extends RouteEditor {
       .distinct(DiffAt.equal)
       // don't use plug or the stream will be killed when killing the editor
       .subscribe(function(v) diff.pulse(v));
-
-    editor.focus.set(true);
   }
 
   function setEditor(index : Int, value : TypedValue) {

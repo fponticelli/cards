@@ -33,10 +33,11 @@ class AnonymousObjectEditor extends BaseObjectEditor {
           type : ArrayType(o.type),
           description : 'list of ${o.description}'
         }))
-        .concat(types.map(function(o) return {
-          type : ArrayType(ArrayType(o.type)),
-          description : 'list of list of ${o.description}'
-        }));
+        //.concat(types.map(function(o) return {
+        //  type : ArrayType(ArrayType(o.type)),
+        //  description : 'list of list of ${o.description}'
+        //}))
+        ;
       return types;
     })();
   var menuAdd : Menu;
@@ -64,6 +65,7 @@ class AnonymousObjectEditor extends BaseObjectEditor {
           var name = guessFieldName();
           addFieldDefinition({ name : name, type : item.type, optional : true });
           realizeField(name);
+          editors.get(name).focus.set(true);
         });
       menuAdd.addItem(button.component);
     });

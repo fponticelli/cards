@@ -98,10 +98,11 @@ class BaseObjectEditor extends RouteEditor {
     fields.mapi(function(field, i) {
       addFieldDefinition(field, i);
     });
-
+/*
     currentField
       .toBool()
       .feed(focus);
+*/
   }
 
   function ensureField(name : String) {
@@ -124,13 +125,14 @@ class BaseObjectEditor extends RouteEditor {
   function createFieldLabel(parent : Component, container : Element, name : String)
     container.textContent = name;
 
-  public function realizeField(name : String) {
+  public function realizeField(name : String, ?type : SchemaType) {
     if(editors.exists(name))
       throw 'field $name already realized';
     var def = fields.first(function(field) return field.name == name);
     if(null == def) throw 'unable to realize $name because it is not defined in ObjectType';
-
-    var editor = switch def.type {
+    if(null == type)
+      type = def.type;
+    var editor = switch type {
       case ObjectType(_), ArrayType(_):
         var rowh = Browser.document.createTableRowElement(),
             rowd = Browser.document.createTableRowElement(),
@@ -177,13 +179,14 @@ class BaseObjectEditor extends RouteEditor {
     }
     editors.set(name, editor);
 
+    editor.focus.feed(focus);
+
     editor.focus
       .withValue(true)
       .mapValue(function(_) return def.name)
       .toOption()
+      .log()
       .feed(currentField);
-
-    editor.focus.set(true);
   }
 
   static function findRef(table : TableElement, index : Int) {
