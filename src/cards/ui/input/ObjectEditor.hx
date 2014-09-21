@@ -22,7 +22,7 @@ class ObjectEditor extends BaseObjectEditor {
         menuAdd.visible.stream.set(true);
       });
 
-    menuAdd = new Menu({});
+    menuAdd = new Menu({ parent : component });
     inited = true;
     setAddState();
   }
