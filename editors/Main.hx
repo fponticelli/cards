@@ -10,33 +10,37 @@ using udom.Dom.Query;
 using StringTools;
 import cards.ui.input.Diff;
 import cards.ui.input.DiffAt;
+import cards.model.SchemaType;
 
 class Main {
   public static function main() {
-
+    var complexObjectDefinitions = [
+        { name : "name", type : StringType, optional : false },
+        { name : "age",  type : FloatType, optional : true },
+        { name : "contacts", type : ArrayType(ObjectType([
+            { name : "type",  type : StringType, optional : true },
+            { name : "value", type : StringType, optional : false },
+            { name : "primary", type : BoolType, optional : true }
+          ])), optional : false },
+        { name : "address", type : ObjectType([
+            { name : "line 1", type : StringType, optional : false },
+            { name : "line 2", type : StringType, optional : true },
+            { name : "post code", type : FloatType, optional : false },
+            { name : "city", type : StringType, optional : false },
+            { name : "state", type : StringType, optional : false }
+          ]), optional : false}
+      ];
 
     Dom.ready().success(function(_) {
       var main = new Main(Query.first(".container"));
       main.addDemo(function(el) {
+        return new RuntimeObjectEditor(el, null, complexObjectDefinitions);
+      });
+      main.addDemo(function(el) {
         return new AnonymousObjectEditor(el, null);
       });
       main.addDemo(function(el) {
-        var editor = new ObjectEditor(el, null, [
-          { name : "name", type : StringType, optional : false },
-          { name : "age",  type : FloatType, optional : true },
-          { name : "contacts", type : ArrayType(ObjectType([
-              { name : "type",  type : StringType, optional : true },
-              { name : "value", type : StringType, optional : false },
-              { name : "primary", type : BoolType, optional : true }
-            ])), optional : false },
-          { name : "address", type : ObjectType([
-              { name : "line 1", type : StringType, optional : false },
-              { name : "line 2", type : StringType, optional : true },
-              { name : "post code", type : FloatType, optional : false },
-              { name : "city", type : StringType, optional : false },
-              { name : "state", type : StringType, optional : false }
-            ]), optional : false}
-        ]);
+        var editor = new ObjectEditor(el, null, complexObjectDefinitions);
         editor.diff.pulse(new DiffAt('name', Set('Franco')));
         editor.diff.pulse(new DiffAt('contacts[0]', Add));
         editor.diff.pulse(new DiffAt('contacts[0].type', Set('email')));
