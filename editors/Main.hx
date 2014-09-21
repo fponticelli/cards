@@ -66,7 +66,7 @@ class Main {
         return new TextEditor(el, null);
       });
       main.addDemo(function(el) {
-        return new CodeEditor(el, null);
+        return new CodeMirrorEditor(el, null);
       });
       main.addDemo(function(el) {
         return new ReferenceEditor(el, null);

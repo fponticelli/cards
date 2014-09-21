@@ -146,7 +146,7 @@ class BaseObjectEditor extends RouteEditor {
         th.className = "composite";
         td.colSpan = 2;
         td.className = "composite";
-        var editor = EditorFactory.create(def.type, td, component);
+        var editor = EditorFactory.create(type, td, component);
         rowh.appendChild(th);
         rowd.appendChild(td);
         var ref = findRef(table, index);
@@ -166,7 +166,7 @@ class BaseObjectEditor extends RouteEditor {
         createFieldLabel(component, th, name);
         th.className = "primitive";
         td.className = "primitive";
-        var editor = EditorFactory.create(def.type, td, component);
+        var editor = EditorFactory.create(type, td, component);
         row.appendChild(th);
         row.appendChild(td);
         var ref = findRef(table, index);
@@ -185,7 +185,6 @@ class BaseObjectEditor extends RouteEditor {
       .withValue(true)
       .mapValue(function(_) return def.name)
       .toOption()
-      .log()
       .feed(currentField);
   }
 
@@ -205,7 +204,7 @@ class BaseObjectEditor extends RouteEditor {
     editor.dispose();
     editors.remove(name);
     var rows = Query.all('tr[data-index="${def.index}"]', table).childrenOf(table);
-    rows.map(function(row) {
+    rows.copy().map(function(row) {
       table.removeChild(row);
     });
     currentField.set(None);

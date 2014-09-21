@@ -33,12 +33,28 @@ class RuntimeObjectEditor extends ObjectEditor {
           toEnable.map(function(button) button.enabled.set(true));
         }, disableAllButtons);
 
+    function changeEditorType(name : String, newType : SchemaType) {
+        removeField(name);
+        realizeField(name, newType);
+        editors.get(name).focus.set(true);
+    }
+
     currentField
       .filterOption()
       .sampleBy(buttonCode.clicks)
       .left()
-      .subscribe(function(name) {
-        trace('click $name');
-      });
+      .subscribe(changeEditorType.bind(_, CodeType));
+
+    currentField
+      .filterOption()
+      .sampleBy(buttonReference.clicks)
+      .left()
+      .subscribe(changeEditorType.bind(_, ReferenceType));
+
+    currentField
+      .filterOption()
+      .sampleBy(buttonValue.clicks)
+      .left()
+      .subscribe(changeEditorType.bind(_, null));
   }
 }

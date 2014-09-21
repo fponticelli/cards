@@ -12,7 +12,7 @@ class EditorFactory {
       case BoolType:
         new BoolEditor(container, parent);
       case CodeType:
-        new CodeEditor(container, parent);
+        new CodeMirrorEditor(container, parent);
       case DateType:
         new DateEditor(container, parent, false);
       case FloatType:

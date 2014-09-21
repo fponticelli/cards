@@ -211,7 +211,6 @@ a img {
   position: relative;
 }
 .card .array .items {
-  max-height: 16em;
   overflow-y: auto;
   overflow-x: hidden;
 }
@@ -253,6 +252,9 @@ a img {
   color: #000;
   font-size: 0.6em;
   background-color: #ddd;
+}
+.card .table th:not([colspan]) {
+  max-width: 8em;
 }
 .card .table th,
 .card .table td {

@@ -10,7 +10,7 @@ using thx.stream.dom.Dom;
 import cards.components.Component;
 
 // TODO focus
-class CodeEditor extends Editor {
+class CodeMirrorEditor extends Editor {
   var editor : Dynamic;
   public function new(container : Element, parent : Component) {
     var options = {
@@ -40,6 +40,10 @@ class CodeEditor extends Editor {
     });
 
     focus.subscribe(function(_) editor.focus());
+
+    thx.core.Timer.delay(function() {
+        editor.refresh();
+      }, 10);
   }
 
   function changes() {
