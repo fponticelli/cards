@@ -5,8 +5,8 @@ import js.html.Element;
 import cards.components.Component;
 import js.html.KeyboardEvent;
 
-// TODO limit input to acceptable field value
-// TODO limit paste values
+// TODO: limit input to acceptable field value
+// TODO: limit paste values
 class FieldNameEditor extends InputBasedEditor {
   //static var pattern = ~/[a-z]_/i;
   public function new(container : Element, parent : Component) {

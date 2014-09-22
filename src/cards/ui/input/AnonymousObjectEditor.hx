@@ -79,7 +79,7 @@ class AnonymousObjectEditor extends BaseObjectEditor {
 
   override function createFieldLabel(parent : Component, container : Element, name : String) {
     var editor = new cards.ui.input.FieldNameEditor(container, parent);
-    // TODO change model
+    // TODO: change model
     editor.stream
       .mapValue(function(v) return v.asValue())
       .debounce(10)

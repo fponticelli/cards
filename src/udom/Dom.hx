@@ -17,7 +17,7 @@ class Html {
     return H.toArray(parseList(html.trim()));
   }
 
-  // TODO unsafe cast
+  // TODO: unsafe cast
   public inline static function parse(html : String) : Element {
     return cast parseList(html.ltrim())[0];
   }

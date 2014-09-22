@@ -27,7 +27,7 @@ abstract TypedValue(Tuple2<SchemaType, Dynamic>) {
     return new TypedValue(BoolType, b);
 
   @:to public function asString()
-    return Std.string(this._1); // TODO use type transform here
+    return Std.string(this._1); // TODO: use type transform here
 
   @:op(A==B) public static function equal(a : TypedValue, b : TypedValue) {
     if(null == a && null == b)

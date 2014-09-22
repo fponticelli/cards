@@ -6,7 +6,7 @@ import cards.model.SchemaType;
 import thx.stream.Bus;
 import thx.stream.Value;
 
-// TODO add interface IRoutedEditor to support path
+// TODO: add interface IRoutedEditor to support path
 class Editor implements IEditor {
   public var stream(default, null) : Bus<TypedValue>;
   public var type(default, null) : SchemaType;

@@ -39,7 +39,7 @@ class TextEditor implements Editor<String> {
     component.el.addEventListener('dragstart', function(e) e.preventDefault(), false);
     component.el.addEventListener('drop', function(e) e.preventDefault(), false);
 
-    // TODO find out how to set the content of :before programmatically
+    // TODO: find out how to set the content of :before programmatically
     component.el.style.content = options.placeHolder;
 
     var text = new Text(component, options.defaultText);
@@ -50,7 +50,7 @@ class TextEditor implements Editor<String> {
       .feed(value);
 
     focus = new Value(false);
-    // TODO adding contenteditable dynamically doesn't work very well in FF
+    // TODO: adding contenteditable dynamically doesn't work very well in FF
     //focus.subscribe(component.el.subscribeToggleAttribute('contenteditable', 'true'));
     focus.withValue(true).subscribe(component.el.subscribeFocus());
     var focusStream = focus

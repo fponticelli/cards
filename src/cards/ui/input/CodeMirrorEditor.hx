@@ -9,7 +9,7 @@ import udom.Dom.Query;
 using thx.stream.dom.Dom;
 import cards.components.Component;
 
-// TODO focus
+// TODO: focus
 class CodeMirrorEditor extends Editor {
   var editor : Dynamic;
   public function new(container : Element, parent : Component) {

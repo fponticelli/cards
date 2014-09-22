@@ -83,7 +83,7 @@ class BaseObjectEditor extends RouteEditor {
               throw 'unable to forward $d within ObjectEditor';
           }
         case [[], Set(tv)] if(Type.enumEq(type, tv.asType())):
-          // TODO set value?
+          // TODO: set value?
         case _:
           trace(d.path.toString());
           trace(switch d.diff {
@@ -242,7 +242,7 @@ class BaseObjectEditor extends RouteEditor {
       if(name == field.name)
         throw '$name field already exists in this ObjectType';
 
-  // TODO pulse passes original object and bad things can happen if it is modified elsewhere
+  // TODO: pulse passes original object and bad things can happen if it is modified elsewhere
   function pulse()
     stream.pulse(new TypedValue(type, object));
 }

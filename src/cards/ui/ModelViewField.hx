@@ -38,7 +38,7 @@ class ModelViewField {
     });
 
     // setup field value
-    // TODO support multiple editors data types
+    // TODO: support multiple editors data types
     /*
     value = new TextEditor({
       //el : Query.first('.value', component.el),
@@ -70,7 +70,7 @@ class ModelViewField {
     if(null != editor) {
       v = TypeTransform.transform(editor.type, type)(editor.value.get());
       editor.value.clear();
-      // TODO add proper editor destroy?
+      // TODO: add proper editor destroy?
     }
     this.type = type;
     editor = EditorPicker.pick(type, container, component, v);

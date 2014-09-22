@@ -17,7 +17,7 @@ class Article {
   public var component(default, null) : Component;
   public var fragment(default, null) : Value<Option<Fragment>>;
 
-  // TODO possibly remove
+  // TODO: possibly remove
   var fragmentStream : Bus<Fragment>;
   var fragmentsMap : Map<Fragment, Void -> Void>;
 

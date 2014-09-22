@@ -25,17 +25,17 @@ class ValueProperty<T> extends Property {
     runtime
       .subscribe(function(opt : Option<Runtime>) switch opt {
         case None:
-          // TODO Remove?
+          // TODO: Remove?
           component.el.classList.remove('error');
           runtimeError.set(None);
         case Some(runtime):
           switch runtime.expression {
             case SyntaxError(e):
-              // TODO Remove?
+              // TODO: Remove?
               component.el.classList.add('error');
               runtimeError.set(None);
             case Fun(f):
-              // TODO Remove?
+              // TODO: Remove?
               component.el.classList.remove('error');
               runtimeError.set(None);
               switch f() {

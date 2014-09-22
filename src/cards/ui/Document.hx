@@ -24,7 +24,7 @@ class Document {
     statusbar = new Statusbar({ parent : component, container : component.el });
 
 
-    // TODO change this to components
+    // TODO: change this to components
     article.fragment
       .mapValue(function(r) switch r {
         case Some(v):

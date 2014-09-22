@@ -76,7 +76,7 @@ class ArrayEditor extends RouteEditor {
               throw 'unable to forward $d within ArrayEditor';
           }
         case [[], Set(tv)] if(Type.enumEq(type, tv.asType())):
-          // TODO set value?
+          // TODO: set value?
         case _:
           throw 'unable to assign $d within ArrayEditor';
       }
@@ -162,7 +162,7 @@ class ArrayEditor extends RouteEditor {
       .filterValue(function(v) return currentIndex.get().toBool())
       .mapValue(function(v) return new DiffAt(currentIndex.get().toValue(), Set(v)))
       .distinct(DiffAt.equal)
-      // don't use plug or the stream will be killed when killing the editor
+      // don't use plug or the diff stream will be killed when killing the editor
       .subscribe(function(v) diff.pulse(v));
   }
 
@@ -188,7 +188,7 @@ class ArrayEditor extends RouteEditor {
     }, 10);
   }
 
-  // TODO pulse passes original object and bad things can happen if it is modified elsewhere
+  // TODO: pulse passes original object and bad things can happen if it is modified elsewhere
   function pulse()
     stream.pulse(new TypedValue(type, values));
 }

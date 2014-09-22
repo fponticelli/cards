@@ -22,7 +22,7 @@ return $code;';
   }
 
   static var pattern = ~/\$\.(.+?)\b/;
-  // TODO poorman implementation
+  // TODO: poorman implementation
   public static function extractDependencies(code : String) {
     var set = new Set();
     while(pattern.match(code)) {

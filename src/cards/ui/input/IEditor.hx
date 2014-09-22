@@ -5,7 +5,7 @@ import cards.model.SchemaType;
 import thx.stream.Bus;
 import thx.stream.Value;
 
-// TODO add destroy/dispose
+// TODO: add destroy/dispose
 interface IEditor {
   public var stream(default, null) : Bus<TypedValue>;
   public var type(default, null) : SchemaType;
@@ -14,6 +14,4 @@ interface IEditor {
 
   public function toString() : String;
   public function dispose() : Void;
-//  public var parent(default, null) : IEditor;
-//  public var children(default, null) : Array<IEditor>;
 }

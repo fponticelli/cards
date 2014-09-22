@@ -89,7 +89,7 @@ class ContextField {
             wireRuntime(editor, function(value : String) return Runtime.toRuntime(value, options.model));
           case ReferenceType:
             wireRuntime(editor, function(value : String) return Runtime.toRuntime(ReferenceTransform.toCode(value), options.model));
-            // TODO break loop!
+            // TODO: break loop!
             bus.subscribe(function(value : Dynamic) {
               var path = (editor.value.get() : String);
               options.modelView.setField(path, value, options.type);
@@ -98,7 +98,7 @@ class ContextField {
           case _:
             options.value.runtime.set(None);
             editor.value.feed(options.value.stream);
-            // TODO does this leak?
+            // TODO: does this leak?
             options.value.stream.feed(editor.value);
         }
       },
@@ -132,7 +132,7 @@ class ContextField {
           fieldValue.editor.focus.set(true);
       });
 
-    // TODO is this properly cancelled?
+    // TODO: is this properly cancelled?
     withError.toBool().subscribe(component.el.subscribeToggleClass('error'));
     withError.either(
       function(err) {
