@@ -153,14 +153,14 @@ class ArrayEditor extends RouteEditor {
 
     editor.focus
       .withValue(true)
-      .mapValue(function(_) return editor.component.el.parentElement)
-      .mapValue(function(el) return el.getElementIndex())
+      .map(function(_) return editor.component.el.parentElement)
+      .map(function(el) return el.getElementIndex())
       .toOption()
       .feed(currentIndex);
 
     editor.stream
-      .filterValue(function(v) return currentIndex.get().toBool())
-      .mapValue(function(v) return new DiffAt(currentIndex.get().toValue(), Set(v)))
+      .filter(function(v) return currentIndex.get().toBool())
+      .map(function(v) return new DiffAt(currentIndex.get().toValue(), Set(v)))
       .distinct(DiffAt.equal)
       // don't use plug or the diff stream will be killed when killing the editor
       .subscribe(function(v) diff.pulse(v));

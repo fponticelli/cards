@@ -26,7 +26,7 @@ class TextEditor extends Editor {
     var el : TextAreaElement = cast component.el;
     el.streamEvent('input')
       .audit(function(_) resize())
-      .mapValue(function(_) return (el.value : TypedValue))
+      .map(function(_) return (el.value : TypedValue))
       .plug(stream);
     el.streamFocus().feed(focus);
 

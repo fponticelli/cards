@@ -22,9 +22,9 @@ class DateEditor extends Editor {
 
     var el : InputElement = cast component.el;
     el.streamEvent('change')
-      .mapValue(function(_) return try (Date.fromString(el.value) : TypedValue) catch(e : Dynamic) null)
+      .map(function(_) return try (Date.fromString(el.value) : TypedValue) catch(e : Dynamic) null)
       .notNull()
-      .filterValue(function(v) return !Math.isNaN(v.asValue().getTime()))
+      .filter(function(v) return !Math.isNaN(v.asValue().getTime()))
       .plug(stream);
     el.streamFocus().feed(focus);
 

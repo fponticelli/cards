@@ -98,7 +98,7 @@ class ContextView {
       .feed(button.remove.enabled);
     field
       .filterOption()
-      .mapValue(function(v) : Emitter<SchemaType> return v.currentType)
+      .map(function(v) : Emitter<SchemaType> return v.currentType)
       .flatMap()
       .subscribe(function(type) {
         switch type {
@@ -164,7 +164,7 @@ class ContextView {
 
     f.focus
       .withValue(true)
-      .mapValue(function(_) return Some(f))
+      .map(function(_) return Some(f))
       .feed(field);
   }
 

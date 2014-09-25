@@ -395,10 +395,10 @@ Main.prototype = {
 		this.demos.appendChild(sample);
 		var editor = handler(el);
 		if(null == editor) return;
-		editor.stream.mapValue(function(v) {
+		editor.stream.map(function(v) {
 			return "content: " + cards.ui.input._TypedValue.TypedValue_Impl_.toString(v);
 		}).subscribe(thx.stream.dom.Dom.subscribeText(this.output));
-		editor.focus.withValue(true).mapValue(function(_) {
+		editor.focus.withValue(true).map(function(_) {
 			return "focus: " + editor.toString() + ", " + Std.string(editor.type);
 		}).subscribe(thx.stream.dom.Dom.subscribeText(this.focus));
 		footer.textContent = "editor: " + editor.toString() + "\ntype: " + StringTools.replace(Std.string(editor.type),"\t"," ");
@@ -1779,7 +1779,7 @@ cards.ui.input.BaseObjectEditor = function(container,parent,fields) {
 	this.toolbar = new cards.ui.widgets.Toolbar({ parent : this.component, container : this.component.el});
 	var buttonRemove = this.toolbar.right.addButton("",Config.icons.remove);
 	buttonRemove.enabled.set(false);
-	this.currentField.mapValue(function(cur) {
+	this.currentField.map(function(cur) {
 		switch(cur[1]) {
 		case 1:
 			return false;
@@ -2209,10 +2209,10 @@ cards.ui.input.BaseObjectEditor.prototype = $extend(cards.ui.input.RouteEditor.p
 		}
 		this.editors.set(name,editor);
 		editor.focus.feed(this.focus);
-		editor.focus.withValue(true).mapValue(function(_) {
+		editor.focus.withValue(true).map(function(_) {
 			return def.name;
 		}).toOption().feed(this.currentField);
-		editor.stream.mapValue(function(v) {
+		editor.stream.map(function(v) {
 			var path = cards.ui.input._Path.Path_Impl_.stringAsPath(name);
 			var diff = cards.ui.input.Diff.Set(v);
 			return { _0 : path, _1 : diff};
@@ -2327,7 +2327,7 @@ cards.ui.input.AnonymousObjectEditor.prototype = $extend(cards.ui.input.BaseObje
 	,createFieldLabel: function(parent,container,name) {
 		var _g = this;
 		var editor = new cards.ui.input.FieldNameEditor(container,parent);
-		editor.stream.mapValue(function(v) {
+		editor.stream.map(function(v) {
 			return v._1;
 		}).debounce(10).window(2,false).subscribe(function(names) {
 			switch(names.length) {
@@ -2621,14 +2621,14 @@ cards.ui.input.ArrayEditor.prototype = $extend(cards.ui.input.RouteEditor.protot
 		var editor = cards.ui.input.EditorFactory.create(this.innerType,item,this.component);
 		this.editors.splice(index,0,editor);
 		editor.focus.feed(this.focus);
-		editor.focus.withValue(true).mapValue(function(_) {
+		editor.focus.withValue(true).map(function(_) {
 			return editor.component.el.parentElement;
-		}).mapValue(function(el) {
+		}).map(function(el) {
 			return udom.Query.getElementIndex(el);
 		}).toOption().feed(this.currentIndex);
-		editor.stream.filterValue(function(v) {
+		editor.stream.filter(function(v) {
 			return thx.core.Options.toBool(_g.currentIndex.get());
-		}).mapValue(function(v1) {
+		}).map(function(v1) {
 			var path = cards.ui.input._Path.Path_Impl_.intAsPath(thx.core.Options.toValue(_g.currentIndex.get()));
 			var diff = cards.ui.input.Diff.Set(v1);
 			return { _0 : path, _1 : diff};
@@ -2667,7 +2667,7 @@ cards.ui.input.BoolEditor = function(container,parent) {
 	var options = { template : "<input class=\"editor bool\" placeholder=\"on/off\" type=\"checkbox\" />", container : container, parent : parent};
 	cards.ui.input.Editor.call(this,cards.model.SchemaType.BoolType,options);
 	var el = this.component.el;
-	thx.stream.dom.Dom.streamEvent(el,"change").mapValue(function(_) {
+	thx.stream.dom.Dom.streamEvent(el,"change").map(function(_) {
 		var _1 = el.checked;
 		return { _0 : cards.model.SchemaType.BoolType, _1 : _1};
 	}).plug(this.stream);
@@ -2743,7 +2743,7 @@ cards.ui.input.InputBasedEditor = function(container,parent,valueType,name,type,
 	var options = { template : "<input class=\"editor " + name + "\" placeholder=\"" + name + "\" type=\"" + type + "\" />", container : container, parent : parent};
 	cards.ui.input.Editor.call(this,valueType,options);
 	var el = this.component.el;
-	thx.stream.dom.Dom.streamEvent(el,event).mapValue(function(_) {
+	thx.stream.dom.Dom.streamEvent(el,event).map(function(_) {
 		return extract(el);
 	}).plug(this.stream);
 	thx.stream.dom.Dom.streamFocus(el).feed(this.focus);
@@ -2773,7 +2773,7 @@ cards.ui.input.DateEditor = function(container,parent,useTime) {
 	var options = { template : "<input class=\"editor date\" placeholder=\"insert date\" type=\"" + (useTime?"datetime-local":"date") + "\" />", container : container, parent : parent};
 	cards.ui.input.Editor.call(this,cards.model.SchemaType.DateType,options);
 	var el = this.component.el;
-	thx.stream.dom.Dom.streamEvent(el,"change").mapValue(function(_) {
+	thx.stream.dom.Dom.streamEvent(el,"change").map(function(_) {
 		try {
 			var d = HxOverrides.strDate(el.value);
 			var _1 = d;
@@ -2781,7 +2781,7 @@ cards.ui.input.DateEditor = function(container,parent,useTime) {
 		} catch( e ) {
 			return null;
 		}
-	}).notNull().filterValue(function(v) {
+	}).notNull().filter(function(v) {
 		return !(function($this) {
 			var $r;
 			var f = v._1.getTime();
@@ -3051,7 +3051,7 @@ cards.ui.input.TextEditor = function(container,parent) {
 	var el = this.component.el;
 	thx.stream.dom.Dom.streamEvent(el,"input").audit(function(_) {
 		_g.resize();
-	}).mapValue(function(_1) {
+	}).map(function(_1) {
 		var _11 = el.value;
 		return { _0 : cards.model.SchemaType.StringType, _1 : _11};
 	}).plug(this.stream);
@@ -3170,12 +3170,12 @@ cards.ui.widgets.FrameOverlay = function(options) {
 	var clear = function(_) {
 		_g.visible.stream.set(false);
 	};
-	this.visible.stream.filterValue(function(b) {
+	this.visible.stream.filter(function(b) {
 		return !b;
 	}).subscribe(function(_1) {
 		window.document.removeEventListener("mouseup",clear,false);
 	});
-	this.visible.stream.filterValue(function(b1) {
+	this.visible.stream.filter(function(b1) {
 		return b1;
 	}).subscribe(function(_2) {
 		window.document.addEventListener("mouseup",clear,false);
@@ -5277,7 +5277,7 @@ thx.stream.Emitter.prototype = {
 		});
 	}
 	,count: function() {
-		return this.mapValue((function() {
+		return this.map((function() {
 			var c = 0;
 			return function(_) {
 				return ++c;
@@ -5331,7 +5331,7 @@ thx.stream.Emitter.prototype = {
 		});
 	}
 	,diff: function(init,f) {
-		return this.window(2,null != init).mapValue(function(a) {
+		return this.window(2,null != init).map(function(a) {
 			if(a.length == 1) return f(init,a[0]); else return f(a[0],a[1]);
 		});
 	}
@@ -5441,7 +5441,7 @@ thx.stream.Emitter.prototype = {
 			}));
 		});
 	}
-	,map: function(f) {
+	,mapPromise: function(f) {
 		var _g = this;
 		return new thx.stream.Emitter(function(stream) {
 			_g.init(new thx.stream.Stream(function(r) {
@@ -5472,37 +5472,37 @@ thx.stream.Emitter.prototype = {
 			}));
 		});
 	}
-	,mapValue: function(f) {
-		return this.map(function(v) {
+	,map: function(f) {
+		return this.mapPromise(function(v) {
 			return thx.promise.Promise.value(f(v));
 		});
 	}
 	,toOption: function() {
-		return this.mapValue(function(v) {
+		return this.map(function(v) {
 			if(null == v) return haxe.ds.Option.None; else return haxe.ds.Option.Some(v);
 		});
 	}
 	,toNil: function() {
-		return this.mapValue(function(_) {
+		return this.map(function(_) {
 			return thx.core.Nil.nil;
 		});
 	}
 	,toTrue: function() {
-		return this.mapValue(function(_) {
+		return this.map(function(_) {
 			return true;
 		});
 	}
 	,toFalse: function() {
-		return this.mapValue(function(_) {
+		return this.map(function(_) {
 			return false;
 		});
 	}
 	,toValue: function(value) {
-		return this.mapValue(function(_) {
+		return this.map(function(_) {
 			return value;
 		});
 	}
-	,filter: function(f) {
+	,filterPromise: function(f) {
 		var _g = this;
 		return new thx.stream.Emitter(function(stream) {
 			_g.init(new thx.stream.Stream(function(r) {
@@ -5533,8 +5533,8 @@ thx.stream.Emitter.prototype = {
 			}));
 		});
 	}
-	,filterValue: function(f) {
-		return this.filter(function(v) {
+	,filter: function(f) {
+		return this.filterPromise(function(v) {
 			return thx.promise.Promise.value(f(v));
 		});
 	}
@@ -5546,7 +5546,7 @@ thx.stream.Emitter.prototype = {
 			return a == b;
 		};
 		var last = null;
-		return this.filterValue(function(v) {
+		return this.filter(function(v) {
 			if(equals(v,last)) return false; else {
 				last = v;
 				return true;
@@ -5583,12 +5583,12 @@ thx.stream.Emitter.prototype = {
 		});
 	}
 	,memberOf: function(arr,equality) {
-		return this.filterValue(function(v) {
+		return this.filter(function(v) {
 			return thx.core.Arrays.contains(arr,v,equality);
 		});
 	}
 	,notNull: function() {
-		return this.filterValue(function(v) {
+		return this.filter(function(v) {
 			return v != null;
 		});
 	}
@@ -5601,7 +5601,7 @@ thx.stream.Emitter.prototype = {
 		})());
 	}
 	,skipUntil: function(predicate) {
-		return this.filterValue((function() {
+		return this.filter((function() {
 			var flag = false;
 			return function(v) {
 				if(flag) return true;
@@ -5664,7 +5664,7 @@ thx.stream.Emitter.prototype = {
 		});
 	}
 	,withValue: function(expected) {
-		return this.filterValue(function(v) {
+		return this.filter(function(v) {
 			return v == expected;
 		});
 	}
@@ -5727,14 +5727,14 @@ thx.stream.Emitter.prototype = {
 		return { _0 : _0, _1 : _1};
 	}
 	,audit: function(handler) {
-		return this.mapValue(function(v) {
+		return this.map(function(v) {
 			handler(v);
 			return v;
 		});
 	}
 	,log: function(prefix,posInfo) {
 		if(prefix == null) prefix = ""; else prefix = "" + prefix + ": ";
-		return this.mapValue(function(v) {
+		return this.map(function(v) {
 			haxe.Log.trace("" + prefix + Std.string(v),posInfo);
 			return v;
 		});
@@ -5861,7 +5861,7 @@ thx.stream.Emitter.prototype = {
 		});
 	}
 	,samplerOf: function(sampled) {
-		return sampled.sampleBy(this).mapValue(function(t) {
+		return sampled.sampleBy(this).map(function(t) {
 			return { _0 : t._1, _1 : t._0};
 		});
 	}
@@ -6047,12 +6047,12 @@ thx.stream.Bus.prototype = $extend(thx.stream.Emitter.prototype,{
 thx.stream.Emitters = function() { };
 thx.stream.Emitters.__name__ = ["thx","stream","Emitters"];
 thx.stream.Emitters.skipNull = function(emitter) {
-	return emitter.filterValue(function(value) {
+	return emitter.filter(function(value) {
 		return null != value;
 	});
 };
 thx.stream.Emitters.unique = function(emitter) {
-	return emitter.filterValue((function() {
+	return emitter.filter((function() {
 		var buf = [];
 		return function(v) {
 			if(HxOverrides.indexOf(buf,v,0) >= 0) return false; else {
@@ -6065,22 +6065,22 @@ thx.stream.Emitters.unique = function(emitter) {
 thx.stream.EmitterStrings = function() { };
 thx.stream.EmitterStrings.__name__ = ["thx","stream","EmitterStrings"];
 thx.stream.EmitterStrings.match = function(emitter,pattern) {
-	return emitter.filterValue(function(s) {
+	return emitter.filter(function(s) {
 		return pattern.match(s);
 	});
 };
 thx.stream.EmitterStrings.toBool = function(emitter) {
-	return emitter.mapValue(function(s) {
+	return emitter.map(function(s) {
 		return s != null && s != "";
 	});
 };
 thx.stream.EmitterStrings.truthy = function(emitter) {
-	return emitter.filterValue(function(s) {
+	return emitter.filter(function(s) {
 		return s != null && s != "";
 	});
 };
 thx.stream.EmitterStrings.unique = function(emitter) {
-	return emitter.filterValue((function() {
+	return emitter.filter((function() {
 		var buf = new haxe.ds.StringMap();
 		return function(v) {
 			if(buf.exists(v)) return false; else {
@@ -6093,7 +6093,7 @@ thx.stream.EmitterStrings.unique = function(emitter) {
 thx.stream.EmitterInts = function() { };
 thx.stream.EmitterInts.__name__ = ["thx","stream","EmitterInts"];
 thx.stream.EmitterInts.average = function(emitter) {
-	return emitter.mapValue((function() {
+	return emitter.map((function() {
 		var sum = 0.0;
 		var count = 0;
 		return function(v) {
@@ -6102,37 +6102,37 @@ thx.stream.EmitterInts.average = function(emitter) {
 	})());
 };
 thx.stream.EmitterInts.greaterThan = function(emitter,x) {
-	return emitter.filterValue(function(v) {
+	return emitter.filter(function(v) {
 		return v > x;
 	});
 };
 thx.stream.EmitterInts.greaterThanOrEqualTo = function(emitter,x) {
-	return emitter.filterValue(function(v) {
+	return emitter.filter(function(v) {
 		return v >= x;
 	});
 };
 thx.stream.EmitterInts.inRange = function(emitter,min,max) {
-	return emitter.filterValue(function(v) {
+	return emitter.filter(function(v) {
 		return v <= max && v >= min;
 	});
 };
 thx.stream.EmitterInts.insideRange = function(emitter,min,max) {
-	return emitter.filterValue(function(v) {
+	return emitter.filter(function(v) {
 		return v < max && v > min;
 	});
 };
 thx.stream.EmitterInts.lessThan = function(emitter,x) {
-	return emitter.filterValue(function(v) {
+	return emitter.filter(function(v) {
 		return v < x;
 	});
 };
 thx.stream.EmitterInts.lessThanOrEqualTo = function(emitter,x) {
-	return emitter.filterValue(function(v) {
+	return emitter.filter(function(v) {
 		return v <= x;
 	});
 };
 thx.stream.EmitterInts.max = function(emitter) {
-	return emitter.filterValue((function() {
+	return emitter.filter((function() {
 		var max = null;
 		return function(v) {
 			if(null == max || v > max) {
@@ -6143,7 +6143,7 @@ thx.stream.EmitterInts.max = function(emitter) {
 	})());
 };
 thx.stream.EmitterInts.min = function(emitter) {
-	return emitter.filterValue((function() {
+	return emitter.filter((function() {
 		var min = null;
 		return function(v) {
 			if(null == min || v < min) {
@@ -6154,7 +6154,7 @@ thx.stream.EmitterInts.min = function(emitter) {
 	})());
 };
 thx.stream.EmitterInts.sum = function(emitter) {
-	return emitter.mapValue((function() {
+	return emitter.map((function() {
 		var value = 0;
 		return function(v) {
 			return value += v;
@@ -6162,12 +6162,12 @@ thx.stream.EmitterInts.sum = function(emitter) {
 	})());
 };
 thx.stream.EmitterInts.toBool = function(emitter) {
-	return emitter.mapValue(function(i) {
+	return emitter.map(function(i) {
 		return i != 0;
 	});
 };
 thx.stream.EmitterInts.unique = function(emitter) {
-	return emitter.filterValue((function() {
+	return emitter.filter((function() {
 		var buf = new haxe.ds.IntMap();
 		return function(v) {
 			if(buf.exists(v)) return false; else {
@@ -6180,7 +6180,7 @@ thx.stream.EmitterInts.unique = function(emitter) {
 thx.stream.EmitterFloats = function() { };
 thx.stream.EmitterFloats.__name__ = ["thx","stream","EmitterFloats"];
 thx.stream.EmitterFloats.average = function(emitter) {
-	return emitter.mapValue((function() {
+	return emitter.map((function() {
 		var sum = 0.0;
 		var count = 0;
 		return function(v) {
@@ -6189,37 +6189,37 @@ thx.stream.EmitterFloats.average = function(emitter) {
 	})());
 };
 thx.stream.EmitterFloats.greaterThan = function(emitter,x) {
-	return emitter.filterValue(function(v) {
+	return emitter.filter(function(v) {
 		return v > x;
 	});
 };
 thx.stream.EmitterFloats.greaterThanOrEqualTo = function(emitter,x) {
-	return emitter.filterValue(function(v) {
+	return emitter.filter(function(v) {
 		return v >= x;
 	});
 };
 thx.stream.EmitterFloats.inRange = function(emitter,min,max) {
-	return emitter.filterValue(function(v) {
+	return emitter.filter(function(v) {
 		return v <= max && v >= min;
 	});
 };
 thx.stream.EmitterFloats.insideRange = function(emitter,min,max) {
-	return emitter.filterValue(function(v) {
+	return emitter.filter(function(v) {
 		return v < max && v > min;
 	});
 };
 thx.stream.EmitterFloats.lessThan = function(emitter,x) {
-	return emitter.filterValue(function(v) {
+	return emitter.filter(function(v) {
 		return v < x;
 	});
 };
 thx.stream.EmitterFloats.lessThanOrEqualTo = function(emitter,x) {
-	return emitter.filterValue(function(v) {
+	return emitter.filter(function(v) {
 		return v <= x;
 	});
 };
 thx.stream.EmitterFloats.max = function(emitter) {
-	return emitter.filterValue((function() {
+	return emitter.filter((function() {
 		var max = -Infinity;
 		return function(v) {
 			if(v > max) {
@@ -6230,7 +6230,7 @@ thx.stream.EmitterFloats.max = function(emitter) {
 	})());
 };
 thx.stream.EmitterFloats.min = function(emitter) {
-	return emitter.filterValue((function() {
+	return emitter.filter((function() {
 		var min = Infinity;
 		return function(v) {
 			if(v < min) {
@@ -6241,7 +6241,7 @@ thx.stream.EmitterFloats.min = function(emitter) {
 	})());
 };
 thx.stream.EmitterFloats.sum = function(emitter) {
-	return emitter.mapValue((function() {
+	return emitter.map((function() {
 		var sum = 0.0;
 		return function(v) {
 			return sum += v;
@@ -6268,26 +6268,26 @@ thx.stream.EmitterOptions.either = function(emitter,some,none,fail,end) {
 	},fail,end);
 };
 thx.stream.EmitterOptions.filterOption = function(emitter) {
-	return emitter.filterValue(function(opt) {
+	return emitter.filter(function(opt) {
 		return thx.core.Options.toBool(opt);
-	}).mapValue(function(opt1) {
+	}).map(function(opt1) {
 		return thx.core.Options.toValue(opt1);
 	});
 };
 thx.stream.EmitterOptions.toBool = function(emitter) {
-	return emitter.mapValue(function(opt) {
+	return emitter.map(function(opt) {
 		return thx.core.Options.toBool(opt);
 	});
 };
 thx.stream.EmitterOptions.toValue = function(emitter) {
-	return emitter.mapValue(function(opt) {
+	return emitter.map(function(opt) {
 		return thx.core.Options.toValue(opt);
 	});
 };
 thx.stream.EmitterBools = function() { };
 thx.stream.EmitterBools.__name__ = ["thx","stream","EmitterBools"];
 thx.stream.EmitterBools.negate = function(emitter) {
-	return emitter.mapValue(function(v) {
+	return emitter.map(function(v) {
 		return !v;
 	});
 };
@@ -6322,7 +6322,7 @@ thx.stream.EmitterEmitters.flatMap = function(emitter) {
 thx.stream.EmitterArrays = function() { };
 thx.stream.EmitterArrays.__name__ = ["thx","stream","EmitterArrays"];
 thx.stream.EmitterArrays.containerOf = function(emitter,value) {
-	return emitter.filterValue(function(arr) {
+	return emitter.filter(function(arr) {
 		return HxOverrides.indexOf(arr,value,0) >= 0;
 	});
 };
@@ -6355,12 +6355,12 @@ thx.stream.EmitterArrays.flatten = function(emitter) {
 thx.stream.EmitterValues = function() { };
 thx.stream.EmitterValues.__name__ = ["thx","stream","EmitterValues"];
 thx.stream.EmitterValues.left = function(emitter) {
-	return emitter.mapValue(function(v) {
+	return emitter.map(function(v) {
 		return v._0;
 	});
 };
 thx.stream.EmitterValues.right = function(emitter) {
-	return emitter.mapValue(function(v) {
+	return emitter.map(function(v) {
 		return v._1;
 	});
 };
@@ -6529,7 +6529,7 @@ thx.stream.dom.Dom.streamKey = function(el,name,capture) {
 };
 thx.stream.dom.Dom.streamInput = function(el,capture) {
 	if(capture == null) capture = false;
-	return thx.stream.dom.Dom.streamEvent(el,"input",capture).mapValue(function(_) {
+	return thx.stream.dom.Dom.streamEvent(el,"input",capture).map(function(_) {
 		return el.value;
 	});
 };

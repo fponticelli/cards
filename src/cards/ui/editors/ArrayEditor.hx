@@ -58,7 +58,7 @@ class ArrayEditor implements Editor<Array<Dynamic>> {
       editor = EditorPicker.pick(innerType, item.el, item, value);
 
     editor.value
-      .mapValue(function(v) {
+      .map(function(v) {
         var arr = this.value.get().copy();
         arr[index] = v;
         return arr;

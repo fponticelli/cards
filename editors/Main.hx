@@ -122,11 +122,11 @@ class Main {
     if(null == editor)
       return;
     editor.stream
-      .mapValue(function(v) return "content: " + v.toString())
+      .map(function(v) return "content: " + v.toString())
       .subscribe(output.subscribeText());
     editor.focus
       .withValue(true)
-      .mapValue(function(_) return "focus: " + editor.toString() + ", " + editor.type)
+      .map(function(_) return "focus: " + editor.toString() + ", " + editor.type)
       .subscribe(focus.subscribeText());
     footer.textContent = 'editor: ' + editor.toString() + '\ntype: ' + Std.string(editor.type).replace('\t', ' ');
   }

@@ -22,14 +22,14 @@ class FrameOverlay {
       visible.stream.set(false);
     }
     visible.stream
-      .filterValue(function(b) {
+      .filter(function(b) {
         return !b;
       })
       .subscribe(function(_) {
         Browser.document.removeEventListener('mouseup', clear, false);
       });
     visible.stream
-      .filterValue(function(b) {
+      .filter(function(b) {
         return b;
       })
       .subscribe(function(_) {

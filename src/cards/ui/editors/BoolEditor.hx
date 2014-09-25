@@ -41,7 +41,7 @@ class BoolEditor implements Editor<Bool> {
       .toNil()
       .merge(
         component.el.streamKey('up')
-          .filterValue(function(e : KeyboardEvent) {
+          .filter(function(e : KeyboardEvent) {
             return switch e.keyCode {
               case 32, 13: // spacebar, return
                 true;
@@ -51,7 +51,7 @@ class BoolEditor implements Editor<Bool> {
           })
           .toNil()
       )
-      .mapValue(function(_) return !value.get())
+      .map(function(_) return !value.get())
       .feed(value);
 
     focus = new Value(false);

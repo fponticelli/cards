@@ -26,7 +26,7 @@ class Document {
 
     // TODO: change this to components
     article.fragment
-      .mapValue(function(r) switch r {
+      .map(function(r) switch r {
         case Some(v):
           return '$v';
         case None:
@@ -47,7 +47,7 @@ class Document {
       });
     buttonAddText.enabled.set(false);
     article.fragment
-      .mapValue(function(r) switch r {
+      .map(function(r) switch r {
         case Some(v):
           return getNearestBlock(v) != null;
         case None:    return false;

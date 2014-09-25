@@ -56,7 +56,7 @@ class ContextField {
     withError = new Value(None);
 
     function wireRuntime(editor : Editor<Dynamic>, convert : String -> Runtime) {
-      var runtime = editor.value.mapValue(convert);
+      var runtime = editor.value.map(convert);
       runtime
         .distinct(function(a, b) {
           return b != null && a.dependencies.equals(b.dependencies);
@@ -72,7 +72,7 @@ class ContextField {
         .toOption()
         .feed(options.value.runtime);
       runtime
-        .mapValue(function(res) return res.expression.toErrorOption())
+        .map(function(res) return res.expression.toErrorOption())
         .merge(options.value.runtimeError)
         .feed(withError);
     }

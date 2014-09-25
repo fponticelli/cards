@@ -44,7 +44,7 @@ class BaseObjectEditor extends RouteEditor {
     buttonRemove.enabled.set(false);
 
     currentField
-      .mapValue(function(cur) return switch cur {
+      .map(function(cur) return switch cur {
         case None: false;
         case Some(name): defMap.get(name).field.optional;
       })
@@ -183,12 +183,12 @@ class BaseObjectEditor extends RouteEditor {
 
     editor.focus
       .withValue(true)
-      .mapValue(function(_) return def.name)
+      .map(function(_) return def.name)
       .toOption()
       .feed(currentField);
 
     editor.stream
-      .mapValue(function(v)
+      .map(function(v)
         return new DiffAt(name, Set(v)))
       .plug(diff);
 

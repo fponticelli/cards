@@ -19,7 +19,7 @@ class BoolEditor extends Editor {
 
     var el : InputElement = cast component.el;
     el.streamEvent('change')
-      .mapValue(function(_) return (el.checked : TypedValue))
+      .map(function(_) return (el.checked : TypedValue))
       .plug(stream);
     el.streamFocus().feed(focus);
 

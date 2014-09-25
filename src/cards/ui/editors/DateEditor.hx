@@ -38,7 +38,7 @@ class DateEditor implements Editor<Date> {
     var input = (cast component.el : js.html.InputElement);
 
     input.streamInput()
-      .mapValue(function(_) {
+      .map(function(_) {
         return input.valueAsDate;
       })
       .feed(value);

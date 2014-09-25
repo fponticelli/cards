@@ -36,7 +36,7 @@ class FloatEditor implements Editor<Float> {
     var focusStream = component.el.streamFocus().feed(focus);
 
     component.el.streamEvent('input')
-      .mapValue(function(_) return (cast component.el : js.html.InputElement).valueAsNumber)
+      .map(function(_) return (cast component.el : js.html.InputElement).valueAsNumber)
       .feed(value);
     cancel = function() {
       focusStream.cancel();

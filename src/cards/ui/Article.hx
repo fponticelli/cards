@@ -41,7 +41,7 @@ class Article {
     var focusStream = fragment
           .focus
           .withValue(true)
-          .mapValue(function(_) : Fragment return fragment)
+          .map(function(_) : Fragment return fragment)
           .plug(fragmentStream);
     fragmentsMap.set(fragment, focusStream.cancel);
   }

@@ -46,7 +46,7 @@ class TextEditor implements Editor<String> {
 
     value = text.stream;
     options.inputEvent(component)
-      .mapValue(function(_) return text.component.el.textContent)
+      .map(function(_) return text.component.el.textContent)
       .feed(value);
 
     focus = new Value(false);
@@ -67,14 +67,14 @@ class TextEditor implements Editor<String> {
 
     var empty = new Value(options.defaultText == '');
     component.el.streamEvent('input')
-      .mapValue(function(_) return text.component.el.textContent == '')
-      .merge(value.mapValue(function(t) return t == ''))
+      .map(function(_) return text.component.el.textContent == '')
+      .merge(value.map(function(t) return t == ''))
       .feed(empty);
     empty.subscribe(component.el.subscribeToggleClass('empty'));
 
     // PASTE EVENT
     component.el.streamEvent("paste")
-      .mapValue(function(ev) {
+      .map(function(ev) {
         var e : Dynamic = ev;
         e.preventDefault();
         var data      = null == e.clipboardData ? "" : e.clipboardData.getData("text/plain"),
@@ -84,7 +84,7 @@ class TextEditor implements Editor<String> {
             end       = selection.extentOffset;
         return current.substr(0, start) + data + current.substr(end);
       })
-      .filterValue(function(v) return v.length > 0)
+      .filter(function(v) return v.length > 0)
       .feed(value);
   }
 

@@ -25,7 +25,7 @@ class InputBasedEditor extends Editor {
 
     var el : InputElement = cast component.el;
     el.streamEvent(event)
-      .mapValue(function(_) return extract(el))
+      .map(function(_) return extract(el))
       .plug(stream);
     el.streamFocus().feed(focus);
 

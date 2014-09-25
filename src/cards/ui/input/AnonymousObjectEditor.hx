@@ -81,7 +81,7 @@ class AnonymousObjectEditor extends BaseObjectEditor {
     var editor = new cards.ui.input.FieldNameEditor(container, parent);
     // TODO: change model
     editor.stream
-      .mapValue(function(v) return v.asValue())
+      .map(function(v) return v.asValue())
       .debounce(10)
       .window(2, false)
       .subscribe(function(names) switch names{
