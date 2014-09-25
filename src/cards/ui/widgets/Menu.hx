@@ -4,7 +4,6 @@ import js.Browser;
 import cards.components.Component;
 import cards.components.ComponentOptions;
 import js.html.Element;
-import thx.Assert;
 import udom.Dom;
 
 class Menu extends FrameOverlay {
@@ -32,8 +31,6 @@ class Menu extends FrameOverlay {
   }
 
   public function removeItem(item : Component) {
-    Assert.notNull(item);
-    Assert.isTrue(items.exists(item));
     var el = items.get(item);
     item.detach();
     ul.removeChild(el);

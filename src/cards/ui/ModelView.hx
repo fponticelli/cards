@@ -8,7 +8,6 @@ import cards.ui.input.TypedValue;
 import js.html.Element;
 using thx.stream.Emitter;
 import cards.components.Component;
-import thx.Assert;
 import cards.model.DataEvent;
 import cards.model.SchemaEvent;
 import cards.model.SchemaType;

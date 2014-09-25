@@ -1,4 +1,5 @@
 (function () { "use strict";
+var $estr = function() { return js.Boot.__string_rec(this,''); };
 function $extend(from, fields) {
 	function Inherit() {} Inherit.prototype = from; var proto = new Inherit();
 	for (var name in fields) proto[name] = fields[name];
@@ -77,12 +78,6 @@ DateTools.__format = function(d,f) {
 DateTools.format = function(d,f) {
 	return DateTools.__format(d,f);
 };
-DateTools.delta = function(d,t) {
-	var t1 = d.getTime() + t;
-	var d1 = new Date();
-	d1.setTime(t1);
-	return d1;
-};
 var EReg = function(r,opt) {
 	opt = opt.split("u").join("");
 	this.r = new RegExp(r,opt);
@@ -98,10 +93,6 @@ EReg.prototype = {
 	}
 	,matched: function(n) {
 		if(this.r.m != null && n >= 0 && n < this.r.m.length) return this.r.m[n]; else throw "EReg::matched";
-	}
-	,matchedLeft: function() {
-		if(this.r.m == null) throw "No string matched";
-		return this.r.s.substr(0,this.r.m.index);
 	}
 	,matchedRight: function() {
 		if(this.r.m == null) throw "No string matched";
@@ -231,15 +222,6 @@ HxOverrides.iter = function(a) {
 };
 var Lambda = function() { };
 Lambda.__name__ = ["Lambda"];
-Lambda.array = function(it) {
-	var a = new Array();
-	var $it0 = $iterator(it)();
-	while( $it0.hasNext() ) {
-		var i = $it0.next();
-		a.push(i);
-	}
-	return a;
-};
 Lambda.has = function(it,elt) {
 	var $it0 = $iterator(it)();
 	while( $it0.hasNext() ) {
@@ -251,7 +233,7 @@ Lambda.has = function(it,elt) {
 var Main = function() { };
 Main.__name__ = ["Main"];
 Main.main = function() {
-	var version = "0.1.12+82";
+	var version = "0.1.16+89";
 	thx.stream.dom.Dom.ready().success(function(_) {
 		var values = new cards.properties.ValueProperties();
 		var fragments = new cards.ui.fragments.FragmentProperties();
@@ -410,20 +392,27 @@ StringTools.replace = function(s,sub,by) {
 };
 var ValueType = { __ename__ : ["ValueType"], __constructs__ : ["TNull","TInt","TFloat","TBool","TObject","TFunction","TClass","TEnum","TUnknown"] };
 ValueType.TNull = ["TNull",0];
+ValueType.TNull.toString = $estr;
 ValueType.TNull.__enum__ = ValueType;
 ValueType.TInt = ["TInt",1];
+ValueType.TInt.toString = $estr;
 ValueType.TInt.__enum__ = ValueType;
 ValueType.TFloat = ["TFloat",2];
+ValueType.TFloat.toString = $estr;
 ValueType.TFloat.__enum__ = ValueType;
 ValueType.TBool = ["TBool",3];
+ValueType.TBool.toString = $estr;
 ValueType.TBool.__enum__ = ValueType;
 ValueType.TObject = ["TObject",4];
+ValueType.TObject.toString = $estr;
 ValueType.TObject.__enum__ = ValueType;
 ValueType.TFunction = ["TFunction",5];
+ValueType.TFunction.toString = $estr;
 ValueType.TFunction.__enum__ = ValueType;
-ValueType.TClass = function(c) { var $x = ["TClass",6,c]; $x.__enum__ = ValueType; return $x; };
-ValueType.TEnum = function(e) { var $x = ["TEnum",7,e]; $x.__enum__ = ValueType; return $x; };
+ValueType.TClass = function(c) { var $x = ["TClass",6,c]; $x.__enum__ = ValueType; $x.toString = $estr; return $x; };
+ValueType.TEnum = function(e) { var $x = ["TEnum",7,e]; $x.__enum__ = ValueType; $x.toString = $estr; return $x; };
 ValueType.TUnknown = ["TUnknown",8];
+ValueType.TUnknown.toString = $estr;
 ValueType.TUnknown.__enum__ = ValueType;
 var Type = function() { };
 Type.__name__ = ["Type"];
@@ -496,15 +485,6 @@ Type.enumEq = function(a,b) {
 		return false;
 	}
 	return true;
-};
-Type.enumConstructor = function(e) {
-	return e[0];
-};
-Type.enumParameters = function(e) {
-	return e.slice(2);
-};
-Type.enumIndex = function(e) {
-	return e[1];
 };
 var cards = {};
 cards.components = {};
@@ -660,10 +640,10 @@ cards.model.Data.prototype = {
 	,__class__: cards.model.Data
 };
 cards.model.DataEvent = { __ename__ : ["cards","model","DataEvent"], __constructs__ : ["SetValue"] };
-cards.model.DataEvent.SetValue = function(path,value,type) { var $x = ["SetValue",0,path,value,type]; $x.__enum__ = cards.model.DataEvent; return $x; };
+cards.model.DataEvent.SetValue = function(path,value,type) { var $x = ["SetValue",0,path,value,type]; $x.__enum__ = cards.model.DataEvent; $x.toString = $estr; return $x; };
 cards.model.Expression = { __ename__ : ["cards","model","Expression"], __constructs__ : ["Fun","SyntaxError"] };
-cards.model.Expression.Fun = function(f) { var $x = ["Fun",0,f]; $x.__enum__ = cards.model.Expression; return $x; };
-cards.model.Expression.SyntaxError = function(msg) { var $x = ["SyntaxError",1,msg]; $x.__enum__ = cards.model.Expression; return $x; };
+cards.model.Expression.Fun = function(f) { var $x = ["Fun",0,f]; $x.__enum__ = cards.model.Expression; $x.toString = $estr; return $x; };
+cards.model.Expression.SyntaxError = function(msg) { var $x = ["SyntaxError",1,msg]; $x.__enum__ = cards.model.Expression; $x.toString = $estr; return $x; };
 cards.model.Expressions = function() { };
 cards.model.Expressions.__name__ = ["cards","model","Expressions"];
 cards.model.Expressions.toErrorOption = function(exp) {
@@ -799,8 +779,8 @@ cards.model.Runtime.prototype = {
 	,__class__: cards.model.Runtime
 };
 cards.model.RuntimeResult = { __ename__ : ["cards","model","RuntimeResult"], __constructs__ : ["Result","Error"] };
-cards.model.RuntimeResult.Result = function(value) { var $x = ["Result",0,value]; $x.__enum__ = cards.model.RuntimeResult; return $x; };
-cards.model.RuntimeResult.Error = function(msg) { var $x = ["Error",1,msg]; $x.__enum__ = cards.model.RuntimeResult; return $x; };
+cards.model.RuntimeResult.Result = function(value) { var $x = ["Result",0,value]; $x.__enum__ = cards.model.RuntimeResult; $x.toString = $estr; return $x; };
+cards.model.RuntimeResult.Error = function(msg) { var $x = ["Error",1,msg]; $x.__enum__ = cards.model.RuntimeResult; $x.toString = $estr; return $x; };
 cards.model.Schema = function() {
 	this.fields = new haxe.ds.StringMap();
 	this.stream = this.bus = new thx.stream.Bus();
@@ -865,25 +845,31 @@ cards.model.Schema.prototype = {
 	,__class__: cards.model.Schema
 };
 cards.model.SchemaEvent = { __ename__ : ["cards","model","SchemaEvent"], __constructs__ : ["ListFields","AddField","DeleteField","RenameField","RetypeField"] };
-cards.model.SchemaEvent.ListFields = function(list) { var $x = ["ListFields",0,list]; $x.__enum__ = cards.model.SchemaEvent; return $x; };
-cards.model.SchemaEvent.AddField = function(name,type) { var $x = ["AddField",1,name,type]; $x.__enum__ = cards.model.SchemaEvent; return $x; };
-cards.model.SchemaEvent.DeleteField = function(name) { var $x = ["DeleteField",2,name]; $x.__enum__ = cards.model.SchemaEvent; return $x; };
-cards.model.SchemaEvent.RenameField = function(oldname,newname) { var $x = ["RenameField",3,oldname,newname]; $x.__enum__ = cards.model.SchemaEvent; return $x; };
-cards.model.SchemaEvent.RetypeField = function(name,type) { var $x = ["RetypeField",4,name,type]; $x.__enum__ = cards.model.SchemaEvent; return $x; };
+cards.model.SchemaEvent.ListFields = function(list) { var $x = ["ListFields",0,list]; $x.__enum__ = cards.model.SchemaEvent; $x.toString = $estr; return $x; };
+cards.model.SchemaEvent.AddField = function(name,type) { var $x = ["AddField",1,name,type]; $x.__enum__ = cards.model.SchemaEvent; $x.toString = $estr; return $x; };
+cards.model.SchemaEvent.DeleteField = function(name) { var $x = ["DeleteField",2,name]; $x.__enum__ = cards.model.SchemaEvent; $x.toString = $estr; return $x; };
+cards.model.SchemaEvent.RenameField = function(oldname,newname) { var $x = ["RenameField",3,oldname,newname]; $x.__enum__ = cards.model.SchemaEvent; $x.toString = $estr; return $x; };
+cards.model.SchemaEvent.RetypeField = function(name,type) { var $x = ["RetypeField",4,name,type]; $x.__enum__ = cards.model.SchemaEvent; $x.toString = $estr; return $x; };
 cards.model.SchemaType = { __ename__ : ["cards","model","SchemaType"], __constructs__ : ["ArrayType","BoolType","DateType","FloatType","ObjectType","StringType","CodeType","ReferenceType"] };
-cards.model.SchemaType.ArrayType = function(item) { var $x = ["ArrayType",0,item]; $x.__enum__ = cards.model.SchemaType; return $x; };
+cards.model.SchemaType.ArrayType = function(item) { var $x = ["ArrayType",0,item]; $x.__enum__ = cards.model.SchemaType; $x.toString = $estr; return $x; };
 cards.model.SchemaType.BoolType = ["BoolType",1];
+cards.model.SchemaType.BoolType.toString = $estr;
 cards.model.SchemaType.BoolType.__enum__ = cards.model.SchemaType;
 cards.model.SchemaType.DateType = ["DateType",2];
+cards.model.SchemaType.DateType.toString = $estr;
 cards.model.SchemaType.DateType.__enum__ = cards.model.SchemaType;
 cards.model.SchemaType.FloatType = ["FloatType",3];
+cards.model.SchemaType.FloatType.toString = $estr;
 cards.model.SchemaType.FloatType.__enum__ = cards.model.SchemaType;
-cards.model.SchemaType.ObjectType = function(fields) { var $x = ["ObjectType",4,fields]; $x.__enum__ = cards.model.SchemaType; return $x; };
+cards.model.SchemaType.ObjectType = function(fields) { var $x = ["ObjectType",4,fields]; $x.__enum__ = cards.model.SchemaType; $x.toString = $estr; return $x; };
 cards.model.SchemaType.StringType = ["StringType",5];
+cards.model.SchemaType.StringType.toString = $estr;
 cards.model.SchemaType.StringType.__enum__ = cards.model.SchemaType;
 cards.model.SchemaType.CodeType = ["CodeType",6];
+cards.model.SchemaType.CodeType.toString = $estr;
 cards.model.SchemaType.CodeType.__enum__ = cards.model.SchemaType;
 cards.model.SchemaType.ReferenceType = ["ReferenceType",7];
+cards.model.SchemaType.ReferenceType.toString = $estr;
 cards.model.SchemaType.ReferenceType.__enum__ = cards.model.SchemaType;
 cards.model.Scope = function() {
 	this.name = "Franco";
@@ -1340,15 +1326,12 @@ cards.properties.ValueProperties.__name__ = ["cards","properties","ValueProperti
 cards.properties.ValueProperties.prototype = {
 	map: null
 	,add: function(name,info) {
-		thx.Assert.isFalse(this.map.exists(name),"ValueProperties already contains \"" + name + "\"",{ fileName : "ValueProperties.hx", lineNumber : 15, className : "cards.properties.ValueProperties", methodName : "add"});
 		this.map.set(name,info);
 	}
 	,remove: function(name) {
-		thx.Assert.isTrue(this.map.exists(name),"ValueProperties does not contain \"" + name + "\"",{ fileName : "ValueProperties.hx", lineNumber : 20, className : "cards.properties.ValueProperties", methodName : "remove"});
 		this.map.remove(name);
 	}
 	,get: function(name) {
-		thx.Assert.isTrue(this.map.exists(name),"ValueProperties does not contain \"" + name + "\"",{ fileName : "ValueProperties.hx", lineNumber : 25, className : "cards.properties.ValueProperties", methodName : "get"});
 		return this.map.get(name);
 	}
 	,ensure: function(name,component) {
@@ -1936,7 +1919,6 @@ cards.ui.Article.prototype = {
 		if(thx.core.Options.equalsValue(this.fragment.get(),fragment)) this.fragment.set(haxe.ds.Option.None);
 		var finalizer = this.fragmentsMap.h[fragment.__id__];
 		this.fragmentsMap.remove(fragment);
-		thx.Assert.notNull(finalizer,null,{ fileName : "Article.hx", lineNumber : 84, className : "cards.ui.Article", methodName : "removeFragment"});
 		finalizer();
 	}
 	,__class__: cards.ui.Article
@@ -2066,61 +2048,6 @@ cards.ui.widgets.Tooltip.prototype = $extend(cards.ui.widgets.FrameOverlay.proto
 	}
 	,__class__: cards.ui.widgets.Tooltip
 });
-var haxe = {};
-haxe.ds = {};
-haxe.ds.StringMap = function() {
-	this.h = { };
-};
-haxe.ds.StringMap.__name__ = ["haxe","ds","StringMap"];
-haxe.ds.StringMap.__interfaces__ = [IMap];
-haxe.ds.StringMap.prototype = {
-	h: null
-	,set: function(key,value) {
-		this.h["$" + key] = value;
-	}
-	,get: function(key) {
-		return this.h["$" + key];
-	}
-	,exists: function(key) {
-		return this.h.hasOwnProperty("$" + key);
-	}
-	,remove: function(key) {
-		key = "$" + key;
-		if(!this.h.hasOwnProperty(key)) return false;
-		delete(this.h[key]);
-		return true;
-	}
-	,keys: function() {
-		var a = [];
-		for( var key in this.h ) {
-		if(this.h.hasOwnProperty(key)) a.push(key.substr(1));
-		}
-		return HxOverrides.iter(a);
-	}
-	,iterator: function() {
-		return { ref : this.h, it : this.keys(), hasNext : function() {
-			return this.it.hasNext();
-		}, next : function() {
-			var i = this.it.next();
-			return this.ref["$" + i];
-		}};
-	}
-	,toString: function() {
-		var s = new StringBuf();
-		s.b += "{";
-		var it = this.keys();
-		while( it.hasNext() ) {
-			var i = it.next();
-			if(i == null) s.b += "null"; else s.b += "" + i;
-			s.b += " => ";
-			s.add(Std.string(this.get(i)));
-			if(it.hasNext()) s.b += ", ";
-		}
-		s.b += "}";
-		return s.b;
-	}
-	,__class__: haxe.ds.StringMap
-};
 var js = {};
 js.Boot = function() { };
 js.Boot.__name__ = ["js","Boot"];
@@ -2284,34 +2211,26 @@ thx.stream.dom.Dom.ready = function() {
 		},false);
 	});
 };
+thx.stream.dom.Dom.streamClick = function(el,capture) {
+	if(capture == null) capture = false;
+	return thx.stream.dom.Dom.streamEvent(el,"click",capture);
+};
 thx.stream.dom.Dom.streamEvent = function(el,name,capture) {
 	if(capture == null) capture = false;
-	return thx.stream.Emitter.create(function(stream) {
+	return new thx.stream.Emitter(function(stream) {
 		el.addEventListener(name,$bind(stream,stream.pulse),capture);
 		stream.addCleanUp(function() {
 			el.removeEventListener(name,$bind(stream,stream.pulse),capture);
 		});
 	});
 };
-thx.stream.dom.Dom.streamMouseEvent = function(el,name,capture) {
+thx.stream.dom.Dom.streamFocus = function(el,capture) {
 	if(capture == null) capture = false;
-	return thx.stream.dom.Dom.streamEvent(el,name,capture);
-};
-thx.stream.dom.Dom.streamMouseMove = function(el,capture) {
-	if(capture == null) capture = false;
-	return thx.stream.dom.Dom.streamEvent(el,"mousemove",capture);
-};
-thx.stream.dom.Dom.streamMouseDown = function(el,capture) {
-	if(capture == null) capture = false;
-	return thx.stream.dom.Dom.streamEvent(el,"mousedown",capture);
-};
-thx.stream.dom.Dom.streamMouseUp = function(el,capture) {
-	if(capture == null) capture = false;
-	return thx.stream.dom.Dom.streamEvent(el,"mouseup",capture);
+	return thx.stream.dom.Dom.streamEvent(el,"focus",capture).toTrue().merge(thx.stream.dom.Dom.streamEvent(el,"blur",capture).toFalse());
 };
 thx.stream.dom.Dom.streamKey = function(el,name,capture) {
 	if(capture == null) capture = false;
-	return thx.stream.Emitter.create((function($this) {
+	return new thx.stream.Emitter((function($this) {
 		var $r;
 		if(!StringTools.startsWith(name,"key")) name = "key" + name;
 		$r = function(stream) {
@@ -2323,29 +2242,31 @@ thx.stream.dom.Dom.streamKey = function(el,name,capture) {
 		return $r;
 	}(this)));
 };
-thx.stream.dom.Dom.streamFocus = function(el,capture) {
-	if(capture == null) capture = false;
-	return thx.stream.dom.Dom.streamEvent(el,"focus",capture).toTrue().merge(thx.stream.dom.Dom.streamEvent(el,"blur",capture).toFalse());
-};
-thx.stream.dom.Dom.streamClick = function(el,capture) {
-	if(capture == null) capture = false;
-	return thx.stream.dom.Dom.streamEvent(el,"click",capture);
-};
 thx.stream.dom.Dom.streamInput = function(el,capture) {
 	if(capture == null) capture = false;
 	return thx.stream.dom.Dom.streamEvent(el,"input",capture).mapValue(function(_) {
 		return el.value;
 	});
 };
-thx.stream.dom.Dom.subscribeText = function(el,force) {
-	if(force == null) force = false;
-	return function(text) {
-		if(el.textContent != text || force) el.textContent = text;
-	};
+thx.stream.dom.Dom.streamMouseDown = function(el,capture) {
+	if(capture == null) capture = false;
+	return thx.stream.dom.Dom.streamEvent(el,"mousedown",capture);
 };
-thx.stream.dom.Dom.subscribeHTML = function(el) {
-	return function(html) {
-		el.innerHTML = html;
+thx.stream.dom.Dom.streamMouseEvent = function(el,name,capture) {
+	if(capture == null) capture = false;
+	return thx.stream.dom.Dom.streamEvent(el,name,capture);
+};
+thx.stream.dom.Dom.streamMouseMove = function(el,capture) {
+	if(capture == null) capture = false;
+	return thx.stream.dom.Dom.streamEvent(el,"mousemove",capture);
+};
+thx.stream.dom.Dom.streamMouseUp = function(el,capture) {
+	if(capture == null) capture = false;
+	return thx.stream.dom.Dom.streamEvent(el,"mouseup",capture);
+};
+thx.stream.dom.Dom.subscribeAttribute = function(el,name) {
+	return function(value) {
+		if(null == value) el.removeAttribute(name); else el.setAttribute(name,value);
 	};
 };
 thx.stream.dom.Dom.subscribeFocus = function(el) {
@@ -2353,9 +2274,15 @@ thx.stream.dom.Dom.subscribeFocus = function(el) {
 		if(focus) el.focus(); else el.blur();
 	};
 };
-thx.stream.dom.Dom.subscribeAttribute = function(el,name) {
-	return function(value) {
-		if(null == value) el.removeAttribute(name); else el.setAttribute(name,value);
+thx.stream.dom.Dom.subscribeHTML = function(el) {
+	return function(html) {
+		el.innerHTML = html;
+	};
+};
+thx.stream.dom.Dom.subscribeText = function(el,force) {
+	if(force == null) force = false;
+	return function(text) {
+		if(el.textContent != text || force) el.textContent = text;
 	};
 };
 thx.stream.dom.Dom.subscribeToggleAttribute = function(el,name,value) {
@@ -2380,42 +2307,8 @@ thx.stream.Emitter = function(init) {
 	this.init = init;
 };
 thx.stream.Emitter.__name__ = ["thx","stream","Emitter"];
-thx.stream.Emitter.create = function(init) {
-	return new thx.stream.Emitter(init);
-};
 thx.stream.Emitter.prototype = {
 	init: null
-	,sign: function(subscriber) {
-		var stream = new thx.stream.Stream(subscriber);
-		this.init(stream);
-		return stream;
-	}
-	,subscribe: function(pulse,fail,end) {
-		if(null != pulse) pulse = pulse; else pulse = function(_) {
-		};
-		if(null != fail) fail = fail; else fail = function(_1) {
-		};
-		if(null != end) end = end; else end = function(_2) {
-		};
-		var stream = new thx.stream.Stream(function(r) {
-			switch(r[1]) {
-			case 0:
-				var v = r[2];
-				pulse(v);
-				break;
-			case 2:
-				var e = r[2];
-				fail(e);
-				break;
-			case 1:
-				var c = r[2];
-				end(c);
-				break;
-			}
-		});
-		this.init(stream);
-		return stream;
-	}
 	,feed: function(value) {
 		var stream = new thx.stream.Stream(null);
 		stream.subscriber = function(r) {
@@ -2451,32 +2344,86 @@ thx.stream.Emitter.prototype = {
 		this.init(stream);
 		return stream;
 	}
-	,delay: function(time) {
+	,sign: function(subscriber) {
+		var stream = new thx.stream.Stream(subscriber);
+		this.init(stream);
+		return stream;
+	}
+	,subscribe: function(pulse,fail,end) {
+		if(null != pulse) pulse = pulse; else pulse = function(_) {
+		};
+		if(null != fail) fail = fail; else fail = function(_1) {
+		};
+		if(null != end) end = end; else end = function(_2) {
+		};
+		var stream = new thx.stream.Stream(function(r) {
+			switch(r[1]) {
+			case 0:
+				var v = r[2];
+				pulse(v);
+				break;
+			case 2:
+				var e = r[2];
+				fail(e);
+				break;
+			case 1:
+				var c = r[2];
+				end(c);
+				break;
+			}
+		});
+		this.init(stream);
+		return stream;
+	}
+	,concat: function(other) {
 		var _g = this;
 		return new thx.stream.Emitter(function(stream) {
-			var id = setTimeout(function() {
-				_g.init(stream);
-			},time);
-			stream.addCleanUp((function(f,id1) {
-				return function() {
-					return f(id1);
-				};
-			})(thx.core.Timer.clear,id));
+			_g.init(new thx.stream.Stream(function(r) {
+				switch(r[1]) {
+				case 0:
+					var v = r[2];
+					stream.pulse(v);
+					break;
+				case 2:
+					var e = r[2];
+					stream.fail(e);
+					break;
+				case 1:
+					switch(r[2]) {
+					case true:
+						stream.cancel();
+						break;
+					case false:
+						other.init(stream);
+						break;
+					}
+					break;
+				}
+			}));
 		});
+	}
+	,count: function() {
+		return this.mapValue((function() {
+			var c = 0;
+			return function(_) {
+				return ++c;
+			};
+		})());
 	}
 	,debounce: function(delay) {
 		var _g = this;
 		return new thx.stream.Emitter(function(stream) {
-			var id = null;
+			var cancel = function() {
+			};
 			stream.addCleanUp(function() {
-				clearTimeout(id);
+				cancel();
 			});
 			_g.init(new thx.stream.Stream(function(r) {
 				switch(r[1]) {
 				case 0:
 					var v = r[2];
-					clearTimeout(id);
-					id = thx.core.Timer.delay((function(f,v1) {
+					cancel();
+					cancel = thx.core.Timer.delay((function(f,v1) {
 						return function() {
 							return f(v1);
 						};
@@ -2492,7 +2439,127 @@ thx.stream.Emitter.prototype = {
 						stream.cancel();
 						break;
 					case false:
-						setTimeout($bind(stream,stream.end),delay);
+						thx.core.Timer.delay($bind(stream,stream.end),delay);
+						break;
+					}
+					break;
+				}
+			}));
+		});
+	}
+	,delay: function(time) {
+		var _g = this;
+		return new thx.stream.Emitter(function(stream) {
+			var cancel = thx.core.Timer.delay(function() {
+				_g.init(stream);
+			},time);
+			stream.addCleanUp(cancel);
+		});
+	}
+	,diff: function(init,f) {
+		return this.window(2,null != init).mapValue(function(a) {
+			if(a.length == 1) return f(init,a[0]); else return f(a[0],a[1]);
+		});
+	}
+	,merge: function(other) {
+		var _g = this;
+		return new thx.stream.Emitter(function(stream) {
+			_g.init(stream);
+			other.init(stream);
+		});
+	}
+	,previous: function() {
+		var _g = this;
+		return new thx.stream.Emitter(function(stream) {
+			var value = null;
+			var first = true;
+			var pulse = function() {
+				if(first) {
+					first = false;
+					return;
+				}
+				stream.pulse(value);
+			};
+			_g.init(new thx.stream.Stream(function(r) {
+				switch(r[1]) {
+				case 0:
+					var v = r[2];
+					pulse();
+					value = v;
+					break;
+				case 2:
+					var e = r[2];
+					stream.fail(e);
+					break;
+				case 1:
+					switch(r[2]) {
+					case true:
+						stream.cancel();
+						break;
+					case false:
+						stream.end();
+						break;
+					}
+					break;
+				}
+			}));
+		});
+	}
+	,reduce: function(acc,f) {
+		var _g = this;
+		return new thx.stream.Emitter(function(stream) {
+			_g.init(new thx.stream.Stream(function(r) {
+				switch(r[1]) {
+				case 0:
+					var v = r[2];
+					acc = f(acc,v);
+					stream.pulse(acc);
+					break;
+				case 2:
+					var e = r[2];
+					stream.fail(e);
+					break;
+				case 1:
+					switch(r[2]) {
+					case true:
+						stream.cancel();
+						break;
+					case false:
+						stream.end();
+						break;
+					}
+					break;
+				}
+			}));
+		});
+	}
+	,window: function(size,emitWithLess) {
+		if(emitWithLess == null) emitWithLess = false;
+		var _g = this;
+		return new thx.stream.Emitter(function(stream) {
+			var buf = [];
+			var pulse = function() {
+				if(buf.length > size) buf.shift();
+				if(buf.length == size || emitWithLess) stream.pulse(buf.slice());
+			};
+			_g.init(new thx.stream.Stream(function(r) {
+				switch(r[1]) {
+				case 0:
+					var v = r[2];
+					buf.push(v);
+					pulse();
+					break;
+				case 2:
+					var e = r[2];
+					stream.fail(e);
+					break;
+				case 1:
+					switch(r[2]) {
+					case true:
+						stream.cancel();
+						break;
+					case false:
+						stream.end();
 						break;
 					}
 					break;
@@ -2536,57 +2603,29 @@ thx.stream.Emitter.prototype = {
 			return thx.promise.Promise.value(f(v));
 		});
 	}
-	,takeUntil: function(f) {
-		var _g = this;
-		return new thx.stream.Emitter(function(stream) {
-			var instream = null;
-			instream = new thx.stream.Stream(function(r) {
-				switch(r[1]) {
-				case 0:
-					var v = r[2];
-					f(v).either(function(c) {
-						if(c) stream.pulse(v); else {
-							instream.end();
-							stream.end();
-						}
-					},$bind(stream,stream.fail));
-					break;
-				case 2:
-					var e = r[2];
-					instream.fail(e);
-					stream.fail(e);
-					break;
-				case 1:
-					switch(r[2]) {
-					case true:
-						instream.cancel();
-						stream.cancel();
-						break;
-					case false:
-						instream.end();
-						stream.end();
-						break;
-					}
-					break;
-				}
-			});
-			_g.init(instream);
+	,toOption: function() {
+		return this.mapValue(function(v) {
+			if(null == v) return haxe.ds.Option.None; else return haxe.ds.Option.Some(v);
 		});
 	}
-	,take: function(count) {
-		return this.takeUntil((function($this) {
-			var $r;
-			var counter = 0;
-			$r = function(_) {
-				return thx.promise.Promise.value(counter++ < count);
-			};
-			return $r;
-		}(this)));
+	,toNil: function() {
+		return this.mapValue(function(_) {
+			return thx.core.Nil.nil;
+		});
 	}
-	,audit: function(handler) {
-		return this.mapValue(function(v) {
-			handler(v);
-			return v;
+	,toTrue: function() {
+		return this.mapValue(function(_) {
+			return true;
+		});
+	}
+	,toFalse: function() {
+		return this.mapValue(function(_) {
+			return false;
+		});
+	}
+	,toValue: function(value) {
+		return this.mapValue(function(_) {
+			return value;
 		});
 	}
 	,filter: function(f) {
@@ -2625,14 +2664,30 @@ thx.stream.Emitter.prototype = {
 			return thx.promise.Promise.value(f(v));
 		});
 	}
-	,concat: function(other) {
+	,first: function() {
+		return this.take(1);
+	}
+	,distinct: function(equals) {
+		if(null == equals) equals = function(a,b) {
+			return a == b;
+		};
+		var last = null;
+		return this.filterValue(function(v) {
+			if(equals(v,last)) return false; else {
+				last = v;
+				return true;
+			}
+		});
+	}
+	,last: function() {
 		var _g = this;
 		return new thx.stream.Emitter(function(stream) {
+			var last = null;
 			_g.init(new thx.stream.Stream(function(r) {
 				switch(r[1]) {
 				case 0:
 					var v = r[2];
-					stream.pulse(v);
+					last = v;
 					break;
 				case 2:
 					var e = r[2];
@@ -2644,41 +2699,7 @@ thx.stream.Emitter.prototype = {
 						stream.cancel();
 						break;
 					case false:
-						other.init(stream);
-						break;
-					}
-					break;
-				}
-			}));
-		});
-	}
-	,merge: function(other) {
-		var _g = this;
-		return new thx.stream.Emitter(function(stream) {
-			_g.init(stream);
-			other.init(stream);
-		});
-	}
-	,reduce: function(acc,f) {
-		var _g = this;
-		return new thx.stream.Emitter(function(stream) {
-			_g.init(new thx.stream.Stream(function(r) {
-				switch(r[1]) {
-				case 0:
-					var v = r[2];
-					acc = f(acc,v);
-					stream.pulse(acc);
-					break;
-				case 2:
-					var e = r[2];
-					stream.fail(e);
-					break;
-				case 1:
-					switch(r[2]) {
-					case true:
-						stream.cancel();
-						break;
-					case false:
+						stream.pulse(last);
 						stream.end();
 						break;
 					}
@@ -2687,29 +2708,154 @@ thx.stream.Emitter.prototype = {
 			}));
 		});
 	}
-	,toOption: function() {
+	,memberOf: function(arr,equality) {
+		return this.filterValue(function(v) {
+			return thx.core.Arrays.contains(arr,v,equality);
+		});
+	}
+	,notNull: function() {
+		return this.filterValue(function(v) {
+			return v != null;
+		});
+	}
+	,skip: function(n) {
+		return this.skipUntil((function() {
+			var count = 0;
+			return function(_) {
+				return count++ < n;
+			};
+		})());
+	}
+	,skipUntil: function(predicate) {
+		return this.filterValue((function() {
+			var flag = false;
+			return function(v) {
+				if(flag) return true;
+				if(predicate(v)) return false;
+				return flag = true;
+			};
+		})());
+	}
+	,take: function(count) {
+		return this.takeUntil((function($this) {
+			var $r;
+			var counter = 0;
+			$r = function(_) {
+				return thx.promise.Promise.value(counter++ < count);
+			};
+			return $r;
+		}(this)));
+	}
+	,takeAt: function(index) {
+		return this.take(index + 1).last();
+	}
+	,takeLast: function(n) {
+		return thx.stream.EmitterArrays.flatten(this.window(n).last());
+	}
+	,takeUntil: function(f) {
+		var _g = this;
+		return new thx.stream.Emitter(function(stream) {
+			var instream = null;
+			instream = new thx.stream.Stream(function(r) {
+				switch(r[1]) {
+				case 0:
+					var v = r[2];
+					f(v).either(function(c) {
+						if(c) stream.pulse(v); else {
+							instream.end();
+							stream.end();
+						}
+					},$bind(stream,stream.fail));
+					break;
+				case 2:
+					var e = r[2];
+					instream.fail(e);
+					stream.fail(e);
+					break;
+				case 1:
+					switch(r[2]) {
+					case true:
+						instream.cancel();
+						stream.cancel();
+						break;
+					case false:
+						instream.end();
+						stream.end();
+						break;
+					}
+					break;
+				}
+			});
+			_g.init(instream);
+		});
+	}
+	,withValue: function(expected) {
+		return this.filterValue(function(v) {
+			return v == expected;
+		});
+	}
+	,split: function() {
+		var _g = this;
+		var inited = false;
+		var streams = [];
+		var init = function(stream) {
+			streams.push(stream);
+			if(!inited) {
+				inited = true;
+				thx.core.Timer.immediate(function() {
+					_g.init(new thx.stream.Stream(function(r) {
+						switch(r[1]) {
+						case 0:
+							var v = r[2];
+							var _g1 = 0;
+							while(_g1 < streams.length) {
+								var s = streams[_g1];
+								++_g1;
+								s.pulse(v);
+							}
+							break;
+						case 2:
+							var e = r[2];
+							var _g11 = 0;
+							while(_g11 < streams.length) {
+								var s1 = streams[_g11];
+								++_g11;
+								s1.faile(e);
+							}
+							break;
+						case 1:
+							switch(r[2]) {
+							case true:
+								var _g12 = 0;
+								while(_g12 < streams.length) {
+									var s2 = streams[_g12];
+									++_g12;
+									s2.canel();
+								}
+								break;
+							case false:
+								var _g13 = 0;
+								while(_g13 < streams.length) {
+									var s3 = streams[_g13];
+									++_g13;
+									s3.end();
+								}
+								break;
+							}
+							break;
+						}
+					}));
+				});
+			}
+		};
+		var _0 = new thx.stream.Emitter(init);
+		var _1 = new thx.stream.Emitter(init);
+		return { _0 : _0, _1 : _1};
+	}
+	,audit: function(handler) {
 		return this.mapValue(function(v) {
-			if(null == v) return haxe.ds.Option.None; else return haxe.ds.Option.Some(v);
-		});
-	}
-	,toNil: function() {
-		return this.mapValue(function(_) {
-			return thx.core.Nil.nil;
-		});
-	}
-	,toTrue: function() {
-		return this.mapValue(function(_) {
-			return true;
-		});
-	}
-	,toFalse: function() {
-		return this.mapValue(function(_) {
-			return false;
-		});
-	}
-	,toValue: function(value) {
-		return this.mapValue(function(_) {
-			return value;
+			handler(v);
+			return v;
 		});
 	}
 	,log: function(prefix,posInfo) {
@@ -2717,46 +2863,6 @@ thx.stream.Emitter.prototype = {
 		return this.mapValue(function(v) {
 			haxe.Log.trace("" + prefix + Std.string(v),posInfo);
 			return v;
-		});
-	}
-	,withValue: function(expected) {
-		return this.filterValue(null == expected?function(v) {
-			return v != null;
-		}:function(v1) {
-			return v1 == expected;
-		});
-	}
-	,distinct: function(equals) {
-		var _g = this;
-		return new thx.stream.Emitter(function(stream) {
-			if(null == equals) equals = function(a,b) {
-				return a == b;
-			};
-			var last = null;
-			_g.init(new thx.stream.Stream(function(r) {
-				switch(r[1]) {
-				case 0:
-					var v = r[2];
-					if(equals(v,last)) return;
-					last = v;
-					stream.pulse(v);
-					break;
-				case 2:
-					var e = r[2];
-					stream.fail(e);
-					break;
-				case 1:
-					switch(r[2]) {
-					case true:
-						stream.cancel();
-						break;
-					case false:
-						stream.end();
-						break;
-					}
-					break;
-				}
-			}));
 		});
 	}
 	,pair: function(other) {
@@ -2800,73 +2906,6 @@ thx.stream.Emitter.prototype = {
 				case 0:
 					var v1 = r1[2];
 					_1 = v1;
-					pulse();
-					break;
-				case 2:
-					var e1 = r1[2];
-					stream.fail(e1);
-					break;
-				case 1:
-					switch(r1[2]) {
-					case true:
-						stream.cancel();
-						break;
-					case false:
-						stream.end();
-						break;
-					}
-					break;
-				}
-			}));
-		});
-	}
-	,zip: function(other) {
-		var _g = this;
-		return new thx.stream.Emitter(function(stream) {
-			var _0 = [];
-			var _1 = [];
-			stream.addCleanUp(function() {
-				_0 = null;
-				_1 = null;
-			});
-			var pulse = function() {
-				if(_0.length == 0 || _1.length == 0) return;
-				stream.pulse((function($this) {
-					var $r;
-					var _01 = _0.shift();
-					var _11 = _1.shift();
-					$r = { _0 : _01, _1 : _11};
-					return $r;
-				}(this)));
-			};
-			_g.init(new thx.stream.Stream(function(r) {
-				switch(r[1]) {
-				case 0:
-					var v = r[2];
-					_0.push(v);
-					pulse();
-					break;
-				case 2:
-					var e = r[2];
-					stream.fail(e);
-					break;
-				case 1:
-					switch(r[2]) {
-					case true:
-						stream.cancel();
-						break;
-					case false:
-						stream.end();
-						break;
-					}
-					break;
-				}
-			}));
-			other.init(new thx.stream.Stream(function(r1) {
-				switch(r1[1]) {
-				case 0:
-					var v1 = r1[2];
-					_1.push(v1);
 					pulse();
 					break;
 				case 2:
@@ -2947,20 +2986,35 @@ thx.stream.Emitter.prototype = {
 			}));
 		});
 	}
-	,window: function(size,emitWithLess) {
-		if(emitWithLess == null) emitWithLess = false;
+	,samplerOf: function(sampled) {
+		return sampled.sampleBy(this).mapValue(function(t) {
+			return { _0 : t._1, _1 : t._0};
+		});
+	}
+	,zip: function(other) {
 		var _g = this;
 		return new thx.stream.Emitter(function(stream) {
-			var buf = [];
+			var _0 = [];
+			var _1 = [];
+			stream.addCleanUp(function() {
+				_0 = null;
+				_1 = null;
+			});
 			var pulse = function() {
-				if(buf.length > size) buf.shift();
-				if(buf.length == size || emitWithLess) stream.pulse(buf.slice());
+				if(_0.length == 0 || _1.length == 0) return;
+				stream.pulse((function($this) {
+					var $r;
+					var _01 = _0.shift();
+					var _11 = _1.shift();
+					$r = { _0 : _01, _1 : _11};
+					return $r;
+				}(this)));
 			};
 			_g.init(new thx.stream.Stream(function(r) {
 				switch(r[1]) {
 				case 0:
 					var v = r[2];
-					buf.push(v);
+					_0.push(v);
 					pulse();
 					break;
 				case 2:
@@ -2979,33 +3033,19 @@ thx.stream.Emitter.prototype = {
 					break;
 				}
 			}));
-		});
-	}
-	,previous: function() {
-		var _g = this;
-		return new thx.stream.Emitter(function(stream) {
-			var value = null;
-			var first = true;
-			var pulse = function() {
-				if(first) {
-					first = false;
-					return;
-				}
-				stream.pulse(value);
-			};
-			_g.init(new thx.stream.Stream(function(r) {
-				switch(r[1]) {
+			other.init(new thx.stream.Stream(function(r1) {
+				switch(r1[1]) {
 				case 0:
-					var v = r[2];
+					var v1 = r1[2];
+					_1.push(v1);
 					pulse();
-					value = v;
 					break;
 				case 2:
-					var e = r[2];
-					stream.fail(e);
+					var e1 = r1[2];
+					stream.fail(e1);
 					break;
 				case 1:
-					switch(r[2]) {
+					switch(r1[2]) {
 					case true:
 						stream.cancel();
 						break;
@@ -3093,29 +3133,15 @@ thx.stream.Value.prototype = $extend(thx.stream.Emitter.prototype,{
 	}
 	,__class__: thx.stream.Value
 });
+var haxe = {};
+haxe.ds = {};
 haxe.ds.Option = { __ename__ : ["haxe","ds","Option"], __constructs__ : ["Some","None"] };
-haxe.ds.Option.Some = function(v) { var $x = ["Some",0,v]; $x.__enum__ = haxe.ds.Option; return $x; };
+haxe.ds.Option.Some = function(v) { var $x = ["Some",0,v]; $x.__enum__ = haxe.ds.Option; $x.toString = $estr; return $x; };
 haxe.ds.Option.None = ["None",1];
+haxe.ds.Option.None.toString = $estr;
 haxe.ds.Option.None.__enum__ = haxe.ds.Option;
 thx.stream.EmitterOptions = function() { };
 thx.stream.EmitterOptions.__name__ = ["thx","stream","EmitterOptions"];
-thx.stream.EmitterOptions.filterOption = function(emitter) {
-	return emitter.filterValue(function(opt) {
-		return thx.core.Options.toBool(opt);
-	}).mapValue(function(opt1) {
-		return thx.core.Options.toValue(opt1);
-	});
-};
-thx.stream.EmitterOptions.toValue = function(emitter) {
-	return emitter.mapValue(function(opt) {
-		return thx.core.Options.toValue(opt);
-	});
-};
-thx.stream.EmitterOptions.toBool = function(emitter) {
-	return emitter.mapValue(function(opt) {
-		return thx.core.Options.toBool(opt);
-	});
-};
 thx.stream.EmitterOptions.either = function(emitter,some,none,fail,end) {
 	if(null == some) some = function(_) {
 	};
@@ -3133,29 +3159,26 @@ thx.stream.EmitterOptions.either = function(emitter,some,none,fail,end) {
 		}
 	},fail,end);
 };
+thx.stream.EmitterOptions.filterOption = function(emitter) {
+	return emitter.filterValue(function(opt) {
+		return thx.core.Options.toBool(opt);
+	}).mapValue(function(opt1) {
+		return thx.core.Options.toValue(opt1);
+	});
+};
+thx.stream.EmitterOptions.toBool = function(emitter) {
+	return emitter.mapValue(function(opt) {
+		return thx.core.Options.toBool(opt);
+	});
+};
+thx.stream.EmitterOptions.toValue = function(emitter) {
+	return emitter.mapValue(function(opt) {
+		return thx.core.Options.toValue(opt);
+	});
+};
 thx.core = {};
 thx.core.Options = function() { };
 thx.core.Options.__name__ = ["thx","core","Options"];
-thx.core.Options.toValue = function(option) {
-	switch(option[1]) {
-	case 1:
-		return null;
-	case 0:
-		var v = option[2];
-		return v;
-	}
-};
-thx.core.Options.toBool = function(option) {
-	switch(option[1]) {
-	case 1:
-		return false;
-	case 0:
-		return true;
-	}
-};
-thx.core.Options.toOption = function(value) {
-	if(null == value) return haxe.ds.Option.None; else return haxe.ds.Option.Some(value);
-};
 thx.core.Options.equals = function(a,b,eq) {
 	switch(a[1]) {
 	case 1:
@@ -3184,6 +3207,53 @@ thx.core.Options.equals = function(a,b,eq) {
 thx.core.Options.equalsValue = function(a,b,eq) {
 	return thx.core.Options.equals(a,thx.core.Options.toOption(b),eq);
 };
+thx.core.Options.flatMap = function(option,callback) {
+	switch(option[1]) {
+	case 1:
+		return [];
+	case 0:
+		var v = option[2];
+		return callback(v);
+	}
+};
+thx.core.Options.map = function(option,callback) {
+	switch(option[1]) {
+	case 1:
+		return haxe.ds.Option.None;
+	case 0:
+		var v = option[2];
+		return haxe.ds.Option.Some(callback(v));
+	}
+};
+thx.core.Options.toArray = function(option) {
+	switch(option[1]) {
+	case 1:
+		return [];
+	case 0:
+		var v = option[2];
+		return [v];
+	}
+};
+thx.core.Options.toBool = function(option) {
+	switch(option[1]) {
+	case 1:
+		return false;
+	case 0:
+		return true;
+	}
+};
+thx.core.Options.toOption = function(value) {
+	if(null == value) return haxe.ds.Option.None; else return haxe.ds.Option.Some(value);
+};
+thx.core.Options.toValue = function(option) {
+	switch(option[1]) {
+	case 1:
+		return null;
+	case 0:
+		var v = option[2];
+		return v;
+	}
+};
 cards.ui.ContextField = function(options) {
 	var _g = this;
 	if(null == options.template && null == options.el) options.template = "<div class=\"field\"><div class=\"key-container\"><div class=\"key\"></div></div><div class=\"value-container\"></div></div>";
@@ -3199,7 +3269,7 @@ cards.ui.ContextField = function(options) {
 	var wireRuntime = function(editor,convert) {
 		var runtime = editor.value.mapValue(convert);
 		runtime.distinct(function(a,b) {
-			return b != null && thx.core.Arrays.same(a.dependencies,b.dependencies);
+			return b != null && thx.core.Arrays.equals(a.dependencies,b.dependencies);
 		}).subscribe(function(res) {
 			options.model.changes.subscribe(function(path) {
 				if(thx.core.Arrays.contains(res.dependencies,path,function(a1,b1) {
@@ -4956,7 +5026,7 @@ cards.ui.input.ArrayEditor.prototype = $extend(cards.ui.input.RouteEditor.protot
 		editor.dispose();
 		this.editors.splice(index,1);
 		this.currentIndex.set(haxe.ds.Option.None);
-		setTimeout(function() {
+		thx.core.Timer.delay(function() {
 			if(_g.editors.length == 0) return;
 			if(index == _g.editors.length) index--;
 			_g.editors[index].focus.set(true);
@@ -5007,7 +5077,7 @@ cards.ui.input.CodeMirrorEditor = function(container,parent) {
 	this.focus.subscribe(function(_) {
 		_g.editor.focus();
 	});
-	setTimeout(function() {
+	thx.core.Timer.delay(function() {
 		_g.editor.refresh();
 	},10);
 };
@@ -5048,13 +5118,13 @@ cards.ui.input.DateEditor = function(container,parent,useTime) {
 	var el = this.component.el;
 	thx.stream.dom.Dom.streamEvent(el,"change").mapValue(function(_) {
 		try {
-			var d = thx.date.ISO8601.parseDateTime(el.value);
+			var d = HxOverrides.strDate(el.value);
 			var _1 = d;
 			return { _0 : cards.model.SchemaType.DateType, _1 : _1};
 		} catch( e ) {
 			return null;
 		}
-	}).withValue().filterValue(function(v) {
+	}).notNull().filterValue(function(v) {
 		return !(function($this) {
 			var $r;
 			var f = v._1.getTime();
@@ -5078,10 +5148,12 @@ cards.ui.input.DateEditor.prototype = $extend(cards.ui.input.Editor.prototype,{
 });
 cards.ui.input.Diff = { __ename__ : ["cards","ui","input","Diff"], __constructs__ : ["Remove","Add","Set"] };
 cards.ui.input.Diff.Remove = ["Remove",0];
+cards.ui.input.Diff.Remove.toString = $estr;
 cards.ui.input.Diff.Remove.__enum__ = cards.ui.input.Diff;
 cards.ui.input.Diff.Add = ["Add",1];
+cards.ui.input.Diff.Add.toString = $estr;
 cards.ui.input.Diff.Add.__enum__ = cards.ui.input.Diff;
-cards.ui.input.Diff.Set = function(value) { var $x = ["Set",2,value]; $x.__enum__ = cards.ui.input.Diff; return $x; };
+cards.ui.input.Diff.Set = function(value) { var $x = ["Set",2,value]; $x.__enum__ = cards.ui.input.Diff; $x.toString = $estr; return $x; };
 cards.ui.input._DiffAt = {};
 cards.ui.input._DiffAt.DiffAt_Impl_ = function() { };
 cards.ui.input._DiffAt.DiffAt_Impl_.__name__ = ["cards","ui","input","_DiffAt","DiffAt_Impl_"];
@@ -5271,8 +5343,8 @@ cards.ui.input._Path.Path_Impl_.equal = function(this1,other) {
 	return true;
 };
 cards.ui.input.PathItem = { __ename__ : ["cards","ui","input","PathItem"], __constructs__ : ["Field","Index"] };
-cards.ui.input.PathItem.Field = function(name) { var $x = ["Field",0,name]; $x.__enum__ = cards.ui.input.PathItem; return $x; };
-cards.ui.input.PathItem.Index = function(pos) { var $x = ["Index",1,pos]; $x.__enum__ = cards.ui.input.PathItem; return $x; };
+cards.ui.input.PathItem.Field = function(name) { var $x = ["Field",0,name]; $x.__enum__ = cards.ui.input.PathItem; $x.toString = $estr; return $x; };
+cards.ui.input.PathItem.Index = function(pos) { var $x = ["Index",1,pos]; $x.__enum__ = cards.ui.input.PathItem; $x.toString = $estr; return $x; };
 cards.ui.input.ReferenceEditor = function(container,parent) {
 	cards.ui.input.InputBasedEditor.call(this,container,parent,cards.model.SchemaType.ReferenceType,"reference","text","input",function(el) {
 		var _1 = el.value;
@@ -5352,22 +5424,31 @@ cards.ui.input._TypedValue.TypedValue_Impl_.toString = function(this1) {
 };
 cards.ui.widgets.AnchorPoint = { __ename__ : ["cards","ui","widgets","AnchorPoint"], __constructs__ : ["TopLeft","Top","TopRight","Left","Center","Right","BottomLeft","Bottom","BottomRight"] };
 cards.ui.widgets.AnchorPoint.TopLeft = ["TopLeft",0];
+cards.ui.widgets.AnchorPoint.TopLeft.toString = $estr;
 cards.ui.widgets.AnchorPoint.TopLeft.__enum__ = cards.ui.widgets.AnchorPoint;
 cards.ui.widgets.AnchorPoint.Top = ["Top",1];
+cards.ui.widgets.AnchorPoint.Top.toString = $estr;
 cards.ui.widgets.AnchorPoint.Top.__enum__ = cards.ui.widgets.AnchorPoint;
 cards.ui.widgets.AnchorPoint.TopRight = ["TopRight",2];
+cards.ui.widgets.AnchorPoint.TopRight.toString = $estr;
 cards.ui.widgets.AnchorPoint.TopRight.__enum__ = cards.ui.widgets.AnchorPoint;
 cards.ui.widgets.AnchorPoint.Left = ["Left",3];
+cards.ui.widgets.AnchorPoint.Left.toString = $estr;
 cards.ui.widgets.AnchorPoint.Left.__enum__ = cards.ui.widgets.AnchorPoint;
 cards.ui.widgets.AnchorPoint.Center = ["Center",4];
+cards.ui.widgets.AnchorPoint.Center.toString = $estr;
 cards.ui.widgets.AnchorPoint.Center.__enum__ = cards.ui.widgets.AnchorPoint;
 cards.ui.widgets.AnchorPoint.Right = ["Right",5];
+cards.ui.widgets.AnchorPoint.Right.toString = $estr;
 cards.ui.widgets.AnchorPoint.Right.__enum__ = cards.ui.widgets.AnchorPoint;
 cards.ui.widgets.AnchorPoint.BottomLeft = ["BottomLeft",6];
+cards.ui.widgets.AnchorPoint.BottomLeft.toString = $estr;
 cards.ui.widgets.AnchorPoint.BottomLeft.__enum__ = cards.ui.widgets.AnchorPoint;
 cards.ui.widgets.AnchorPoint.Bottom = ["Bottom",7];
+cards.ui.widgets.AnchorPoint.Bottom.toString = $estr;
 cards.ui.widgets.AnchorPoint.Bottom.__enum__ = cards.ui.widgets.AnchorPoint;
 cards.ui.widgets.AnchorPoint.BottomRight = ["BottomRight",8];
+cards.ui.widgets.AnchorPoint.BottomRight.toString = $estr;
 cards.ui.widgets.AnchorPoint.BottomRight.__enum__ = cards.ui.widgets.AnchorPoint;
 cards.ui.widgets.Button = function(text,icon) {
 	if(text == null) text = "";
@@ -5417,8 +5498,6 @@ cards.ui.widgets.Menu.prototype = $extend(cards.ui.widgets.FrameOverlay.prototyp
 		this.items.set(item,el);
 	}
 	,removeItem: function(item) {
-		thx.Assert.notNull(item,null,{ fileName : "Menu.hx", lineNumber : 35, className : "cards.ui.widgets.Menu", methodName : "removeItem"});
-		thx.Assert.isTrue(this.items.h.__keys__[item.__id__] != null,null,{ fileName : "Menu.hx", lineNumber : 36, className : "cards.ui.widgets.Menu", methodName : "removeItem"});
 		var el = this.items.h[item.__id__];
 		item.detach();
 		this.ul.removeChild(el);
@@ -5475,11 +5554,12 @@ cards.util.MacroVersion = function() { };
 cards.util.MacroVersion.__name__ = ["cards","util","MacroVersion"];
 haxe.StackItem = { __ename__ : ["haxe","StackItem"], __constructs__ : ["CFunction","Module","FilePos","Method","LocalFunction"] };
 haxe.StackItem.CFunction = ["CFunction",0];
+haxe.StackItem.CFunction.toString = $estr;
 haxe.StackItem.CFunction.__enum__ = haxe.StackItem;
-haxe.StackItem.Module = function(m) { var $x = ["Module",1,m]; $x.__enum__ = haxe.StackItem; return $x; };
-haxe.StackItem.FilePos = function(s,file,line) { var $x = ["FilePos",2,s,file,line]; $x.__enum__ = haxe.StackItem; return $x; };
-haxe.StackItem.Method = function(classname,method) { var $x = ["Method",3,classname,method]; $x.__enum__ = haxe.StackItem; return $x; };
-haxe.StackItem.LocalFunction = function(v) { var $x = ["LocalFunction",4,v]; $x.__enum__ = haxe.StackItem; return $x; };
+haxe.StackItem.Module = function(m) { var $x = ["Module",1,m]; $x.__enum__ = haxe.StackItem; $x.toString = $estr; return $x; };
+haxe.StackItem.FilePos = function(s,file,line) { var $x = ["FilePos",2,s,file,line]; $x.__enum__ = haxe.StackItem; $x.toString = $estr; return $x; };
+haxe.StackItem.Method = function(classname,method) { var $x = ["Method",3,classname,method]; $x.__enum__ = haxe.StackItem; $x.toString = $estr; return $x; };
+haxe.StackItem.LocalFunction = function(v) { var $x = ["LocalFunction",4,v]; $x.__enum__ = haxe.StackItem; $x.toString = $estr; return $x; };
 haxe.CallStack = function() { };
 haxe.CallStack.__name__ = ["haxe","CallStack"];
 haxe.CallStack.callStack = function() {
@@ -5511,6 +5591,54 @@ haxe.CallStack.callStack = function() {
 };
 haxe.CallStack.exceptionStack = function() {
 	return [];
+};
+haxe.CallStack.toString = function(stack) {
+	var b = new StringBuf();
+	var _g = 0;
+	while(_g < stack.length) {
+		var s = stack[_g];
+		++_g;
+		b.b += "\nCalled from ";
+		haxe.CallStack.itemToString(b,s);
+	}
+	return b.b;
+};
+haxe.CallStack.itemToString = function(b,s) {
+	switch(s[1]) {
+	case 0:
+		b.b += "a C function";
+		break;
+	case 1:
+		var m = s[2];
+		b.b += "module ";
+		if(m == null) b.b += "null"; else b.b += "" + m;
+		break;
+	case 2:
+		var line = s[4];
+		var file = s[3];
+		var s1 = s[2];
+		if(s1 != null) {
+			haxe.CallStack.itemToString(b,s1);
+			b.b += " (";
+		}
+		if(file == null) b.b += "null"; else b.b += "" + file;
+		b.b += " line ";
+		if(line == null) b.b += "null"; else b.b += "" + line;
+		if(s1 != null) b.b += ")";
+		break;
+	case 3:
+		var meth = s[3];
+		var cname = s[2];
+		if(cname == null) b.b += "null"; else b.b += "" + cname;
+		b.b += ".";
+		if(meth == null) b.b += "null"; else b.b += "" + meth;
+		break;
+	case 4:
+		var n = s[2];
+		b.b += "local function #";
+		if(n == null) b.b += "null"; else b.b += "" + n;
+		break;
+	}
 };
 haxe.CallStack.makeStack = function(s) {
 	if(typeof(s) == "string") {
@@ -5617,526 +5745,71 @@ haxe.ds.ObjectMap.prototype = {
 	}
 	,__class__: haxe.ds.ObjectMap
 };
-haxe.io = {};
-haxe.io.Bytes = function() { };
-haxe.io.Bytes.__name__ = ["haxe","io","Bytes"];
-haxe.io.Bytes.prototype = {
-	length: null
-	,b: null
-	,__class__: haxe.io.Bytes
+haxe.ds.StringMap = function() {
+	this.h = { };
 };
-haxe.io.Eof = function() { };
-haxe.io.Eof.__name__ = ["haxe","io","Eof"];
-haxe.io.Eof.prototype = {
-	toString: function() {
-		return "Eof";
+haxe.ds.StringMap.__name__ = ["haxe","ds","StringMap"];
+haxe.ds.StringMap.__interfaces__ = [IMap];
+haxe.ds.StringMap.prototype = {
+	h: null
+	,set: function(key,value) {
+		this.h["$" + key] = value;
 	}
-	,__class__: haxe.io.Eof
-};
-thx.core.Error = function(message,stack,pos) {
-	this.message = message;
-	if(null == stack) {
-		stack = haxe.CallStack.exceptionStack();
-		if(stack.length == 0) stack = haxe.CallStack.callStack();
+	,get: function(key) {
+		return this.h["$" + key];
 	}
-	this.stack = stack;
-	this.pos = pos;
-};
-thx.core.Error.__name__ = ["thx","core","Error"];
-thx.core.Error.fromDynamic = function(err,pos) {
-	if(js.Boot.__instanceof(err,thx.core.Error)) return err;
-	return new thx.core.Error("" + Std.string(err),null,pos);
-};
-thx.core.Error.__super__ = Error;
-thx.core.Error.prototype = $extend(Error.prototype,{
-	stack: null
-	,pos: null
-	,__class__: thx.core.Error
-});
-thx.Assert = function() { };
-thx.Assert.__name__ = ["thx","Assert"];
-thx.Assert.isTrue = function(cond,msg,pos) {
-	if(thx.Assert.results == null) throw "Assert.results is not currently bound to any assert context";
-	if(null == msg) msg = "expected true";
-	if(cond) thx.Assert.results.add(thx.core.Assertion.Success(pos)); else thx.Assert.results.add(thx.core.Assertion.Failure(msg,pos));
-};
-thx.Assert.isFalse = function(value,msg,pos) {
-	if(null == msg) msg = "expected false";
-	thx.Assert.isTrue(value == false,msg,pos);
-};
-thx.Assert.isNull = function(value,msg,pos) {
-	if(msg == null) msg = "expected null but was " + thx.Assert.q(value);
-	thx.Assert.isTrue(value == null,msg,pos);
-};
-thx.Assert.notNull = function(value,msg,pos) {
-	if(null == msg) msg = "expected not null";
-	thx.Assert.isTrue(value != null,msg,pos);
-};
-thx.Assert["is"] = function(value,type,msg,pos) {
-	if(msg == null) msg = "expected type " + thx.Assert.typeToString(type) + " but was " + thx.Assert.typeToString(value);
-	thx.Assert.isTrue(js.Boot.__instanceof(value,type),msg,pos);
-};
-thx.Assert.notEquals = function(expected,value,msg,pos) {
-	if(msg == null) msg = "expected " + thx.Assert.q(expected) + " and testa value " + thx.Assert.q(value) + " should be different";
-	thx.Assert.isFalse(expected == value,msg,pos);
-};
-thx.Assert.equals = function(expected,value,msg,pos) {
-	if(msg == null) msg = "expected " + thx.Assert.q(expected) + " but was " + thx.Assert.q(value);
-	thx.Assert.isTrue(expected == value,msg,pos);
-};
-thx.Assert.match = function(pattern,value,msg,pos) {
-	if(msg == null) msg = "the value " + thx.Assert.q(value) + "does not match the provided pattern";
-	thx.Assert.isTrue(pattern.match(value),msg,pos);
-};
-thx.Assert.floatEquals = function(expected,value,approx,msg,pos) {
-	if(msg == null) msg = "expected " + thx.Assert.q(expected) + " but was " + thx.Assert.q(value);
-	return thx.Assert.isTrue(thx.Assert._floatEquals(expected,value,approx),msg,pos);
-};
-thx.Assert._floatEquals = function(expected,value,approx) {
-	if(isNaN(expected)) return isNaN(value); else if(isNaN(value)) return false; else if(!isFinite(expected) && !isFinite(value)) return expected > 0 == value > 0;
-	if(null == approx) approx = 1e-5;
-	return Math.abs(value - expected) < approx;
-};
-thx.Assert.getTypeName = function(v) {
-	{
-		var _g = Type["typeof"](v);
-		switch(_g[1]) {
-		case 0:
-			return "[null]";
-		case 1:
-			return "Int";
-		case 2:
-			return "Float";
-		case 3:
-			return "Bool";
-		case 5:
-			return "function";
-		case 6:
-			var c = _g[2];
-			return Type.getClassName(c);
-		case 7:
-			var e = _g[2];
-			return Type.getEnumName(e);
-		case 4:
-			return "Object";
-		case 8:
-			return "Unknown";
+	,exists: function(key) {
+		return this.h.hasOwnProperty("$" + key);
+	}
+	,remove: function(key) {
+		key = "$" + key;
+		if(!this.h.hasOwnProperty(key)) return false;
+		delete(this.h[key]);
+		return true;
+	}
+	,keys: function() {
+		var a = [];
+		for( var key in this.h ) {
+		if(this.h.hasOwnProperty(key)) a.push(key.substr(1));
 		}
+		return HxOverrides.iter(a);
 	}
-};
-thx.Assert.isIterable = function(v,isAnonym) {
-	var fields;
-	if(isAnonym) fields = Reflect.fields(v); else fields = Type.getInstanceFields(Type.getClass(v));
-	if(!Lambda.has(fields,"iterator")) return false;
-	return Reflect.isFunction(Reflect.field(v,"iterator"));
-};
-thx.Assert.isIterator = function(v,isAnonym) {
-	var fields;
-	if(isAnonym) fields = Reflect.fields(v); else fields = Type.getInstanceFields(Type.getClass(v));
-	if(!Lambda.has(fields,"next") || !Lambda.has(fields,"hasNext")) return false;
-	return Reflect.isFunction(Reflect.field(v,"next")) && Reflect.isFunction(Reflect.field(v,"hasNext"));
-};
-thx.Assert.sameAs = function(expected,value,status) {
-	var texpected = thx.Assert.getTypeName(expected);
-	var tvalue = thx.Assert.getTypeName(value);
-	if(texpected != tvalue) {
-		status.error = "expected type " + texpected + " but it is " + tvalue + (status.path == ""?"":" for field " + status.path);
-		return false;
+	,iterator: function() {
+		return { ref : this.h, it : this.keys(), hasNext : function() {
+			return this.it.hasNext();
+		}, next : function() {
+			var i = this.it.next();
+			return this.ref["$" + i];
+		}};
 	}
-	{
-		var _g = Type["typeof"](expected);
-		switch(_g[1]) {
-		case 2:
-			if(!thx.Assert._floatEquals(expected,value)) {
-				status.error = "expected " + thx.Assert.q(expected) + " but it is " + thx.Assert.q(value) + (status.path == ""?"":" for field " + status.path);
-				return false;
-			}
-			return true;
-		case 0:case 1:case 3:
-			if(expected != value) {
-				status.error = "expected " + thx.Assert.q(expected) + " but it is " + thx.Assert.q(value) + (status.path == ""?"":" for field " + status.path);
-				return false;
-			}
-			return true;
-		case 5:
-			if(!Reflect.compareMethods(expected,value)) {
-				status.error = "expected same function reference" + (status.path == ""?"":" for field " + status.path);
-				return false;
-			}
-			return true;
-		case 6:
-			var c = _g[2];
-			var cexpected = Type.getClassName(c);
-			var cvalue = Type.getClassName(Type.getClass(value));
-			if(cexpected != cvalue) {
-				status.error = "expected instance of " + thx.Assert.q(cexpected) + " but it is " + thx.Assert.q(cvalue) + (status.path == ""?"":" for field " + status.path);
-				return false;
-			}
-			if(typeof(expected) == "string" && expected != value) {
-				status.error = "expected '" + Std.string(expected) + "' but it is '" + Std.string(value) + "'";
-				return false;
-			}
-			if((expected instanceof Array) && expected.__enum__ == null) {
-				if(status.recursive || status.path == "") {
-					if(expected.length != value.length) {
-						status.error = "expected " + Std.string(expected.length) + " elements but they were " + Std.string(value.length) + (status.path == ""?"":" for field " + status.path);
-						return false;
-					}
-					var path = status.path;
-					var _g2 = 0;
-					var _g1 = expected.length;
-					while(_g2 < _g1) {
-						var i = _g2++;
-						if(path == "") status.path = "array[" + i + "]"; else status.path = path + "[" + i + "]";
-						if(!thx.Assert.sameAs(expected[i],value[i],status)) {
-							status.error = "expected " + thx.Assert.q(expected) + " but it is " + thx.Assert.q(value) + (status.path == ""?"":" for field " + status.path);
-							return false;
-						}
-					}
-				}
-				return true;
-			}
-			if(js.Boot.__instanceof(expected,Date)) {
-				if(expected.getTime() != value.getTime()) {
-					status.error = "expected " + thx.Assert.q(expected) + " but it is " + thx.Assert.q(value) + (status.path == ""?"":" for field " + status.path);
-					return false;
-				}
-				return true;
-			}
-			if(js.Boot.__instanceof(expected,haxe.io.Bytes)) {
-				if(status.recursive || status.path == "") {
-					var ebytes = expected;
-					var vbytes = value;
-					if(ebytes.length != vbytes.length) return false;
-					var _g21 = 0;
-					var _g11 = ebytes.length;
-					while(_g21 < _g11) {
-						var i1 = _g21++;
-						if(ebytes.b[i1] != vbytes.b[i1]) {
-							status.error = "expected byte " + ebytes.b[i1] + " but wss " + ebytes.b[i1] + (status.path == ""?"":" for field " + status.path);
-							return false;
-						}
-					}
-				}
-				return true;
-			}
-			if(js.Boot.__instanceof(expected,haxe.ds.StringMap) || js.Boot.__instanceof(expected,haxe.ds.IntMap)) {
-				if(status.recursive || status.path == "") {
-					var keys = Lambda.array({ iterator : function() {
-						return expected.keys();
-					}});
-					var vkeys = Lambda.array({ iterator : function() {
-						return value.keys();
-					}});
-					if(keys.length != vkeys.length) {
-						status.error = "expected " + keys.length + " keys but they were " + vkeys.length + (status.path == ""?"":" for field " + status.path);
-						return false;
-					}
-					var path1 = status.path;
-					var _g12 = 0;
-					while(_g12 < keys.length) {
-						var key = keys[_g12];
-						++_g12;
-						if(path1 == "") status.path = "hash[" + key + "]"; else status.path = path1 + "[" + key + "]";
-						if(!thx.Assert.sameAs(expected.get(key),value.get(key),status)) {
-							status.error = "expected " + thx.Assert.q(expected) + " but it is " + thx.Assert.q(value) + (status.path == ""?"":" for field " + status.path);
-							return false;
-						}
-					}
-				}
-				return true;
-			}
-			if(thx.Assert.isIterator(expected,false)) {
-				if(status.recursive || status.path == "") {
-					var evalues = Lambda.array({ iterator : function() {
-						return expected;
-					}});
-					var vvalues = Lambda.array({ iterator : function() {
-						return value;
-					}});
-					if(evalues.length != vvalues.length) {
-						status.error = "expected " + evalues.length + " values in Iterator but they were " + vvalues.length + (status.path == ""?"":" for field " + status.path);
-						return false;
-					}
-					var path2 = status.path;
-					var _g22 = 0;
-					var _g13 = evalues.length;
-					while(_g22 < _g13) {
-						var i2 = _g22++;
-						if(path2 == "") status.path = "iterator[" + i2 + "]"; else status.path = path2 + "[" + i2 + "]";
-						if(!thx.Assert.sameAs(evalues[i2],vvalues[i2],status)) {
-							status.error = "expected " + thx.Assert.q(expected) + " but it is " + thx.Assert.q(value) + (status.path == ""?"":" for field " + status.path);
-							return false;
-						}
-					}
-				}
-				return true;
-			}
-			if(thx.Assert.isIterable(expected,false)) {
-				if(status.recursive || status.path == "") {
-					var evalues1 = Lambda.array(expected);
-					var vvalues1 = Lambda.array(value);
-					if(evalues1.length != vvalues1.length) {
-						status.error = "expected " + evalues1.length + " values in Iterable but they were " + vvalues1.length + (status.path == ""?"":" for field " + status.path);
-						return false;
-					}
-					var path3 = status.path;
-					var _g23 = 0;
-					var _g14 = evalues1.length;
-					while(_g23 < _g14) {
-						var i3 = _g23++;
-						if(path3 == "") status.path = "iterable[" + i3 + "]"; else status.path = path3 + "[" + i3 + "]";
-						if(!thx.Assert.sameAs(evalues1[i3],vvalues1[i3],status)) return false;
-					}
-				}
-				return true;
-			}
-			if(status.recursive || status.path == "") {
-				var fields = Type.getInstanceFields(Type.getClass(expected));
-				var path4 = status.path;
-				var _g15 = 0;
-				while(_g15 < fields.length) {
-					var field = fields[_g15];
-					++_g15;
-					if(path4 == "") status.path = field; else status.path = path4 + "." + field;
-					var e = Reflect.field(expected,field);
-					if(Reflect.isFunction(e)) continue;
-					var v = Reflect.field(value,field);
-					if(!thx.Assert.sameAs(e,v,status)) return false;
-				}
-			}
-			return true;
-		case 7:
-			var e1 = _g[2];
-			var eexpected = Type.getEnumName(e1);
-			var evalue = Type.getEnumName(Type.getEnum(value));
-			if(eexpected != evalue) {
-				status.error = "expected enumeration of " + thx.Assert.q(eexpected) + " but it is " + thx.Assert.q(evalue) + (status.path == ""?"":" for field " + status.path);
-				return false;
-			}
-			if(status.recursive || status.path == "") {
-				if(Type.enumIndex(expected) != Type.enumIndex(value)) {
-					status.error = "expected " + thx.Assert.q(Type.enumConstructor(expected)) + " but is " + thx.Assert.q(Type.enumConstructor(value)) + (status.path == ""?"":" for field " + status.path);
-					return false;
-				}
-				var eparams = Type.enumParameters(expected);
-				var vparams = Type.enumParameters(value);
-				var path5 = status.path;
-				var _g24 = 0;
-				var _g16 = eparams.length;
-				while(_g24 < _g16) {
-					var i4 = _g24++;
-					if(path5 == "") status.path = "enum[" + i4 + "]"; else status.path = path5 + "[" + i4 + "]";
-					if(!thx.Assert.sameAs(eparams[i4],vparams[i4],status)) {
-						status.error = "expected " + thx.Assert.q(expected) + " but it is " + thx.Assert.q(value) + (status.path == ""?"":" for field " + status.path);
-						return false;
-					}
-				}
-			}
-			return true;
-		case 4:
-			if(status.recursive || status.path == "") {
-				var tfields = Reflect.fields(value);
-				var fields1 = Reflect.fields(expected);
-				var path6 = status.path;
-				var _g17 = 0;
-				while(_g17 < fields1.length) {
-					var field1 = fields1[_g17];
-					++_g17;
-					HxOverrides.remove(tfields,field1);
-					if(path6 == "") status.path = field1; else status.path = path6 + "." + field1;
-					if(!Object.prototype.hasOwnProperty.call(value,field1)) {
-						status.error = "expected field " + status.path + " does not exist in " + thx.Assert.q(value);
-						return false;
-					}
-					var e2 = Reflect.field(expected,field1);
-					if(Reflect.isFunction(e2)) continue;
-					var v1 = Reflect.field(value,field1);
-					if(!thx.Assert.sameAs(e2,v1,status)) return false;
-				}
-				if(tfields.length > 0) {
-					status.error = "the tested object has extra field(s) (" + tfields.join(", ") + ") not included in the expected ones";
-					return false;
-				}
-			}
-			if(thx.Assert.isIterator(expected,true)) {
-				if(!thx.Assert.isIterator(value,true)) {
-					status.error = "expected Iterable but it is not " + (status.path == ""?"":" for field " + status.path);
-					return false;
-				}
-				if(status.recursive || status.path == "") {
-					var evalues2 = Lambda.array({ iterator : function() {
-						return expected;
-					}});
-					var vvalues2 = Lambda.array({ iterator : function() {
-						return value;
-					}});
-					if(evalues2.length != vvalues2.length) {
-						status.error = "expected " + evalues2.length + " values in Iterator but they were " + vvalues2.length + (status.path == ""?"":" for field " + status.path);
-						return false;
-					}
-					var path7 = status.path;
-					var _g25 = 0;
-					var _g18 = evalues2.length;
-					while(_g25 < _g18) {
-						var i5 = _g25++;
-						if(path7 == "") status.path = "iterator[" + i5 + "]"; else status.path = path7 + "[" + i5 + "]";
-						if(!thx.Assert.sameAs(evalues2[i5],vvalues2[i5],status)) {
-							status.error = "expected " + thx.Assert.q(expected) + " but it is " + thx.Assert.q(value) + (status.path == ""?"":" for field " + status.path);
-							return false;
-						}
-					}
-				}
-				return true;
-			}
-			if(thx.Assert.isIterable(expected,true)) {
-				if(!thx.Assert.isIterable(value,true)) {
-					status.error = "expected Iterator but it is not " + (status.path == ""?"":" for field " + status.path);
-					return false;
-				}
-				if(status.recursive || status.path == "") {
-					var evalues3 = Lambda.array(expected);
-					var vvalues3 = Lambda.array(value);
-					if(evalues3.length != vvalues3.length) {
-						status.error = "expected " + evalues3.length + " values in Iterable but they were " + vvalues3.length + (status.path == ""?"":" for field " + status.path);
-						return false;
-					}
-					var path8 = status.path;
-					var _g26 = 0;
-					var _g19 = evalues3.length;
-					while(_g26 < _g19) {
-						var i6 = _g26++;
-						if(path8 == "") status.path = "iterable[" + i6 + "]"; else status.path = path8 + "[" + i6 + "]";
-						if(!thx.Assert.sameAs(evalues3[i6],vvalues3[i6],status)) return false;
-					}
-				}
-				return true;
-			}
-			return true;
-		case 8:
-			throw "Unable to compare two unknown types";
-			break;
+	,toString: function() {
+		var s = new StringBuf();
+		s.b += "{";
+		var it = this.keys();
+		while( it.hasNext() ) {
+			var i = it.next();
+			if(i == null) s.b += "null"; else s.b += "" + i;
+			s.b += " => ";
+			s.add(Std.string(this.get(i)));
+			if(it.hasNext()) s.b += ", ";
 		}
+		s.b += "}";
+		return s.b;
 	}
-	throw "Unable to compare values: " + thx.Assert.q(expected) + " and " + thx.Assert.q(value);
-};
-thx.Assert.q = function(v) {
-	if(typeof(v) == "string") return "\"" + StringTools.replace(v,"\"","\\\"") + "\""; else return Std.string(v);
-};
-thx.Assert.same = function(expected,value,recursive,msg,pos) {
-	var status = { recursive : null == recursive?true:recursive, path : "", error : null};
-	if(thx.Assert.sameAs(expected,value,status)) thx.Assert.isTrue(true,msg,pos); else thx.Assert.fail(msg == null?status.error:msg,pos);
-};
-thx.Assert.raises = function(method,type,msgNotThrown,msgWrongType,pos) {
-	if(type == null) type = String;
-	try {
-		method();
-		var name = Type.getClassName(type);
-		if(name == null) name = "" + Std.string(type);
-		if(null == msgNotThrown) msgNotThrown = "exception of type " + name + " not raised";
-		thx.Assert.fail(msgNotThrown,pos);
-	} catch( ex ) {
-		var name1 = Type.getClassName(type);
-		if(name1 == null) name1 = "" + Std.string(type);
-		if(null == msgWrongType) msgWrongType = "expected throw of type " + name1 + " but was " + Std.string(ex);
-		thx.Assert.isTrue(js.Boot.__instanceof(ex,type),msgWrongType,pos);
-	}
-};
-thx.Assert.allows = function(possibilities,value,msg,pos) {
-	if(Lambda.has(possibilities,value)) thx.Assert.isTrue(true,msg,pos); else thx.Assert.fail(msg == null?"value " + thx.Assert.q(value) + " not found in the expected possibilities " + Std.string(possibilities):msg,pos);
-};
-thx.Assert.contains = function(match,values,msg,pos) {
-	if(Lambda.has(values,match)) thx.Assert.isTrue(true,msg,pos); else thx.Assert.fail(msg == null?"values " + thx.Assert.q(values) + " do not contain " + Std.string(match):msg,pos);
-};
-thx.Assert.notContains = function(match,values,msg,pos) {
-	if(!Lambda.has(values,match)) thx.Assert.isTrue(true,msg,pos); else thx.Assert.fail(msg == null?"values " + thx.Assert.q(values) + " do contain " + Std.string(match):msg,pos);
-};
-thx.Assert.stringContains = function(match,value,msg,pos) {
-	if(value != null && value.indexOf(match) >= 0) thx.Assert.isTrue(true,msg,pos); else thx.Assert.fail(msg == null?"value " + thx.Assert.q(value) + " does not contain " + thx.Assert.q(match):msg,pos);
-};
-thx.Assert.stringSequence = function(sequence,value,msg,pos) {
-	if(null == value) {
-		thx.Assert.fail(msg == null?"null argument value":msg,pos);
-		return;
-	}
-	var p = 0;
-	var _g = 0;
-	while(_g < sequence.length) {
-		var s = sequence[_g];
-		++_g;
-		var p2 = value.indexOf(s,p);
-		if(p2 < 0) {
-			if(msg == null) {
-				msg = "expected '" + s + "' after ";
-				if(p > 0) {
-					var cut = HxOverrides.substr(value,0,p);
-					if(cut.length > 30) cut = "..." + HxOverrides.substr(cut,-27,null);
-					msg += " '" + cut + "'";
-				} else msg += " begin";
-			}
-			thx.Assert.fail(msg,pos);
-			return;
-		}
-		p = p2 + s.length;
-	}
-	thx.Assert.isTrue(true,msg,pos);
-};
-thx.Assert.fail = function(msg,pos) {
-	if(msg == null) msg = "failure expected";
-	thx.Assert.isTrue(false,msg,pos);
-};
-thx.Assert.warn = function(msg) {
-	thx.Assert.results.add(thx.core.Assertion.Warning(msg));
-};
-thx.Assert.createAsync = function(f,timeout) {
-	return function() {
-	};
-};
-thx.Assert.createEvent = function(f,timeout) {
-	return function(e) {
-	};
-};
-thx.Assert.typeToString = function(t) {
-	try {
-		var _t = Type.getClass(t);
-		if(_t != null) t = _t;
-	} catch( e ) {
-	}
-	try {
-		return Type.getClassName(t);
-	} catch( e1 ) {
-	}
-	try {
-		var _t1 = Type.getEnum(t);
-		if(_t1 != null) t = _t1;
-	} catch( e2 ) {
-	}
-	try {
-		return Type.getEnumName(t);
-	} catch( e3 ) {
-	}
-	try {
-		return Std.string(Type["typeof"](t));
-	} catch( e4 ) {
-	}
-	try {
-		return Std.string(t);
-	} catch( e5 ) {
-	}
-	return "<unable to retrieve type name>";
+	,__class__: haxe.ds.StringMap
 };
 thx.core.Arrays = function() { };
 thx.core.Arrays.__name__ = ["thx","core","Arrays"];
-thx.core.Arrays.same = function(a,b,eq) {
-	if(a == null || b == null || a.length != b.length) return false;
-	if(null == eq) eq = thx.core.Function.equality;
-	var _g1 = 0;
-	var _g = a.length;
-	while(_g1 < _g) {
-		var i = _g1++;
-		if(!eq(a[i],b[i])) return false;
+thx.core.Arrays.contains = function(array,element,eq) {
+	if(null == eq) return HxOverrides.indexOf(array,element,0) >= 0; else {
+		var _g1 = 0;
+		var _g = array.length;
+		while(_g1 < _g) {
+			var i = _g1++;
+			if(eq(array[i],element)) return true;
+		}
+		return false;
 	}
-	return true;
 };
 thx.core.Arrays.cross = function(a,b) {
 	var r = [];
@@ -6153,18 +5826,18 @@ thx.core.Arrays.cross = function(a,b) {
 	}
 	return r;
 };
-thx.core.Arrays.crossMulti = function(a) {
-	var acopy = a.slice();
+thx.core.Arrays.crossMulti = function(array) {
+	var acopy = array.slice();
 	var result = acopy.shift().map(function(v) {
 		return [v];
 	});
 	while(acopy.length > 0) {
-		var arr = acopy.shift();
+		var array1 = acopy.shift();
 		var tresult = result;
 		result = [];
 		var _g = 0;
-		while(_g < arr.length) {
-			var v1 = arr[_g];
+		while(_g < array1.length) {
+			var v1 = array1[_g];
 			++_g;
 			var _g1 = 0;
 			while(_g1 < tresult.length) {
@@ -6178,86 +5851,29 @@ thx.core.Arrays.crossMulti = function(a) {
 	}
 	return result;
 };
-thx.core.Arrays.pushIf = function(arr,cond,value) {
-	if(cond) arr.push(value);
-	return arr;
-};
-thx.core.Arrays.eachPair = function(arr,handler) {
+thx.core.Arrays.eachPair = function(array,callback) {
 	var _g1 = 0;
-	var _g = arr.length;
+	var _g = array.length;
 	while(_g1 < _g) {
 		var i = _g1++;
 		var _g3 = i;
-		var _g2 = arr.length;
+		var _g2 = array.length;
 		while(_g3 < _g2) {
 			var j = _g3++;
-			if(!handler(arr[i],arr[j])) return;
+			if(!callback(array[i],array[j])) return;
 		}
 	}
 };
-thx.core.Arrays.mapi = function(arr,handler) {
-	return arr.map(handler);
-};
-thx.core.Arrays.first = function(arr,f) {
-	var _g = 0;
-	while(_g < arr.length) {
-		var item = arr[_g];
-		++_g;
-		if(f(item)) return item;
+thx.core.Arrays.equals = function(a,b,equality) {
+	if(a == null || b == null || a.length != b.length) return false;
+	if(null == equality) equality = thx.core.Functions.equality;
+	var _g1 = 0;
+	var _g = a.length;
+	while(_g1 < _g) {
+		var i = _g1++;
+		if(!equality(a[i],b[i])) return false;
 	}
-	return null;
-};
-thx.core.Arrays.find = function(arr,f) {
-	var out = [];
-	var _g = 0;
-	while(_g < arr.length) {
-		var item = arr[_g];
-		++_g;
-		if(f(item)) out.push(item);
-	}
-	return out;
-};
-thx.core.Arrays.flatMap = function(arr,callback) {
-	return thx.core.Arrays.flatten(arr.map(callback));
-};
-thx.core.Arrays.flatten = function(arr) {
-	return Array.prototype.concat.apply([],arr);
-};
-thx.core.Arrays.reduce = function(arr,callback,initial) {
-	return arr.reduce(callback,initial);
-};
-thx.core.Arrays.reducei = function(arr,callback,initial) {
-	return arr.reduce(callback,initial);
-};
-thx.core.Arrays.order = function(arr,sort) {
-	var n = arr.slice();
-	n.sort(sort);
-	return n;
-};
-thx.core.Arrays.isEmpty = function(arr) {
-	return arr.length == 0;
-};
-thx.core.Arrays.contains = function(arr,element,eq) {
-	if(null == eq) return HxOverrides.indexOf(arr,element,0) >= 0; else {
-		var _g1 = 0;
-		var _g = arr.length;
-		while(_g1 < _g) {
-			var i = _g1++;
-			if(eq(arr[i],element)) return true;
-		}
-		return false;
-	}
-};
-thx.core.Arrays.shuffle = function(a) {
-	var t = thx.core.Ints.range(a.length);
-	var arr = [];
-	while(t.length > 0) {
-		var pos = Std.random(t.length);
-		var index = t[pos];
-		t.splice(pos,1);
-		arr.push(a[index]);
-	}
-	return arr;
+	return true;
 };
 thx.core.Arrays.extract = function(a,f) {
 	var _g1 = 0;
@@ -6268,13 +5884,63 @@ thx.core.Arrays.extract = function(a,f) {
 	}
 	return null;
 };
-thx.core.Assertion = { __ename__ : ["thx","core","Assertion"], __constructs__ : ["Success","Failure","Error","PreConditionError","PostConditionError","Warning"] };
-thx.core.Assertion.Success = function(pos) { var $x = ["Success",0,pos]; $x.__enum__ = thx.core.Assertion; return $x; };
-thx.core.Assertion.Failure = function(msg,pos) { var $x = ["Failure",1,msg,pos]; $x.__enum__ = thx.core.Assertion; return $x; };
-thx.core.Assertion.Error = function(e,stack) { var $x = ["Error",2,e,stack]; $x.__enum__ = thx.core.Assertion; return $x; };
-thx.core.Assertion.PreConditionError = function(e,stack) { var $x = ["PreConditionError",3,e,stack]; $x.__enum__ = thx.core.Assertion; return $x; };
-thx.core.Assertion.PostConditionError = function(e,stack) { var $x = ["PostConditionError",4,e,stack]; $x.__enum__ = thx.core.Assertion; return $x; };
-thx.core.Assertion.Warning = function(msg) { var $x = ["Warning",5,msg]; $x.__enum__ = thx.core.Assertion; return $x; };
+thx.core.Arrays.find = function(array,f) {
+	var out = [];
+	var _g = 0;
+	while(_g < array.length) {
+		var item = array[_g];
+		++_g;
+		if(f(item)) out.push(item);
+	}
+	return out;
+};
+thx.core.Arrays.first = function(array,predicate) {
+	var _g = 0;
+	while(_g < array.length) {
+		var item = array[_g];
+		++_g;
+		if(predicate(item)) return item;
+	}
+	return null;
+};
+thx.core.Arrays.flatMap = function(array,callback) {
+	return thx.core.Arrays.flatten(array.map(callback));
+};
+thx.core.Arrays.flatten = function(array) {
+	return Array.prototype.concat.apply([],array);
+};
+thx.core.Arrays.isEmpty = function(array) {
+	return array.length == 0;
+};
+thx.core.Arrays.mapi = function(array,callback) {
+	return array.map(callback);
+};
+thx.core.Arrays.order = function(array,sort) {
+	var n = array.slice();
+	n.sort(sort);
+	return n;
+};
+thx.core.Arrays.pushIf = function(array,condition,value) {
+	if(condition) array.push(value);
+	return array;
+};
+thx.core.Arrays.reduce = function(array,callback,initial) {
+	return array.reduce(callback,initial);
+};
+thx.core.Arrays.reducei = function(array,callback,initial) {
+	return array.reduce(callback,initial);
+};
+thx.core.Arrays.shuffle = function(a) {
+	var t = thx.core.Ints.range(a.length);
+	var array = [];
+	while(t.length > 0) {
+		var pos = Std.random(t.length);
+		var index = t[pos];
+		t.splice(pos,1);
+		array.push(a[index]);
+	}
+	return array;
+};
 thx.core.Dynamics = function() { };
 thx.core.Dynamics.__name__ = ["thx","core","Dynamics"];
 thx.core.Dynamics.same = function(a,b) {
@@ -6402,15 +6068,38 @@ thx.core.Dynamics.same = function(a,b) {
 	}
 	throw new thx.core.Error("Unable to compare values: " + Std.string(a) + " and " + Std.string(b),null,{ fileName : "Dynamics.hx", lineNumber : 138, className : "thx.core.Dynamics", methodName : "same"});
 };
+thx.core.Error = function(message,stack,pos) {
+	Error.call(this,message);
+	if(null == stack) {
+		stack = haxe.CallStack.exceptionStack();
+		if(stack.length == 0) stack = haxe.CallStack.callStack();
+	}
+	this.stackItems = stack;
+	this.pos = pos;
+};
+thx.core.Error.__name__ = ["thx","core","Error"];
+thx.core.Error.fromDynamic = function(err,pos) {
+	if(js.Boot.__instanceof(err,thx.core.Error)) return err;
+	return new thx.core.Error("" + Std.string(err),null,pos);
+};
+thx.core.Error.__super__ = Error;
+thx.core.Error.prototype = $extend(Error.prototype,{
+	pos: null
+	,stackItems: null
+	,toString: function() {
+		return this.message + "from: " + this.pos.className + "." + this.pos.methodName + "() at " + this.pos.lineNumber + "\n\n" + haxe.CallStack.toString(this.stackItems);
+	}
+	,__class__: thx.core.Error
+});
 thx.core.Function0 = function() { };
 thx.core.Function0.__name__ = ["thx","core","Function0"];
-thx.core.Function0.noop = function() {
-};
 thx.core.Function0.join = function(fa,fb) {
 	return function() {
 		fa();
 		fb();
 	};
+};
+thx.core.Function0.noop = function() {
 };
 thx.core.Function0.once = function(f) {
 	return function() {
@@ -6421,12 +6110,12 @@ thx.core.Function0.once = function(f) {
 };
 thx.core.Function1 = function() { };
 thx.core.Function1.__name__ = ["thx","core","Function1"];
-thx.core.Function1.noop = function(_) {
-};
 thx.core.Function1.compose = function(fa,fb) {
 	return function(v) {
 		return fa(fb(v));
 	};
+};
+thx.core.Function1.noop = function(_) {
 };
 thx.core.Function1.join = function(fa,fb) {
 	return function(v) {
@@ -6434,31 +6123,31 @@ thx.core.Function1.join = function(fa,fb) {
 		fb(v);
 	};
 };
-thx.core.Function = function() { };
-thx.core.Function.__name__ = ["thx","core","Function"];
-thx.core.Function.equality = function(a,b) {
+thx.core.Functions = function() { };
+thx.core.Functions.__name__ = ["thx","core","Functions"];
+thx.core.Functions.equality = function(a,b) {
 	return a == b;
 };
 thx.core.Ints = function() { };
 thx.core.Ints.__name__ = ["thx","core","Ints"];
-thx.core.Ints.clamp = function(v,min,max) {
-	if(v < min) return min; else if(v > max) return max; else return v;
-};
 thx.core.Ints.canParse = function(s) {
 	return thx.core.Ints.pattern_parse.match(s);
 };
-thx.core.Ints.min = function(a,b) {
-	if(a < b) return a; else return b;
+thx.core.Ints.clamp = function(v,min,max) {
+	if(v < min) return min; else if(v > max) return max; else return v;
+};
+thx.core.Ints.compare = function(a,b) {
+	return a - b;
 };
 thx.core.Ints.max = function(a,b) {
 	if(a > b) return a; else return b;
 };
+thx.core.Ints.min = function(a,b) {
+	if(a < b) return a; else return b;
+};
 thx.core.Ints.parse = function(s) {
 	if(HxOverrides.substr(s,0,1) == "+") s = HxOverrides.substr(s,1,null);
 	return Std.parseInt(s);
-};
-thx.core.Ints.compare = function(a,b) {
-	return a - b;
 };
 thx.core.Ints.range = function(start,stop,step) {
 	if(step == null) step = 1;
@@ -6475,23 +6164,32 @@ thx.core.Ints.range = function(start,stop,step) {
 };
 thx.core.Iterables = function() { };
 thx.core.Iterables.__name__ = ["thx","core","Iterables"];
+thx.core.Iterables.eachPair = function(it,handler) {
+	return thx.core.Iterators.eachPair($iterator(it)(),handler);
+};
+thx.core.Iterables.filter = function(it,predicate) {
+	return thx.core.Iterators.filter($iterator(it)(),predicate);
+};
+thx.core.Iterables.find = function(it,f) {
+	return thx.core.Iterators.find($iterator(it)(),f);
+};
+thx.core.Iterables.first = function(it,f) {
+	return thx.core.Iterators.first($iterator(it)(),f);
+};
+thx.core.Iterables.isEmpty = function(it) {
+	return thx.core.Iterators.isEmpty($iterator(it)());
+};
+thx.core.Iterables.isIterable = function(v) {
+	var fields;
+	if(Reflect.isObject(v) && null == Type.getClass(v)) fields = Reflect.fields(v); else fields = Type.getInstanceFields(Type.getClass(v));
+	if(!Lambda.has(fields,"iterator")) return false;
+	return Reflect.isFunction(Reflect.field(v,"iterator"));
+};
 thx.core.Iterables.map = function(it,f) {
 	return thx.core.Iterators.map($iterator(it)(),f);
 };
 thx.core.Iterables.mapi = function(it,f) {
 	return thx.core.Iterators.mapi($iterator(it)(),f);
-};
-thx.core.Iterables.first = function(it,f) {
-	return thx.core.Iterators.first($iterator(it)(),f);
-};
-thx.core.Iterables.find = function(it,f) {
-	return thx.core.Iterators.find($iterator(it)(),f);
-};
-thx.core.Iterables.eachPair = function(it,handler) {
-	return thx.core.Iterators.eachPair($iterator(it)(),handler);
-};
-thx.core.Iterables.toArray = function(it) {
-	return thx.core.Iterators.toArray($iterator(it)());
 };
 thx.core.Iterables.order = function(it,sort) {
 	return thx.core.Iterators.order($iterator(it)(),sort);
@@ -6502,17 +6200,8 @@ thx.core.Iterables.reduce = function(it,callback,initial) {
 thx.core.Iterables.reducei = function(it,callback,initial) {
 	return thx.core.Iterators.reducei($iterator(it)(),callback,initial);
 };
-thx.core.Iterables.isEmpty = function(it) {
-	return thx.core.Iterators.isEmpty($iterator(it)());
-};
-thx.core.Iterables.filter = function(it,predicate) {
-	return thx.core.Iterators.filter($iterator(it)(),predicate);
-};
-thx.core.Iterables.isIterable = function(v) {
-	var fields;
-	if(Reflect.isObject(v) && null == Type.getClass(v)) fields = Reflect.fields(v); else fields = Type.getInstanceFields(Type.getClass(v));
-	if(!Lambda.has(fields,"iterator")) return false;
-	return Reflect.isFunction(Reflect.field(v,"iterator"));
+thx.core.Iterables.toArray = function(it) {
+	return thx.core.Iterators.toArray($iterator(it)());
 };
 thx.core.Iterators = function() { };
 thx.core.Iterators.__name__ = ["thx","core","Iterators"];
@@ -6593,6 +6282,7 @@ thx.core.Iterators.isIterator = function(v) {
 };
 thx.core.Nil = { __ename__ : ["thx","core","Nil"], __constructs__ : ["nil"] };
 thx.core.Nil.nil = ["nil",0];
+thx.core.Nil.nil.toString = $estr;
 thx.core.Nil.nil.__enum__ = thx.core.Nil;
 thx.core.Objects = function() { };
 thx.core.Objects.__name__ = ["thx","core","Objects"];
@@ -6604,7 +6294,7 @@ thx.core.Set = function() {
 	this.length = 0;
 };
 thx.core.Set.__name__ = ["thx","core","Set"];
-thx.core.Set.ofArray = function(arr) {
+thx.core.Set.arrayToSet = function(arr) {
 	var set = new thx.core.Set();
 	var _g = 0;
 	while(_g < arr.length) {
@@ -6791,14 +6481,26 @@ thx.core.Strings.compare = function(a,b) {
 };
 thx.core.Timer = function() { };
 thx.core.Timer.__name__ = ["thx","core","Timer"];
-thx.core.Timer.repeat = function(callback,ms) {
-	return setInterval(callback,ms);
+thx.core.Timer.repeat = function(callback,delayms) {
+	return (function(f,id) {
+		return function() {
+			return f(id);
+		};
+	})(thx.core.Timer.clear,setInterval(callback,delayms));
 };
-thx.core.Timer.delay = function(callback,ms) {
-	return setTimeout(callback,ms);
+thx.core.Timer.delay = function(callback,delayms) {
+	return (function(f,id) {
+		return function() {
+			return f(id);
+		};
+	})(thx.core.Timer.clear,setTimeout(callback,delayms));
 };
 thx.core.Timer.immediate = function(callback) {
-	return setImmediate(callback);
+	return (function(f,id) {
+		return function() {
+			return f(id);
+		};
+	})(thx.core.Timer.clear,setImmediate(callback));
 };
 thx.core.Timer.clear = function(id) {
 	return clearTimeout(id);
@@ -6809,7 +6511,7 @@ thx.core._Tuple.Tuple0_Impl_.__name__ = ["thx","core","_Tuple","Tuple0_Impl_"];
 thx.core._Tuple.Tuple0_Impl_._new = function() {
 	return thx.core.Nil.nil;
 };
-thx.core._Tuple.Tuple0_Impl_.toTuple1 = function(this1,v) {
+thx.core._Tuple.Tuple0_Impl_["with"] = function(this1,v) {
 	return v;
 };
 thx.core._Tuple.Tuple0_Impl_.toString = function(this1) {
@@ -6829,8 +6531,14 @@ thx.core._Tuple.Tuple1_Impl_._new = function(_0) {
 thx.core._Tuple.Tuple1_Impl_.get__0 = function(this1) {
 	return this1;
 };
-thx.core._Tuple.Tuple1_Impl_.toTuple2 = function(this1,v) {
+thx.core._Tuple.Tuple1_Impl_["with"] = function(this1,v) {
 	return { _0 : this1, _1 : v};
+};
+thx.core._Tuple.Tuple1_Impl_.dropLeft = function(this1) {
+	return thx.core.Nil.nil;
+};
+thx.core._Tuple.Tuple1_Impl_.dropRight = function(this1) {
+	return thx.core.Nil.nil;
 };
 thx.core._Tuple.Tuple1_Impl_.toString = function(this1) {
 	return "Tuple1(" + Std.string(this1) + ")";
@@ -6849,7 +6557,13 @@ thx.core._Tuple.Tuple2_Impl_.get__1 = function(this1) {
 thx.core._Tuple.Tuple2_Impl_.flip = function(this1) {
 	return { _0 : this1._1, _1 : this1._0};
 };
-thx.core._Tuple.Tuple2_Impl_.toTuple3 = function(this1,v) {
+thx.core._Tuple.Tuple2_Impl_.dropLeft = function(this1) {
+	return this1._1;
+};
+thx.core._Tuple.Tuple2_Impl_.dropRight = function(this1) {
+	return this1._0;
+};
+thx.core._Tuple.Tuple2_Impl_["with"] = function(this1,v) {
 	return { _0 : this1._0, _1 : this1._1, _2 : v};
 };
 thx.core._Tuple.Tuple2_Impl_.toString = function(this1) {
@@ -6872,7 +6586,13 @@ thx.core._Tuple.Tuple3_Impl_.get__2 = function(this1) {
 thx.core._Tuple.Tuple3_Impl_.flip = function(this1) {
 	return { _0 : this1._2, _1 : this1._1, _2 : this1._0};
 };
-thx.core._Tuple.Tuple3_Impl_.toTuple4 = function(this1,v) {
+thx.core._Tuple.Tuple3_Impl_.dropLeft = function(this1) {
+	return { _0 : this1._1, _1 : this1._2};
+};
+thx.core._Tuple.Tuple3_Impl_.dropRight = function(this1) {
+	return { _0 : this1._0, _1 : this1._1};
+};
+thx.core._Tuple.Tuple3_Impl_["with"] = function(this1,v) {
 	return { _0 : this1._0, _1 : this1._1, _2 : this1._2, _3 : v};
 };
 thx.core._Tuple.Tuple3_Impl_.toString = function(this1) {
@@ -6898,7 +6618,13 @@ thx.core._Tuple.Tuple4_Impl_.get__3 = function(this1) {
 thx.core._Tuple.Tuple4_Impl_.flip = function(this1) {
 	return { _0 : this1._3, _1 : this1._2, _2 : this1._1, _3 : this1._0};
 };
-thx.core._Tuple.Tuple4_Impl_.toTuple5 = function(this1,v) {
+thx.core._Tuple.Tuple4_Impl_.dropLeft = function(this1) {
+	return { _0 : this1._1, _1 : this1._2, _2 : this1._3};
+};
+thx.core._Tuple.Tuple4_Impl_.dropRight = function(this1) {
+	return { _0 : this1._0, _1 : this1._1, _2 : this1._2};
+};
+thx.core._Tuple.Tuple4_Impl_["with"] = function(this1,v) {
 	return { _0 : this1._0, _1 : this1._1, _2 : this1._2, _3 : this1._3, _4 : v};
 };
 thx.core._Tuple.Tuple4_Impl_.toString = function(this1) {
@@ -6927,7 +6653,13 @@ thx.core._Tuple.Tuple5_Impl_.get__4 = function(this1) {
 thx.core._Tuple.Tuple5_Impl_.flip = function(this1) {
 	return { _0 : this1._4, _1 : this1._3, _2 : this1._2, _3 : this1._1, _4 : this1._0};
 };
-thx.core._Tuple.Tuple5_Impl_.toTuple6 = function(this1,v) {
+thx.core._Tuple.Tuple5_Impl_.dropLeft = function(this1) {
+	return { _0 : this1._1, _1 : this1._2, _2 : this1._3, _3 : this1._4};
+};
+thx.core._Tuple.Tuple5_Impl_.dropRight = function(this1) {
+	return { _0 : this1._0, _1 : this1._1, _2 : this1._2, _3 : this1._3};
+};
+thx.core._Tuple.Tuple5_Impl_["with"] = function(this1,v) {
 	return { _0 : this1._0, _1 : this1._1, _2 : this1._2, _3 : this1._3, _4 : this1._4, _5 : v};
 };
 thx.core._Tuple.Tuple5_Impl_.toString = function(this1) {
@@ -6958,6 +6690,12 @@ thx.core._Tuple.Tuple6_Impl_.get__5 = function(this1) {
 };
 thx.core._Tuple.Tuple6_Impl_.flip = function(this1) {
 	return { _0 : this1._5, _1 : this1._4, _2 : this1._3, _3 : this1._2, _4 : this1._1, _5 : this1._0};
+};
+thx.core._Tuple.Tuple6_Impl_.dropLeft = function(this1) {
+	return { _0 : this1._1, _1 : this1._2, _2 : this1._3, _3 : this1._4, _4 : this1._5};
+};
+thx.core._Tuple.Tuple6_Impl_.dropRight = function(this1) {
+	return { _0 : this1._0, _1 : this1._1, _2 : this1._2, _3 : this1._3, _4 : this1._4};
 };
 thx.core._Tuple.Tuple6_Impl_.toString = function(this1) {
 	return "Tuple6(" + Std.string(this1._0) + "," + Std.string(this1._1) + "," + Std.string(this1._2) + "," + Std.string(this1._3) + "," + Std.string(this1._4) + "," + Std.string(this1._5) + ")";
@@ -7075,88 +6813,6 @@ thx.core.UUID.create = function() {
 	}
 	return s.join("");
 };
-thx.date = {};
-thx.date.ISO8601TimeZone = { __ename__ : ["thx","date","ISO8601TimeZone"], __constructs__ : ["LocalTime","UTC","UTCOffset"] };
-thx.date.ISO8601TimeZone.LocalTime = ["LocalTime",0];
-thx.date.ISO8601TimeZone.LocalTime.__enum__ = thx.date.ISO8601TimeZone;
-thx.date.ISO8601TimeZone.UTC = ["UTC",1];
-thx.date.ISO8601TimeZone.UTC.__enum__ = thx.date.ISO8601TimeZone;
-thx.date.ISO8601TimeZone.UTCOffset = function(offset) { var $x = ["UTCOffset",2,offset]; $x.__enum__ = thx.date.ISO8601TimeZone; return $x; };
-thx.date.ISO8601 = function() { };
-thx.date.ISO8601.__name__ = ["thx","date","ISO8601"];
-thx.date.ISO8601.mInt = function(e,index) {
-	return Std.parseInt(e.matched(index));
-};
-thx.date.ISO8601.parseDate = function(date) {
-	var _g = 0;
-	var _g1 = thx.date.ISO8601.dateParsers;
-	while(_g < _g1.length) {
-		var parser = _g1[_g];
-		++_g;
-		if(parser.pattern.match(date)) return parser.extract(parser.pattern);
-	}
-	throw "invalid ISO8601 date: " + date;
-};
-thx.date.ISO8601.parseOffset = function(t) {
-	if(t.length == 5) return { hour : Std.parseInt(HxOverrides.substr(t,0,2)), minute : Std.parseInt(HxOverrides.substr(t,3,null))}; else if(t.length == 4) return { hour : Std.parseInt(HxOverrides.substr(t,0,2)), minute : Std.parseInt(HxOverrides.substr(t,2,null))}; else if(t.length == 2) return { hour : Std.parseInt(t)}; else throw "invalid time zone offset: " + t;
-};
-thx.date.ISO8601.parseTime = function(timeString) {
-	var time = null;
-	var timeZone = thx.date.ISO8601TimeZone.LocalTime;
-	var millis = 0;
-	if(HxOverrides.substr(timeString,-1,null) == "Z") {
-		timeString = HxOverrides.substr(timeString,0,timeString.length - 1);
-		timeZone = thx.date.ISO8601TimeZone.UTC;
-	} else if(thx.date.ISO8601.timeZoneSign.match(timeString)) {
-		var sign = thx.date.ISO8601.timeZoneSign.matched(1);
-		timeString = thx.date.ISO8601.timeZoneSign.matchedLeft();
-		var offset = thx.date.ISO8601.parseOffset(thx.date.ISO8601.timeZoneSign.matchedRight());
-		if(sign == "-") offset.hour = -offset.hour;
-		timeZone = thx.date.ISO8601TimeZone.UTCOffset(offset);
-	}
-	timeString = StringTools.replace(timeString,",",".");
-	var parts = timeString.split(".");
-	if(parts.length == 2) {
-		timeString = parts[0];
-		millis = Math.round(Std.parseFloat("0." + parts[1]) * 1000);
-	}
-	var _g = 0;
-	var _g1 = thx.date.ISO8601.timeParsers;
-	while(_g < _g1.length) {
-		var parser = _g1[_g];
-		++_g;
-		if(parser.pattern.match(timeString)) {
-			time = parser.extract(parser.pattern);
-			break;
-		}
-	}
-	if(null != time) {
-		time.timeZone = timeZone;
-		return time;
-	}
-	time.millis = millis;
-	throw "invalid ISO8601 time: " + timeString;
-};
-thx.date.ISO8601.parseDateTime = function(dateString) {
-	var parts = dateString.split("T");
-	var date = thx.date.ISO8601.parseDate(parts[0]);
-	if(parts.length == 1) return date; else return thx.date.ISO8601.addTimeSpan(date,thx.date.ISO8601.parseTime(parts[1]));
-};
-thx.date.ISO8601.addTimeSpan = function(date,span) {
-	return DateTools.delta(date,1000 * ((null == span.second?0:span.second) + (null == span.minute?0:span.minute) * 60 + span.hour * 60 * 60));
-};
-thx.date.ISO8601.createDate = function(year,month,day,hour,minute,second) {
-	if(second == null) second = 0;
-	if(minute == null) minute = 0;
-	if(hour == null) hour = 0;
-	if(day == null) day = 0;
-	if(month == null) month = 1;
-	return new Date(year,month - 1,day,hour,minute,second);
-};
-thx.date.ISO8601.createTime = function(hour,minute,second,millis,timeZone) {
-	if(null == timeZone) timeZone = thx.date.ISO8601TimeZone.LocalTime;
-	if(null == minute) return { hour : hour, timeZone : timeZone}; else if(null == second) return { hour : hour, minute : minute, timeZone : timeZone}; else if(null == millis) return { hour : hour, minute : minute, second : second, timeZone : timeZone}; else return { hour : hour, minute : minute, second : second, millis : millis, timeZone : timeZone};
-};
 thx.promise = {};
 thx.promise.Deferred = function() {
 	this.promise = new thx.promise.Promise();
@@ -7164,11 +6820,11 @@ thx.promise.Deferred = function() {
 thx.promise.Deferred.__name__ = ["thx","promise","Deferred"];
 thx.promise.Deferred.prototype = {
 	promise: null
-	,rejectWith: function(error) {
-		return this.fulfill(thx.promise.PromiseValue.Failure(thx.core.Error.fromDynamic(error,{ fileName : "Deferred.hx", lineNumber : 13, className : "thx.promise.Deferred", methodName : "rejectWith"})));
-	}
 	,reject: function(error) {
 		return this.fulfill(thx.promise.PromiseValue.Failure(error));
+	}
+	,rejectWith: function(error,pos) {
+		return this.fulfill(thx.promise.PromiseValue.Failure(thx.core.Error.fromDynamic(error,pos)));
 	}
 	,resolve: function(value) {
 		return this.fulfill(thx.promise.PromiseValue.Success(value));
@@ -7186,16 +6842,6 @@ thx.promise.Promise = function() {
 	this.state = haxe.ds.Option.None;
 };
 thx.promise.Promise.__name__ = ["thx","promise","Promise"];
-thx.promise.Promise.create = function(callback) {
-	var deferred = new thx.promise.Deferred();
-	callback($bind(deferred,deferred.resolve),$bind(deferred,deferred.reject));
-	return deferred.promise;
-};
-thx.promise.Promise.fulfilled = function(callback) {
-	var deferred = new thx.promise.Deferred();
-	callback($bind(deferred,deferred.fulfill));
-	return deferred.promise;
-};
 thx.promise.Promise.all = function(arr) {
 	return thx.promise.Promise.create(function(resolve,reject) {
 		var results = [];
@@ -7215,32 +6861,42 @@ thx.promise.Promise.all = function(arr) {
 		});
 	});
 };
-thx.promise.Promise.value = function(v) {
-	return thx.promise.Promise.create(function(resolve,_) {
-		resolve(v);
-	});
+thx.promise.Promise.create = function(callback) {
+	var deferred = new thx.promise.Deferred();
+	callback($bind(deferred,deferred.resolve),$bind(deferred,deferred.reject));
+	return deferred.promise;
+};
+thx.promise.Promise.createFulfill = function(callback) {
+	var deferred = new thx.promise.Deferred();
+	callback($bind(deferred,deferred.fulfill));
+	return deferred.promise;
 };
 thx.promise.Promise.error = function(err) {
 	return thx.promise.Promise.create(function(_,reject) {
 		reject(err);
 	});
 };
+thx.promise.Promise.value = function(v) {
+	return thx.promise.Promise.create(function(resolve,_) {
+		resolve(v);
+	});
+};
 thx.promise.Promise.prototype = {
 	handlers: null
 	,state: null
-	,then: function(handler) {
-		this.handlers.push(handler);
-		this.update();
-		return this;
+	,always: function(handler) {
+		this.then(function(_) {
+			handler();
+		});
 	}
 	,either: function(success,failure) {
 		this.then(function(r) {
 			switch(r[1]) {
-			case 1:
+			case 0:
 				var value = r[2];
 				success(value);
 				break;
-			case 0:
+			case 1:
 				var error = r[2];
 				failure(error);
 				break;
@@ -7248,60 +6904,18 @@ thx.promise.Promise.prototype = {
 		});
 		return this;
 	}
-	,success: function(success) {
-		return this.either(success,function(_) {
-		});
-	}
-	,failure: function(failure) {
-		return this.either(function(_) {
-		},failure);
-	}
-	,throwFailure: function() {
-		return this.failure(function(err) {
-			throw err;
-		});
-	}
-	,map: function(handler) {
-		var _g = this;
-		return thx.promise.Promise.fulfilled(function(fulfill) {
-			_g.then(function(result) {
-				handler(result).then(fulfill);
-			});
-		});
-	}
-	,mapEither: function(success,failure) {
-		return this.map(function(result) {
-			switch(result[1]) {
+	,isComplete: function() {
+		{
+			var _g = this.state;
+			switch(_g[1]) {
 			case 1:
-				var value = result[2];
-				return success(value);
+				return false;
 			case 0:
-				var error = result[2];
-				return failure(error);
+				return true;
 			}
-		});
+		}
 	}
-	,mapSuccess: function(success) {
-		return this.mapEither(success,function(err) {
-			return thx.promise.Promise.error(err);
-		});
-	}
-	,mapFailure: function(failure) {
-		return this.mapEither(function(value) {
-			return thx.promise.Promise.value(value);
-		},failure);
-	}
-	,always: function(handler) {
-		this.then(function(_) {
-			handler();
-		});
-	}
-	,mapAlways: function(handler) {
-		this.map(function(_) {
-			return handler();
-		});
-	}
-	,isResolved: function() {
+	,isFailure: function() {
 		{
 			var _g = this.state;
 			switch(_g[1]) {
@@ -7318,7 +6932,7 @@ thx.promise.Promise.prototype = {
 			}
 		}
 	}
-	,isFailure: function() {
+	,isResolved: function() {
 		{
 			var _g = this.state;
 			switch(_g[1]) {
@@ -7335,16 +6949,58 @@ thx.promise.Promise.prototype = {
 			}
 		}
 	}
-	,isComplete: function() {
-		{
-			var _g = this.state;
-			switch(_g[1]) {
-			case 1:
-				return false;
+	,failure: function(failure) {
+		return this.either(function(_) {
+		},failure);
+	}
+	,map: function(handler) {
+		var _g = this;
+		return thx.promise.Promise.createFulfill(function(fulfill) {
+			_g.then(function(result) {
+				handler(result).then(fulfill);
+			});
+		});
+	}
+	,mapAlways: function(handler) {
+		this.map(function(_) {
+			return handler();
+		});
+	}
+	,mapEither: function(success,failure) {
+		return this.map(function(result) {
+			switch(result[1]) {
 			case 0:
-				return true;
+				var value = result[2];
+				return success(value);
+			case 1:
+				var error = result[2];
+				return failure(error);
 			}
-		}
+		});
+	}
+	,mapFailure: function(failure) {
+		return this.mapEither(function(value) {
+			return thx.promise.Promise.value(value);
+		},failure);
+	}
+	,mapSuccess: function(success) {
+		return this.mapEither(success,function(err) {
+			return thx.promise.Promise.error(err);
+		});
+	}
+	,success: function(success) {
+		return this.either(success,function(_) {
+		});
+	}
+	,then: function(handler) {
+		this.handlers.push(handler);
+		this.update();
+		return this;
+	}
+	,throwFailure: function() {
+		return this.failure(function(err) {
+			throw err;
+		});
 	}
 	,toString: function() {
 		return "Promise";
@@ -7383,17 +7039,9 @@ thx.promise.Promise.prototype = {
 };
 thx.promise.Promises = function() { };
 thx.promise.Promises.__name__ = ["thx","promise","Promises"];
-thx.promise.Promises.log = function(promise,prefix) {
-	if(prefix == null) prefix = "";
-	return promise.either(function(r) {
-		haxe.Log.trace("" + prefix + " SUCCESS: " + Std.string(r),{ fileName : "Promise.hx", lineNumber : 148, className : "thx.promise.Promises", methodName : "log"});
-	},function(e) {
-		haxe.Log.trace("" + prefix + " ERROR: " + e.toString(),{ fileName : "Promise.hx", lineNumber : 149, className : "thx.promise.Promises", methodName : "log"});
-	});
-};
 thx.promise.Promises.delay = function(p,interval) {
 	return p.map(function(r) {
-		return thx.promise.Promise.fulfilled(null == interval?function(fulfill) {
+		return thx.promise.Promise.createFulfill(null == interval?function(fulfill) {
 			thx.core.Timer.immediate((function(f,a1) {
 				return function() {
 					return f(a1);
@@ -7435,6 +7083,14 @@ thx.promise.Promises.join = function(p1,p2) {
 			v2 = v3;
 			complete();
 		},handleError);
+	});
+};
+thx.promise.Promises.log = function(promise,prefix) {
+	if(prefix == null) prefix = "";
+	return promise.either(function(r) {
+		haxe.Log.trace("" + prefix + " SUCCESS: " + Std.string(r),{ fileName : "Promise.hx", lineNumber : 195, className : "thx.promise.Promises", methodName : "log"});
+	},function(e) {
+		haxe.Log.trace("" + prefix + " ERROR: " + e.toString(),{ fileName : "Promise.hx", lineNumber : 196, className : "thx.promise.Promises", methodName : "log"});
 	});
 };
 thx.promise.PromiseTuple6 = function() { };
@@ -7569,13 +7225,13 @@ thx.promise.PromiseNil.join = function(p1,p2) {
 		});
 	});
 };
-thx.promise.PromiseValue = { __ename__ : ["thx","promise","PromiseValue"], __constructs__ : ["Failure","Success"] };
-thx.promise.PromiseValue.Failure = function(err) { var $x = ["Failure",0,err]; $x.__enum__ = thx.promise.PromiseValue; return $x; };
-thx.promise.PromiseValue.Success = function(value) { var $x = ["Success",1,value]; $x.__enum__ = thx.promise.PromiseValue; return $x; };
-thx.stream.Bus = function(unique,equal) {
-	if(unique == null) unique = false;
+thx.promise.PromiseValue = { __ename__ : ["thx","promise","PromiseValue"], __constructs__ : ["Success","Failure"] };
+thx.promise.PromiseValue.Success = function(value) { var $x = ["Success",0,value]; $x.__enum__ = thx.promise.PromiseValue; $x.toString = $estr; return $x; };
+thx.promise.PromiseValue.Failure = function(err) { var $x = ["Failure",1,err]; $x.__enum__ = thx.promise.PromiseValue; $x.toString = $estr; return $x; };
+thx.stream.Bus = function(distinctValuesOnly,equal) {
+	if(distinctValuesOnly == null) distinctValuesOnly = false;
 	var _g = this;
-	this.unique = unique;
+	this.distinctValuesOnly = distinctValuesOnly;
 	if(null == equal) this.equal = function(a,b) {
 		return a == b;
 	}; else this.equal = equal;
@@ -7593,14 +7249,39 @@ thx.stream.Bus.__super__ = thx.stream.Emitter;
 thx.stream.Bus.prototype = $extend(thx.stream.Emitter.prototype,{
 	downStreams: null
 	,upStreams: null
-	,unique: null
+	,distinctValuesOnly: null
 	,equal: null
 	,value: null
+	,cancel: function() {
+		this.emit(thx.stream.StreamValue.End(true));
+	}
+	,clearStreams: function() {
+		var _g = 0;
+		var _g1 = this.downStreams.slice();
+		while(_g < _g1.length) {
+			var stream = _g1[_g];
+			++_g;
+			stream.end();
+		}
+	}
+	,clearEmitters: function() {
+		var _g = 0;
+		var _g1 = this.upStreams.slice();
+		while(_g < _g1.length) {
+			var stream = _g1[_g];
+			++_g;
+			stream.cancel();
+		}
+	}
+	,clear: function() {
+		this.clearEmitters();
+		this.clearStreams();
+	}
 	,emit: function(value) {
 		switch(value[1]) {
 		case 0:
 			var v = value[2];
-			if(this.unique) {
+			if(this.distinctValuesOnly) {
 				if(this.equal(v,this.value)) return;
 				this.value = v;
 			}
@@ -7646,62 +7327,220 @@ thx.stream.Bus.prototype = $extend(thx.stream.Emitter.prototype,{
 			break;
 		}
 	}
-	,pulse: function(value) {
-		this.emit(thx.stream.StreamValue.Pulse(value));
+	,end: function() {
+		this.emit(thx.stream.StreamValue.End(false));
 	}
 	,fail: function(error) {
 		this.emit(thx.stream.StreamValue.Failure(error));
 	}
-	,end: function() {
-		this.emit(thx.stream.StreamValue.End(false));
-	}
-	,cancel: function() {
-		this.emit(thx.stream.StreamValue.End(true));
-	}
-	,clearStreams: function() {
-		var _g = 0;
-		var _g1 = this.downStreams.slice();
-		while(_g < _g1.length) {
-			var stream = _g1[_g];
-			++_g;
-			stream.end();
-		}
-	}
-	,clearEmitters: function() {
-		var _g = 0;
-		var _g1 = this.upStreams.slice();
-		while(_g < _g1.length) {
-			var stream = _g1[_g];
-			++_g;
-			stream.cancel();
-		}
-	}
-	,clear: function() {
-		this.clearEmitters();
-		this.clearStreams();
+	,pulse: function(value) {
+		this.emit(thx.stream.StreamValue.Pulse(value));
 	}
 	,__class__: thx.stream.Bus
 });
-thx.stream.EmitterStrings = function() { };
-thx.stream.EmitterStrings.__name__ = ["thx","stream","EmitterStrings"];
-thx.stream.EmitterStrings.toBool = function(emitter) {
-	return emitter.mapValue(function(s) {
-		return s != null && s != "";
-	});
-};
-thx.stream.EmitterInts = function() { };
-thx.stream.EmitterInts.__name__ = ["thx","stream","EmitterInts"];
-thx.stream.EmitterInts.toBool = function(emitter) {
-	return emitter.mapValue(function(i) {
-		return i != 0;
-	});
-};
 thx.stream.Emitters = function() { };
 thx.stream.Emitters.__name__ = ["thx","stream","Emitters"];
 thx.stream.Emitters.skipNull = function(emitter) {
 	return emitter.filterValue(function(value) {
 		return null != value;
 	});
+};
+thx.stream.Emitters.unique = function(emitter) {
+	return emitter.filterValue((function() {
+		var buf = [];
+		return function(v) {
+			if(HxOverrides.indexOf(buf,v,0) >= 0) return false; else {
+				buf.push(v);
+				return true;
+			}
+		};
+	})());
+};
+thx.stream.EmitterStrings = function() { };
+thx.stream.EmitterStrings.__name__ = ["thx","stream","EmitterStrings"];
+thx.stream.EmitterStrings.match = function(emitter,pattern) {
+	return emitter.filterValue(function(s) {
+		return pattern.match(s);
+	});
+};
+thx.stream.EmitterStrings.toBool = function(emitter) {
+	return emitter.mapValue(function(s) {
+		return s != null && s != "";
+	});
+};
+thx.stream.EmitterStrings.truthy = function(emitter) {
+	return emitter.filterValue(function(s) {
+		return s != null && s != "";
+	});
+};
+thx.stream.EmitterStrings.unique = function(emitter) {
+	return emitter.filterValue((function() {
+		var buf = new haxe.ds.StringMap();
+		return function(v) {
+			if(buf.exists(v)) return false; else {
+				buf.set(v,true);
+				return true;
+			}
+		};
+	})());
+};
+thx.stream.EmitterInts = function() { };
+thx.stream.EmitterInts.__name__ = ["thx","stream","EmitterInts"];
+thx.stream.EmitterInts.average = function(emitter) {
+	return emitter.mapValue((function() {
+		var sum = 0.0;
+		var count = 0;
+		return function(v) {
+			return (sum += v) / ++count;
+		};
+	})());
+};
+thx.stream.EmitterInts.greaterThan = function(emitter,x) {
+	return emitter.filterValue(function(v) {
+		return v > x;
+	});
+};
+thx.stream.EmitterInts.greaterThanOrEqualTo = function(emitter,x) {
+	return emitter.filterValue(function(v) {
+		return v >= x;
+	});
+};
+thx.stream.EmitterInts.inRange = function(emitter,min,max) {
+	return emitter.filterValue(function(v) {
+		return v <= max && v >= min;
+	});
+};
+thx.stream.EmitterInts.insideRange = function(emitter,min,max) {
+	return emitter.filterValue(function(v) {
+		return v < max && v > min;
+	});
+};
+thx.stream.EmitterInts.lessThan = function(emitter,x) {
+	return emitter.filterValue(function(v) {
+		return v < x;
+	});
+};
+thx.stream.EmitterInts.lessThanOrEqualTo = function(emitter,x) {
+	return emitter.filterValue(function(v) {
+		return v <= x;
+	});
+};
+thx.stream.EmitterInts.max = function(emitter) {
+	return emitter.filterValue((function() {
+		var max = null;
+		return function(v) {
+			if(null == max || v > max) {
+				max = v;
+				return true;
+			} else return false;
+		};
+	})());
+};
+thx.stream.EmitterInts.min = function(emitter) {
+	return emitter.filterValue((function() {
+		var min = null;
+		return function(v) {
+			if(null == min || v < min) {
+				min = v;
+				return true;
+			} else return false;
+		};
+	})());
+};
+thx.stream.EmitterInts.sum = function(emitter) {
+	return emitter.mapValue((function() {
+		var value = 0;
+		return function(v) {
+			return value += v;
+		};
+	})());
+};
+thx.stream.EmitterInts.toBool = function(emitter) {
+	return emitter.mapValue(function(i) {
+		return i != 0;
+	});
+};
+thx.stream.EmitterInts.unique = function(emitter) {
+	return emitter.filterValue((function() {
+		var buf = new haxe.ds.IntMap();
+		return function(v) {
+			if(buf.exists(v)) return false; else {
+				buf.set(v,true);
+				return true;
+			}
+		};
+	})());
+};
+thx.stream.EmitterFloats = function() { };
+thx.stream.EmitterFloats.__name__ = ["thx","stream","EmitterFloats"];
+thx.stream.EmitterFloats.average = function(emitter) {
+	return emitter.mapValue((function() {
+		var sum = 0.0;
+		var count = 0;
+		return function(v) {
+			return (sum += v) / ++count;
+		};
+	})());
+};
+thx.stream.EmitterFloats.greaterThan = function(emitter,x) {
+	return emitter.filterValue(function(v) {
+		return v > x;
+	});
+};
+thx.stream.EmitterFloats.greaterThanOrEqualTo = function(emitter,x) {
+	return emitter.filterValue(function(v) {
+		return v >= x;
+	});
+};
+thx.stream.EmitterFloats.inRange = function(emitter,min,max) {
+	return emitter.filterValue(function(v) {
+		return v <= max && v >= min;
+	});
+};
+thx.stream.EmitterFloats.insideRange = function(emitter,min,max) {
+	return emitter.filterValue(function(v) {
+		return v < max && v > min;
+	});
+};
+thx.stream.EmitterFloats.lessThan = function(emitter,x) {
+	return emitter.filterValue(function(v) {
+		return v < x;
+	});
+};
+thx.stream.EmitterFloats.lessThanOrEqualTo = function(emitter,x) {
+	return emitter.filterValue(function(v) {
+		return v <= x;
+	});
+};
+thx.stream.EmitterFloats.max = function(emitter) {
+	return emitter.filterValue((function() {
+		var max = -Infinity;
+		return function(v) {
+			if(v > max) {
+				max = v;
+				return true;
+			} else return false;
+		};
+	})());
+};
+thx.stream.EmitterFloats.min = function(emitter) {
+	return emitter.filterValue((function() {
+		var min = Infinity;
+		return function(v) {
+			if(v < min) {
+				min = v;
+				return true;
+			} else return false;
+		};
+	})());
+};
+thx.stream.EmitterFloats.sum = function(emitter) {
+	return emitter.mapValue((function() {
+		var sum = 0.0;
+		return function(v) {
+			return sum += v;
+		};
+	})());
 };
 thx.stream.EmitterBools = function() { };
 thx.stream.EmitterBools.__name__ = ["thx","stream","EmitterBools"];
@@ -7738,7 +7577,14 @@ thx.stream.EmitterEmitters.flatMap = function(emitter) {
 		}));
 	});
 };
-thx.stream.EmitterEmitters.flatten = function(emitter) {
+thx.stream.EmitterArrays = function() { };
+thx.stream.EmitterArrays.__name__ = ["thx","stream","EmitterArrays"];
+thx.stream.EmitterArrays.containerOf = function(emitter,value) {
+	return emitter.filterValue(function(arr) {
+		return HxOverrides.indexOf(arr,value,0) >= 0;
+	});
+};
+thx.stream.EmitterArrays.flatten = function(emitter) {
 	return new thx.stream.Emitter(function(stream) {
 		emitter.init(new thx.stream.Stream(function(r) {
 			switch(r[1]) {
@@ -7798,18 +7644,18 @@ thx.stream.Stream.prototype = {
 	,addCleanUp: function(f) {
 		this.cleanUps.push(f);
 	}
-	,pulse: function(v) {
-		this.subscriber(thx.stream.StreamValue.Pulse(v));
-	}
-	,end: function() {
-		this.finalize(thx.stream.StreamValue.End(false));
-	}
 	,cancel: function() {
 		this.canceled = true;
 		this.finalize(thx.stream.StreamValue.End(true));
 	}
+	,end: function() {
+		this.finalize(thx.stream.StreamValue.End(false));
+	}
 	,fail: function(error) {
 		this.finalize(thx.stream.StreamValue.Failure(error));
+	}
+	,pulse: function(v) {
+		this.subscriber(thx.stream.StreamValue.Pulse(v));
 	}
 	,finalize: function(signal) {
 		if(this.finalized) return;
@@ -7822,9 +7668,9 @@ thx.stream.Stream.prototype = {
 	,__class__: thx.stream.Stream
 };
 thx.stream.StreamValue = { __ename__ : ["thx","stream","StreamValue"], __constructs__ : ["Pulse","End","Failure"] };
-thx.stream.StreamValue.Pulse = function(value) { var $x = ["Pulse",0,value]; $x.__enum__ = thx.stream.StreamValue; return $x; };
-thx.stream.StreamValue.End = function(cancel) { var $x = ["End",1,cancel]; $x.__enum__ = thx.stream.StreamValue; return $x; };
-thx.stream.StreamValue.Failure = function(err) { var $x = ["Failure",2,err]; $x.__enum__ = thx.stream.StreamValue; return $x; };
+thx.stream.StreamValue.Pulse = function(value) { var $x = ["Pulse",0,value]; $x.__enum__ = thx.stream.StreamValue; $x.toString = $estr; return $x; };
+thx.stream.StreamValue.End = function(cancel) { var $x = ["End",1,cancel]; $x.__enum__ = thx.stream.StreamValue; $x.toString = $estr; return $x; };
+thx.stream.StreamValue.Failure = function(err) { var $x = ["Failure",2,err]; $x.__enum__ = thx.stream.StreamValue; $x.toString = $estr; return $x; };
 udom.Query = function() { };
 udom.Query.__name__ = ["udom","Query"];
 udom.Query.first = function(selector,ctx) {
@@ -7895,40 +7741,6 @@ if(Array.prototype.filter == null) Array.prototype.filter = function(f1) {
 	}
 	return a1;
 };
-var posToString = function(pos) {
-	return pos;
-};
-thx.Assert.results = { add : function(assertion) {
-	switch(assertion[1]) {
-	case 1:
-		var pos1 = assertion[3];
-		var msg = assertion[2];
-		throw new thx.core.Error(msg,null,pos1);
-		break;
-	case 2:
-		var stack = assertion[3];
-		var e = assertion[2];
-		throw new thx.core.Error(Std.string(e),stack,{ fileName : "Assert.hx", lineNumber : 675, className : "thx.Assert", methodName : "__init__"});
-		break;
-	case 3:
-		var stack = assertion[3];
-		var e = assertion[2];
-		throw new thx.core.Error(Std.string(e),stack,{ fileName : "Assert.hx", lineNumber : 675, className : "thx.Assert", methodName : "__init__"});
-		break;
-	case 4:
-		var stack = assertion[3];
-		var e = assertion[2];
-		throw new thx.core.Error(Std.string(e),stack,{ fileName : "Assert.hx", lineNumber : 675, className : "thx.Assert", methodName : "__init__"});
-		break;
-	case 5:
-		var msg1 = assertion[2];
-		haxe.Log.trace(msg1,{ fileName : "Assert.hx", lineNumber : 677, className : "thx.Assert", methodName : "__init__"});
-		break;
-	case 0:
-		var pos2 = assertion[2];
-		break;
-	}
-}};
 var scope = ("undefined" !== typeof window && window) || ("undefined" !== typeof global && global) || this;
 if(!scope.setImmediate) scope.setImmediate = function(callback) {
 	scope.setTimeout(callback,0);
@@ -7967,27 +7779,6 @@ thx.core.Strings.__ucwordswsPattern = new EReg("\\s[a-z]","g");
 thx.core.Strings.__alphaNumPattern = new EReg("^[a-z0-9]+$","i");
 thx.core.Strings.__digitsPattern = new EReg("^[0-9]+$","");
 thx.core.UUID.itoh = "0123456789ABCDEF";
-thx.date.ISO8601.dateParsers = [{ pattern : new EReg("^\\d{4}$",""), extract : function(e) {
-	return thx.date.ISO8601.createDate(thx.date.ISO8601.mInt(e,0));
-}},{ pattern : new EReg("^(\\d{4})-(\\d{2})$",""), extract : function(e1) {
-	return thx.date.ISO8601.createDate(thx.date.ISO8601.mInt(e1,1),thx.date.ISO8601.mInt(e1,2));
-}},{ pattern : new EReg("^(\\d{4})-(\\d{2})-(\\d{2})$",""), extract : function(e2) {
-	return thx.date.ISO8601.createDate(thx.date.ISO8601.mInt(e2,1),thx.date.ISO8601.mInt(e2,2),thx.date.ISO8601.mInt(e2,3));
-}},{ pattern : new EReg("^(\\d{4})(\\d{2})(\\d{2})$",""), extract : function(e3) {
-	return thx.date.ISO8601.createDate(thx.date.ISO8601.mInt(e3,1),thx.date.ISO8601.mInt(e3,2),thx.date.ISO8601.mInt(e3,3));
-}}];
-thx.date.ISO8601.timeZoneSign = new EReg("([+-])","");
-thx.date.ISO8601.timeParsers = [{ pattern : new EReg("^(\\d{2}):(\\d{2}):(\\d{2})$",""), extract : function(e) {
-	return thx.date.ISO8601.createTime(thx.date.ISO8601.mInt(e,1),thx.date.ISO8601.mInt(e,2),thx.date.ISO8601.mInt(e,3));
-}},{ pattern : new EReg("^(\\d{2})(\\d{2})(\\d{2})$",""), extract : function(e1) {
-	return thx.date.ISO8601.createTime(thx.date.ISO8601.mInt(e1,1),thx.date.ISO8601.mInt(e1,2),thx.date.ISO8601.mInt(e1,3));
-}},{ pattern : new EReg("^(\\d{2}):(\\d{2})$",""), extract : function(e2) {
-	return thx.date.ISO8601.createTime(thx.date.ISO8601.mInt(e2,1),thx.date.ISO8601.mInt(e2,2));
-}},{ pattern : new EReg("^(\\d{2})(\\d{2})$",""), extract : function(e3) {
-	return thx.date.ISO8601.createTime(thx.date.ISO8601.mInt(e3,1),thx.date.ISO8601.mInt(e3,2));
-}},{ pattern : new EReg("^\\d{2}$",""), extract : function(e4) {
-	return thx.date.ISO8601.createTime(thx.date.ISO8601.mInt(e4,0));
-}}];
 thx.promise.Promise.nil = thx.promise.Promise.value(thx.core.Nil.nil);
 udom.Query.doc = document;
 Main.main();

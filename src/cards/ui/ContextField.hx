@@ -59,7 +59,7 @@ class ContextField {
       var runtime = editor.value.mapValue(convert);
       runtime
         .distinct(function(a, b) {
-          return b != null && a.dependencies.same(b.dependencies);
+          return b != null && a.dependencies.equals(b.dependencies);
         })
         .subscribe(function(res : Runtime) {
           options.model.changes.subscribe(function(path) {

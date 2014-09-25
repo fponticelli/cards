@@ -3,7 +3,6 @@ package cards.ui;
 import js.html.Element;
 import cards.components.Component;
 import cards.model.SchemaType;
-import thx.Assert;
 import cards.ui.editors.EditorPicker;
 import cards.ui.editors.Editor;
 import udom.Dom;

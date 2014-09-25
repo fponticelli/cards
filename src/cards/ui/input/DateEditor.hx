@@ -6,7 +6,7 @@ import js.html.Element;
 import js.html.InputElement;
 import udom.Dom.Query;
 using thx.stream.dom.Dom;
-import thx.date.ISO8601;
+//import thx.date.ISO8601;
 import cards.components.Component;
 
 class DateEditor extends Editor {
@@ -22,8 +22,8 @@ class DateEditor extends Editor {
 
     var el : InputElement = cast component.el;
     el.streamEvent('change')
-      .mapValue(function(_) return try (ISO8601.parseDateTime(el.value) : TypedValue) catch(e : Dynamic) null)
-      .withValue()
+      .mapValue(function(_) return try (Date.fromString(el.value) : TypedValue) catch(e : Dynamic) null)
+      .notNull()
       .filterValue(function(v) return !Math.isNaN(v.asValue().getTime()))
       .plug(stream);
     el.streamFocus().feed(focus);

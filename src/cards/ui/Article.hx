@@ -2,7 +2,6 @@ package cards.ui;
 
 import cards.components.Component;
 import cards.components.ComponentOptions;
-import thx.Assert;
 import cards.ui.fragments.Block;
 import cards.ui.fragments.ReadonlyBlock;
 import cards.ui.fragments.Fragment;
@@ -81,7 +80,6 @@ class Article {
       this.fragment.set(None);
     var finalizer = fragmentsMap.get(fragment);
     fragmentsMap.remove(fragment);
-    Assert.notNull(finalizer);
     finalizer();
   }
 }
