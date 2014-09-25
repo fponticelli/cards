@@ -35,7 +35,7 @@ abstract TypedValue(Tuple2<SchemaType, Dynamic>) {
     else if(null == a || null == b)
       return false;
     else
-      return Dynamics.same(a.asValue(), b.asValue()) && Dynamics.same(a.asType(), b.asType());
+      return Dynamics.equals(a.asValue(), b.asValue()) && Dynamics.equals(a.asType(), b.asType());
   }
 
   public function toString()
