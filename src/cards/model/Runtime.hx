@@ -24,7 +24,7 @@ return $code;';
   static var pattern = ~/\$\.(.+?)\b/;
   // TODO: poorman implementation
   public static function extractDependencies(code : String) {
-    var set = new Set();
+    var set : Set<String> = [];
     while(pattern.match(code)) {
       set.add(pattern.matched(1));
       code = pattern.matchedRight();

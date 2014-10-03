@@ -128,7 +128,7 @@ class BaseObjectEditor extends RouteEditor {
   public function realizeField(name : String, ?type : SchemaType) {
     if(editors.exists(name))
       throw 'field $name already realized';
-    var def = fields.first(function(field) return field.name == name);
+    var def = fields.find(function(field) return field.name == name);
     if(null == def) throw 'unable to realize $name because it is not defined in ObjectType';
     if(null == type)
       type = def.type;

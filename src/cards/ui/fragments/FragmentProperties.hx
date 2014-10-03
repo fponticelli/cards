@@ -13,7 +13,7 @@ class FragmentProperties {
   public function associate(fragment : FragmentName, property : PropertyName) {
     var s = map.get(fragment);
     if(null == s)
-      map.set(fragment, s = new Set());
+      map.set(fragment, s = []);
     s.add(property);
   }
 
@@ -23,7 +23,7 @@ class FragmentProperties {
   public function getAssociations(fragment : FragmentName) : Iterator<String> {
     var s = map.get(fragment);
     if(s == null)
-      s = new Set();
+      s = [];
     return s.iterator();
   }
 }
