@@ -869,12 +869,12 @@ cards.model.Runtime.formatCode = function(code,scope) {
 	return "" + prelim + "\ndelete scope;\nreturn " + code + ";";
 };
 cards.model.Runtime.extractDependencies = function(code) {
-	var set = new thx.core.Set();
+	var set = thx.core._Set.Set_Impl_.arrayToSet([]);
 	while(cards.model.Runtime.pattern.match(code)) {
-		set.add(cards.model.Runtime.pattern.matched(1));
+		thx.core._Set.Set_Impl_.add(set,cards.model.Runtime.pattern.matched(1));
 		code = cards.model.Runtime.pattern.matchedRight();
 	}
-	return thx.core.Iterators.order(set.iterator(),thx.core.Strings.compare);
+	return thx.core.Iterables.order(thx.core._Set.Set_Impl_.setToArray(set),thx.core.Strings.compare);
 };
 cards.model.Runtime.toRuntime = function(code,model) {
 	var expression;
@@ -2157,7 +2157,7 @@ cards.ui.input.BaseObjectEditor.prototype = $extend(cards.ui.input.RouteEditor.p
 	}
 	,realizeField: function(name,type) {
 		if(this.editors.exists(name)) throw "field " + name + " already realized";
-		var def = thx.core.Arrays.first(this.fields,function(field) {
+		var def = thx.core.Arrays.find(this.fields,function(field) {
 			return field.name == name;
 		});
 		if(null == def) throw "unable to realize " + name + " because it is not defined in ObjectType";
@@ -2824,7 +2824,7 @@ cards.ui.input._DiffAt.DiffAt_Impl_.get_diff = function(this1) {
 	return this1._1;
 };
 cards.ui.input._DiffAt.DiffAt_Impl_.equal = function(a,b) {
-	if(null == a && null == b) return true; else if(null == a || null == b) return false; else return cards.ui.input._Path.Path_Impl_.equal(a._0,b._0) && thx.core.Dynamics.same(a._1,b._1);
+	if(null == a && null == b) return true; else if(null == a || null == b) return false; else return cards.ui.input._Path.Path_Impl_.equal(a._0,b._0) && thx.core.Dynamics.equals(a._1,b._1);
 };
 cards.ui.input._DiffAt.DiffAt_Impl_.toString = function(this1) {
 	return cards.ui.input._Path.Path_Impl_.toString(this1._0) + ":" + Std.string(this1._1);
@@ -3105,7 +3105,7 @@ cards.ui.input._TypedValue.TypedValue_Impl_.asString = function(this1) {
 	return Std.string(this1._1);
 };
 cards.ui.input._TypedValue.TypedValue_Impl_.equal = function(a,b) {
-	if(null == a && null == b) return true; else if(null == a || null == b) return false; else return thx.core.Dynamics.same(a._1,b._1) && thx.core.Dynamics.same(a._0,b._0);
+	if(null == a && null == b) return true; else if(null == a || null == b) return false; else return thx.core.Dynamics.equals(a._1,b._1) && thx.core.Dynamics.equals(a._0,b._0);
 };
 cards.ui.input._TypedValue.TypedValue_Impl_.toString = function(this1) {
 	return Std.string(this1._1) + " : " + Std.string(this1._0);
@@ -3714,6 +3714,40 @@ var thx = {};
 thx.core = {};
 thx.core.Arrays = function() { };
 thx.core.Arrays.__name__ = ["thx","core","Arrays"];
+thx.core.Arrays.after = function(array,element) {
+	return array.slice(HxOverrides.indexOf(array,element,0) + 1);
+};
+thx.core.Arrays.all = function(arr,predicate) {
+	var _g = 0;
+	while(_g < arr.length) {
+		var item = arr[_g];
+		++_g;
+		if(!predicate(item)) return false;
+	}
+	return true;
+};
+thx.core.Arrays.any = function(arr,predicate) {
+	var _g = 0;
+	while(_g < arr.length) {
+		var item = arr[_g];
+		++_g;
+		if(predicate(item)) return true;
+	}
+	return false;
+};
+thx.core.Arrays.at = function(arr,indexes) {
+	return indexes.map(function(i) {
+		return arr[i];
+	});
+};
+thx.core.Arrays.before = function(array,element) {
+	return array.slice(0,HxOverrides.indexOf(array,element,0));
+};
+thx.core.Arrays.compact = function(arr) {
+	return arr.filter(function(v) {
+		return null != v;
+	});
+};
 thx.core.Arrays.contains = function(array,element,eq) {
 	if(null == eq) return HxOverrides.indexOf(array,element,0) >= 0; else {
 		var _g1 = 0;
@@ -3789,26 +3823,16 @@ thx.core.Arrays.equals = function(a,b,equality) {
 	}
 	return true;
 };
-thx.core.Arrays.extract = function(a,f) {
+thx.core.Arrays.extract = function(a,predicate) {
 	var _g1 = 0;
 	var _g = a.length;
 	while(_g1 < _g) {
 		var i = _g1++;
-		if(f(a[i])) return a.splice(i,1)[0];
+		if(predicate(a[i])) return a.splice(i,1)[0];
 	}
 	return null;
 };
-thx.core.Arrays.find = function(array,f) {
-	var out = [];
-	var _g = 0;
-	while(_g < array.length) {
-		var item = array[_g];
-		++_g;
-		if(f(item)) out.push(item);
-	}
-	return out;
-};
-thx.core.Arrays.first = function(array,predicate) {
+thx.core.Arrays.find = function(array,predicate) {
 	var _g = 0;
 	while(_g < array.length) {
 		var item = array[_g];
@@ -3817,22 +3841,62 @@ thx.core.Arrays.first = function(array,predicate) {
 	}
 	return null;
 };
+thx.core.Arrays.findLast = function(array,predicate) {
+	var len = array.length;
+	var j;
+	var _g = 0;
+	while(_g < len) {
+		var i = _g++;
+		j = len - i - 1;
+		if(predicate(array[j])) return array[j];
+	}
+	return null;
+};
+thx.core.Arrays.first = function(array) {
+	return array[0];
+};
 thx.core.Arrays.flatMap = function(array,callback) {
 	return thx.core.Arrays.flatten(array.map(callback));
 };
 thx.core.Arrays.flatten = function(array) {
 	return Array.prototype.concat.apply([],array);
 };
+thx.core.Arrays.from = function(array,element) {
+	return array.slice(HxOverrides.indexOf(array,element,0));
+};
+thx.core.Arrays.head = function(array) {
+	return array[0];
+};
+thx.core.Arrays.initial = function(array) {
+	return array.slice(0,array.length - 1);
+};
 thx.core.Arrays.isEmpty = function(array) {
 	return array.length == 0;
 };
+thx.core.Arrays.last = function(array) {
+	return array[array.length - 1];
+};
 thx.core.Arrays.mapi = function(array,callback) {
 	return array.map(callback);
+};
+thx.core.Arrays.mapRight = function(array,callback) {
+	var i = array.length;
+	var result = [];
+	while(--i >= 0) result.push(callback(array[i]));
+	return result;
 };
 thx.core.Arrays.order = function(array,sort) {
 	var n = array.slice();
 	n.sort(sort);
 	return n;
+};
+thx.core.Arrays.pull = function(array,toRemove,equality) {
+	var _g = 0;
+	while(_g < toRemove.length) {
+		var item = toRemove[_g];
+		++_g;
+		thx.core.Arrays.removeAll(array,item,equality);
+	}
 };
 thx.core.Arrays.pushIf = function(array,condition,value) {
 	if(condition) array.push(value);
@@ -3843,6 +3907,33 @@ thx.core.Arrays.reduce = function(array,callback,initial) {
 };
 thx.core.Arrays.reducei = function(array,callback,initial) {
 	return array.reduce(callback,initial);
+};
+thx.core.Arrays.reduceRight = function(array,callback,initial) {
+	var i = array.length;
+	while(--i >= 0) initial = callback(initial,array[i]);
+	return initial;
+};
+thx.core.Arrays.removeAll = function(array,element,equality) {
+	if(null == equality) equality = thx.core.Functions.equality;
+	var i = array.length;
+	while(--i >= 0) if(equality(array[i],element)) array.splice(i,1);
+};
+thx.core.Arrays.rest = function(array) {
+	return array.slice(1);
+};
+thx.core.Arrays.sample = function(array,n) {
+	if(n > array.length) n = array.length;
+	var copy = array.slice();
+	var result = [];
+	var _g = 0;
+	while(_g < n) {
+		var i = _g++;
+		result.push(copy.splice(Std.random(copy.length),1)[0]);
+	}
+	return result;
+};
+thx.core.Arrays.sampleOne = function(array) {
+	return array[Std.random(array.length)];
 };
 thx.core.Arrays.shuffle = function(a) {
 	var t = thx.core.Ints.range(a.length);
@@ -3855,11 +3946,163 @@ thx.core.Arrays.shuffle = function(a) {
 	}
 	return array;
 };
+thx.core.Arrays.take = function(arr,n) {
+	return arr.slice(0,n);
+};
+thx.core.Arrays.takeLast = function(arr,n) {
+	return arr.slice(arr.length - n);
+};
+thx.core.Arrays.zip = function(array1,array2) {
+	var length = thx.core.Ints.min(array1.length,array2.length);
+	var array = [];
+	var _g = 0;
+	while(_g < length) {
+		var i = _g++;
+		array.push({ _0 : array1[i], _1 : array2[i]});
+	}
+	return array;
+};
+thx.core.Arrays.zip3 = function(array1,array2,array3) {
+	var length = thx.core.ArrayInts.min([array1.length,array2.length,array3.length]);
+	var array = [];
+	var _g = 0;
+	while(_g < length) {
+		var i = _g++;
+		array.push({ _0 : array1[i], _1 : array2[i], _2 : array3[i]});
+	}
+	return array;
+};
+thx.core.Arrays.zip4 = function(array1,array2,array3,array4) {
+	var length = thx.core.ArrayInts.min([array1.length,array2.length,array3.length,array4.length]);
+	var array = [];
+	var _g = 0;
+	while(_g < length) {
+		var i = _g++;
+		array.push({ _0 : array1[i], _1 : array2[i], _2 : array3[i], _3 : array4[i]});
+	}
+	return array;
+};
+thx.core.Arrays.zip5 = function(array1,array2,array3,array4,array5) {
+	var length = thx.core.ArrayInts.min([array1.length,array2.length,array3.length,array4.length,array5.length]);
+	var array = [];
+	var _g = 0;
+	while(_g < length) {
+		var i = _g++;
+		array.push({ _0 : array1[i], _1 : array2[i], _2 : array3[i], _3 : array4[i], _4 : array5[i]});
+	}
+	return array;
+};
+thx.core.Arrays.unzip = function(array) {
+	var a1 = [];
+	var a2 = [];
+	array.map(function(t) {
+		a1.push(t._0);
+		a2.push(t._1);
+	});
+	return { _0 : a1, _1 : a2};
+};
+thx.core.Arrays.unzip3 = function(array) {
+	var a1 = [];
+	var a2 = [];
+	var a3 = [];
+	array.map(function(t) {
+		a1.push(t._0);
+		a2.push(t._1);
+		a3.push(t._2);
+	});
+	return { _0 : a1, _1 : a2, _2 : a3};
+};
+thx.core.Arrays.unzip4 = function(array) {
+	var a1 = [];
+	var a2 = [];
+	var a3 = [];
+	var a4 = [];
+	array.map(function(t) {
+		a1.push(t._0);
+		a2.push(t._1);
+		a3.push(t._2);
+		a4.push(t._3);
+	});
+	return { _0 : a1, _1 : a2, _2 : a3, _3 : a4};
+};
+thx.core.Arrays.unzip5 = function(array) {
+	var a1 = [];
+	var a2 = [];
+	var a3 = [];
+	var a4 = [];
+	var a5 = [];
+	array.map(function(t) {
+		a1.push(t._0);
+		a2.push(t._1);
+		a3.push(t._2);
+		a4.push(t._3);
+		a5.push(t._4);
+	});
+	return { _0 : a1, _1 : a2, _2 : a3, _3 : a4, _4 : a5};
+};
+thx.core.ArrayFloats = function() { };
+thx.core.ArrayFloats.__name__ = ["thx","core","ArrayFloats"];
+thx.core.ArrayFloats.average = function(arr) {
+	if(arr.length == 0) return null;
+	var sum = arr.reduce(function(acc,v) {
+		acc.count++;
+		acc.sum += v;
+		return acc;
+	},{ count : 0, sum : 0.0});
+	return sum.sum / sum.count;
+};
+thx.core.ArrayFloats.compact = function(arr) {
+	return arr.filter(function(v) {
+		return null != v && isFinite(v);
+	});
+};
+thx.core.ArrayFloats.max = function(arr) {
+	if(arr.length == 0) return null; else return arr.reduce(function(max,v) {
+		if(v > max) return v; else return max;
+	},arr[0]);
+};
+thx.core.ArrayFloats.min = function(arr) {
+	if(arr.length == 0) return null; else return arr.reduce(function(min,v) {
+		if(v < min) return v; else return min;
+	},arr[0]);
+};
+thx.core.ArrayInts = function() { };
+thx.core.ArrayInts.__name__ = ["thx","core","ArrayInts"];
+thx.core.ArrayInts.average = function(arr) {
+	return thx.core.ArrayFloats.average(arr);
+};
+thx.core.ArrayInts.max = function(arr) {
+	if(arr.length == 0) return null; else return arr.reduce(function(max,v) {
+		if(v > max) return v; else return max;
+	},arr[0]);
+};
+thx.core.ArrayInts.min = function(arr) {
+	if(arr.length == 0) return null; else return arr.reduce(function(min,v) {
+		if(v < min) return v; else return min;
+	},arr[0]);
+};
+thx.core.ArrayStrings = function() { };
+thx.core.ArrayStrings.__name__ = ["thx","core","ArrayStrings"];
+thx.core.ArrayStrings.compact = function(arr) {
+	return arr.filter(function(v) {
+		return !thx.core.Strings.isEmpty(v);
+	});
+};
+thx.core.ArrayStrings.max = function(arr) {
+	if(arr.length == 0) return null; else return arr.reduce(function(max,v) {
+		if(v > max) return v; else return max;
+	},arr[0]);
+};
+thx.core.ArrayStrings.min = function(arr) {
+	if(arr.length == 0) return null; else return arr.reduce(function(min,v) {
+		if(v < min) return v; else return min;
+	},arr[0]);
+};
 thx.core.Dynamics = function() { };
 thx.core.Dynamics.__name__ = ["thx","core","Dynamics"];
-thx.core.Dynamics.same = function(a,b) {
-	if(a == b) return true;
+thx.core.Dynamics.equals = function(a,b) {
 	if(!thx.core.Types.sameType(a,b)) return false;
+	if(a == b) return true;
 	{
 		var _g = Type["typeof"](a);
 		switch(_g[1]) {
@@ -3881,7 +4124,7 @@ thx.core.Dynamics.same = function(a,b) {
 				var _g1 = aa.length;
 				while(_g2 < _g1) {
 					var i = _g2++;
-					if(!thx.core.Dynamics.same(aa[i],ab[i])) return false;
+					if(!thx.core.Dynamics.equals(aa[i],ab[i])) return false;
 				}
 				return true;
 			}
@@ -3896,7 +4139,7 @@ thx.core.Dynamics.same = function(a,b) {
 				while(_g11 < ka.length) {
 					var key = ka[_g11];
 					++_g11;
-					if(!hb.exists(key) || !thx.core.Dynamics.same(ha.get(key),hb.get(key))) return false;
+					if(!hb.exists(key) || !thx.core.Dynamics.equals(ha.get(key),hb.get(key))) return false;
 				}
 				return true;
 			}
@@ -3911,10 +4154,12 @@ thx.core.Dynamics.same = function(a,b) {
 				var _g12 = va.length;
 				while(_g21 < _g12) {
 					var i1 = _g21++;
-					if(!thx.core.Dynamics.same(va[i1],vb[i1])) return false;
+					if(!thx.core.Dynamics.equals(va[i1],vb[i1])) return false;
 				}
 				return true;
 			}
+			var f;
+			if(Object.prototype.hasOwnProperty.call(a,"equals") && Reflect.isFunction(f = Reflect.field(a,"equals"))) return f.apply(a,[b]);
 			var fields = Type.getInstanceFields(Type.getClass(a));
 			var _g13 = 0;
 			while(_g13 < fields.length) {
@@ -3923,7 +4168,7 @@ thx.core.Dynamics.same = function(a,b) {
 				var va1 = Reflect.field(a,field);
 				if(Reflect.isFunction(va1)) continue;
 				var vb1 = Reflect.field(b,field);
-				if(!thx.core.Dynamics.same(va1,vb1)) return false;
+				if(!thx.core.Dynamics.equals(va1,vb1)) return false;
 			}
 			return true;
 		case 7:
@@ -3939,7 +4184,7 @@ thx.core.Dynamics.same = function(a,b) {
 			var _g14 = pa.length;
 			while(_g22 < _g14) {
 				var i2 = _g22++;
-				if(!thx.core.Dynamics.same(pa[i2],pb[i2])) return false;
+				if(!thx.core.Dynamics.equals(pa[i2],pb[i2])) return false;
 			}
 			return true;
 		case 4:
@@ -3954,7 +4199,7 @@ thx.core.Dynamics.same = function(a,b) {
 				var va2 = Reflect.field(a,field1);
 				if(Reflect.isFunction(va2)) continue;
 				var vb2 = Reflect.field(b,field1);
-				if(!thx.core.Dynamics.same(va2,vb2)) return false;
+				if(!thx.core.Dynamics.equals(va2,vb2)) return false;
 			}
 			if(fb.length > 0) return false;
 			var t1 = false;
@@ -3970,7 +4215,7 @@ thx.core.Dynamics.same = function(a,b) {
 				var _g16 = aa1.length;
 				while(_g23 < _g16) {
 					var i3 = _g23++;
-					if(!thx.core.Dynamics.same(aa1[i3],ab1[i3])) return false;
+					if(!thx.core.Dynamics.equals(aa1[i3],ab1[i3])) return false;
 				}
 				return true;
 			}
@@ -3980,12 +4225,16 @@ thx.core.Dynamics.same = function(a,b) {
 			break;
 		}
 	}
-	throw new thx.core.Error("Unable to compare values: " + Std.string(a) + " and " + Std.string(b),null,{ fileName : "Dynamics.hx", lineNumber : 138, className : "thx.core.Dynamics", methodName : "same"});
+	throw new thx.core.Error("Unable to compare values: " + Std.string(a) + " and " + Std.string(b),null,{ fileName : "Dynamics.hx", lineNumber : 149, className : "thx.core.Dynamics", methodName : "equals"});
 };
 thx.core.Error = function(message,stack,pos) {
 	Error.call(this,message);
 	if(null == stack) {
-		stack = haxe.CallStack.exceptionStack();
+		try {
+			stack = haxe.CallStack.exceptionStack();
+		} catch( e ) {
+			stack = [];
+		}
 		if(stack.length == 0) stack = haxe.CallStack.callStack();
 	}
 	this.stackItems = stack;
@@ -4007,19 +4256,41 @@ thx.core.Error.prototype = $extend(Error.prototype,{
 });
 thx.core.Function0 = function() { };
 thx.core.Function0.__name__ = ["thx","core","Function0"];
+thx.core.Function0.after = function(n,callback) {
+	return function() {
+		if(--n == 0) callback();
+	};
+};
 thx.core.Function0.join = function(fa,fb) {
 	return function() {
 		fa();
 		fb();
 	};
 };
-thx.core.Function0.noop = function() {
-};
 thx.core.Function0.once = function(f) {
 	return function() {
-		f();
-		f = function() {
-		};
+		var t = f;
+		f = thx.core.Functions.noop;
+		t();
+	};
+};
+thx.core.Function0.negate = function(callback) {
+	return function() {
+		return !callback();
+	};
+};
+thx.core.Function0.times = function(n,callback) {
+	return function() {
+		return thx.core.Ints.range(n).map(function(_) {
+			return callback();
+		});
+	};
+};
+thx.core.Function0.timesi = function(n,callback) {
+	return function() {
+		return thx.core.Ints.range(n).map(function(i) {
+			return callback(i);
+		});
 	};
 };
 thx.core.Function1 = function() { };
@@ -4029,26 +4300,119 @@ thx.core.Function1.compose = function(fa,fb) {
 		return fa(fb(v));
 	};
 };
-thx.core.Function1.noop = function(_) {
-};
 thx.core.Function1.join = function(fa,fb) {
 	return function(v) {
 		fa(v);
 		fb(v);
 	};
 };
+thx.core.Function1.memoize = function(callback,resolver) {
+	if(null == resolver) resolver = function(v) {
+		return "" + Std.string(v);
+	};
+	var map = new haxe.ds.StringMap();
+	return function(v1) {
+		var key = resolver(v1);
+		if(map.exists(key)) return map.get(key);
+		var result = callback(v1);
+		map.set(key,result);
+		return result;
+	};
+};
+thx.core.Function1.negate = function(callback) {
+	return function(v) {
+		return !callback(v);
+	};
+};
+thx.core.Function1.noop = function(_) {
+};
+thx.core.Function1.times = function(n,callback) {
+	return function(value) {
+		return thx.core.Ints.range(n).map(function(_) {
+			return callback(value);
+		});
+	};
+};
+thx.core.Function1.timesi = function(n,callback) {
+	return function(value) {
+		return thx.core.Ints.range(n).map(function(i) {
+			return callback(value,i);
+		});
+	};
+};
+thx.core.Function1.swapArguments = function(callback) {
+	return function(a2,a1) {
+		return callback(a1,a2);
+	};
+};
+thx.core.Function2 = function() { };
+thx.core.Function2.__name__ = ["thx","core","Function2"];
+thx.core.Function2.memoize = function(callback,resolver) {
+	if(null == resolver) resolver = function(v1,v2) {
+		return "" + Std.string(v1) + ":" + Std.string(v2);
+	};
+	var map = new haxe.ds.StringMap();
+	return function(v11,v21) {
+		var key = resolver(v11,v21);
+		if(map.exists(key)) return map.get(key);
+		var result = callback(v11,v21);
+		map.set(key,result);
+		return result;
+	};
+};
+thx.core.Function2.negate = function(callback) {
+	return function(v1,v2) {
+		return !callback(v1,v2);
+	};
+};
+thx.core.Function3 = function() { };
+thx.core.Function3.__name__ = ["thx","core","Function3"];
+thx.core.Function3.memoize = function(callback,resolver) {
+	if(null == resolver) resolver = function(v1,v2,v3) {
+		return "" + Std.string(v1) + ":" + Std.string(v2) + ":" + Std.string(v3);
+	};
+	var map = new haxe.ds.StringMap();
+	return function(v11,v21,v31) {
+		var key = resolver(v11,v21,v31);
+		if(map.exists(key)) return map.get(key);
+		var result = callback(v11,v21,v31);
+		map.set(key,result);
+		return result;
+	};
+};
+thx.core.Function3.negate = function(callback) {
+	return function(v1,v2,v3) {
+		return !callback(v1,v2,v3);
+	};
+};
 thx.core.Functions = function() { };
 thx.core.Functions.__name__ = ["thx","core","Functions"];
+thx.core.Functions.constant = function(v) {
+	return function() {
+		return v;
+	};
+};
 thx.core.Functions.equality = function(a,b) {
 	return a == b;
 };
+thx.core.Functions.identity = function(value) {
+	return value;
+};
+thx.core.Functions.noop = function() {
+};
 thx.core.Ints = function() { };
 thx.core.Ints.__name__ = ["thx","core","Ints"];
+thx.core.Ints.abs = function(v) {
+	if(v < 0) return -v; else return v;
+};
 thx.core.Ints.canParse = function(s) {
 	return thx.core.Ints.pattern_parse.match(s);
 };
 thx.core.Ints.clamp = function(v,min,max) {
 	if(v < min) return min; else if(v > max) return max; else return v;
+};
+thx.core.Ints.clampSym = function(v,max) {
+	return thx.core.Ints.clamp(v,-max,max);
 };
 thx.core.Ints.compare = function(a,b) {
 	return a - b;
@@ -4063,6 +4427,10 @@ thx.core.Ints.parse = function(s) {
 	if(HxOverrides.substr(s,0,1) == "+") s = HxOverrides.substr(s,1,null);
 	return Std.parseInt(s);
 };
+thx.core.Ints.random = function(min,max) {
+	if(min == null) min = 0;
+	return Std.random(max + 1) + min;
+};
 thx.core.Ints.range = function(start,stop,step) {
 	if(step == null) step = 1;
 	if(null == stop) {
@@ -4076,19 +4444,33 @@ thx.core.Ints.range = function(start,stop,step) {
 	if(step < 0) while((j = start + step * ++i) > stop) range.push(j); else while((j = start + step * ++i) < stop) range.push(j);
 	return range;
 };
+thx.core.Ints.wrapCircular = function(v,max) {
+	v = v % max;
+	if(v < 0) v += max;
+	return v;
+};
 thx.core.Iterables = function() { };
 thx.core.Iterables.__name__ = ["thx","core","Iterables"];
+thx.core.Iterables.all = function(it,predicate) {
+	return thx.core.Iterators.all($iterator(it)(),predicate);
+};
+thx.core.Iterables.any = function(it,predicate) {
+	return thx.core.Iterators.any($iterator(it)(),predicate);
+};
 thx.core.Iterables.eachPair = function(it,handler) {
 	return thx.core.Iterators.eachPair($iterator(it)(),handler);
 };
 thx.core.Iterables.filter = function(it,predicate) {
 	return thx.core.Iterators.filter($iterator(it)(),predicate);
 };
-thx.core.Iterables.find = function(it,f) {
-	return thx.core.Iterators.find($iterator(it)(),f);
+thx.core.Iterables.find = function(it,predicate) {
+	return thx.core.Iterators.find($iterator(it)(),predicate);
 };
-thx.core.Iterables.first = function(it,f) {
-	return thx.core.Iterators.first($iterator(it)(),f);
+thx.core.Iterables.first = function(it) {
+	return thx.core.Iterators.first($iterator(it)());
+};
+thx.core.Iterables.last = function(it) {
+	return thx.core.Iterators.last($iterator(it)());
 };
 thx.core.Iterables.isEmpty = function(it) {
 	return thx.core.Iterators.isEmpty($iterator(it)());
@@ -4119,6 +4501,53 @@ thx.core.Iterables.toArray = function(it) {
 };
 thx.core.Iterators = function() { };
 thx.core.Iterators.__name__ = ["thx","core","Iterators"];
+thx.core.Iterators.all = function(it,predicate) {
+	while( it.hasNext() ) {
+		var item = it.next();
+		if(!predicate(item)) return false;
+	}
+	return true;
+};
+thx.core.Iterators.any = function(it,predicate) {
+	while( it.hasNext() ) {
+		var item = it.next();
+		if(predicate(item)) return true;
+	}
+	return false;
+};
+thx.core.Iterators.eachPair = function(it,handler) {
+	thx.core.Arrays.eachPair(thx.core.Iterators.toArray(it),handler);
+};
+thx.core.Iterators.filter = function(it,predicate) {
+	return thx.core.Iterators.reduce(it,function(acc,item) {
+		if(predicate(item)) acc.push(item);
+		return acc;
+	},[]);
+};
+thx.core.Iterators.find = function(it,f) {
+	while( it.hasNext() ) {
+		var item = it.next();
+		if(f(item)) return item;
+	}
+	return null;
+};
+thx.core.Iterators.first = function(it) {
+	if(it.hasNext()) return it.next(); else return null;
+};
+thx.core.Iterators.isEmpty = function(it) {
+	return !it.hasNext();
+};
+thx.core.Iterators.isIterator = function(v) {
+	var fields;
+	if(Reflect.isObject(v) && null == Type.getClass(v)) fields = Reflect.fields(v); else fields = Type.getInstanceFields(Type.getClass(v));
+	if(!Lambda.has(fields,"next") || !Lambda.has(fields,"hasNext")) return false;
+	return Reflect.isFunction(Reflect.field(v,"next")) && Reflect.isFunction(Reflect.field(v,"hasNext"));
+};
+thx.core.Iterators.last = function(it) {
+	var buf = null;
+	while(it.hasNext()) buf = it.next();
+	return buf;
+};
 thx.core.Iterators.map = function(it,f) {
 	var acc = [];
 	while( it.hasNext() ) {
@@ -4135,32 +4564,6 @@ thx.core.Iterators.mapi = function(it,f) {
 		acc.push(f(v,i++));
 	}
 	return acc;
-};
-thx.core.Iterators.first = function(it,f) {
-	while( it.hasNext() ) {
-		var item = it.next();
-		if(f(item)) return item;
-	}
-	return null;
-};
-thx.core.Iterators.find = function(it,f) {
-	var out = [];
-	while( it.hasNext() ) {
-		var item = it.next();
-		if(f(item)) out.push(item);
-	}
-	return out;
-};
-thx.core.Iterators.eachPair = function(it,handler) {
-	thx.core.Arrays.eachPair(thx.core.Iterators.toArray(it),handler);
-};
-thx.core.Iterators.toArray = function(it) {
-	var items = [];
-	while( it.hasNext() ) {
-		var item = it.next();
-		items.push(item);
-	}
-	return items;
 };
 thx.core.Iterators.order = function(it,sort) {
 	var n = thx.core.Iterators.toArray(it);
@@ -4179,20 +4582,13 @@ thx.core.Iterators.reducei = function(it,callback,initial) {
 	});
 	return initial;
 };
-thx.core.Iterators.isEmpty = function(it) {
-	return !it.hasNext();
-};
-thx.core.Iterators.filter = function(it,predicate) {
-	return thx.core.Iterators.reduce(it,function(acc,item) {
-		if(predicate(item)) acc.push(item);
-		return acc;
-	},[]);
-};
-thx.core.Iterators.isIterator = function(v) {
-	var fields;
-	if(Reflect.isObject(v) && null == Type.getClass(v)) fields = Reflect.fields(v); else fields = Type.getInstanceFields(Type.getClass(v));
-	if(!Lambda.has(fields,"next") || !Lambda.has(fields,"hasNext")) return false;
-	return Reflect.isFunction(Reflect.field(v,"next")) && Reflect.isFunction(Reflect.field(v,"hasNext"));
+thx.core.Iterators.toArray = function(it) {
+	var items = [];
+	while( it.hasNext() ) {
+		var item = it.next();
+		items.push(item);
+	}
+	return items;
 };
 thx.core.Nil = { __ename__ : ["thx","core","Nil"], __constructs__ : ["nil"] };
 thx.core.Nil.nil = ["nil",0];
@@ -4202,6 +4598,33 @@ thx.core.Objects = function() { };
 thx.core.Objects.__name__ = ["thx","core","Objects"];
 thx.core.Objects.isEmpty = function(o) {
 	return Reflect.fields(o).length == 0;
+};
+thx.core.Objects.exists = function(o,name) {
+	return Object.prototype.hasOwnProperty.call(o,name);
+};
+thx.core.Objects.fields = function(o) {
+	return Reflect.fields(o);
+};
+thx.core.Objects.size = function(o) {
+	return Reflect.fields(o).length;
+};
+thx.core.Objects.values = function(o) {
+	return Reflect.fields(o).map(function(key) {
+		return Reflect.field(o,key);
+	});
+};
+thx.core.Objects.tuples = function(o) {
+	return Reflect.fields(o).map(function(key) {
+		var _1 = Reflect.field(o,key);
+		return { _0 : key, _1 : _1};
+	});
+};
+thx.core.Objects.objectToMap = function(o) {
+	return thx.core.Arrays.reduce(thx.core.Objects.tuples(o),function(map,t) {
+		var value = t._1;
+		map.set(t._0,value);
+		return map;
+	},new haxe.ds.StringMap());
 };
 thx.core.Options = function() { };
 thx.core.Options.__name__ = ["thx","core","Options"];
@@ -4231,7 +4654,7 @@ thx.core.Options.equals = function(a,b,eq) {
 	}
 };
 thx.core.Options.equalsValue = function(a,b,eq) {
-	return thx.core.Options.equals(a,thx.core.Options.toOption(b),eq);
+	return thx.core.Options.equals(a,null == b?haxe.ds.Option.None:haxe.ds.Option.Some(b),eq);
 };
 thx.core.Options.flatMap = function(option,callback) {
 	switch(option[1]) {
@@ -4280,126 +4703,194 @@ thx.core.Options.toValue = function(option) {
 		return v;
 	}
 };
-thx.core.Set = function() {
-	this._v = [];
-	this.length = 0;
-};
-thx.core.Set.__name__ = ["thx","core","Set"];
-thx.core.Set.arrayToSet = function(arr) {
-	var set = new thx.core.Set();
+thx.core._Set = {};
+thx.core._Set.Set_Impl_ = function() { };
+thx.core._Set.Set_Impl_.__name__ = ["thx","core","_Set","Set_Impl_"];
+thx.core._Set.Set_Impl_.arrayToSet = function(arr) {
+	var set = [];
 	var _g = 0;
 	while(_g < arr.length) {
-		var item = arr[_g];
+		var v = arr[_g];
 		++_g;
-		set.add(item);
+		thx.core._Set.Set_Impl_.push(set,v);
 	}
 	return set;
 };
-thx.core.Set.prototype = {
-	length: null
-	,_v: null
-	,add: function(v) {
-		HxOverrides.remove(this._v,v);
-		this._v.push(v);
-		this.length = this._v.length;
+thx.core._Set.Set_Impl_._new = function(arr) {
+	return arr;
+};
+thx.core._Set.Set_Impl_.add = function(this1,v) {
+	if(thx.core._Set.Set_Impl_.exists(this1,v)) return false; else {
+		this1.push(v);
+		return true;
 	}
-	,remove: function(v) {
-		var t = HxOverrides.remove(this._v,v);
-		this.length = this._v.length;
-		return t;
+};
+thx.core._Set.Set_Impl_.copy = function(this1) {
+	var arr = this1.slice();
+	return arr;
+};
+thx.core._Set.Set_Impl_.difference = function(this1,set) {
+	var result = this1.slice();
+	var $it0 = HxOverrides.iter(set);
+	while( $it0.hasNext() ) {
+		var item = $it0.next();
+		HxOverrides.remove(result,item);
 	}
-	,exists: function(v) {
-		var _g = 0;
-		var _g1 = this._v;
-		while(_g < _g1.length) {
-			var t = _g1[_g];
-			++_g;
-			if(t == v) return true;
-		}
-		return false;
+	return result;
+};
+thx.core._Set.Set_Impl_.exists = function(this1,v) {
+	var _g = 0;
+	while(_g < this1.length) {
+		var t = this1[_g];
+		++_g;
+		if(t == v) return true;
 	}
-	,iterator: function() {
-		return HxOverrides.iter(this._v);
+	return false;
+};
+thx.core._Set.Set_Impl_.get = function(this1,index) {
+	return this1[index];
+};
+thx.core._Set.Set_Impl_.intersection = function(this1,set) {
+	var result = [];
+	var _g = 0;
+	while(_g < this1.length) {
+		var item = this1[_g];
+		++_g;
+		if(thx.core._Set.Set_Impl_.exists(set,item)) result.push(item);
 	}
-	,array: function() {
-		return this._v.slice();
-	}
-	,toString: function() {
-		return "{" + this._v.join(", ") + "}";
-	}
-	,__class__: thx.core.Set
+	return result;
+};
+thx.core._Set.Set_Impl_.push = function(this1,v) {
+	thx.core._Set.Set_Impl_.add(this1,v);
+};
+thx.core._Set.Set_Impl_.slice = function(this1,pos,end) {
+	var arr = this1.slice(pos,end);
+	return arr;
+};
+thx.core._Set.Set_Impl_.splice = function(this1,pos,len) {
+	var arr = this1.splice(pos,len);
+	return arr;
+};
+thx.core._Set.Set_Impl_.union = function(this1,set) {
+	return thx.core._Set.Set_Impl_.arrayToSet(this1.concat(thx.core._Set.Set_Impl_.setToArray(set)));
+};
+thx.core._Set.Set_Impl_.setToArray = function(this1) {
+	return this1.slice();
+};
+thx.core._Set.Set_Impl_.toString = function(this1) {
+	return "{" + this1.join(", ") + "}";
 };
 thx.core.Strings = function() { };
 thx.core.Strings.__name__ = ["thx","core","Strings"];
-thx.core.Strings.upTo = function(value,searchFor) {
+thx.core.Strings.after = function(value,searchFor) {
 	var pos = value.indexOf(searchFor);
-	if(pos < 0) return value; else return HxOverrides.substr(value,0,pos);
-};
-thx.core.Strings.startFrom = function(value,searchFor) {
-	var pos = value.indexOf(searchFor);
-	if(pos < 0) return value; else return HxOverrides.substr(value,pos + searchFor.length,null);
-};
-thx.core.Strings.rtrim = function(value,charlist) {
-	var len = value.length;
-	while(len > 0) {
-		var c = HxOverrides.substr(value,len - 1,1);
-		if(charlist.indexOf(c) < 0) break;
-		len--;
-	}
-	return HxOverrides.substr(value,0,len);
-};
-thx.core.Strings.ltrim = function(value,charlist) {
-	var start = 0;
-	while(start < value.length) {
-		var c = HxOverrides.substr(value,start,1);
-		if(charlist.indexOf(c) < 0) break;
-		start++;
-	}
-	return HxOverrides.substr(value,start,null);
-};
-thx.core.Strings.trim = function(value,charlist) {
-	return thx.core.Strings.rtrim(thx.core.Strings.ltrim(value,charlist),charlist);
-};
-thx.core.Strings.collapse = function(value) {
-	return thx.core.Strings._reCollapse.replace(StringTools.trim(value)," ");
-};
-thx.core.Strings.ucfirst = function(value) {
-	if(value == null) return null; else return value.charAt(0).toUpperCase() + HxOverrides.substr(value,1,null);
-};
-thx.core.Strings.lcfirst = function(value) {
-	if(value == null) return null; else return value.charAt(0).toLowerCase() + HxOverrides.substr(value,1,null);
-};
-thx.core.Strings.empty = function(value) {
-	return value == null || value == "";
-};
-thx.core.Strings.isAlphaNum = function(value) {
-	if(value == null) return false; else return thx.core.Strings.__alphaNumPattern.match(value);
-};
-thx.core.Strings.digitsOnly = function(value) {
-	if(value == null) return false; else return thx.core.Strings.__digitsPattern.match(value);
-};
-thx.core.Strings.ucwords = function(value) {
-	return thx.core.Strings.__ucwordsPattern.map(value == null?null:value.charAt(0).toUpperCase() + HxOverrides.substr(value,1,null),thx.core.Strings.__upperMatch);
-};
-thx.core.Strings.ucwordsws = function(value) {
-	return thx.core.Strings.__ucwordswsPattern.map(value == null?null:value.charAt(0).toUpperCase() + HxOverrides.substr(value,1,null),thx.core.Strings.__upperMatch);
-};
-thx.core.Strings.__upperMatch = function(re) {
-	return re.matched(0).toUpperCase();
-};
-thx.core.Strings.humanize = function(s) {
-	return StringTools.replace(thx.core.Strings.underscore(s),"_"," ");
+	if(pos < 0) return ""; else return HxOverrides.substr(value,pos + searchFor.length,null);
 };
 thx.core.Strings.capitalize = function(s) {
 	return HxOverrides.substr(s,0,1).toUpperCase() + HxOverrides.substr(s,1,null);
 };
-thx.core.Strings.succ = function(s) {
-	return HxOverrides.substr(s,0,-1) + String.fromCharCode((function($this) {
+thx.core.Strings.capitalizeWords = function(value,whiteSpaceOnly) {
+	if(whiteSpaceOnly == null) whiteSpaceOnly = false;
+	if(whiteSpaceOnly) return thx.core.Strings.UCWORDSWS.map(HxOverrides.substr(value,0,1).toUpperCase() + HxOverrides.substr(value,1,null),thx.core.Strings.upperMatch); else return thx.core.Strings.UCWORDS.map(HxOverrides.substr(value,0,1).toUpperCase() + HxOverrides.substr(value,1,null),thx.core.Strings.upperMatch);
+};
+thx.core.Strings.compare = function(a,b) {
+	if(a < b) return -1; else if(a > b) return 1; else return 0;
+};
+thx.core.Strings.contains = function(s,test) {
+	return s.indexOf(test) >= 0;
+};
+thx.core.Strings.collapse = function(value) {
+	return thx.core.Strings.WSG.replace(StringTools.trim(value)," ");
+};
+thx.core.Strings.dasherize = function(s) {
+	return StringTools.replace(s,"_","-");
+};
+thx.core.Strings.ellipsis = function(s,maxlen,symbol) {
+	if(symbol == null) symbol = "...";
+	if(maxlen == null) maxlen = 20;
+	if(s.length > maxlen) return HxOverrides.substr(s,0,symbol.length > maxlen - symbol.length?symbol.length:maxlen - symbol.length) + symbol; else return s;
+};
+thx.core.Strings.filter = function(s,predicate) {
+	return s.split("").filter(predicate).join("");
+};
+thx.core.Strings.filterCharcode = function(s,predicate) {
+	return thx.core.Strings.toCharcodeArray(s).filter(predicate).map(function(i) {
+		return String.fromCharCode(i);
+	}).join("");
+};
+thx.core.Strings.from = function(value,searchFor) {
+	var pos = value.indexOf(searchFor);
+	if(pos < 0) return ""; else return HxOverrides.substr(value,pos,null);
+};
+thx.core.Strings.humanize = function(s) {
+	return StringTools.replace(thx.core.Strings.underscore(s),"_"," ");
+};
+thx.core.Strings.isAlphaNum = function(value) {
+	return thx.core.Strings.ALPHANUM.match(value);
+};
+thx.core.Strings.isDigitsOnly = function(value) {
+	return thx.core.Strings.DIGITS.match(value);
+};
+thx.core.Strings.isEmpty = function(value) {
+	return value == null || value == "";
+};
+thx.core.Strings.iterator = function(s) {
+	var _this = s.split("");
+	return HxOverrides.iter(_this);
+};
+thx.core.Strings.map = function(value,callback) {
+	return value.split("").map(callback).join("");
+};
+thx.core.Strings.repeat = function(s,times) {
+	return ((function($this) {
 		var $r;
-		var _this = HxOverrides.substr(s,-1,null);
-		$r = HxOverrides.cca(_this,0);
+		var _g = [];
+		{
+			var _g1 = 0;
+			while(_g1 < times) {
+				var i = _g1++;
+				_g.push(s);
+			}
+		}
+		$r = _g;
 		return $r;
-	}(this)) + 1);
+	}(this))).join("");
+};
+thx.core.Strings.stripTags = function(s) {
+	return thx.core.Strings.STRIPTAGS.replace(s,"");
+};
+thx.core.Strings.toArray = function(s) {
+	return s.split("");
+};
+thx.core.Strings.toCharcodeArray = function(s) {
+	return s.split("").map(function(s1) {
+		return HxOverrides.cca(s1,0);
+	});
+};
+thx.core.Strings.trim = function(value,charlist) {
+	return thx.core.Strings.trimRight(thx.core.Strings.trimLeft(value,charlist),charlist);
+};
+thx.core.Strings.trimLeft = function(value,charlist) {
+	var pos = 0;
+	var _g1 = 0;
+	var _g = value.length;
+	while(_g1 < _g) {
+		var i = _g1++;
+		if(thx.core.Strings.contains(charlist,value.charAt(i))) pos++; else break;
+	}
+	return HxOverrides.substr(value,pos,null);
+};
+thx.core.Strings.trimRight = function(value,charlist) {
+	var len = value.length;
+	var pos = len;
+	var i;
+	var _g = 0;
+	while(_g < len) {
+		var j = _g++;
+		i = len - j - 1;
+		if(thx.core.Strings.contains(charlist,value.charAt(i))) pos = i; else break;
+	}
+	return HxOverrides.substr(value,0,pos);
 };
 thx.core.Strings.underscore = function(s) {
 	s = new EReg("::","g").replace(s,"/");
@@ -4408,33 +4899,22 @@ thx.core.Strings.underscore = function(s) {
 	s = new EReg("-","g").replace(s,"_");
 	return s.toLowerCase();
 };
-thx.core.Strings.dasherize = function(s) {
-	return StringTools.replace(s,"_","-");
-};
-thx.core.Strings.repeat = function(s,times) {
-	var b = [];
-	var _g = 0;
-	while(_g < times) {
-		var i = _g++;
-		b.push(s);
-	}
-	return b.join("");
+thx.core.Strings.upTo = function(value,searchFor) {
+	var pos = value.indexOf(searchFor);
+	if(pos < 0) return value; else return HxOverrides.substr(value,0,pos);
 };
 thx.core.Strings.wrapColumns = function(s,columns,indent,newline) {
 	if(newline == null) newline = "\n";
 	if(indent == null) indent = "";
 	if(columns == null) columns = 78;
-	var parts = thx.core.Strings._reSplitWC.split(s);
-	var result = [];
-	var _g = 0;
-	while(_g < parts.length) {
-		var part = parts[_g];
-		++_g;
-		result.push(thx.core.Strings._wrapColumns(StringTools.trim(thx.core.Strings._reReduceWS.replace(part," ")),columns,indent,newline));
-	}
-	return result.join(newline);
+	return thx.core.Strings.SPLIT_LINES.split(s).map(function(part) {
+		return thx.core.Strings.wrapLine(StringTools.trim(thx.core.Strings.WSG.replace(part," ")),columns,indent,newline);
+	}).join(newline);
 };
-thx.core.Strings._wrapColumns = function(s,columns,indent,newline) {
+thx.core.Strings.upperMatch = function(re) {
+	return re.matched(0).toUpperCase();
+};
+thx.core.Strings.wrapLine = function(s,columns,indent,newline) {
 	var parts = [];
 	var pos = 0;
 	var len = s.length;
@@ -4459,19 +4939,23 @@ thx.core.Strings._wrapColumns = function(s,columns,indent,newline) {
 	}
 	return indent + parts.join(newline + indent);
 };
-thx.core.Strings.stripTags = function(s) {
-	return thx.core.Strings._reStripTags.replace(s,"");
-};
-thx.core.Strings.ellipsis = function(s,maxlen,symbol) {
-	if(symbol == null) symbol = "...";
-	if(maxlen == null) maxlen = 20;
-	if(s.length > maxlen) return HxOverrides.substr(s,0,symbol.length > maxlen - symbol.length?symbol.length:maxlen - symbol.length) + symbol; else return s;
-};
-thx.core.Strings.compare = function(a,b) {
-	if(a < b) return -1; else if(a > b) return 1; else return 0;
-};
 thx.core.Timer = function() { };
 thx.core.Timer.__name__ = ["thx","core","Timer"];
+thx.core.Timer.debounce = function(callback,delayms,leading) {
+	if(leading == null) leading = false;
+	var cancel = thx.core.Functions.noop;
+	var poll = function() {
+		cancel();
+		cancel = thx.core.Timer.delay(callback,delayms);
+	};
+	return function() {
+		if(leading) {
+			leading = false;
+			callback();
+		}
+		poll();
+	};
+};
 thx.core.Timer.repeat = function(callback,delayms) {
 	return (function(f,id) {
 		return function() {
@@ -4492,6 +4976,23 @@ thx.core.Timer.immediate = function(callback) {
 			return f(id);
 		};
 	})(thx.core.Timer.clear,setImmediate(callback));
+};
+thx.core.Timer.throttle = function(callback,delayms,leading) {
+	if(leading == null) leading = false;
+	var waiting = false;
+	var poll = function() {
+		waiting = true;
+		thx.core.Timer.delay(callback,delayms);
+	};
+	return function() {
+		if(leading) {
+			leading = false;
+			callback();
+			return;
+		}
+		if(waiting) return;
+		poll();
+	};
 };
 thx.core.Timer.clear = function(id) {
 	return clearTimeout(id);
@@ -4525,12 +5026,6 @@ thx.core._Tuple.Tuple1_Impl_.get__0 = function(this1) {
 thx.core._Tuple.Tuple1_Impl_["with"] = function(this1,v) {
 	return { _0 : this1, _1 : v};
 };
-thx.core._Tuple.Tuple1_Impl_.dropLeft = function(this1) {
-	return thx.core.Nil.nil;
-};
-thx.core._Tuple.Tuple1_Impl_.dropRight = function(this1) {
-	return thx.core.Nil.nil;
-};
 thx.core._Tuple.Tuple1_Impl_.toString = function(this1) {
 	return "Tuple1(" + Std.string(this1) + ")";
 };
@@ -4539,10 +5034,10 @@ thx.core._Tuple.Tuple2_Impl_.__name__ = ["thx","core","_Tuple","Tuple2_Impl_"];
 thx.core._Tuple.Tuple2_Impl_._new = function(_0,_1) {
 	return { _0 : _0, _1 : _1};
 };
-thx.core._Tuple.Tuple2_Impl_.get__0 = function(this1) {
+thx.core._Tuple.Tuple2_Impl_.get_left = function(this1) {
 	return this1._0;
 };
-thx.core._Tuple.Tuple2_Impl_.get__1 = function(this1) {
+thx.core._Tuple.Tuple2_Impl_.get_right = function(this1) {
 	return this1._1;
 };
 thx.core._Tuple.Tuple2_Impl_.flip = function(this1) {
@@ -4565,15 +5060,6 @@ thx.core._Tuple.Tuple3_Impl_.__name__ = ["thx","core","_Tuple","Tuple3_Impl_"];
 thx.core._Tuple.Tuple3_Impl_._new = function(_0,_1,_2) {
 	return { _0 : _0, _1 : _1, _2 : _2};
 };
-thx.core._Tuple.Tuple3_Impl_.get__0 = function(this1) {
-	return this1._0;
-};
-thx.core._Tuple.Tuple3_Impl_.get__1 = function(this1) {
-	return this1._1;
-};
-thx.core._Tuple.Tuple3_Impl_.get__2 = function(this1) {
-	return this1._2;
-};
 thx.core._Tuple.Tuple3_Impl_.flip = function(this1) {
 	return { _0 : this1._2, _1 : this1._1, _2 : this1._0};
 };
@@ -4593,18 +5079,6 @@ thx.core._Tuple.Tuple4_Impl_ = function() { };
 thx.core._Tuple.Tuple4_Impl_.__name__ = ["thx","core","_Tuple","Tuple4_Impl_"];
 thx.core._Tuple.Tuple4_Impl_._new = function(_0,_1,_2,_3) {
 	return { _0 : _0, _1 : _1, _2 : _2, _3 : _3};
-};
-thx.core._Tuple.Tuple4_Impl_.get__0 = function(this1) {
-	return this1._0;
-};
-thx.core._Tuple.Tuple4_Impl_.get__1 = function(this1) {
-	return this1._1;
-};
-thx.core._Tuple.Tuple4_Impl_.get__2 = function(this1) {
-	return this1._2;
-};
-thx.core._Tuple.Tuple4_Impl_.get__3 = function(this1) {
-	return this1._3;
 };
 thx.core._Tuple.Tuple4_Impl_.flip = function(this1) {
 	return { _0 : this1._3, _1 : this1._2, _2 : this1._1, _3 : this1._0};
@@ -4626,21 +5100,6 @@ thx.core._Tuple.Tuple5_Impl_.__name__ = ["thx","core","_Tuple","Tuple5_Impl_"];
 thx.core._Tuple.Tuple5_Impl_._new = function(_0,_1,_2,_3,_4) {
 	return { _0 : _0, _1 : _1, _2 : _2, _3 : _3, _4 : _4};
 };
-thx.core._Tuple.Tuple5_Impl_.get__0 = function(this1) {
-	return this1._0;
-};
-thx.core._Tuple.Tuple5_Impl_.get__1 = function(this1) {
-	return this1._1;
-};
-thx.core._Tuple.Tuple5_Impl_.get__2 = function(this1) {
-	return this1._2;
-};
-thx.core._Tuple.Tuple5_Impl_.get__3 = function(this1) {
-	return this1._3;
-};
-thx.core._Tuple.Tuple5_Impl_.get__4 = function(this1) {
-	return this1._4;
-};
 thx.core._Tuple.Tuple5_Impl_.flip = function(this1) {
 	return { _0 : this1._4, _1 : this1._3, _2 : this1._2, _3 : this1._1, _4 : this1._0};
 };
@@ -4661,24 +5120,6 @@ thx.core._Tuple.Tuple6_Impl_.__name__ = ["thx","core","_Tuple","Tuple6_Impl_"];
 thx.core._Tuple.Tuple6_Impl_._new = function(_0,_1,_2,_3,_4,_5) {
 	return { _0 : _0, _1 : _1, _2 : _2, _3 : _3, _4 : _4, _5 : _5};
 };
-thx.core._Tuple.Tuple6_Impl_.get__0 = function(this1) {
-	return this1._0;
-};
-thx.core._Tuple.Tuple6_Impl_.get__1 = function(this1) {
-	return this1._1;
-};
-thx.core._Tuple.Tuple6_Impl_.get__2 = function(this1) {
-	return this1._2;
-};
-thx.core._Tuple.Tuple6_Impl_.get__3 = function(this1) {
-	return this1._3;
-};
-thx.core._Tuple.Tuple6_Impl_.get__4 = function(this1) {
-	return this1._4;
-};
-thx.core._Tuple.Tuple6_Impl_.get__5 = function(this1) {
-	return this1._5;
-};
 thx.core._Tuple.Tuple6_Impl_.flip = function(this1) {
 	return { _0 : this1._5, _1 : this1._4, _2 : this1._3, _3 : this1._2, _4 : this1._1, _5 : this1._0};
 };
@@ -4697,22 +5138,12 @@ thx.core.Types.isAnonymousObject = function(v) {
 	return Reflect.isObject(v) && null == Type.getClass(v);
 };
 thx.core.Types.sameType = function(a,b) {
-	return thx.core.ValueTypes.toString(Type["typeof"](a)) == thx.core.ValueTypes.toString(Type["typeof"](b));
+	return thx.core.Types.typeToString(Type["typeof"](a)) == thx.core.Types.typeToString(Type["typeof"](b));
 };
-thx.core.ClassTypes = function() { };
-thx.core.ClassTypes.__name__ = ["thx","core","ClassTypes"];
-thx.core.ClassTypes.toString = function(cls) {
-	return Type.getClassName(cls);
+thx.core.Types.valueTypeToString = function(value) {
+	return thx.core.Types.typeToString(Type["typeof"](value));
 };
-thx.core.ClassTypes["as"] = function(value,type) {
-	if(js.Boot.__instanceof(value,type)) return value; else return null;
-};
-thx.core.ValueTypes = function() { };
-thx.core.ValueTypes.__name__ = ["thx","core","ValueTypes"];
-thx.core.ValueTypes.typeAsString = function(value) {
-	return thx.core.ValueTypes.toString(Type["typeof"](value));
-};
-thx.core.ValueTypes.toString = function(type) {
+thx.core.Types.typeToString = function(type) {
 	switch(type[1]) {
 	case 1:
 		return "Int";
@@ -4721,7 +5152,7 @@ thx.core.ValueTypes.toString = function(type) {
 	case 3:
 		return "Bool";
 	case 4:
-		return "Dynamic";
+		return "{}";
 	case 5:
 		return "Function";
 	case 6:
@@ -4731,10 +5162,10 @@ thx.core.ValueTypes.toString = function(type) {
 		var e = type[2];
 		return Type.getEnumName(e);
 	default:
-		return null;
+		throw "invalid type " + Std.string(type);
 	}
 };
-thx.core.ValueTypes.typeInheritance = function(type) {
+thx.core.Types.typeInheritance = function(type) {
 	switch(type[1]) {
 	case 1:
 		return ["Int"];
@@ -4743,7 +5174,7 @@ thx.core.ValueTypes.typeInheritance = function(type) {
 	case 3:
 		return ["Bool"];
 	case 4:
-		return ["Dynamic"];
+		return ["{}"];
 	case 5:
 		return ["Function"];
 	case 6:
@@ -4758,8 +5189,11 @@ thx.core.ValueTypes.typeInheritance = function(type) {
 		var e = type[2];
 		return [Type.getEnumName(e)];
 	default:
-		return null;
+		throw "invalid type " + Std.string(type);
 	}
+};
+thx.core.Types.valueTypeInheritance = function(value) {
+	return thx.core.Types.typeInheritance(Type["typeof"](value));
 };
 thx.promise = {};
 thx.promise.Deferred = function() {
@@ -5611,14 +6045,11 @@ thx.stream.Emitter.prototype = {
 		})());
 	}
 	,take: function(count) {
-		return this.takeUntil((function($this) {
-			var $r;
-			var counter = 0;
-			$r = function(_) {
-				return thx.promise.Promise.value(counter++ < count);
+		return this.takeUntil((function(counter) {
+			return function(_) {
+				return counter++ < count;
 			};
-			return $r;
-		}(this)));
+		})(0));
 	}
 	,takeAt: function(index) {
 		return this.take(index + 1).last();
@@ -5634,12 +6065,10 @@ thx.stream.Emitter.prototype = {
 				switch(r[1]) {
 				case 0:
 					var v = r[2];
-					f(v).either(function(c) {
-						if(c) stream.pulse(v); else {
-							instream.end();
-							stream.end();
-						}
-					},$bind(stream,stream.fail));
+					if(f(v)) stream.pulse(v); else {
+						instream.end();
+						stream.end();
+					}
 					break;
 				case 2:
 					var e = r[2];
@@ -6413,11 +6842,11 @@ thx.stream.StreamValue = { __ename__ : ["thx","stream","StreamValue"], __constru
 thx.stream.StreamValue.Pulse = function(value) { var $x = ["Pulse",0,value]; $x.__enum__ = thx.stream.StreamValue; $x.toString = $estr; return $x; };
 thx.stream.StreamValue.End = function(cancel) { var $x = ["End",1,cancel]; $x.__enum__ = thx.stream.StreamValue; $x.toString = $estr; return $x; };
 thx.stream.StreamValue.Failure = function(err) { var $x = ["Failure",2,err]; $x.__enum__ = thx.stream.StreamValue; $x.toString = $estr; return $x; };
-thx.stream.Value = function(value,equal) {
+thx.stream.Value = function(value,equals) {
 	var _g = this;
-	if(null == equal) this.equal = function(a,b) {
+	if(null == equals) this.equals = function(a,b) {
 		return a == b;
-	}; else this.equal = equal;
+	}; else this.equals = equals;
 	this.value = value;
 	this.downStreams = [];
 	this.upStreams = [];
@@ -6430,26 +6859,24 @@ thx.stream.Value = function(value,equal) {
 	});
 };
 thx.stream.Value.__name__ = ["thx","stream","Value"];
-thx.stream.Value.createOption = function(value,equal) {
+thx.stream.Value.createOption = function(value,equals) {
 	var def;
 	if(null == value) def = haxe.ds.Option.None; else def = haxe.ds.Option.Some(value);
-	return new thx.stream.Value(def,(function(f,eq) {
-		return function(a,b) {
-			return f(a,b,eq);
-		};
-	})(thx.core.Options.equals,equal));
+	return new thx.stream.Value(def,function(a,b) {
+		return thx.core.Options.equals(a,b,equals);
+	});
 };
 thx.stream.Value.__super__ = thx.stream.Emitter;
 thx.stream.Value.prototype = $extend(thx.stream.Emitter.prototype,{
 	value: null
 	,downStreams: null
 	,upStreams: null
-	,equal: null
+	,equals: null
 	,get: function() {
 		return this.value;
 	}
 	,set: function(value) {
-		if(this.equal(this.value,value)) return;
+		if(this.equals(this.value,value)) return;
 		this.value = value;
 		this.update();
 	}
@@ -6697,14 +7124,13 @@ cards.ui.widgets.Button.sound = (function() {
 })();
 haxe.ds.ObjectMap.count = 0;
 thx.core.Ints.pattern_parse = new EReg("^[+-]?(\\d+|0x[0-9A-F]+)$","i");
-thx.core.Strings._reSplitWC = new EReg("(\r\n|\n\r|\n|\r)","g");
-thx.core.Strings._reReduceWS = new EReg("\\s+","");
-thx.core.Strings._reStripTags = new EReg("(<[a-z]+[^>/]*/?>|</[a-z]+>)","i");
-thx.core.Strings._reCollapse = new EReg("\\s+","g");
-thx.core.Strings.__ucwordsPattern = new EReg("[^a-zA-Z]([a-z])","g");
-thx.core.Strings.__ucwordswsPattern = new EReg("\\s[a-z]","g");
-thx.core.Strings.__alphaNumPattern = new EReg("^[a-z0-9]+$","i");
-thx.core.Strings.__digitsPattern = new EReg("^[0-9]+$","");
+thx.core.Strings.UCWORDS = new EReg("[^a-zA-Z]([a-z])","g");
+thx.core.Strings.UCWORDSWS = new EReg("\\s[a-z]","g");
+thx.core.Strings.ALPHANUM = new EReg("^[a-z0-9]+$","i");
+thx.core.Strings.DIGITS = new EReg("^[0-9]+$","");
+thx.core.Strings.STRIPTAGS = new EReg("</?[a-z]+[^>]*?/?>","gi");
+thx.core.Strings.WSG = new EReg("\\s+","g");
+thx.core.Strings.SPLIT_LINES = new EReg("\r\n|\n\r|\n|\r","g");
 thx.promise.Promise.nil = thx.promise.Promise.value(thx.core.Nil.nil);
 udom.Query.doc = document;
 Main.main();

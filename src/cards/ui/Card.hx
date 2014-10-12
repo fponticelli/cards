@@ -16,10 +16,12 @@ class Card {
         document = new Document({ el : Query.first('.doc', card.el) }),
         context = new ContextView(
           document,
-          model,
-          modelView,
           mapper,
-          { el : Query.first('.context', card.el) }
+          Query.first('.context', card.el),
+          document.component
+//          model,
+//          modelView,
+//          mapper
         );
 
     modelView.component.appendTo(Query.first('.model', card.el));
