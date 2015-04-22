@@ -3,7 +3,7 @@ package cards.ui;
 import cards.components.Component;
 import cards.ui.fragments.FragmentMapper;
 import cards.ui.input.RuntimeObjectEditor;
-import js.html.Element;
+import js.html.DOMElement as Element;
 import cards.ui.fragments.Fragment;
 import cards.properties.ValueProperty;
 using thx.stream.Emitter;

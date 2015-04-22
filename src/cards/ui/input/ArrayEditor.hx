@@ -3,7 +3,7 @@ package cards.ui.input;
 import cards.ui.widgets.*;
 import cards.model.SchemaType;
 import js.Browser;
-import js.html.Element;
+import js.html.DOMElement as Element;
 import js.html.LIElement;
 import cards.ui.input.EditorFactory;
 import thx.stream.Value;
@@ -11,7 +11,7 @@ using thx.stream.Emitter;
 import haxe.ds.Option;
 import js.html.OListElement;
 using udom.Dom;
-using thx.core.Options;
+using thx.Options;
 import cards.ui.input.Diff;
 import cards.components.Component;
 
@@ -179,7 +179,7 @@ class ArrayEditor extends RouteEditor {
     currentIndex.set(None);
 
     // set focus after removal
-    thx.core.Timer.delay(function() {
+    thx.Timer.delay(function() {
       if(editors.length == 0)
         return;
       if(index == editors.length)

@@ -1,8 +1,8 @@
 package cards.model.ref;
 
-using thx.core.Iterators;
-using thx.core.Arrays;
-using thx.core.Ints;
+using thx.Iterators;
+using thx.Arrays;
+using thx.Ints;
 
 class ArrayRef extends BaseRef implements IRef implements IParentRef {
   var items : Map<Int, IRef>;

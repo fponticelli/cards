@@ -1,6 +1,6 @@
 package cards.model.ref;
 
-using thx.core.Types;
+using thx.Types;
 
 class Ref {
   public static function fromValue(value : Dynamic, ?parent : IParentRef) : IRef {

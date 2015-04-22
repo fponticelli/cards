@@ -1,8 +1,8 @@
 package cards.model;
 
 import haxe.ds.Option;
-using thx.core.Set;
-using thx.core.Iterables;
+using thx.Set;
+using thx.Iterables;
 import cards.model.Expression;
 import cards.model.Scope;
 
@@ -29,7 +29,7 @@ return $code;';
       set.add(pattern.matched(1));
       code = pattern.matchedRight();
     }
-    return set.order(thx.core.Strings.compare);
+    return set.order(thx.Strings.compare);
   }
 
   public static function toRuntime(code : String, model : Model) : Runtime {

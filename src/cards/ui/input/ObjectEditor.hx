@@ -4,7 +4,7 @@ import cards.components.Component;
 import cards.model.SchemaType;
 import cards.ui.widgets.Button;
 import cards.ui.widgets.Menu;
-import js.html.Element;
+import js.html.DOMElement as Element;
 
 class ObjectEditor extends BaseObjectEditor {
   var menuAdd : Menu;

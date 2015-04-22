@@ -17,7 +17,7 @@ class Block implements Fragment {
     if(null == options.el && null == options.template)
       options.template = '<div class="block" tabindex="1"></div>';
     parent = options.fragmentParent;
-    uid = null != options.uid ? options.uid : thx.core.UUID.create();
+    uid = null != options.uid ? options.uid : thx.Uuid.create();
     component = new Component(options);
     active = new Value(false);
     active.feed(new ToggleClass(component, 'active').stream);

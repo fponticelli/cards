@@ -1,7 +1,7 @@
 package cards.ui.widgets;
 
 import udom.Dom;
-import js.html.Element;
+import js.html.DOMElement as Element;
 import cards.components.Component;
 import cards.components.ComponentOptions;
 

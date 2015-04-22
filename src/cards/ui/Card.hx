@@ -3,7 +3,7 @@ package cards.ui;
 import cards.model.Model;
 import cards.components.Component;
 import cards.ui.fragments.FragmentMapper;
-import js.html.Element;
+import js.html.DOMElement as Element;
 import udom.Dom;
 using thx.stream.Emitter;
 

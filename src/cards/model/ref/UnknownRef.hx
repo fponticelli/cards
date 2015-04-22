@@ -1,13 +1,13 @@
 package cards.model.ref;
 
-using thx.core.Objects;
-using thx.core.Arrays;
+using thx.Objects;
+using thx.Arrays;
 
 class UnknownRef extends BaseRef implements IRef implements IParentRef {
   public var ref(default, null) : Null<IRef>;
   var hasRef : Bool = false;
 
-  public function get()
+  public function get() : Dynamic
     return hasRef ? ref.get() : null;
 
   public function set(value : Dynamic) {

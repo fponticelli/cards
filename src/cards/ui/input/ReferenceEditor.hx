@@ -1,7 +1,7 @@
 package cards.ui.input;
 
 import cards.model.SchemaType;
-import js.html.Element;
+import js.html.DOMElement as Element;
 import cards.components.Component;
 
 class ReferenceEditor extends InputBasedEditor {

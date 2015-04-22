@@ -1,6 +1,6 @@
 package cards.ui.input;
 
-import js.html.Element;
+import js.html.DOMElement as Element;
 import cards.components.Component;
 import cards.model.SchemaType;
 using thx.stream.Emitter;

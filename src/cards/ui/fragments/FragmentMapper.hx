@@ -2,7 +2,7 @@ package cards.ui.fragments;
 
 import cards.properties.ValueProperties;
 import cards.ui.fragments.FragmentProperties;
-using thx.core.Iterators;
+using thx.Iterators;
 
 class FragmentMapper {
   public var fragments(default, null) : FragmentProperties;

@@ -1,8 +1,8 @@
 package cards.model.ref;
 
-using thx.core.Iterators;
-using thx.core.Iterables;
-import thx.core.Types;
+using thx.Iterators;
+using thx.Iterables;
+import thx.Types;
 
 class ObjectRef extends BaseRef implements IRef implements IParentRef {
   var fields : Map<String, IRef>;

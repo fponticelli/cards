@@ -1,6 +1,6 @@
 package cards.components;
 
-import js.html.Element;
+import js.html.DOMElement as Element;
 
 typedef ComponentOptions = {
   ?el : Element,

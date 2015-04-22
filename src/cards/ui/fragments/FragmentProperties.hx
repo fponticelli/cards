@@ -1,8 +1,8 @@
 package cards.ui.fragments;
 
-import thx.core.Set;
+import thx.Set;
 import cards.properties.PropertyName;
-using thx.core.Iterables;
+using thx.Iterables;
 
 class FragmentProperties {
   var map : Map<String, Set<String>>;

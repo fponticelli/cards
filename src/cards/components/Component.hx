@@ -1,7 +1,7 @@
 package cards.components;
 
 import udom.Dom;
-import js.html.Element;
+import js.html.DOMElement as Element;
 
 class Component {
   public var children(get, null) : Iterable<Component>;
@@ -27,7 +27,7 @@ class Component {
       el = Html.parse(options.template);
     }
     if(null != options.classes)
-      options.classes.split(' ').map(el.classList.add);
+      options.classes.split(' ').map(cast el.classList.add);
     if(null != options.parent)
       options.parent.add(this);
     if(null != options.container)

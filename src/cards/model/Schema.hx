@@ -1,6 +1,6 @@
 package cards.model;
 
-import thx.core.Error;
+import thx.Error;
 import thx.stream.Bus;
 import thx.stream.Emitter;
 import cards.model.SchemaEvent;

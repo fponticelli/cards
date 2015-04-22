@@ -10,7 +10,7 @@ import cards.components.ComponentOptions;
 import udom.Dom;
 import cards.properties.ToggleClass;
 import cards.properties.ValueProperty;
-using thx.core.Arrays;
+using thx.Arrays;
 import cards.types.CodeTransform;
 import cards.types.ReferenceTransform;
 import cards.types.TypeTransform;
@@ -22,7 +22,7 @@ import haxe.ds.Option;
 import cards.model.SchemaType;
 import cards.ui.widgets.Tooltip;
 import cards.ui.FieldValue;
-using thx.core.Options;
+using thx.Options;
 using cards.model.Expression;
 using StringTools;
 

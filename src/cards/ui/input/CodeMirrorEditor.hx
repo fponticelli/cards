@@ -3,7 +3,7 @@ package cards.ui.input;
 import cards.components.ComponentOptions;
 import cards.model.SchemaType;
 import cards.ui.input.TypedValue;
-import js.html.Element;
+import js.html.DOMElement as Element;
 import js.html.TextAreaElement;
 import udom.Dom.Query;
 using thx.stream.dom.Dom;
@@ -41,7 +41,7 @@ class CodeMirrorEditor extends Editor {
 
     focus.subscribe(function(_) editor.focus());
 
-    thx.core.Timer.delay(function() {
+    thx.Timer.delay(function() {
         editor.refresh();
       }, 10);
   }

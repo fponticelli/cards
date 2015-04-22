@@ -6,7 +6,7 @@ abstract Path(Array<PathItem>) from Array<PathItem> to Array<PathItem> {
   inline public function new(arr : Array<PathItem>)
     this = arr;
 
-  @:from public static function stringAsPath(path : String)
+  @:from public static function stringAsPath(path : String) : Path
     return path.replace('[', '.[').split('.')
       .filter(function(s) return s.length > 0)
       .map(function(v) {

@@ -1,7 +1,7 @@
 package cards.ui.editors;
 
 using thx.stream.Emitter;
-import js.html.Element;
+import js.html.DOMElement as Element;
 import js.html.Event;
 import cards.components.Component;
 import cards.components.ComponentOptions;
@@ -81,7 +81,7 @@ class TextEditor implements Editor<String> {
             current   = value.get(),
             selection = Browser.window.getSelection(),
             start     = selection.anchorOffset,
-            end       = selection.extentOffset;
+            end       = untyped selection.extentOffset;
         return current.substr(0, start) + data + current.substr(end);
       })
       .filter(function(v) return v.length > 0)

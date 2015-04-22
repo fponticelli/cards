@@ -1,8 +1,8 @@
 package cards.ui.input;
 
 import cards.model.SchemaType;
-import thx.core.Tuple;
-import thx.core.Dynamics;
+import thx.Tuple;
+import thx.Dynamics;
 
 abstract TypedValue(Tuple2<SchemaType, Dynamic>) {
   public inline function new(type : SchemaType, value : Dynamic)

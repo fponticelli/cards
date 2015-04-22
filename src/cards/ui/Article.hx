@@ -8,7 +8,7 @@ import cards.ui.fragments.Fragment;
 import cards.ui.fragments.InlineText;
 import thx.stream.Value;
 import haxe.ds.Option;
-using thx.core.Options;
+using thx.Options;
 using thx.stream.Bus;
 using thx.stream.Emitter;
 

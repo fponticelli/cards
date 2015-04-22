@@ -2,7 +2,7 @@ package cards.ui;
 
 import udom.Dom;
 import haxe.ds.Option;
-import js.html.Element;
+import js.html.DOMElement as Element;
 import thx.stream.Value;
 import cards.components.Component;
 import cards.components.ComponentOptions;
@@ -15,7 +15,7 @@ import cards.ui.widgets.Button;
 import cards.ui.fragments.Fragment;
 import cards.ui.widgets.Menu;
 import cards.ui.widgets.Toolbar;
-using thx.core.Options;
+using thx.Options;
 using thx.stream.Emitter;
 
 class ContextView2 {

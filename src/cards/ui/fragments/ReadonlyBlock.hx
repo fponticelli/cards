@@ -22,7 +22,7 @@ class ReadonlyBlock implements Fragment {
     component = new Component(options);
     focus = new Value(false);
     active = new Value(false);
-    uid = null != options.uid ? options.uid : thx.core.UUID.create();
+    uid = null != options.uid ? options.uid : thx.Uuid.create();
 
     focusStream = component.el.streamFocus().feed(focus);
 

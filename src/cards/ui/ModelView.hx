@@ -5,7 +5,7 @@ import cards.ui.input.AnonymousObjectEditor;
 import cards.ui.input.DiffAt;
 import cards.ui.input.Path;
 import cards.ui.input.TypedValue;
-import js.html.Element;
+import js.html.DOMElement as Element;
 using thx.stream.Emitter;
 import cards.components.Component;
 import cards.model.DataEvent;

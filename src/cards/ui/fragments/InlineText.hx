@@ -16,7 +16,7 @@ class InlineText implements Fragment {
   public function new(options : InlineTextOptions) {
     if(null == options.el && null == options.template)
       options.template = '<span class="text"></span>';
-    uid = null != options.uid ? options.uid : thx.core.UUID.create();
+    uid = null != options.uid ? options.uid : thx.Uuid.create();
     if(null == options.placeHolder)
       options.placeHolder = 'type some content';
     parent = options.fragmentParent;

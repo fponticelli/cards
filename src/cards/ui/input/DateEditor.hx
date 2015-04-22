@@ -2,7 +2,7 @@ package cards.ui.input;
 
 import cards.components.ComponentOptions;
 import cards.model.SchemaType;
-import js.html.Element;
+import js.html.DOMElement as Element;
 import js.html.InputElement;
 import udom.Dom.Query;
 using thx.stream.dom.Dom;

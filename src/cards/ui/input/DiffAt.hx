@@ -1,8 +1,8 @@
 package cards.ui.input;
 
 import cards.model.SchemaType;
-using thx.core.Dynamics;
-using thx.core.Tuple;
+using thx.Dynamics;
+using thx.Tuple;
 
 abstract DiffAt(Tuple2<Path, Diff>) {
   public inline function new(path : Path, diff : Diff)

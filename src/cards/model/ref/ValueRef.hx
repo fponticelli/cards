@@ -1,7 +1,7 @@
 package cards.model.ref;
 
-using thx.core.Objects;
-using thx.core.Arrays;
+using thx.Objects;
+using thx.Arrays;
 
 class ValueRef extends BaseRef implements IRef {
   var _hasValue : Bool = false;

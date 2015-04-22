@@ -8,7 +8,7 @@ import cards.ui.fragments.InlineText;
 import cards.ui.widgets.Toolbar;
 import cards.ui.widgets.Statusbar;
 using thx.stream.Emitter;
-using thx.core.Options;
+using thx.Options;
 using thx.stream.dom.Dom;
 
 class Document {

@@ -1,6 +1,6 @@
 package cards.types;
 
-import thx.core.Objects;
+import thx.Objects;
 
 class ObjectTransform {
   public static function toArray(value : {}) : Array<Dynamic> {

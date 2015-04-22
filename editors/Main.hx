@@ -2,7 +2,7 @@ import cards.components.Component;
 import cards.ui.input.*;
 import cards.ui.input.Path;
 import js.Browser;
-import js.html.Element;
+import js.html.DOMElement as Element;
 import thx.promise.Promise;
 using thx.stream.Bus;
 using thx.stream.dom.Dom;

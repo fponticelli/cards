@@ -3,7 +3,7 @@ package cards.ui.widgets;
 import js.Browser;
 import cards.components.Component;
 import cards.components.ComponentOptions;
-import js.html.Element;
+import js.html.DOMElement as Element;
 import udom.Dom;
 
 class Menu extends FrameOverlay {
